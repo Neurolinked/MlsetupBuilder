@@ -1,7 +1,7 @@
 # MlsetupBuilder
 Cyberpunk 2077 modding tool to build json version of .mlsetup files (electron version)
 
-clone the repository
+clone the repository, then
 ```
 cd MlsetupBuilder
 
