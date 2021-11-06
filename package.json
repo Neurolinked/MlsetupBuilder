@@ -1,0 +1,28 @@
+{
+  "name": "mlsetupbuilder",
+	"productName": "MlsetupBuilder",
+  "version": "1.5.95",
+  "description": "MlSetupBuilder",
+  "main": "main.js",
+  "scripts": {
+		"start": "electron ."
+	},
+  "keywords": [
+    "Cyberpunk2077",
+    "mlsetup"
+  ],
+  "author": "Neurolinked",
+  "license": "GNU",
+	"repository": {
+    "type": "git",
+    "url": "https://github.com/Neurolinked/MlsetupBuilder.git"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.4"
+  },
+  "devDependencies": {
+		"electron": "^15.3.0",
+    "electron-packager": "^15.4.0",
+    "electron-winstaller": "^5.0.0"
+  }
+}
