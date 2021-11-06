@@ -3,8 +3,10 @@ Cyberpunk 2077 modding tool to build json version of .mlsetup files (electron ve
 
 clone the repository
 
-run "npm -i"
+cd MlsetupBuilder
 
-ng serve
+npm install .
+
+npx electron .
 
 You are good to go. Happy Coding!
