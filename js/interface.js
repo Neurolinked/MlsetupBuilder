@@ -910,7 +910,7 @@ function vacuumCleaner(on = true){
 $("#TheMagicIsHere").click(function(){
 		if (String($("#passaggio").val()).trim()!="") {
 			theArcOfNOA = JSON.parse($("#passaggio").val());
-			if (theArcOfNOA.Extension==".mlsetup"){
+			/*if (theArcOfNOA.Extension==".mlsetup"){ */
 				if (theArcOfNOA.Chunks[0].Properties.layers.length>0){
 					vacuumCleaner();//cleanup all layers data in the lists
 					var tempArray=[];
@@ -1014,10 +1014,11 @@ $("#TheMagicIsHere").click(function(){
 					$("#importTech").val("");
           $("#layeringsystem li.active").click();
 				}
+				/*
 			}else{
 				//using tooltip
 				console.log('Json file not compatible');
-			}
+			}*/
 		}else{
       console.log('No file loaded');
 		}
@@ -1034,7 +1035,8 @@ $("#TheMagicIsHere").click(function(){
     //if there are a system of layers setup
 	  if ($("#layeringsystem li").length > 0 ){
       //file header
-			let preamble ='{\r\n  "Extension": ".mlsetup",\r\n'
+			//let preamble ='{\r\n  "Extension": ".mlsetup",\r\n'
+			let preamble ='{\r\n'
 										+'  "Chunks": {\r\n'
 										+'    "0": {\r\n'
 										+'      "Type": "Multilayer_Setup",\r\n'
