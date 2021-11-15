@@ -9,7 +9,7 @@ Number.prototype.countDecimals = function () {
 }
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
-    if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("microblends")) ){
+    if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("package")) ){
       for (k=0, j=microblendObj.microblends.length;k<j;k++){
         $("#mbSelect").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
         $("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png');'\" data-package='"+microblendObj.package+"'  data-toggle='tooltip' title='"+microblendObj.microblends[k].name+"'> </li>");
@@ -748,9 +748,9 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     if ((numerocicle > 3)){
       layblend = 1 + Math.floor(Math.random() * (numerocicle-4))
     }
+
     //let mblist = Object.entries($("#mbSelect option").filter())
     for (k=0;k<numerocicle;k++){
-        //console.log(subjectlayer[k].innerText);
 
         if ((turnOnOff) && (k>0) && $("#layeringsystem li").eq(subjectlayer[k].innerText).data("opacity")>0){
           if (Math.random() > 0.45){
@@ -794,6 +794,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       $("#layeringsystem li.active").click();
     }
 	});
+
   //Clean the actual selected layer
   $("#clean-Layer").click(function(){
     //if a layer is active

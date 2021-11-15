@@ -1,7 +1,7 @@
 {
   "name": "mlsetupbuilder",
 	"productName": "MlsetupBuilder",
-  "version": "1.5.95",
+  "version": "1.5.96",
   "description": "MlSetupBuilder",
   "main": "main.js",
   "scripts": {

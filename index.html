@@ -367,38 +367,28 @@ preference modal folder
 </div>
 <!-- A modal for the setup of the option randomizer -->
 <div class="modal fade" id="RandOptmodal" tabindex="-1" aria-labelledby="RandOptmodalH" aria-hidden="true" data-focus="true">
-<div class="modal-dialog modal modal-dialog-centered">
-  <div class="modal-content ">
-    <div class="modal-header bg-info text-dark">
-      <h5 class="modal-title" id="RandOptmodalH">Option settings for the randomizer</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body text-white" style="background-color:#121212;">
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="rndOnOff">
-        <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
-      </div>
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="rndAll" disabled>
-        <label class="form-check-label" for="rndAll" ><details><summary>Randomize all layers</summary>Without this option ONLY the already active layers can obtain randomized values.</details></label>
-      </div>
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="rndMbWild">
-        <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize microblends</summary>On a basis, the microblend are setup to use the flat default microblend, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-<!-- tooltip display Problems -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-<div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-  <div class="toast-header">
-    <strong class="me-auto">Notification</strong>
-    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-  </div>
-  <div class="toast-body"></div>
-</div>
+	<div class="modal-dialog modal modal-dialog-centered">
+	  <div class="modal-content ">
+	    <div class="modal-header bg-info text-dark">
+	      <h5 class="modal-title" id="RandOptmodalH">Option settings for the randomizer</h5>
+	      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	    </div>
+	    <div class="modal-body text-white" style="background-color:#121212;">
+	      <div class="form-check form-switch">
+	        <input class="form-check-input" type="checkbox" id="rndOnOff">
+	        <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
+	      </div>
+	      <div class="form-check form-switch">
+	        <input class="form-check-input" type="checkbox" id="rndAll" disabled>
+	        <label class="form-check-label" for="rndAll" ><details><summary>Randomize all layers</summary>Without this option ONLY the already active layers can obtain randomized values.</details></label>
+	      </div>
+	      <div class="form-check form-switch">
+	        <input class="form-check-input" type="checkbox" id="rndMbWild">
+	        <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize microblends</summary>On a basis, the microblend are setup to use the flat default microblend, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 </div>
 <!-- windows for aiming the microblend over the masks -->
 <div class="modal fade" id="AimBlend" tabindex="-1" aria-labelledby="aimblendLBL" aria-hidden="true">
