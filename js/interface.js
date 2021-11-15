@@ -1026,13 +1026,15 @@ $("#TheMagicIsHere").click(function(){
 	});
   //Event to export your setup
   $("#exportJason").click(function(){
+		let nomefile = 'commonlayer.json';
     //check if there is already a chosed Names
 		if (String($("#nametoexport").val()).trim()!==''){
-			let nomefiles = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
-			$("#exportJason").attr("download",nomefiles+".json");
-		}else{
+			nomefile = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
+			//$("#exportJason").attr("download",nomefile+".json");
+		}/*else{
 			$("#exportJason").attr("download","material.json");
-		}
+		}*/
+
     //if there are a system of layers setup
 	  if ($("#layeringsystem li").length > 0 ){
       //file header
@@ -1049,13 +1051,9 @@ $("#TheMagicIsHere").click(function(){
 										+'        "layers": [\r\n';
       let ratiovalue='\r\n';
       let ratioIVal = $("#layerRatio").val();
-
-      console.log("Ratio:"+ratioIVal);
-
       if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined) && (Number(ratioIVal)!=1)){
           ratiovalue = ',\r\n        "ratio": '+Number(ratioIVal)+'\r\n';
       }
-
       //file tail
 			let closing = '\r\n        ]'+ratiovalue+'      }\r\n    }\r\n  }\r\n}';
 			let jsonbody = '';
@@ -1120,10 +1118,13 @@ $("#TheMagicIsHere").click(function(){
 		}
 
 		jsonbody=jsonbody.slice(0,-3); //removes latest commas
-		//console.log(preamble+jsonbody+closing);
-		//console.log(JSON.parse(preamble+jsonbody+closing));
-		var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(preamble+jsonbody+closing); //pack the text to be sent
-		var link = document.getElementById('exportJason').href = dataUri;
+		thePIT.Export({
+			file:nomefile,
+			content:preamble+jsonbody+closing,
+			type:'mlsetup'
+		});
+		/*var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(preamble+jsonbody+closing); //pack the text to be sent
+		var link = document.getElementById('exportJason').href = dataUri;*/
 	 }
  });
 

@@ -16,7 +16,10 @@ contextBridge.exposeInMainWorld(
       },
       ConfiguraUnbundle:() => {
         ipcRenderer.send('main:setupUnbundle',{});
-      }
+      },
+			Export:(data) => {
+				ipcRenderer.send('main:writefile',data);
+			}
 	},
 
 )
@@ -57,7 +60,7 @@ ipcRenderer.on('preload:prefsOn', (event, theresult) => {
       unbundlepath.value = configurazione.unbundle
       preferenzecaricate.checked = true
     }else{
-      notificationCenter.innerHTML = "No path setup for the source folder" + notificationCenter.innerHTML+"\n";
+      notificationCenter.innerHTML = "No path setup for the source folder\n" + notificationCenter.innerHTML;
       preferenzecaricate.checked = false
     }
 })
@@ -65,6 +68,11 @@ ipcRenderer.on('preload:prefsOn', (event, theresult) => {
 ipcRenderer.on('preload:prefsLoad', (event, unbundlepath) => {
   let path_unbundle = document.querySelector("#prefxunbundle")
   path_unbundle.value = unbundlepath
+})
+
+ipcRenderer.on('preload:logEntry',(event, resultSave) => {
+	var notificationCenter = document.querySelector("#NotificationCenter .offcanvas-body")
+	notificationCenter.innerHTML = resultSave + "\n" + notificationCenter.innerHTML;
 })
 
 window.addEventListener('DOMContentLoaded', () => {

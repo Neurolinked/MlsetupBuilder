@@ -108,7 +108,8 @@
     <div>
       <div class="input-group input-group-sm">
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
-        <a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>
+        <!--<a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>//-->
+				<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>
       </div>
   </div>
   </div>
@@ -436,7 +437,6 @@ preference modal folder
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body text-white">
-      <p><strong>This is an &alpha; release of the "MlsetupBuilder" software</strong></p>
       The software is ment to help in creating .json files that can be compiled in .mlsetup format and assigned with everything that use the Cyberpunk 2077 multilayer systems
       <ul>
       <li>The multilayer editor system does not need a model to be displayed in the viewport to work</li>
@@ -454,9 +454,8 @@ preference modal folder
         </ul>
       </li>
       <li>You can explicit custom path for materials and microblends</li>
-      <li>Soon it will be developed a randomizer for working on the active layers</li>
+      <li>Property randomizer for layers with simple configuration window</li>
       </ul>
-      Soon I'll publish some video explanation with a desctiption of the usual workflow to use the software.
     </div>
   </div>
 </div>
@@ -597,7 +596,7 @@ THE SOFTWARE.</p>
     <li data-action="cpmb">Copy microblends data</li>
     <li data-action="pstmb" disabled>Paste microblends data</li>
   </ul>
-  <script src='./js/3dIF.js'></script>
+  <script defer src='./js/3dIF.js'></script>
   <script src="./renderer.js"></script>
   </body>
 </html>

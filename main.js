@@ -248,13 +248,13 @@ ipcMain.on('main:readFile',(event,percorso,flags)=>{
   })
 })
 
+//write the configuration file after the selection of the directory in the
+//preference interface window
 ipcMain.on('main:setupUnbundle',(event, arg) => {
   const result = dialog.showOpenDialog({title:'Choose the unbundle folder', properties: ['openDirectory'] }).then(result => {
     if (!result.canceled){
       default_config.unbundle = result.filePaths[0]
-
       let dummy = JSON.stringify(default_config)
-
       fs.writeFile(path.join(app.getPath('userData'),configfile),dummy,'utf8',(errw,data) =>{
         if(errw){
           dialog.showErrorBox('No permission to write in user folder to save preferences');
@@ -268,3 +268,26 @@ ipcMain.on('main:setupUnbundle',(event, arg) => {
     dialog.showErrorBox("Preferences error",err.message)
   })
 })
+//json version of mlsetup file write operation
+ipcMain.on('main:writefile',(event,arg) => {
+	if (arg.type=='mlsetup'){
+		const salvataggio = dialog.showSaveDialog({
+			title:'Save the mlsetup jsonized',
+			defaultPath: arg.file,
+			filters:[ { name: 'All Files', extensions: ['*'] },	{ name: 'Jsons', extensions: ['json'] } ],
+			properties: ['createDirectory']
+		}).then(salvataggio => {
+		    if (!salvataggio.canceled){
+					fs.writeFile(salvataggio.filePath, arg.content,'utf8',(errw,data) =>{
+						if(errw){
+							dialog.showErrorBox('Error during the writing process of the file')
+							return
+						}
+					})
+					event.reply('preload:logEntry', 'File saved in: '+salvataggio.filePath)
+				}else{
+					event.reply('preload:logEntry', 'Save procedure cancelled')
+				}
+		})
+	}
+});
