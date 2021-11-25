@@ -30,7 +30,6 @@
   </head>
   <body>
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
-    <!--<input type="text" class="d-none" id="unbundlepath" disabled value="" />-->
     <div id="dat-container"></div>
 <!--THREE.js libraries -->
     <script src='./js/threejs/build/three.min.js'></script>
@@ -76,7 +75,7 @@
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>
-      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors or use CTRL+SHIFT+i to check error on the browser console">Alerts <span class="badge bg-warning text-dark"></span></button>
+      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
     </div>
     <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn ml-2 btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
     <button type="button" id="btnMdlLoader" class=" btn btn-out-Prim"><i class="fas fa-dolly"></i> Load Model</button>
@@ -359,7 +358,7 @@ preference modal folder
 <div class="modal-dialog modal-lg modal-dialog-centered">
   <div class="modal-content ">
     <div class="modal-header bg-info text-dark">
-      <h5 class="modal-title" id="modelsInfoH"><i class="fas fa-info-circle"></i> Last loaded model information</h5>
+      <h5 class="modal-title" id="modelsInfoH"><i class="fas fa-info-circle"></i> Model information</h5>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body text-white" style="background-color:#121212;"></div>

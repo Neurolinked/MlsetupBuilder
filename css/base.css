@@ -97,7 +97,6 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 #micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 2; grid-row-end: 5;}
 #layer_settings{grid-column-start: 3; grid-column-end: 3; grid-row-start: 2; grid-row-end: 5;}
 #colorGrid{display:grid;grid-template-columns:1fr 2fr 1fr;}
-#MaterialLibrary{height:minmax(100px, calc(max-content -130px));}
 
 #cagethematerials{height:270px;overflow-y: scroll;border:1px solid #4d5154!important;}
 #cagethematerials::-webkit-scrollbar {background-color:var(--layer-0);}
