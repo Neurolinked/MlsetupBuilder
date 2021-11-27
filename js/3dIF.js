@@ -154,7 +154,7 @@ function LoadModelOntheFly(path){
 
       if ( child.isMesh ) {
         //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-        strGLBInfo = strGLBInfo + "<p class='eq-lay1 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay1 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='treeColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+        strGLBInfo = strGLBInfo + "<p class='eq-lay1 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay1 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
         if (!(/(decals)|(vehicle_lights)|(\bnone\b)|(logo_spacestation.+)|(glass.+)|(multilayer_lizzard)|(phongE1SG1.+)|(stickers.+)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|(decal_.+)|(02_ca_limestone_1.*)|(zip+er.+)|(ziper.+)/g.test(child.userData.materialNames.toString()))){
             child.material = material;
         }else{
