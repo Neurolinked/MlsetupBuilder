@@ -30,7 +30,6 @@
   </head>
   <body>
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
-    <!--<input type="text" class="d-none" id="unbundlepath" disabled value="" />-->
     <div id="dat-container"></div>
 <!--THREE.js libraries -->
     <script src='./js/threejs/build/three.min.js'></script>
@@ -76,7 +75,7 @@
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>
-      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors or use CTRL+SHIFT+i to check error on the browser console">Alerts <span class="badge bg-warning text-dark"></span></button>
+      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
     </div>
     <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn ml-2 btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
     <button type="button" id="btnMdlLoader" class=" btn btn-out-Prim"><i class="fas fa-dolly"></i> Load Model</button>
@@ -108,7 +107,8 @@
     <div>
       <div class="input-group input-group-sm">
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
-        <a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>
+        <!--<a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>//-->
+				<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>
       </div>
   </div>
   </div>
@@ -137,8 +137,10 @@
         <li  data-labels="(null_null) unused" class=""  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >19</li>
     </ul>
     <div class="text-center">
-      <div class="btn-group btn-group-sm my-1 " role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-outline-warning" id="layerRandomizer">Randomize</button>
+      <div class="btn-group btn-group-sm m-1 " role="group" aria-label="Layers randomizer">
+				<button type="button" class="btn btn-outline-warning" id="layerRandomizer" data-toggle="tooltip" title="Randomize layers"><i class="fas fa-random"></i></button>
+				<input id="layerRandomCfg" class="form-control rounded-0 border border-warning" type="text" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
+				<!--<button type="button" class="btn btn-outline-warning" id="randomTrScribe" data-toggle="tooltip" title="Transcribe actual enabled layer setup"><i class="fab fa-buffer"></i></button>//-->
         <button type="button" class="btn btn-outline-warning" id="randomicOpt" data-bs-toggle="modal" data-toggle="tooltip" data-bs-target="#RandOptmodal" title="Option setting for the randomizer"><i class="fas fa-cogs"></i></button>
       </div>
     </div>
@@ -358,7 +360,7 @@ preference modal folder
 <div class="modal-dialog modal-lg modal-dialog-centered">
   <div class="modal-content ">
     <div class="modal-header bg-info text-dark">
-      <h5 class="modal-title" id="modelsInfoH"><i class="fas fa-info-circle"></i> Last loaded model information</h5>
+      <h5 class="modal-title" id="modelsInfoH"><i class="fas fa-info-circle"></i> Model information</h5>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body text-white" style="background-color:#121212;"></div>
@@ -367,38 +369,28 @@ preference modal folder
 </div>
 <!-- A modal for the setup of the option randomizer -->
 <div class="modal fade" id="RandOptmodal" tabindex="-1" aria-labelledby="RandOptmodalH" aria-hidden="true" data-focus="true">
-<div class="modal-dialog modal modal-dialog-centered">
-  <div class="modal-content ">
-    <div class="modal-header bg-info text-dark">
-      <h5 class="modal-title" id="RandOptmodalH">Option settings for the randomizer</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body text-white" style="background-color:#121212;">
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="rndOnOff">
-        <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
-      </div>
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="rndAll" disabled>
-        <label class="form-check-label" for="rndAll" ><details><summary>Randomize all layers</summary>Without this option ONLY the already active layers can obtain randomized values.</details></label>
-      </div>
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="rndMbWild">
-        <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize microblends</summary>On a basis, the microblend are setup to use the flat default microblend, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-<!-- tooltip display Problems -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-<div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-  <div class="toast-header">
-    <strong class="me-auto">Notification</strong>
-    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-  </div>
-  <div class="toast-body"></div>
-</div>
+	<div class="modal-dialog modal modal-dialog-centered">
+	  <div class="modal-content ">
+	    <div class="modal-header bg-info text-dark">
+	      <h5 class="modal-title" id="RandOptmodalH">Option settings for the randomizer</h5>
+	      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	    </div>
+	    <div class="modal-body text-white" style="background-color:#121212;">
+	      <div class="form-check form-switch">
+	        <input class="form-check-input" type="checkbox" id="rndOnOff">
+	        <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
+	      </div>
+	      <div class="form-check form-switch">
+	        <input class="form-check-input" type="checkbox" id="rndAll" disabled>
+	        <label class="form-check-label" for="rndAll" ><details><summary>Randomize all layers</summary>Without this option ONLY the already active layers can obtain randomized values.</details></label>
+	      </div>
+	      <div class="form-check form-switch">
+	        <input class="form-check-input" type="checkbox" id="rndMbWild">
+	        <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize microblends</summary>On a basis, the microblend are setup to use the flat default microblend, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 </div>
 <!-- windows for aiming the microblend over the masks -->
 <div class="modal fade" id="AimBlend" tabindex="-1" aria-labelledby="aimblendLBL" aria-hidden="true">
@@ -446,7 +438,6 @@ preference modal folder
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body text-white">
-      <p><strong>This is an &alpha; release of the "MlsetupBuilder" software</strong></p>
       The software is ment to help in creating .json files that can be compiled in .mlsetup format and assigned with everything that use the Cyberpunk 2077 multilayer systems
       <ul>
       <li>The multilayer editor system does not need a model to be displayed in the viewport to work</li>
@@ -464,9 +455,8 @@ preference modal folder
         </ul>
       </li>
       <li>You can explicit custom path for materials and microblends</li>
-      <li>Soon it will be developed a randomizer for working on the active layers</li>
+      <li>Property randomizer for layers with simple configuration window</li>
       </ul>
-      Soon I'll publish some video explanation with a desctiption of the usual workflow to use the software.
     </div>
   </div>
 </div>
@@ -607,7 +597,7 @@ THE SOFTWARE.</p>
     <li data-action="cpmb">Copy microblends data</li>
     <li data-action="pstmb" disabled>Paste microblends data</li>
   </ul>
-  <script src='./js/3dIF.js'></script>
+  <script defer src='./js/3dIF.js'></script>
   <script src="./renderer.js"></script>
   </body>
 </html>

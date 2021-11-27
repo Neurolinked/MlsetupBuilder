@@ -9,7 +9,7 @@ Number.prototype.countDecimals = function () {
 }
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
-    if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("microblends")) ){
+    if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("package")) ){
       for (k=0, j=microblendObj.microblends.length;k<j;k++){
         $("#mbSelect").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
         $("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png');'\" data-package='"+microblendObj.package+"'  data-toggle='tooltip' title='"+microblendObj.microblends[k].name+"'> </li>");
@@ -150,6 +150,13 @@ $(function(){
       $("#layers-contextual").removeClass("visible");
     }
   });
+
+	//replace chars not matching the standard features
+	$("#layerRandomCfg").keyup(function (event) {
+		let stringa = $(this).val();
+		stringa = stringa.replace(/^[,\-]+/,'').replace(/[a-zA-Z\s]+/g,'').replace(/[^0-9,\-\s]+/g,'').replace(/,{2,}/g,',').replace(/\-{2,}/g,'-');
+		$(this).val(stringa);
+	});
 
 /* Normalization layers numbers*/
   function normalizeNumbers(){
@@ -312,6 +319,7 @@ $(function(){
 	});
 
   $("#reloadAim").click(function(){
+		//reload the value from the main window
     $("#AimU").val($("#mbOffU").val());
 		$("#AimV").val($("#mbOffV").val());
 		$("#AimMTile").val($("#mbTile").val());
@@ -332,7 +340,6 @@ $(function(){
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
 
-	//console.log($().jquery);//display Jquery version
 	var TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
@@ -718,15 +725,63 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		var rndMBlend = $("#rndMbWild").prop('checked');
 		//get active layers to be randomized
 		var layerSactive = $("#layeringsystem li:not([disabled])").length;
-    var subjectlayer
+    var subjectlayer, subjectlayerRText
+		var layerfilter = $("#layerRandomCfg").val();
+
+		//check on random layer selections
+		if ($("#layerRandomCfg").val()!=""){
+			//last cleanup, remove single and multiple , or - alone at the start or end of the string
+			layerfilter = layerfilter.replace(/[2-9][0-9]{1}|\d{3,}/g,'19').replace(/[,\-]+$/,'');
+			var arraychilds = new Set(layerfilter.split(',').sort());//create a unique set from a sorted array
+			$("#layerRandomCfg").val(Array.from(arraychilds).join(',')); //translate the obtained values in the field
+			//if it contain the value 0-19 or 19-0 all the layers are selected to be used... so clean the filter even more
+			if (arraychilds.has('0-19') || arraychilds.has('19-0')){
+				$("#layerRandomCfg").val('0-19');
+			}else{
+				//here we explode the ranges
+				arraychilds.forEach((item, i, set) => {
+					if (String(item).match(/^\d+\-\d+$/)!==null){
+						let values = String(item).split('-').map(Number);
+						if (values[0]==values[1]){
+							set.delete(item);
+							set.add(values[0]);
+						}else{
+							let minimum = Math.min.apply(Math, values)
+							let maximum = Math.max.apply(Math, values);
+							set.delete(item);
+							for (k=minimum;k<=maximum;k++){
+								set.add(k);
+							}
+						}
+					}
+				});
+			}
+			subjectlayerRText=Array.from(arraychilds).map(String); //Display The list
+		}
+
+
 
     if (!turnOnOff){
-      subjectlayer = $("#layeringsystem li:not([disabled])").filter(
-        function(){
-          return Number($(this).data("opacity"))>0;
-        });
+	    subjectlayer = $("#layeringsystem li:not([disabled])").filter(
+	      function(){
+					if ($("#layerRandomCfg").val()!=""){
+						if ((subjectlayerRText.includes($(this)[0].innerText)) && (Number($(this).data("opacity"))>0)){
+							return true;
+						}
+					}else{
+	        	return Number($(this).data("opacity"))>0;
+					}
+	    });
     }else{
-      subjectlayer = $("#layeringsystem li:not([disabled])");
+			if ($("#layerRandomCfg").val()!=""){
+				subjectlayer = $("#layeringsystem li:not([disabled])").filter(
+					function(){
+						return subjectlayerRText.includes($(this)[0].innerText);
+					});
+			}else{
+				subjectlayer = $("#layeringsystem li:not([disabled])");
+			}
+
     }
 
     if (!rndMBlend){max_blends=1;}
@@ -748,9 +803,9 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     if ((numerocicle > 3)){
       layblend = 1 + Math.floor(Math.random() * (numerocicle-4))
     }
+
     //let mblist = Object.entries($("#mbSelect option").filter())
     for (k=0;k<numerocicle;k++){
-        //console.log(subjectlayer[k].innerText);
 
         if ((turnOnOff) && (k>0) && $("#layeringsystem li").eq(subjectlayer[k].innerText).data("opacity")>0){
           if (Math.random() > 0.45){
@@ -794,6 +849,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       $("#layeringsystem li.active").click();
     }
 	});
+
   //Clean the actual selected layer
   $("#clean-Layer").click(function(){
     //if a layer is active
@@ -1025,13 +1081,15 @@ $("#TheMagicIsHere").click(function(){
 	});
   //Event to export your setup
   $("#exportJason").click(function(){
+		let nomefile = 'commonlayer.json';
     //check if there is already a chosed Names
 		if (String($("#nametoexport").val()).trim()!==''){
-			let nomefiles = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
-			$("#exportJason").attr("download",nomefiles+".json");
-		}else{
+			nomefile = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
+			//$("#exportJason").attr("download",nomefile+".json");
+		}/*else{
 			$("#exportJason").attr("download","material.json");
-		}
+		}*/
+
     //if there are a system of layers setup
 	  if ($("#layeringsystem li").length > 0 ){
       //file header
@@ -1048,13 +1106,9 @@ $("#TheMagicIsHere").click(function(){
 										+'        "layers": [\r\n';
       let ratiovalue='\r\n';
       let ratioIVal = $("#layerRatio").val();
-
-      console.log("Ratio:"+ratioIVal);
-
       if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined) && (Number(ratioIVal)!=1)){
           ratiovalue = ',\r\n        "ratio": '+Number(ratioIVal)+'\r\n';
       }
-
       //file tail
 			let closing = '\r\n        ]'+ratiovalue+'      }\r\n    }\r\n  }\r\n}';
 			let jsonbody = '';
@@ -1119,10 +1173,13 @@ $("#TheMagicIsHere").click(function(){
 		}
 
 		jsonbody=jsonbody.slice(0,-3); //removes latest commas
-		//console.log(preamble+jsonbody+closing);
-		//console.log(JSON.parse(preamble+jsonbody+closing));
-		var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(preamble+jsonbody+closing); //pack the text to be sent
-		var link = document.getElementById('exportJason').href = dataUri;
+		thePIT.Export({
+			file:nomefile,
+			content:preamble+jsonbody+closing,
+			type:'mlsetup'
+		});
+		/*var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(preamble+jsonbody+closing); //pack the text to be sent
+		var link = document.getElementById('exportJason').href = dataUri;*/
 	 }
  });
 
