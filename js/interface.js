@@ -151,6 +151,13 @@ $(function(){
     }
   });
 
+	//replace chars not matching the standard features
+	$("#layerRandomCfg").keyup(function (event) {
+		let stringa = $(this).val();
+		stringa = stringa.replace(/^[,\-]+/,'').replace(/[a-zA-Z\s]+/g,'').replace(/[^0-9,\-\s]+/g,'').replace(/,{2,}/g,',').replace(/\-{2,}/g,'-');
+		$(this).val(stringa);
+	});
+
 /* Normalization layers numbers*/
   function normalizeNumbers(){
     if ($("#layerTile").val() % 1 == 0){ $("#layerTile").val(Number($("#layerTile").val()).toFixed(1));    }
@@ -312,6 +319,7 @@ $(function(){
 	});
 
   $("#reloadAim").click(function(){
+		//reload the value from the main window
     $("#AimU").val($("#mbOffU").val());
 		$("#AimV").val($("#mbOffV").val());
 		$("#AimMTile").val($("#mbTile").val());
@@ -332,7 +340,6 @@ $(function(){
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
 
-	//console.log($().jquery);//display Jquery version
 	var TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
@@ -718,15 +725,63 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		var rndMBlend = $("#rndMbWild").prop('checked');
 		//get active layers to be randomized
 		var layerSactive = $("#layeringsystem li:not([disabled])").length;
-    var subjectlayer
+    var subjectlayer, subjectlayerRText
+		var layerfilter = $("#layerRandomCfg").val();
+
+		//check on random layer selections
+		if ($("#layerRandomCfg").val()!=""){
+			//last cleanup, remove single and multiple , or - alone at the start or end of the string
+			layerfilter = layerfilter.replace(/[2-9][0-9]{1}|\d{3,}/g,'19').replace(/[,\-]+$/,'');
+			var arraychilds = new Set(layerfilter.split(',').sort());//create a unique set from a sorted array
+			$("#layerRandomCfg").val(Array.from(arraychilds).join(',')); //translate the obtained values in the field
+			//if it contain the value 0-19 or 19-0 all the layers are selected to be used... so clean the filter even more
+			if (arraychilds.has('0-19') || arraychilds.has('19-0')){
+				$("#layerRandomCfg").val('0-19');
+			}else{
+				//here we explode the ranges
+				arraychilds.forEach((item, i, set) => {
+					if (String(item).match(/^\d+\-\d+$/)!==null){
+						let values = String(item).split('-').map(Number);
+						if (values[0]==values[1]){
+							set.delete(item);
+							set.add(values[0]);
+						}else{
+							let minimum = Math.min.apply(Math, values)
+							let maximum = Math.max.apply(Math, values);
+							set.delete(item);
+							for (k=minimum;k<=maximum;k++){
+								set.add(k);
+							}
+						}
+					}
+				});
+			}
+			subjectlayerRText=Array.from(arraychilds).map(String); //Display The list
+		}
+
+
 
     if (!turnOnOff){
-      subjectlayer = $("#layeringsystem li:not([disabled])").filter(
-        function(){
-          return Number($(this).data("opacity"))>0;
-        });
+	    subjectlayer = $("#layeringsystem li:not([disabled])").filter(
+	      function(){
+					if ($("#layerRandomCfg").val()!=""){
+						if ((subjectlayerRText.includes($(this)[0].innerText)) && (Number($(this).data("opacity"))>0)){
+							return true;
+						}
+					}else{
+	        	return Number($(this).data("opacity"))>0;
+					}
+	    });
     }else{
-      subjectlayer = $("#layeringsystem li:not([disabled])");
+			if ($("#layerRandomCfg").val()!=""){
+				subjectlayer = $("#layeringsystem li:not([disabled])").filter(
+					function(){
+						return subjectlayerRText.includes($(this)[0].innerText);
+					});
+			}else{
+				subjectlayer = $("#layeringsystem li:not([disabled])");
+			}
+
     }
 
     if (!rndMBlend){max_blends=1;}

@@ -137,8 +137,10 @@
         <li  data-labels="(null_null) unused" class=""  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >19</li>
     </ul>
     <div class="text-center">
-      <div class="btn-group btn-group-sm my-1 " role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-outline-warning" id="layerRandomizer">Randomize</button>
+      <div class="btn-group btn-group-sm m-1 " role="group" aria-label="Layers randomizer">
+				<button type="button" class="btn btn-outline-warning" id="layerRandomizer" data-toggle="tooltip" title="Randomize layers"><i class="fas fa-random"></i></button>
+				<input id="layerRandomCfg" class="form-control rounded-0 border border-warning" type="text" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
+				<!--<button type="button" class="btn btn-outline-warning" id="randomTrScribe" data-toggle="tooltip" title="Transcribe actual enabled layer setup"><i class="fab fa-buffer"></i></button>//-->
         <button type="button" class="btn btn-outline-warning" id="randomicOpt" data-bs-toggle="modal" data-toggle="tooltip" data-bs-target="#RandOptmodal" title="Option setting for the randomizer"><i class="fas fa-cogs"></i></button>
       </div>
     </div>
