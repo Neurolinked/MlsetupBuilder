@@ -29,7 +29,8 @@ $(function(){
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 
   $(document).on('keydown', function(e) {
-    if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');}
+    if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
+	}else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}
   });
 
   $(document).on('keyup', function(e) { if (e.shiftKey == false) { shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');} });
