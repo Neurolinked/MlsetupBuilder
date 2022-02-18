@@ -1,21 +1,60 @@
 // main.js
-
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, nativeTheme, dialog, Menu } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const store = require('electron-store');
+
+const schema = {
+	unbundle: {
+		type: 'string',
+		default: ''
+	},
+	wcli: {
+		type: 'string',
+		default: ''
+	},
+	maskformat:{
+		type: 'string',
+		default: 'dds'
+	}
+};
+
+const preferences = new store({schema});
+preferences.watch = true
+let mainWindow
 
 var mljson = app.commandLine.getSwitchValue("open")
 if (mljson ==''){
   mljson = app.commandLine.getSwitchValue("o")
 }
 
-//setup for the file path configuration
-let configfile, default_config, configJson
+//setup for the file path configurationa
+/*let configfile, default_config, configJson
 configfile ='mlconfig.json'
 default_config = {'unbundle':''}
-configJson = JSON.stringify(default_config)
-/*
+configJson = JSON.stringify(default_config)*
+*/
+const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder') => {
+  let modal = new BrowserWindow({
+    width: width,
+    height: height,
+    modal: true,
+    parent: parentWindow,
+		webPreferences: {
+			preload: path.join(__dirname, 'apps/preloadpref.js'),
+		},
+		title: title
+  })
+	modal.menuBarVisible=false
+	modal.minimizable=false
+  modal.loadFile(htmlFile)
+	modal.once('ready-to-show', () => {
+		modal.show()
+	})
+  return modal;
+}
+
 const isMac = process.platform === 'darwin'
 
 const template = [
@@ -38,6 +77,10 @@ const template = [
   {
     label: 'File',
     submenu: [
+			{label: '&Preferences', click: () =>{
+				createModal("apps/prefs.html",mainWindow,800,300,'Preferences');
+			}},
+			{ type: 'separator' },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },
@@ -66,8 +109,7 @@ const template = [
       ] : [
         { role: 'delete' },
         { type: 'separator' },
-        { role: 'selectAll' },
-        { label: '&Preferences'}
+        { role: 'selectAll' }
       ])
     ]
   },
@@ -104,16 +146,18 @@ const template = [
   },
   {
     role: 'help',
-    submenu: [{label:'License'}]
+    submenu: [{label:'License',click: () =>{
+				mainWindow.webContents.send('preload:openlicense')
+		}}]
   }
 ]
 
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
-*/
+
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+   mainWindow = new BrowserWindow({
     width: 1280,
     height: 960,
     webPreferences: {
@@ -126,9 +170,12 @@ function createWindow () {
   mainWindow.loadFile('index.html')
   nativeTheme.themeSource = 'dark';
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
+const prefupdate = preferences.onDidAnyChange(()=>{
+	mainWindow.webContents.send('preload:upd_config',preferences.store)
+})
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -147,98 +194,12 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-
-//scrittura file di cofnigurazione come da standard se inesistente
-fs.readFile(path.join(app.getPath('userData'),configfile),'utf8',(err,data) =>{
-  if (err) {
-    if (err.code=='ENOENT'){
-      fs.writeFile(path.join(app.getPath('userData'),configfile),configJson,'utf8',(errw,data) =>{
-        if(errw){
-          console.log('No permission to write in user folder and save preferences');
-          return
-        }
-        console.log('Blank preferences installed')
-      })
-      return
-    }
-  }
-})
-
-//cambia la versione sulla pagina a seconda della versione dell'app
-ipcMain.on('main:getversion', (event, payload) => {
-    const versione = app.getVersion()
-    event.reply('preload:setversion',versione)
-})
-
-//check the argument used and
-ipcMain.on('main:getargs', (event, payload) => {
-  if (mljson!=""){
-    fs.stat(mljson,'utf8',function(err, stat) {
-      if (err) {
-        if (err.code=='ENOENT'){
-          dialog.showErrorBox("File opening error","The searched file does not exists")
-        }else{
-          dialog.showErrorBox("File opening error",err.message)
-        }
-        return
-      }else{
-        var mlsetup_content = ""
-        fs.readFile(mljson,'utf8',(err,data) =>{
-          try {
-              mlsetup_content = JSON.parse(data)
-          } catch(e) {
-             dialog.showErrorBox("File error","Reading error: wrong json file format")
-             mlsetup_content = ""
-          }
-          event.reply('preload:setargs',mlsetup_content)
-        })
-      }
-    })
-  }
-})
-
-ipcMain.on('main:readPrefs',(event,payload) =>{
-  fs.opendir(app.getPath('userData'),(err,data) => {
-    if (err) {
-      event.reply('preload:prefsOn','{"unbundle":""}\n')
-      return
-    }
-    fs.readFile(path.join(app.getPath('userData'),configfile),'utf8',(err,data) =>{
-      if (err) {
-        if (err.code=='ENOENT'){
-          fs.writeFile(path.join(app.getPath('userData'),configfile),'{"unbundle":""}\n','utf8',(errw,data) =>{
-            if(errw){
-              console.log('No permission to write in user folder and save preferences');
-              return
-            }
-            console.log('Blank preferences installed')
-            event.reply('preload:prefsOn','{"unbundle":""}')
-          })
-          return
-        }
-        return
-      }
-      event.reply('preload:prefsOn',data)
-      if(data) {
-          try {
-              default_config =JSON.parse(data)
-          } catch(e) {
-              console.log(e); // error in the above string (in this case, yes)!
-          }
-      }
-    })
-  })
-})
-
-
+//read file on disk
 ipcMain.on('main:readFile',(event,percorso,flags)=>{
-  fs.readFile(path.join(default_config.unbundle,percorso),flags,(err,contenutofile) =>{
+  fs.readFile(path.join(preferences.get('unbundle'),percorso),flags,(err,contenutofile) =>{
     if (err) {
       if (err.code=='ENOENT'){
-        dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(default_config.unbundle,percorso))
+        dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(preferences.get('unbundle'),percorso))
       }else{
         dialog.showErrorBox("File opening error",err.message)
       }
@@ -251,22 +212,43 @@ ipcMain.on('main:readFile',(event,percorso,flags)=>{
 //write the configuration file after the selection of the directory in the
 //preference interface window
 ipcMain.on('main:setupUnbundle',(event, arg) => {
-  const result = dialog.showOpenDialog({title:'Choose the unbundle folder', properties: ['openDirectory'] }).then(result => {
+  const result = dialog.showOpenDialog({title:'Choose the unbundle folder', properties: ['openDirectory'],defaultPath:arg }).then(result => {
     if (!result.canceled){
-      default_config.unbundle = result.filePaths[0]
-      let dummy = JSON.stringify(default_config)
-      fs.writeFile(path.join(app.getPath('userData'),configfile),dummy,'utf8',(errw,data) =>{
-        if(errw){
-          dialog.showErrorBox('No permission to write in user folder to save preferences');
-          return ""
-        }else{
-          event.reply('preload:prefsLoad', default_config.unbundle)
-        }
-      })
+			if (result!=undefined){
+				event.reply('preload:upd_config',{'value':result.filePaths[0],'id':'prefxunbundle'})
+			}else{
+				console.log('errore')
+			}
     }
   }).catch(err => {
     dialog.showErrorBox("Preferences error",err.message)
   })
+})
+//dialog for getting the WolvenkitCLI.exe command
+ipcMain.on('main:setupCR2Wr',(event, arg) => {
+  const result = dialog.showOpenDialog({
+		title:'Choose the Wolvenkit-CLI executable',
+		filters:[ { name: 'executables', extensions: ['exe'] }],
+		defaultPath:arg
+	}).then(result => {
+    if (!result.canceled){
+			event.reply('preload:upd_config',{'value':result.filePaths[0],'id':'wCLIexe'})
+    }
+  }).catch(err => {
+    dialog.showErrorBox("Preferences setup error",err.message)
+  })
+})
+//Save the preferences
+ipcMain.on('main:saveStore',(event, arg) => {
+	if (arg.hasOwnProperty('unbundle')){
+		preferences.set('unbundle',arg.unbundle);
+	}
+	if (arg.hasOwnProperty('wcli')){
+		preferences.set('wcli',arg.wcli);
+	}
+	if (arg.hasOwnProperty('maskformat')){
+		preferences.set('maskformat',arg.maskformat);
+	}
 })
 //json version of mlsetup file write operation
 ipcMain.on('main:writefile',(event,arg) => {
@@ -284,10 +266,19 @@ ipcMain.on('main:writefile',(event,arg) => {
 							return
 						}
 					})
-					event.reply('preload:logEntry', 'File saved in: '+salvataggio.filePath)
+					event.reply('preload:logEntry', 'File saved in: '+salvataggio.filePath+'\n')
 				}else{
 					event.reply('preload:logEntry', 'Save procedure cancelled')
 				}
 		})
+	}
+});
+
+//Get request for stored preferences values
+ipcMain.handle('main:getStoreValue', (event, key) => {
+	if (key===undefined){
+		return preferences.store;
+	}else{
+		return preferences.get(key);
 	}
 });

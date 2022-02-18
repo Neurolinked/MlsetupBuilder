@@ -18,6 +18,21 @@ async function abuildMB(microblendObj){
   }
   return;
 }
+async function abuildMaterial(materialArray){
+	if (typeof(materialArray)=="object"){
+		for (k=0, j=materialArray.length;k<j;k++){
+			// background-image: url('./images/material/asphalt.jpg');
+			$("#cagemLibrary").append("<div style=\"background:url('images/material/"+materialArray[k].name+".png') no-repeat;background-size:100% auto;\" data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</div>");
+		}
+	}
+}
+
+function slideMaterials(index){
+	if (index/3>1){
+		$("#cagemLibrary").animate({scrollTop:((Math.floor(index/3)-1)*67)+"px"},700);
+	}
+}
+
 $(function(){
   var shiftSpeedup = false;
   var indexLayerContextual = null; //variable index for the copied Data
@@ -25,6 +40,7 @@ $(function(){
 
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
+	let buildmyNuMaterial = abuildMaterial(materialCore);
 
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 
@@ -361,6 +377,11 @@ $(function(){
       //Load the layers infor into the fields
       let materialByClick = String($(this).data("material")).replace(/^.*[\\\/]/, '').split('.')[0];
 			semaphoreCLKmBlend=true;
+			//Reset material Library 1.5.99
+			$("#cagemLibrary > div").removeClass("active");
+			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
+			slideMaterials($("#cagemLibrary > div.active").index());
+			//
       $("#materialTrees").jstree().deselect_all(true);//reset the material library
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
 			$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
@@ -639,7 +660,8 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	TreeMaterial.on('select_node.jstree',function(ev,node){
 		if (node.node.type==='materials'){
 			//the node is a material, then change the material
-
+			//console.log(node.node);
+			$("#materialSummary").html(node.node.text);
 			$("#matInput").val(node.node.a_attr['data-val']);
 
 			if (ml_libraries.hasOwnProperty(node.node.text)){
@@ -647,6 +669,8 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 
 				console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
         $("#Rough_out_values").html('');//reset optional roughness
+				$("#Rough_In_values").html('');
+				$("#Metal_Out_values").html('');//reset optional metalLevelsOut
         $("#Norm_Pow_values").html('');
 				$("#materialcolors").html('');
 				$("#cagecolors").html('');
@@ -666,6 +690,10 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				});
 
         //build up the lists of roughness for the current material
+				Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
+					$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
+				});
+
         Object.entries(ml_libraries[materialtoload].overrides.roughLevelsOut).forEach(([key,value])=>{
           $("#Rough_out_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
         });
@@ -673,12 +701,78 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
         Object.entries(ml_libraries[materialtoload].overrides.normalStrength).forEach(([key,value])=>{
           $("#Norm_Pow_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
         });
+
+				Object.entries(ml_libraries[materialtoload].overrides.metalLevelsOut).forEach(([key,value])=>{
+          $("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
+        });
 			}else{
 				console.log("%cNo material override entry loaded for:  "+String(node.node.a_attr['data-val']).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
 				$("#materialcolors").html("");
 			}
 		}
 	});
+
+	$("body").on('click','#cagemLibrary > div',function(event){
+
+		$("#cagemLibrary > div").removeClass("active");
+		$(this).addClass('active');
+
+		if ($(this).index()/3>1){
+			slideMaterials($(this).index());
+			//$("#cagemLibrary").animate({scrollTop:((Math.floor($(this).index()/3)-1)*67)+"px"},700);
+		}
+		$("#materialSummary").html($(this).data('ref'));
+		$("#matInput").val($(this).data('path'));
+
+		if (ml_libraries.hasOwnProperty($(this).data('ref'))){
+			let materialtoload = $(this).data('ref');
+
+			console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
+
+			$("#Rough_out_values").html('');//reset optional roughness
+			$("#Metal_Out_values").html('');
+			$("#Rough_In_values").html('');
+			$("#Norm_Pow_values").html('');
+			$("#materialcolors").html('');
+			$("#cagecolors").html('');
+
+			let toodarkClass;
+
+			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
+				toodarkClass='';
+				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
+				//if (!(colorchecking.getBrightness()>90) && (colorchecking.getBrightness()<110)){
+				if (!tinycolor.isReadable(colorchecking,"#3c454d")){
+					toodarkClass='bg-light';
+				}
+				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
+				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
+				//$("#cagecolors").append('<span style="background-color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
+			});
+
+			//build up the lists of data loaded from the material chosen
+
+			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
+				$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
+			});
+
+			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsOut).forEach(([key,value])=>{
+				$("#Rough_out_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
+			});
+
+			Object.entries(ml_libraries[materialtoload].overrides.normalStrength).forEach(([key,value])=>{
+				$("#Norm_Pow_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
+			});
+
+			Object.entries(ml_libraries[materialtoload].overrides.metalLevelsOut).forEach(([key,value])=>{
+				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
+			});
+		}else{
+			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
+			$("#materialcolors").html("");
+		}
+	});
+
 
   //Clicking outside the contextual menu
   $("body").on('click',function(event){

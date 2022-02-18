@@ -24,7 +24,8 @@
 <!--Material Tree  --><script src="./js/materialTree.js"></script><!--Material Tree -->
 <!--Tinny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
-  <!--hardcoded microblends default //--><script type="text/javascript" src="./jsons/mbcore.json" ></script><!--hardcoded material DB//-->
+  <!--hardcoded microblends default //--><script type="text/javascript" src="./jsons/mbcore.json" ></script><!--hardcoded microblend DB//-->
+	<!--hardcoded material default //--><script type="text/javascript" src="./jsons/materialcore.json" ></script><!--hardcoded material DB//-->
   <script type="text/javascript" src='./js/interface.js'></script>
   <link rel="stylesheet" href="./css/base.css" />
   </head>
@@ -76,6 +77,7 @@
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>
       <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
+			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
     <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn ml-2 btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
     <button type="button" id="btnMdlLoader" class=" btn btn-out-Prim"><i class="fas fa-dolly"></i> Load Model</button>
@@ -85,11 +87,13 @@
       <div class="input-group input-group-sm">
         <span class="input-group-text bg-dark text-info" ><i class="fas fa-cube"></i></span>
         <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
+				<button id="CustModelLoad" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Load a custom .glb"><i class="fas fa-box-open"></i></button>
         <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
       </div>
       <div class="input-group input-group-sm border-secondary">
         <span class="input-group-text bg-dark text-info"><i class="fas fa-mask"></i></span>
         <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
+				<button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
         <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
       </div>
     </div>
@@ -164,15 +168,32 @@
   </div>
   <div id="layer_settings" class="layer-4 rounded">
       <span class="badge w-100 rounded-0 ">Material</span>
-      <div class="input-group mb-1">
-        <button class="btn btn-out-Prim btn-sm" id="applytoMyLayer" type="button" data-toggle="tooltip" title="Apply to layer"><i class="fas fa-paint-roller"></i></button>
-        <input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
-      </div>
+			<div class="row no-gutters layer-3">
+				<div class="col-2">
+					<button class="btn btn-out-Prim btn-sm" id="applytoMyLayer" type="button" data-toggle="tooltip" title="Apply to layer"><i class="fas fa-paint-roller fa-3x"></i></button>
+				</div>
+				<div class="col"-12>
+					<details class=""><summary id="materialSummary" data-toggle="tooltip" title="Click to edit to a custom material">unused</summary>
+		      <div class="input-group mb-1">
+		        <input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
+		      </div>
+					</details>
+				</div>
+			</div>
+			<div id="MLibrary" class="mb-2">
+				<span class="badge w-100 rounded-0" >Library search</span>
+        <div class="input-group input-group-sm mb-1">
+          <input type="text" class="form-control rounded-0" id="_matFinder" placeholder="search for a material in the library">
+          <button type="button" id="matFinderCleared" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
+        </div>
+				<div id="cagemLibrary" class="treeColGrid_spaced"  >
+				</div>
+			</div>
       <div class="treeColGrid layer-1">
         <div>
           <span class="badge  w-100 rounded-0 ">Normals</span>
           <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
-            <optgroup id="defaultNormal" label='Defaults'>
+            <optgroup id="defaultNormal" label='Reset'>
               <option value="null">null</option>
             </optgroup>
             <optgroup id="Norm_Pow_values" label='Materials'></optgroup>
@@ -181,17 +202,10 @@
         <div>
           <span class="badge  w-100 rounded-0 ">Metal Out</span>
           <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
-            <option value="null" >null (1 , 0)</option>
-            <option value="155c34" >155c34 (0.902 , 0)</option>
-            <option value="84a295" >84a295 (0.095 , 0.2549)</option>
-            <option value="a4ca36" >a4ca36 (0 , 0.2549)</option>
-            <option value="280c47" >280c47 (0 , 0)</option>
-            <option value="749e4d" >749e4d (0 , 0.5)</option>
-            <option value="7cda36" >7cda36 (0 , 0.25 )</option>
-            <option value="8980e7" >8980e7 (0 , 1)</option>
-            <option value="b56c4b" >b56c4b (0 , 0.75)</option>
-            <option value="9b8ce6" >9b8ce6 (0 , 0)</option>
-            <option value="fe6d21" >fe6d21 (0 , 1)</option>
+						<optgroup id="defaultMetalOut" label='Reset'>
+              <option value="null">null</option>
+            </optgroup>
+						<optgroup id="Metal_Out_values" label='material'></optgroup>
           </select>
         </div>
         <div>
@@ -208,17 +222,14 @@
         <div>
           <span class="badge w-100 rounded-0 ">Rough In</span>
           <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
-            <option value="null" >null (2 , -0.5)</option>
-            <optgroup label="Only work on debug_parity_test material">
-              <option value="2e977a" >2e977a (5 , -0.625)</option>
-              <option value="48a1ae" >48a1ae (4 , -1.1)</option>
-            </optgroup>
+            <optgroup label="Reset"><option value="null" >null</option></optgroup>
+            <optgroup id="Rough_In_values" label="Material"></optgroup>
           </select>
         </div>
         <div>
           <span class="badge  w-100 rounded-0 ">Rough Out</span>
           <select class="form-select rounded-0" id="layerRoughOut" aria-label="RoughnessOut">
-            <optgroup label="Reset"><option value="null" >Reset</option></optgroup>
+            <optgroup label="Reset"><option value="null" >null</option></optgroup>
             <optgroup label="Material specific" id="Rough_out_values"></optgroup>
           </select>
         </div>

@@ -14,12 +14,15 @@ const NTextarea = document.querySelector("#NotificationCenter div.offcanvas-body
  var control_reset = false;
  var control_side = false;
 
+ var getImageData = false;
+ var imgDataShot = null;
  let scene, camera, renderer, controls, axesHelper;
  let pointlight, ambientlight, pointlight_2, pointlight_3, pointlight_4;
  //-------------parameter for Dat Window-----------------------
 const params = {
  autorotation: false,
  rotationspeed: 6,
+ wireframe: false,
  onesided: false
 };
 //-------------Aiming box for the camera ----------------------
@@ -190,7 +193,11 @@ function LoadModelOntheFly(path){
   });
 }
 
-
+document.getElementById("takeashot").addEventListener('click', (e) =>{
+	getImageData = true;
+  animate();
+  //console.debug(imgDataShot);
+});
 
 document.getElementById("maskLayer").addEventListener('fire', e => {
 	 let modelTarget = document.getElementById("modelTarget").value;
@@ -277,7 +284,7 @@ function init() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
 
-  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-200),0.25,10000);
+  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-200),0.012,10000);
   camera.position.set(0.0,-0.4,-8);
   /*
 
@@ -320,6 +327,10 @@ function init() {
   const GuiBasicsetup = gui.addFolder("Basic Setup");
   GuiBasicsetup.add( params, 'autorotation' ).name( 'Auto Rotation' );
   GuiBasicsetup.add( params, 'rotationspeed',2, 10 ).name( 'Rotation speed' );
+	GuiBasicsetup.add( params, 'wireframe').name( 'View wireframe' ).onChange(() => {
+   if (params.wireframe){material.wireframe=true;}else{material.wireframe=false;}
+   material.NeedUpdates;
+   });;
   GuiBasicsetup.add( params, 'onesided').name( '1-side' ).onChange(() => {
    if (params.onesided){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
    material.NeedUpdates;
@@ -349,6 +360,15 @@ function animate() {
   if (control_side){material.needUpdates; control_side=false;}
 
   renderer.render(scene, camera);
+
+	if(getImageData == true){
+			let a = document.getElementById('takeashot');
+      imgDataShot = renderer.domElement.toDataURL('image/png');
+      getImageData = false;
+			a.href=imgDataShot;
+			a.download = "lastscreen.png";
+			//console.log(imgDataShot);
+  }
   //cameraData.innerText='x:'+Number(camera.position.x).toFixed(3)+' y:'+Number(camera.position.y).toFixed(3)+' z:'+Number(camera.position.z).toFixed(3)+'\nx:'+Number(controls.target.x).toFixed(3)+' y:'+Number(controls.target.y).toFixed(3)+' z:'+Number(controls.target.z).toFixed(3);
   requestAnimationFrame(animate);
 }
