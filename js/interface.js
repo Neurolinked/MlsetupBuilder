@@ -1,5 +1,7 @@
 window.$ = window.jQuery;
 
+
+
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 
@@ -27,22 +29,32 @@ async function abuildMaterial(materialArray){
 	}
 }
 
-function slideMaterials(index){
-	if (index/3>1){
-		$("#cagemLibrary").animate({scrollTop:((Math.floor(index/3)-1)*67)+"px"},700);
-	}
-}
-
 $(function(){
   var shiftSpeedup = false;
   var indexLayerContextual = null; //variable index for the copied Data
   var dataContextual = {};
+
+	const materialsize = window.getComputedStyle(document.body).getPropertyValue('--matsizes').replace(/px/,'');
 
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
 	let buildmyNuMaterial = abuildMaterial(materialCore);
 
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
+	//not sure about this
+	function slideMaterials(index,speed = 700){
+		if (index/4>1){
+			$("#cagemLibrary").animate({scrollTop:((Math.floor(index/4)-0.5)*(parseInt(materialsize)+3))+"px"},speed);
+		}
+	}
+
+	function notifyMe(message, warning = true){
+		$("#NotificationCenter .offcanvas-body").prepend(message+"<br/>");
+		if (warning){
+			let noterrorz = parseInt($("#notyCounter span").text()+0);
+			$("#notyCounter span").text(parseInt(noterrorz+1));
+		}
+	}
 
   $(document).on('keydown', function(e) {
     if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
@@ -64,6 +76,14 @@ $(function(){
         $("#layers-contextual").addClass("visible");
     }
   });
+
+	$("#matInput").on("change",function(){
+		if ($("#matInput").val() != $("#layeringsystem li.active").data("material")){
+			$("#layeringsystem li.active").addClass("notsync");
+		}else{
+			$("#layeringsystem li.active").removeClass("notsync");
+		}
+	});
 
   $("#layers-contextual li").click(function(){
     if ($(this).attr("disabled")!="disabled"){
@@ -175,7 +195,7 @@ $(function(){
 		$(this).val(stringa);
 	});
 
-/* Normalization layers numbers*/
+	/* Normalization layers numbers*/
   function normalizeNumbers(){
     if ($("#layerTile").val() % 1 == 0){ $("#layerTile").val(Number($("#layerTile").val()).toFixed(1));    }
     if ($("#layerOpacity").val() % 1 == 0){ $("#layerOpacity").val(Number($("#layerOpacity").val()).toFixed(1)); }
@@ -353,7 +373,7 @@ $(function(){
 
   //activate and deactivate double layering
   $("#onlyOneSide").click(function(){
-    var sideBox = $("#dat-container ul li:nth-of-type(4) input[type='checkbox']");
+    var sideBox = $("#dat-container ul li:nth-of-type(5) input[type='checkbox']");
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
 
@@ -363,7 +383,8 @@ $(function(){
 	$('#layeringsystem li').click(function(e){
 		if (!$(this).attr("disabled")){
       //activate the new one only if isn't disabled
-			$('#layeringsystem li').removeClass('active');
+			$('#layeringsystem li').removeClass('active notsync');
+
 			$(this).addClass('active');
 			$("#maskLayer").attr("value",$(this).text());
       //if the model is already loaded it fires the event to load the masks
@@ -380,6 +401,7 @@ $(function(){
 			//Reset material Library 1.5.99
 			$("#cagemLibrary > div").removeClass("active");
 			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
+			$("#materialChoser").attr('src','./images/material/'+materialByClick+'.png');
 			slideMaterials($("#cagemLibrary > div.active").index());
 			//
       $("#materialTrees").jstree().deselect_all(true);//reset the material library
@@ -405,14 +427,15 @@ $(function(){
 			$("#mbOffU").val($(this).data("mboffu"));
 			$("#mbOffV").val($(this).data("mboffv"));
       //setup the chosen colors for the layer
-			let  ricercacolore = $(this).data("color");
 
+			let  ricercacolore = $(this).data("color");
       if ($("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).length>0){
         $("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).prop("selected","selected");
         $("#LayerColorL").change();//fire the events as a user color selection to update colors percentage and preview
       }else{
         $("#LayerColorL").prop('selectedIndex',0); //reset to null to let overrides work
       }
+
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
 			$("#mbInput").focusout(); //fires up the change of material blending preview
 		}
@@ -506,16 +529,6 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#maxLayers").val(maxlayers);
 	}
 });
-	//setup the search inside the model list in the offcanvas jsTree
-	//var modToSearch=false;
-/*
-	force function to search
-  $("#modelFinder").keyup(function (event) {
-    if (event.which === 13) {
-        var v = $('#modelFinder').val();
-        $('#modelsTree').jstree(true).search(v);
-      }
-  });*/
 
 	function debounce(cb, interval, immediate) {
 	  var timeout;
@@ -580,29 +593,10 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 
 	//load a new texture to display as microblends and fille the name in the microblend file name
 	$("#mbSelect").change(function(event){
-		/*
-		console.log(event);
-		semaphoreCLKmBlend=false;
-    let notCustom = false;
-		console.log($('#mbSelect option[value="'+$("#mbInput").val()+'"]').length);
-
-    $('#mbSelect option').each(function() {
-        if ($(this).val()==$("#mbInput").val()){
-          notCustom=true;
-          return true;
-        }
-    });
-*/
-  /*  if (notCustom){*/
   		$("#mbInput").val($(this).val());
       if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
   			$("#mb-preview").prop("src",$("#mbSelect option:selected").attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif"); console.log("rilevato errore");});
   		}
-
-		/*
-    }else{
-      $("#mb-preview").prop("src","./images/_nopreview.gif");
-    }*/
 	});
 
 	//chage to a new microblend
@@ -635,7 +629,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   });
   //every time the switch skin it's clicked, it reload automatically the mesh
   //$("#switchSkinned").click(function(){ $("#btnMdlLoader").click();});
-
+	$("#matModFinderCleared").click(function(){$("#matModFinder").val("").keyup()})
   $("#matFinderCleared").click(function(){$("#matFinder").val("").keyup()}); //cleanup the material search
 
 	var TreeMaterial = $('#materialTrees').jstree({
@@ -684,8 +678,8 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
           if (!tinycolor.isReadable(colorchecking,"#3c454d")){
             toodarkClass='bg-light';
           }
-					$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-					$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
+					$("#materialcolors").append('<option class="'+toodarkClass+'"  style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
+					$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 					//$("#cagecolors").append('<span style="background-color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 				});
 
@@ -709,6 +703,23 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				console.log("%cNo material override entry loaded for:  "+String(node.node.a_attr['data-val']).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
 				$("#materialcolors").html("");
 			}
+
+			$("#cagecolors").find('span').sort(function(a, b) {
+	    	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
+			}).appendTo($("#cagecolors"));
+		}
+	});
+
+	$("#materialModal").on('show.bs.modal',function(){
+		//reset the last active material
+		$("#cagemLibrary > div").removeClass("active");
+		//data-ref the name of the material in use
+		let materialtosearch = $("#materialSummary").text();
+		let matindexchose = $("#cagemLibrary > div[data-ref='"+materialtosearch+"']").index();
+
+		$("#cagemLibrary > div[data-ref='"+materialtosearch+"']").addClass("active");
+		if (matindexchose/4>1){
+			slideMaterials(matindexchose,200);
 		}
 	});
 
@@ -717,13 +728,13 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#cagemLibrary > div").removeClass("active");
 		$(this).addClass('active');
 
-		if ($(this).index()/3>1){
+		if ($(this).index()/4>1){
 			slideMaterials($(this).index());
 			//$("#cagemLibrary").animate({scrollTop:((Math.floor($(this).index()/3)-1)*67)+"px"},700);
 		}
 		$("#materialSummary").html($(this).data('ref'));
 		$("#matInput").val($(this).data('path'));
-
+		$("#matInput").trigger("change");
 		if (ml_libraries.hasOwnProperty($(this).data('ref'))){
 			let materialtoload = $(this).data('ref');
 
@@ -746,8 +757,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 					toodarkClass='bg-light';
 				}
 				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
-				//$("#cagecolors").append('<span style="background-color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
+				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
 
 			//build up the lists of data loaded from the material chosen
@@ -767,10 +777,16 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			Object.entries(ml_libraries[materialtoload].overrides.metalLevelsOut).forEach(([key,value])=>{
 				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
 			});
+
+			$("#materialChoser").attr('src','./images/material/'+materialtoload+'.png');
 		}else{
 			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
 			$("#materialcolors").html("");
 		}
+
+		$("#cagecolors").find('span').sort(function(a, b) {
+    	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
+		}).appendTo($("#cagecolors"));
 	});
 
 
@@ -792,8 +808,10 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	});
 
 	$("body").on('click','#cagecolors span',function(){
+		/* retarget the colors chosen*/
 		$("#cagecolors span").removeClass('active');
 		$(this).addClass('active');
+
 		let colorchanger = $(this).attr("title");
 		$("body #materialcolors").prop('selectedIndex',0);
 		if ($("body #materialcolors option:contains('"+colorchanger+"')").length>0) {
@@ -806,9 +824,8 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 
   $("#cagethemicroblends li").click(function(){
     let theoneselected = $(this).data('bs-original-title');
-    console.log(theoneselected+" :contains('"+theoneselected+"')");
+    //console.log(theoneselected+" :contains('"+theoneselected+"')");
     $("#mbSelect option").removeAttr("selected").filter(function() { return $(this).text() === theoneselected;}).attr('selected', true).change();
-    //$("#mbSelect").find("option:contains('"+theoneselected+"')").attr('selected', true).change();
   });
 
 	$("#layerRandomizer").click(function(){
@@ -971,6 +988,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   //applying data to the structure of li
   $("#applytoMyLayer").click(function(){
     if ($("#layeringsystem li.active").length==1){
+			$("#layeringsystem li.active").removeClass("notsync");
       normalizeNumbers();
       let livelloeditato =$("#layeringsystem li.active");
       livelloeditato.attr("data-opacity",$("#layerOpacity").val());//to activate/deactivate Opacity in layers display
@@ -994,7 +1012,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       livelloeditato.data("mboffv",$("#mbOffV").val());
       semaphoreCLKmBlend=true;
     }else{
-      console.log("NO level selected");
+      notifyMe("NO level selected");
     }
   });
  /*------------------------------------------------------------------------------------
@@ -1006,6 +1024,7 @@ $("#importTech").change(function(){
 	fr.onload=function(){$("#passaggio").val(fr.result);} //get the result of the reading to the textarea
 	fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
 });
+
 //Cleanep all the layers value
 function vacuumCleaner(on = true){
   let c_opacity
@@ -1057,10 +1076,12 @@ function vacuumCleaner(on = true){
     $('#layeringsystem li').eq(0).attr({"data-opacity":"1.0"});
   }
 }
+
 //----Button to load
 $("#TheMagicIsHere").click(function(){
 		if (String($("#passaggio").val()).trim()!="") {
 			theArcOfNOA = JSON.parse($("#passaggio").val());
+			if (theArcOfNOA.hasOwnProperty('Chunks')){
 			/*if (theArcOfNOA.Extension==".mlsetup"){ */
 				if (theArcOfNOA.Chunks[0].Properties.layers.length>0){
 					vacuumCleaner();//cleanup all layers data in the lists
@@ -1161,19 +1182,145 @@ $("#TheMagicIsHere").click(function(){
 						k++;
 					});
 					console.log("%c- Imported "+$("#importTech").val()+", Now cleanup -","background-color:green;color:yellow;")
-          $("#load-info").html('<span class="badge bg-info text-dark">Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1)+' </span>');
+          //$("#load-info").html('<span class="badge bg-info text-dark">Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1)+' </span>');
+					notifyMe('Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1),false);
 					$("#importTech").val("");
           $("#layeringsystem li.active").click();
 				}
-				/*
-			}else{
-				//using tooltip
-				console.log('Json file not compatible');
-			}*/
+			}else if (theArcOfNOA.hasOwnProperty("Header")) {
+					if (theArcOfNOA.Header.hasOwnProperty('WKitJsonVersion')){
+						//if the format change i need another version of the structure loading
+						var jsonformat = theArcOfNOA.Header.WKitJsonVersion;
+						switch(jsonformat) {
+							case '0.0.1':
+								notifyMe('Wolvenkit Version: '+theArcOfNOA.Header.WolvenKitVersion+" - JSON encode v.: "+theArcOfNOA.Header.WKitJsonVersion, false);
+								vacuumCleaner();
+								if (theArcOfNOA.hasOwnProperty("Data")){
+									notifyMe("Version: "+theArcOfNOA.Data.Version+" (BuildVersion: "+theArcOfNOA.Data.BuildVersion+")", false);
+
+									var tempArray=[];
+									tempArray=theArcOfNOA.Data.RootChunk.Properties.layers;
+									//console.log(tempArray);
+									if (theArcOfNOA.Data.RootChunk.Properties.hasOwnProperty('ratio')){
+										$("#layerRatio").val(Number(theArcOfNOA.Data.RootChunk.Properties.ratio).toFixed(1));
+									}
+
+									k=0;
+									let basicOpacity,tempTile,tempMat,tempNorm,tempMetalIN,tempMetalOUT,tempRoughIN,tempRoughOUT,tempCol
+									let tempoffU,tempoffV
+									let tempMBlend,tempMBTile,tempMBNS,tempMBCon,tempMBoffU,tempMBoffV;
+									tempArray.forEach(function(element) {
+				// Layer - Reset
+										basicOpacity='1.0';
+										tempTile ="1.0";
+										tempMat='base\\surfaces\\materials\\special\\unused.mltemplate';
+										tempCol='null_null';
+										tempNorm = 'null';
+										tempMetalIN ="null";
+										tempMetalOUT ="null";
+										tempRoughIN ="null";
+										tempRoughOUT ="null";
+										tempoffU ='0';
+										tempoffV ='0';
+
+				// Multiblend Reset
+										tempMBTile ='1.0';
+										tempMBlend = "base\\surfaces\\microblends\\default.xbm";
+										tempMBNS='1.0';
+										tempMBCon='1.0';
+										tempMBoffU ='0';
+										tempMBoffV ='0';
+
+										if (element.hasOwnProperty('Properties')){
+											if (element.Properties.hasOwnProperty('matTile')){tempTile=element.Properties.matTile;}
+											if (element.Properties.hasOwnProperty('opacity')){ basicOpacity=element.Properties.opacity;	}
+					            if (element.Properties.hasOwnProperty('material')){ tempMat=element.Properties.material.DepotPath;}
+
+											if (element.Properties.hasOwnProperty('colorScale')){ tempCol=element.Properties.colorScale;}
+											if (element.Properties.hasOwnProperty('normalStrength')){ tempNorm=element.Properties.normalStrength;}
+					            if (element.Properties.hasOwnProperty('metalLevelsIn')){ tempMetalIN=element.Properties.metalLevelsIn;}
+											if (element.Properties.hasOwnProperty('metalLevelsOut')){ tempMetalOUT=element.Properties.metalLevelsOut;}
+											if (element.Properties.hasOwnProperty('roughLevelsin')){ tempRoughIN=element.Properties.roughLevelsin;}
+											if (element.Properties.hasOwnProperty('roughLevelsOut')){ tempRoughOUT=element.Properties.roughLevelsOut;}
+
+					            if (element.Properties.hasOwnProperty('offsetU')){ tempoffU=element.Properties.offsetU;}
+					            if (element.Properties.hasOwnProperty('offsetV')){ tempoffV=element.Properties.offsetV;}
+
+					            if (element.Properties.hasOwnProperty('microblend')){  if(element.Properties.microblend.DepotPath!=''){ tempMBlend=element.Properties.microblend.DepotPath; } }
+					            if (element.Properties.hasOwnProperty('mbTile')){ tempMBTile=element.Properties.mbTile;}
+					            if (element.Properties.hasOwnProperty('microblendNormalStrength')){ tempMBNS=element.Properties.microblendNormalStrength;}
+											if (element.Properties.hasOwnProperty('microblendContrast')){ tempMBCon=element.Properties.microblendContrast;}
+
+					            if (element.Properties.hasOwnProperty('microblendOffsetU')){ tempMBoffU=element.Properties.microblendOffsetU;}
+											if (element.Properties.hasOwnProperty('microblendOffsetV')){ tempMBoffV=element.Properties.microblendOffsetV;}
+											if ($('#layeringsystem li').eq(k).attr('disabled')!=='disabled'){
+												$('#layeringsystem li').eq(k).data({
+													mattile:tempTile,
+													labels:'('+tempCol+') '+ String(tempMat).replace(/^.*[\\\/]/, '').split('.')[0],
+													material:tempMat,
+													opacity:basicOpacity,
+													color:tempCol,
+													normal:tempNorm,
+													roughin:tempRoughIN,
+													roughout:tempRoughOUT,
+													metalin:tempMetalIN,
+													metalout:tempMetalOUT,
+													offsetU:tempoffU,
+													offsetV:tempoffV,
+													mblend:tempMBlend,
+													mbtile:tempMBTile,
+													mbcontrast:tempMBCon,
+													mbnormal:tempMBNS,
+													mboffu:tempMBoffU,
+													mboffv:tempMBoffV
+												});
+												$('#layeringsystem li').eq(k).attr({
+													"data-mattile":tempTile,
+													"data-labels":'('+tempCol+') '+ String(tempMat).replace(/^.*[\\\/]/, '').split('.')[0],
+													"data-material":tempMat,
+													"data-opacity":basicOpacity,
+													"data-color":tempCol,
+													"data-normal":tempNorm,
+													"data-roughin":tempRoughIN,
+													"data-roughout":tempRoughOUT,
+													"data-metalin":tempMetalIN,
+													"data-metalout":tempMetalOUT,
+													"data-offsetU":tempoffU,
+													"data-offsetV":tempoffV,
+													"data-mblend":tempMBlend,
+													"data-mbtile":tempMBTile,
+													"data-mbcontrast":tempMBCon,
+													"data-mbnormal":tempMBNS,
+													"data-mboffu":tempMBoffU,
+													"data-mboffv":tempMBoffV
+												});
+											}
+											k++;
+										}else{
+											notifyMe('layer without properties');
+										}
+									});
+									console.log("%c- Imported "+$("#importTech").val()+", Now cleanup -","background-color:green;color:yellow;")
+				          //$("#load-info").html('<span class="badge bg-info text-dark">Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1)+' </span>');
+									notifyMe('Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1),false);
+									$("#importTech").val("");
+				          $("#layeringsystem li.active").click();
+								}
+								notifyMe(k+' layer/s found',false);
+								break;
+							default:
+								notifyMe('Unkown version of mlsetup json, the new format need new code to be interpreted')
+						}
+					}
+				}else{
+					//unknown format
+					notifyMe('Unknown JSON structure format')
+				}
 		}else{
       console.log('No file loaded');
 		}
 	});
+
   //Event to export your setup
   $("#exportJason").click(function(){
 		let nomefile = 'commonlayer.json';
@@ -1286,5 +1433,5 @@ $("#TheMagicIsHere").click(function(){
   });
 
  //Display the counted meshes
-	console.log("Mesh linked :"+modelsJson.filter(attri => attri.li_attr!=undefined).length);
+	notifyMe("Mesh linked :"+modelsJson.filter(attri => attri.li_attr!=undefined).length,false);
 });

@@ -25,7 +25,7 @@
   --layer-7:rgba(255,255,255,0.14);
   --layer-8:rgba(255,255,255,0.15);
   --layer-9:rgba(255,255,255,0.16);
-	--matsizes:64px;
+	--matsizes:256px;
 }
 
 .no-gutters {
@@ -64,7 +64,10 @@
 .layer-7{background-color:var(--layer-7);}
 .layer-8{background-color:var(--layer-8);}
 .layer-9{background-color:var(--layer-9);}
-.eq-lay1{background-color:var(--eq-lay3);}
+/* equal layer x */
+.eq-lay1{background-color:var(--eq-lay1);}
+.eq-lay2{background-color:var(--eq-lay2);}
+.eq-lay3{background-color:var(--eq-lay3);}
 
 html, body{margin:0;padding:0;}
 body{width: 100vw;height: 95vh;background-color:var(--layer-0);color:white;}
@@ -110,9 +113,10 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 #micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 2; grid-row-end: 5;}
 #layer_settings{grid-column-start: 3; grid-column-end: 3; grid-row-start: 2; grid-row-end: 5;}
 #colorGrid{display:grid;grid-template-columns:1fr 2fr 1fr;}
+#matdisplay{display:grid;grid-template-columns: 170px 1fr;} /*display the materials and it's datas*/
 
 #cagethematerials{height:270px;overflow-y: scroll;border:1px solid #4d5154!important;}
-#cagemLibrary{height:210px;overflow-y: scroll;border:1px solid #4d5154!important;}
+#cagemLibrary{height:calc(2 * var(--matsizes));overflow-y: scroll;border:1px solid #4d5154!important;}
 #cagemLibrary::-webkit-scrollbar ,
 #cagethematerials::-webkit-scrollbar {background-color:var(--layer-0);}
 #cagemLibrary::-webkit-scrollbar-thumb,
@@ -120,7 +124,6 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 
 #cagemLibrary > div{height:var(--matsizes);border:1px solid var(--secondary);text-align: center;background-color: var(--secondary);margin-bottom:3px;text-shadow: 0 0 3px #000, 0 0 5px #000;}
 #cagemLibrary > div.active{border-color:var(--primary);background-color: var(--active);}
-
 
 #aimGRID{display:grid;grid-template-columns: 20px 521px 1fr;}
 #aimGRID input:first-of-type{grid-column-start: 1;grid-column-end: 1;}
@@ -150,12 +153,11 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 .twoColGrid{display:grid;grid-template-columns:1fr 1fr;}
 .treeColGrid{display:grid;grid-template-columns:1fr 1fr 1fr;}
 .treeColGrid_spaced{display:grid;grid-template-columns:1fr 1fr 1fr;column-gap:3px;}
-
+.matColGrid_spaced{display:grid;grid-template-columns:repeat(4,minmax(170px,256px));column-gap:3px;}
 
 .tint{-moz-box-shadow:inset 0 0 5px #000; -webkit-box-shadow: inset 0 0 5px #000; box-shadow:inset 0 0 5px #000;height:32px !important;background-blend-mode: overlay;}
 #AimBlend .modal-body *:not(button, i), #RandOptmodal *:not(button, i),
 #modelsInformation .input-group-text {border-color:var(--bs-info)!important;}
-
 
 /* correct JSTree*/
 .jstree-default .jstree-anchor{color:var(--active-sel);}
@@ -210,6 +212,7 @@ Contextual Menu for the layering Systems
 
 #layers-contextual.visible{display:block;}
 
+#materialModal input[type='text'],
 #interface input[type='text'],
 #interface input[type='number'],
 #interface input[type='file'],
@@ -294,3 +297,14 @@ input[type=range]:focus {outline: none;}
 #LicenseModal .modal-body{background-color:black!important;-webkit-box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px 40px, 5px 5px 15px 5px rgba(255,179,15,0);
 box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px 40px, 5px 5px 15px 5px rgba(255,179,15,0);}
 .mlsblogo{padding:0!important;margin-right:1em;display: flex;justify-content: center;align-items: center;max-width:256px;}
+
+#materialSummary::before{content: 'Name: ';}
+#materialModal .modal-body,
+#materialChoser{background:radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(39,39,39,1) 100%);}
+#materialChoser{border:1px double var(--secondary);}
+#materialChoser:hover{border-color:var(--active-sel);cursor: pointer;}
+/*#MLibrary{grid-column-start: 2!important;grid-column-end: 2!important;grid-row-start: 2!important;grid-row-end: 3!important;}*/
+
+#materialModal .modal-xl {
+    max-width: 1040px;
+}

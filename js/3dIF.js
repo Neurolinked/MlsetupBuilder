@@ -9,7 +9,11 @@ dat.GUI.prototype.removeFolder = function(name) {
    this.onResize();
  }
 
-const NTextarea = document.querySelector("#NotificationCenter div.offcanvas-body");
+function notify3D(message){
+	var NTextarea = document.querySelector("#NotificationCenter div.offcanvas-body");
+	NTextarea.innerHTML = message+'<br/>'+NTextarea.innerHTML;
+}
+
  var err_counter = 0;
  var control_reset = false;
  var control_side = false;
@@ -42,7 +46,6 @@ window.addEventListener('resize', function() {  resized = true;  });// resize ev
 
 var MDLloadingButton = document.getElementById('btnMdlLoader');
 //-------------Material and Object Constant--------------------
-//var cameraData=document.getElementById("cameraData"); //object to display camera Data
 
 function giveToTheAim(textureData,w,h){
  var aimcanvas = document.getElementById('MaskTargettoAim');
@@ -122,13 +125,13 @@ function loadMapOntheFly(path){
   	 material.needUpdates =true;
   }else{
     let notific = document.querySelector("#notyCounter span");
-    let mipreference = document.getElementById("prefxunbundle");
+    let mipreference = document.getElementById("prefxunbundle")
 
     err_counter = err_counter+1;
     notific.textContent = err_counter;
     material.color.set(0x000055);
     material.map = safeMap;
-    NTextarea.innerHTML = 'An error happened during the load of the file: '+mipreference.value+path+'<br/>'+NTextarea.innerHTML;
+    notify3D('An error happened during the load of the file: '+mipreference.value+path);
   }
 }
 
@@ -157,7 +160,7 @@ function LoadModelOntheFly(path){
 
       if ( child.isMesh ) {
         //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-        strGLBInfo = strGLBInfo + "<p class='eq-lay1 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay1 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+        strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
         if (!(/(decals)|(vehicle_lights)|(\bnone\b)|(logo_spacestation.+)|(glass.+)|(multilayer_lizzard)|(phongE1SG1.+)|(stickers.+)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|(decal_.+)|(02_ca_limestone_1.*)|(zip+er.+)|(ziper.+)/g.test(child.userData.materialNames.toString()))){
             child.material = material;
         }else{
@@ -236,7 +239,7 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 	 loadMapOntheFly(theMaskLayer);
 	 material.needUpdates =true; //setup the mask I'll set the material to update
  }else{
-	 NTextarea.innerHTML = 'the texture '+theMaskLayer+' does not exists<br/>'+NTextarea.innerHTML;
+	 notify3D('the texture '+theMaskLayer+' does not exists');
  }
  //search for the right extension
  if (theModel.match(/^[/|\w|\.]+.glb/)){
@@ -261,7 +264,7 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 	 notific.textContent = err_counter;
 	 console.error("The model '"+theModel+"' does not exists, check that the model .glb file is on the path requested");
 	 MDLloadingButton.disabled=false;
-	 NTextarea.innerHTML = 'We are searching for .glb files and then this "'+theModel+'" one showed up, we can\'t open it now<br/>'+NTextarea.innerHTML;
+	 nofity3D('We are searching for .glb files and then this "'+theModel+'" one showed up, we can\'t open it now');
  }
 });
 
@@ -369,7 +372,6 @@ function animate() {
 			a.download = "lastscreen.png";
 			//console.log(imgDataShot);
   }
-  //cameraData.innerText='x:'+Number(camera.position.x).toFixed(3)+' y:'+Number(camera.position.y).toFixed(3)+' z:'+Number(camera.position.z).toFixed(3)+'\nx:'+Number(controls.target.x).toFixed(3)+' y:'+Number(controls.target.y).toFixed(3)+' z:'+Number(controls.target.z).toFixed(3);
   requestAnimationFrame(animate);
 }
 
