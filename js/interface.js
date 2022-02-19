@@ -403,10 +403,12 @@ $(function(){
 			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
 			$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
 			slideMaterials($("#cagemLibrary > div.active").index());
+			$("#materialSummary").html(materialByClick);
+			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
 			//
-      $("#materialTrees").jstree().deselect_all(true);//reset the material library
+      //$("#materialTrees").jstree().deselect_all(true);//reset the material library
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
-			$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
+			//$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
       //Setup the inputs
       $("#matInput").val($(this).data("material"));
 			$("#layerTile").val($(this).data("mattile"));
@@ -617,7 +619,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	});
 	//Material libraries and search
 	var matToSearch=false;
-
+/*
 	$("#matFinder").keyup(function () {
 
     if(matToSearch) { clearTimeout(matToSearch); }
@@ -627,6 +629,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       $('#materialTrees').jstree(true).search(v);
     }, 250);
   });
+	*/
   //every time the switch skin it's clicked, it reload automatically the mesh
   //$("#switchSkinned").click(function(){ $("#btnMdlLoader").click();});
 	$("#matModFinderCleared").click(function(){$("#matModFinder").val("").keyup()})
@@ -661,7 +664,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#cagemLibrary div").removeClass('active');
 		$("#cagemLibrary div").eq($(this).data('inx')).click();
 	})
-
+/*
 	var TreeMaterial = $('#materialTrees').jstree({
 		'core' : {"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : materialJson},
 		'types' : {
@@ -671,7 +674,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		"search":{"show_only_matches": true,"show_only_matches_children":true},
 		"plugins" : [ "search","types" ]
 	});
-
+*/
 	$("#layerOpacity").change(function(){
 			if (Number($(this).val())==0){
 				$("#layerOpacity").addClass('bg-attention');
@@ -680,6 +683,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			}
 	});
 
+/*
 	//Material Loading and building
 	TreeMaterial.on('select_node.jstree',function(ev,node){
 		if (node.node.type==='materials'){
@@ -738,7 +742,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	    	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
 			}).appendTo($("#cagecolors"));
 		}
-	});
+	});*/
 
 	$("#materialModal").on('show.bs.modal',function(){
 		//reset the last active material
@@ -762,6 +766,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			slideMaterials($(this).index());
 			//$("#cagemLibrary").animate({scrollTop:((Math.floor($(this).index()/3)-1)*67)+"px"},700);
 		}
+
 		$("#materialSummary").html($(this).data('ref'));
 		$("#matInput").val($(this).data('path'));
 		$("#matInput").trigger("change");

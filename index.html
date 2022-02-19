@@ -169,41 +169,42 @@
       <input type="number" class="form-control rounded-0" data-toggle="tooltip" title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
     </div>
   </div>
-  <div id="layer_settings" class="layer-4 rounded">
-      <span class="badge w-100 rounded-0 ">Material</span>
-
+  <div id="layer_settings" class="layer-1 rounded">
+      <span class="badge w-100 rounded-0">Material</span>
 			<div id="matdisplay" class=" no-gutters layer-3" >
-				<!--
-				<div class="dropdown p-0  float-start">-->
 					<img id="materialChoser" src="images/material/unused.jpg" width="170" height="170" data-bs-toggle="modal" data-bs-target="#materialModal" title="Click to choose a new material for the selected layer" />
-					<!--<div class="dropdown-menu rounded-0 text-white p-0" >
-						<div id="MLibrary">
-							<div >place for an inputgroup to search in </div>
-							<!--<div id="cagemLibrary" class="treeColGrid_spaced" > </div>--
-						</div>
-					</div>
-				</div>
-
-				<!--
-				<div class="col-2 p-0">
-					<button class="btn btn-block btn-out-Prim btn-sm" id="applytoMyLayer" type="button" data-toggle="tooltip" title="Apply to layer"><i class="fas fa-paint-roller fa-3x"></i></button>
-				</div>
-				<div class="col-10">-->
 				<div>
-					<details><summary id="materialSummary" data-toggle="tooltip" title="Click to edit to a custom material">unused</summary>
-		      <div class="input-group mb-1">
-		        <input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
-		      </div>
-					</details>
-				</div>
-				<!--</div>-->
-			</div>
+					<div>
+						<div>
+		          <div class="input-group input-group-sm">
+		              <div class="badge my-auto">Tiles</div>
+		            <input type="number" class="form-control rounded-0" id="layerTile" value="1.0" step="0.1" >
+		          </div>
+		          <div class="input-group input-group-sm">
+		            <div class="badge my-auto">Opacity</div>
+		            <input type="number" class="form-control form rounded-0" id="layerOpacity" value="1.0" step="0.01" min="0">
+		          </div>
+		        </div>
+						<div class="eq-lay2">
+		          <div class="input-group input-group-sm">
+		              <div class="badge my-auto">Offset U</div>
+		            <input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01">
+		          </div>
+		          <div class="input-group input-group-sm">
+		              <div class="badge my-auto">Offset V</div>
+		            <input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01">
+		          </div>
+		        </div>
+					</div>
 
-			<!--
-			<div id="MLibrary" class="mb-2">
-				<div id="cagemLibrary" class="treeColGrid_spaced"  > </div>
-			</div>-->
-      <div class="treeColGrid layer-1">
+				</div>
+			</div>
+			<details><summary id="materialSummary" data-toggle="tooltip" title="Click to edit to a custom material">unused</summary>
+			<div class="input-group mb-1">
+				<input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
+			</div>
+			</details>
+      <div class="twoColGrid layer-1">
         <div>
           <span class="badge  w-100 rounded-0 ">Normals</span>
           <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
@@ -222,17 +223,7 @@
 						<optgroup id="Metal_Out_values" label='material'></optgroup>
           </select>
         </div>
-        <div>
-          <div class="input-group input-group-sm">
-            <!--<span class="badge  w-100 rounded-0 ">Tiles</span>-->
-              <div class="badge my-auto">Tiles</div>
-            <input type="number" class="form-control rounded-0" id="layerTile" value="1.0" step="0.1" >
-          </div>
-          <div class="input-group input-group-sm">
-            <div class="badge my-auto">Opacity</div>
-            <input type="number" class="form-control form rounded-0" id="layerOpacity" value="1.0" step="0.01" min="0">
-          </div>
-        </div>
+
         <div>
           <span class="badge w-100 rounded-0 ">Rough In</span>
           <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
@@ -247,24 +238,8 @@
             <optgroup label="Material specific" id="Rough_out_values"></optgroup>
           </select>
         </div>
-        <div class="layer-2">
-          <!--<span class="badge rounded-0 ">Opacity</span>-->
-          <div class="input-group input-group-sm">
-            <!--<span class="badge  w-100 rounded-0 ">Tiles</span>-->
-              <div class="badge my-auto">Offset U</div>
-            <input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01">
-          </div>
-          <div class="input-group input-group-sm">
-            <!--<span class="badge  w-100 rounded-0 ">Tiles</span>-->
-              <div class="badge my-auto">Offset V</div>
-            <input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01">
-          </div>
-        </div>
+
       </div>
-      <!--<div class="twoColGrid mt-1 layer-2" >
-        <div><span class="badge   w-100 rounded-0">Offset U</span><input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01"></div>
-        <div><span class="badge   w-100 rounded-0">Offset V</span><input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01"></div>
-      </div>-->
       <div id="colorGrid">
         <div><span class="badge  w-100 rounded-0">ColorCode</span><input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13"></div>
         <div><span class="badge  w-100 rounded-0">Color list</span>
@@ -281,6 +256,7 @@
       <div id="colordisplay" class="layer-1">
         <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" title='null_null' >&nbsp;</span></div>
       </div>
+			<!--
       <div id="MaterialLibrary" class="mt-3">
         <span class="badge w-100 rounded-0" >Material library search</span>
         <div class="input-group input-group-sm mb-1">
@@ -290,7 +266,7 @@
         <div id="cagethematerials"  >
           <div id="materialTrees" class="layer-1" ></div>
         </div>
-      </div>
+      </div>-->
   </div>
   <div id="micropanel" class="layer-1 rounded">
     <div>
