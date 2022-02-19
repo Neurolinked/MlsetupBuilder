@@ -24,7 +24,7 @@ async function abuildMaterial(materialArray){
 	if (typeof(materialArray)=="object"){
 		for (k=0, j=materialArray.length;k<j;k++){
 			// background-image: url('./images/material/asphalt.jpg');
-			$("#cagemLibrary").append("<div style=\"background:url('images/material/"+materialArray[k].name+".png') no-repeat;background-size:100% auto;\" data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</div>");
+			$("#cagemLibrary").append("<div style=\"background:url('images/material/"+materialArray[k].name+".jpg') no-repeat;background-size:100% auto;\" data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</div>");
 		}
 	}
 }
@@ -401,7 +401,7 @@ $(function(){
 			//Reset material Library 1.5.99
 			$("#cagemLibrary > div").removeClass("active");
 			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
-			$("#materialChoser").attr('src','./images/material/'+materialByClick+'.png');
+			$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
 			slideMaterials($("#cagemLibrary > div.active").index());
 			//
       $("#materialTrees").jstree().deselect_all(true);//reset the material library
@@ -808,7 +808,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
 			});
 
-			$("#materialChoser").attr('src','./images/material/'+materialtoload+'.png');
+			$("#materialChoser").attr('src','./images/material/'+materialtoload+'.jpg');
 		}else{
 			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
 			$("#materialcolors").html("");
