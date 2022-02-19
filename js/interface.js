@@ -632,6 +632,36 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	$("#matModFinderCleared").click(function(){$("#matModFinder").val("").keyup()})
   $("#matFinderCleared").click(function(){$("#matFinder").val("").keyup()}); //cleanup the material search
 
+//filter materials by name and display badge links to select them
+	$("#matModFinder").keyup(function () {
+		if(matToSearch) { clearTimeout(matToSearch); }
+		matToSearch = setTimeout(function () {
+      var v = $('#matModFinder').val();
+			if (v.length<=3){
+				$('#matfindresults').html('');
+			}else{
+				let results = $("#cagemLibrary div[data-ref]").filter(function(){ return $(this).data('ref').match(v);});
+				$('#matfindresults').html('');
+				$(results).each(function( index ) {
+					if (index % 2){
+							$('#matfindresults').append('<a class="text-decoration-none badge layer-1 text-light" href="#" data-inx="'+$(this).index()+'">'+$(this).text()+'</a> ')
+					}else{
+						$('#matfindresults').append('<a class="text-decoration-none badge layer-8 text-light" href="#" data-inx="'+$(this).index()+'">'+$(this).text()+'</a> ')
+					}
+				});
+			}
+			//$('#matModFinder').find()
+
+    }, 250);
+	});
+	/*click in the material selection window over a searched name. it will  select
+	 the new material and move to the place where it is */
+	$("body").on('click',"#matfindresults a.badge",function(){
+		//console.log($(this).data('inx'));
+		$("#cagemLibrary div").removeClass('active');
+		$("#cagemLibrary div").eq($(this).data('inx')).click();
+	})
+
 	var TreeMaterial = $('#materialTrees').jstree({
 		'core' : {"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : materialJson},
 		'types' : {
@@ -970,10 +1000,11 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   		$("#layerOpacity").val("0.0").change();//zeroing the opacity
   		$("#layerColor").val("null_null");//color replace
   		$("#applytoMyLayer").click(); //trigger the application to layer
+			$("#layeringsystem li.active").click() //reselect the layer to updates the material
   	}
   });
-
-  $("#wash-layers").click(function(){ vacuumCleaner(); });
+	//Erase layers and put opacity at 0.0 4 all of them unless the 0 one
+  $("#wash-layers").click(function(){ vacuumCleaner(); $("#layeringsystem li.active").click(); });
 
   //Activate the first layer disabled
   $("#actlast-Layer").click(function(){
@@ -983,7 +1014,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   });
 
   //Erase layers but let opacity at 1.0
-  $("#wipe-layer").click(function(){ vacuumCleaner(false); });
+  $("#wipe-layer").click(function(){ vacuumCleaner(false); $("#layeringsystem li.active").click();});
 
   //applying data to the structure of li
   $("#applytoMyLayer").click(function(){

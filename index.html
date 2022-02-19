@@ -72,6 +72,8 @@
   <canvas id="thacanvas"></canvas>
   <div id="modelsInformation" class="p-2 rounded layer-1 mt-3">
     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+			<input type="checkbox" class="d-none" id="prefloaded" disabled />
+			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
       <!--<input type="checkbox" class="btn-check" id="switchSkinned" checked autocomplete="off"><label class="btn btn-outline-warning" for="switchSkinned">Only Skinned</label>-->
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
@@ -344,7 +346,6 @@
         <!--<span class="badge rounded-pill bg-warning text-dark"></span>-->
         <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
       </div>
-      <!--<div class="text-center"><button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalprefx"><i class="fas fa-cog"></i> Preferences</button></div>-->
     </div>
   </div>
 </div>
@@ -363,42 +364,11 @@
 					</div>
 				</div>
 				<div ><div id="cagemLibrary" class="matColGrid_spaced" > </div></div>
+				<div id='matfindresults' class="p-1 pb-2"></div>
       </div>
     </div>
   </div>
 </div>
-
-<!--
-preference modal folder
--->
-
-<div class="modal fade" id="modalprefx" tabindex="-1" aria-labelledby="modalprefxH" aria-hidden="true" data-focus="true">
-<div class="modal-dialog modal-lg modal-dialog-centered">
-  <div class="modal-content ">
-    <div class="modal-header bg-warning text-dark">
-      <h5 class="modal-title" id="modalprefxH"><i class="fas fa-cog"></i> Software preferences</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body text-white" style="background-color:#121212;">
-      <input type="checkbox" class="d-none" id="prefloaded" disabled />
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text">unbundle folder</span>
-        <input class="form-control" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
-      </div>
-      <div class="btn-group btn-group-sm mb-2 " role="group" aria-label="texture format">
-        <input type="radio" class="btn-check" name="maskExtFormat" id="maskDDSFormat" autocomplete="off" checked disabled>
-        <label class="btn btn-outline-primary" for="maskDDSFormat">DDS</label>
-        <input type="radio" class="btn-check" name="maskExtFormat" id="maskBMPFormat" autocomplete="off" disabled>
-        <label class="btn btn-outline-primary" for="maskBMPFormat">BMP</label>
-        <input type="radio" class="btn-check" name="maskExtFormat" id="maskPNGFormat" autocomplete="off" disabled>
-        <label class="btn btn-outline-primary" for="maskPNGFormat">PNG</label>
-      </div>
-      <div ><button type="button" class="btn btn-sm btn-outline-secondary" ><i class="fas fa-save"></i> Save preferences</button></div>
-    </div>
-  </div>
-</div>
-</div>
-
 <div class="modal fade" id="modalInfo" tabindex="-1" aria-labelledby="modelsInfoH" aria-hidden="true" data-focus="true">
 <div class="modal-dialog modal-xl modal-dialog-centered">
   <div class="modal-content ">

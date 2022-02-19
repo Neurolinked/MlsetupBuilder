@@ -304,7 +304,7 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #materialChoser{border:1px double var(--secondary);}
 #materialChoser:hover{border-color:var(--active-sel);cursor: pointer;}
 /*#MLibrary{grid-column-start: 2!important;grid-column-end: 2!important;grid-row-start: 2!important;grid-row-end: 3!important;}*/
-
+#matfindresults::before{content:'search matches';display:block;border-bottom: 1px solid var(--secondary);font-size:calc(100% * .7);}
 #materialModal .modal-xl {
     max-width: 1040px;
 }

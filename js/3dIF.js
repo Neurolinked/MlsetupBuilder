@@ -125,7 +125,7 @@ function loadMapOntheFly(path){
   	 material.needUpdates =true;
   }else{
     let notific = document.querySelector("#notyCounter span");
-    let mipreference = document.getElementById("prefxunbundle")
+    let mipreference = document.getElementById("prefxunbundle");
 
     err_counter = err_counter+1;
     notific.textContent = err_counter;
