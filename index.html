@@ -114,7 +114,14 @@
       <div class="input-group input-group-sm">
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
         <!--<a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>//-->
-				<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>
+				<!--<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>-->
+				<div class="dropdown">
+				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0" type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
+				  <ul id="xport_dm" class="dropdown-menu" aria-labelledby="exportversions">
+				    <li><a class="dropdown-item" href="#" id="exportJason_v1">Json v0.0.1 (Wkit 8.5)</a></li>
+				    <li><a class="dropdown-item" href="#" id="exportJason">pre-Wkit 8.5</a></li>
+				  </ul>
+				</div>
       </div>
   </div>
   </div>
@@ -165,9 +172,17 @@
       <button class="btn btn-outline-warning" type="button" id="actlast-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Activate the last unactive layer"><i class="fas fa-plug fa-2x"></i></button>
       <!--<button class="btn btn-outline-danger" type="button" id="wipe-layer" data-toggle="tooltip" data-bs-placement="bottom" title="Wipe all layers configuration"><i class="fas fa-soap"></i> </button>-->
     </div>
-    <div class="layer-1 m-2"><span class="badge w-100 rounded-0 "> Ratio </span>
-      <input type="number" class="form-control rounded-0" data-toggle="tooltip" title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
-    </div>
+		<div class="twoColGrid">
+	    <div class="layer-1 m-2"><span class="badge w-100 rounded-0 "> Ratio </span>
+	      <input type="number" class="form-control rounded-0" data-toggle="tooltip" title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
+	    </div>
+			<div class="layer-1 m-2"><span class="badge w-100 rounded-0 "> Normal </span>
+				<div class="form-check form-switch d-flex justify-content-center">
+					<input class="form-check-input " type="checkbox" role="switch" id="useNormals" checked>
+					<!--<label class="form-check-label ml-2" for="flexSwitchCheckDefault">ON</label>-->
+				</div>
+			</div>
+		</div>
   </div>
   <div id="layer_settings" class="layer-1 rounded">
       <span class="badge w-100 rounded-0">Material</span>
