@@ -24,7 +24,8 @@
 <!--Material Tree  --><script src="./js/materialTree.js"></script><!--Material Tree -->
 <!--Tinny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
-  <!--hardcoded microblends default //--><script type="text/javascript" src="./jsons/mbcore.json" ></script><!--hardcoded material DB//-->
+  <!--hardcoded microblends default //--><script type="text/javascript" src="./jsons/mbcore.json" ></script><!--hardcoded microblend DB//-->
+	<!--hardcoded material default //--><script type="text/javascript" src="./js/materialcore.js" ></script><!--hardcoded material DB//-->
   <script type="text/javascript" src='./js/interface.js'></script>
   <link rel="stylesheet" href="./css/base.css" />
   </head>
@@ -36,7 +37,6 @@
     <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
     <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
     <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
-    <script src='./js/threejs/examples/js/Loaders/DDSLoader.js'></script>
 <!--model Library -->
 <div class="offcanvas offcanvas-start bg-dark bg-gradient text-light" tabindex="-1" id="ModelLibrary" aria-labelledby="ModelLibraryLabel">
   <div class="offcanvas-header">
@@ -71,11 +71,14 @@
   <canvas id="thacanvas"></canvas>
   <div id="modelsInformation" class="p-2 rounded layer-1 mt-3">
     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+			<input type="checkbox" class="d-none" id="prefloaded" disabled />
+			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
       <!--<input type="checkbox" class="btn-check" id="switchSkinned" checked autocomplete="off"><label class="btn btn-outline-warning" for="switchSkinned">Only Skinned</label>-->
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>
       <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
+			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
     <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn ml-2 btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
     <button type="button" id="btnMdlLoader" class=" btn btn-out-Prim"><i class="fas fa-dolly"></i> Load Model</button>
@@ -85,11 +88,13 @@
       <div class="input-group input-group-sm">
         <span class="input-group-text bg-dark text-info" ><i class="fas fa-cube"></i></span>
         <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
+				<button id="CustModelLoad" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Load a custom .glb"><i class="fas fa-box-open"></i></button>
         <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
       </div>
       <div class="input-group input-group-sm border-secondary">
         <span class="input-group-text bg-dark text-info"><i class="fas fa-mask"></i></span>
         <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
+				<button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
         <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
       </div>
     </div>
@@ -103,17 +108,25 @@
       </div>
       <textarea id="passaggio" class="d-none"></textarea>
     </div>
-    <div><div id="load-info" ></div></div>
+    <div><!--<div id="load-info" ></div>--></div>
     <div>
       <div class="input-group input-group-sm">
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
         <!--<a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>//-->
-				<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>
+				<!--<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>-->
+				<div class="dropdown">
+				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0" type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
+				  <ul id="xport_dm" class="dropdown-menu" aria-labelledby="exportversions">
+				    <li><a class="dropdown-item" href="#" id="exportJason_v1">Json v0.0.1 (Wkit 8.5)</a></li>
+				    <li><a class="dropdown-item" href="#" id="exportJason">pre-Wkit 8.5</a></li>
+				  </ul>
+				</div>
       </div>
   </div>
   </div>
   <div id="MlEditor" class="text-white layer-1 rounded">
     <span class="badge w-100 rounded-0 ">Layers</span>
+		<div class="d-grid"><button class="btn btn-out-Prim btn-sm" id="applytoMyLayer" type="button" data-toggle="tooltip" data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
     <ul id="layeringsystem" class="layer-2">
       <li  data-labels="(null_null) unused" class=""  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >0</li>
         <li  data-labels="(null_null) unused" class=""  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >1</li>
@@ -158,21 +171,58 @@
       <button class="btn btn-outline-warning" type="button" id="actlast-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Activate the last unactive layer"><i class="fas fa-plug fa-2x"></i></button>
       <!--<button class="btn btn-outline-danger" type="button" id="wipe-layer" data-toggle="tooltip" data-bs-placement="bottom" title="Wipe all layers configuration"><i class="fas fa-soap"></i> </button>-->
     </div>
-    <div class="layer-1 m-2"><span class="badge w-100 rounded-0 "> Ratio </span>
-      <input type="number" class="form-control rounded-0" data-toggle="tooltip" title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
-    </div>
+		<div class="twoColGrid">
+	    <div class="layer-1 m-2"><span class="badge w-100 rounded-0 "> Ratio </span>
+	      <input type="number" class="form-control rounded-0" data-toggle="tooltip" title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
+	    </div>
+			<div class="layer-1 m-2"><span class="badge w-100 rounded-0 "> Normal </span>
+				<div class="form-check form-switch d-flex justify-content-center">
+					<input class="form-check-input " type="checkbox" role="switch" id="useNormals" checked>
+					<!--<label class="form-check-label ml-2" for="flexSwitchCheckDefault">ON</label>-->
+				</div>
+			</div>
+		</div>
   </div>
-  <div id="layer_settings" class="layer-4 rounded">
-      <span class="badge w-100 rounded-0 ">Material</span>
-      <div class="input-group mb-1">
-        <button class="btn btn-out-Prim btn-sm" id="applytoMyLayer" type="button" data-toggle="tooltip" title="Apply to layer"><i class="fas fa-paint-roller"></i></button>
-        <input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
-      </div>
-      <div class="treeColGrid layer-1">
+  <div id="layer_settings" class="layer-1 rounded">
+      <span class="badge w-100 rounded-0">Material</span>
+			<div id="matdisplay" class=" no-gutters layer-3" >
+					<img id="materialChoser" src="images/material/unused.jpg" width="170" height="170" data-bs-toggle="modal" data-bs-target="#materialModal" title="Click to choose a new material for the selected layer" />
+				<div>
+					<div>
+						<div>
+		          <div class="input-group input-group-sm">
+		              <div class="badge my-auto">Tiles</div>
+		            <input type="number" class="form-control rounded-0" id="layerTile" value="1.0" step="0.1" >
+		          </div>
+		          <div class="input-group input-group-sm">
+		            <div class="badge my-auto">Opacity</div>
+		            <input type="number" class="form-control form rounded-0" id="layerOpacity" value="1.0" step="0.01" min="0">
+		          </div>
+		        </div>
+						<div class="eq-lay2">
+		          <div class="input-group input-group-sm">
+		              <div class="badge my-auto">Offset U</div>
+		            <input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01">
+		          </div>
+		          <div class="input-group input-group-sm">
+		              <div class="badge my-auto">Offset V</div>
+		            <input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01">
+		          </div>
+		        </div>
+					</div>
+
+				</div>
+			</div>
+			<details><summary id="materialSummary" data-toggle="tooltip" title="Click to edit to a custom material">unused</summary>
+			<div class="input-group mb-1">
+				<input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
+			</div>
+			</details>
+      <div class="twoColGrid layer-1">
         <div>
           <span class="badge  w-100 rounded-0 ">Normals</span>
           <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
-            <optgroup id="defaultNormal" label='Defaults'>
+            <optgroup id="defaultNormal" label='Reset'>
               <option value="null">null</option>
             </optgroup>
             <optgroup id="Norm_Pow_values" label='Materials'></optgroup>
@@ -181,65 +231,29 @@
         <div>
           <span class="badge  w-100 rounded-0 ">Metal Out</span>
           <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
-            <option value="null" >null (1 , 0)</option>
-            <option value="155c34" >155c34 (0.902 , 0)</option>
-            <option value="84a295" >84a295 (0.095 , 0.2549)</option>
-            <option value="a4ca36" >a4ca36 (0 , 0.2549)</option>
-            <option value="280c47" >280c47 (0 , 0)</option>
-            <option value="749e4d" >749e4d (0 , 0.5)</option>
-            <option value="7cda36" >7cda36 (0 , 0.25 )</option>
-            <option value="8980e7" >8980e7 (0 , 1)</option>
-            <option value="b56c4b" >b56c4b (0 , 0.75)</option>
-            <option value="9b8ce6" >9b8ce6 (0 , 0)</option>
-            <option value="fe6d21" >fe6d21 (0 , 1)</option>
+						<optgroup id="defaultMetalOut" label='Reset'>
+              <option value="null">null</option>
+            </optgroup>
+						<optgroup id="Metal_Out_values" label='material'></optgroup>
           </select>
         </div>
-        <div>
-          <div class="input-group input-group-sm">
-            <!--<span class="badge  w-100 rounded-0 ">Tiles</span>-->
-              <div class="badge my-auto">Tiles</div>
-            <input type="number" class="form-control rounded-0" id="layerTile" value="1.0" step="0.1" >
-          </div>
-          <div class="input-group input-group-sm">
-            <div class="badge my-auto">Opacity</div>
-            <input type="number" class="form-control form rounded-0" id="layerOpacity" value="1.0" step="0.01" min="0">
-          </div>
-        </div>
+
         <div>
           <span class="badge w-100 rounded-0 ">Rough In</span>
           <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
-            <option value="null" >null (2 , -0.5)</option>
-            <optgroup label="Only work on debug_parity_test material">
-              <option value="2e977a" >2e977a (5 , -0.625)</option>
-              <option value="48a1ae" >48a1ae (4 , -1.1)</option>
-            </optgroup>
+            <optgroup label="Reset"><option value="null" >null</option></optgroup>
+            <optgroup id="Rough_In_values" label="Material"></optgroup>
           </select>
         </div>
         <div>
           <span class="badge  w-100 rounded-0 ">Rough Out</span>
           <select class="form-select rounded-0" id="layerRoughOut" aria-label="RoughnessOut">
-            <optgroup label="Reset"><option value="null" >Reset</option></optgroup>
+            <optgroup label="Reset"><option value="null" >null</option></optgroup>
             <optgroup label="Material specific" id="Rough_out_values"></optgroup>
           </select>
         </div>
-        <div class="layer-2">
-          <!--<span class="badge rounded-0 ">Opacity</span>-->
-          <div class="input-group input-group-sm">
-            <!--<span class="badge  w-100 rounded-0 ">Tiles</span>-->
-              <div class="badge my-auto">Offset U</div>
-            <input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01">
-          </div>
-          <div class="input-group input-group-sm">
-            <!--<span class="badge  w-100 rounded-0 ">Tiles</span>-->
-              <div class="badge my-auto">Offset V</div>
-            <input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01">
-          </div>
-        </div>
+
       </div>
-      <!--<div class="twoColGrid mt-1 layer-2" >
-        <div><span class="badge   w-100 rounded-0">Offset U</span><input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01"></div>
-        <div><span class="badge   w-100 rounded-0">Offset V</span><input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01"></div>
-      </div>-->
       <div id="colorGrid">
         <div><span class="badge  w-100 rounded-0">ColorCode</span><input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13"></div>
         <div><span class="badge  w-100 rounded-0">Color list</span>
@@ -256,6 +270,7 @@
       <div id="colordisplay" class="layer-1">
         <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" title='null_null' >&nbsp;</span></div>
       </div>
+			<!--
       <div id="MaterialLibrary" class="mt-3">
         <span class="badge w-100 rounded-0" >Material library search</span>
         <div class="input-group input-group-sm mb-1">
@@ -265,15 +280,7 @@
         <div id="cagethematerials"  >
           <div id="materialTrees" class="layer-1" ></div>
         </div>
-      </div>
-      <div id="MicroblendsLibrary">
-        <span class="badge w-100 rounded-0" >microblends gallery</span>
-        <div id="microdisplay" class="layer-1">
-          <div id="cagethemicroblends" >
-            <li style="background-image:url('./images/thumbs/default.gif');" data-package='source' data-toggle="tooltip" title="default"> </li>
-          </div>
-        </div>
-      </div>
+      </div>-->
   </div>
   <div id="micropanel" class="layer-1 rounded">
     <div>
@@ -292,6 +299,14 @@
       </select>
       <img id="mb-preview" style="background-color:#000;" alt="microblend preview" src='./images/default.gif' >
       <input id="bg-changer" type="color" value="#000000" data-toggle="tooltip" title="Background color check for microblend">
+			<div id="MicroblendsLibrary">
+        <span class="badge w-100 rounded-0" >microblends gallery</span>
+        <div id="microdisplay" class="layer-1">
+          <div id="cagethemicroblends" >
+            <li style="background-image:url('./images/thumbs/default.gif');" data-package='source' data-toggle="tooltip" title="default"> </li>
+          </div>
+        </div>
+      </div>
       <!-- microblends-data -->
       <div class="input-group input-group-sm layer-1 my-1"> <div class="badge my-auto">&micro;blend Tile</div> <input type="number" class="form-control rounded-0 " id="mbTile" value="1.0" step="0.01"> </div>
       <div class="input-group input-group-sm layer-1 mb-1">
@@ -319,45 +334,33 @@
     </div>
       <div id="versionDisplay" class="p-2">
         <!--<span class="badge rounded-pill bg-warning text-dark"></span>-->
-        <a href="#" class="badge rounded-pill bg-danger text-white" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
+        <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
       </div>
-      <div class="text-center"><button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalprefx"><i class="fas fa-cog"></i> Preferences</button></div>
     </div>
   </div>
-  <div id="cameraData" class="text-white"></div>
-</div>
-<!--
-preference modal folder
--->
-<div class="modal fade" id="modalprefx" tabindex="-1" aria-labelledby="modalprefxH" aria-hidden="true" data-focus="true">
-<div class="modal-dialog modal-lg modal-dialog-centered">
-  <div class="modal-content ">
-    <div class="modal-header bg-warning text-dark">
-      <h5 class="modal-title" id="modalprefxH"><i class="fas fa-cog"></i> Software preferences</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body text-white" style="background-color:#121212;">
-      <input type="checkbox" class="d-none" id="prefloaded" disabled />
-      <div class="input-group input-group-sm mb-3">
-        <span class="input-group-text">unbundle folder</span>
-        <input class="form-control" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
-      </div>
-      <div class="btn-group btn-group-sm mb-2 " role="group" aria-label="texture format">
-        <input type="radio" class="btn-check" name="maskExtFormat" id="maskDDSFormat" autocomplete="off" checked disabled>
-        <label class="btn btn-outline-primary" for="maskDDSFormat">DDS</label>
-        <input type="radio" class="btn-check" name="maskExtFormat" id="maskBMPFormat" autocomplete="off" disabled>
-        <label class="btn btn-outline-primary" for="maskBMPFormat">BMP</label>
-        <input type="radio" class="btn-check" name="maskExtFormat" id="maskPNGFormat" autocomplete="off" disabled>
-        <label class="btn btn-outline-primary" for="maskPNGFormat">PNG</label>
-      </div>
-      <div ><button type="button" class="btn btn-sm btn-outline-secondary" ><i class="fas fa-save"></i> Save preferences</button></div>
-    </div>
-  </div>
-</div>
 </div>
 
+
+<div class="modal fade " id="materialModal"  tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
+    <div class="modal-content rounded-0">
+      <div class="modal-body p-0">
+				<div>
+					<div class="input-group">
+					  <span class="input-group-text rounded-0">$</span>
+					  <input type="text" id="matModFinder" class="form-control rounded-0" placeholder="filter by material name" aria-label="Material name">
+						<!--<button class="btn btn-Prim rounded-0" type="button" id="matModSearch">search</button>-->
+						<button type="button" id="matModFinderCleared" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
+					</div>
+				</div>
+				<div ><div id="cagemLibrary" class="matColGrid_spaced" > </div></div>
+				<div id='matfindresults' class="p-1 pb-2"></div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal fade" id="modalInfo" tabindex="-1" aria-labelledby="modelsInfoH" aria-hidden="true" data-focus="true">
-<div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal-dialog modal-xl modal-dialog-centered">
   <div class="modal-content ">
     <div class="modal-header bg-info text-dark">
       <h5 class="modal-title" id="modelsInfoH"><i class="fas fa-info-circle"></i> Model information</h5>
@@ -462,14 +465,19 @@ preference modal folder
 </div>
 </div>
 <!-- License agreement -->
-<div class="modal fade" id="LicenseModal" tabindex="-1" aria-labelledby="LicenseModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content">
+<div class="modal fade " id="LicenseModal" tabindex="-1" aria-labelledby="LicenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
+    <div class="modal-content rounded-0">
+			<!--
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title" id="LicenseModalLabel">License Display</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
+      </div>-->
+      <div class="modal-body p-0">
+				<div class="row m-0">
+					<div class="col mlsblogo">
+				<img src="./images/system/MlsbLogo.gif">
+			</div><div class="col">
         <ul class="nav nav-tabs" id="LicenseTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="mainTab" data-bs-toggle="tab" data-bs-target="#mainL" type="button" role="tab" aria-controls="mainL" aria-selected="true">MlsetupBuilder License</button>
@@ -584,9 +592,7 @@ THE SOFTWARE.</p>
 <p>You can contact me sending an e-mail to neurocode@kientzproduction.com</p></code>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div></div>
       </div>
     </div>
   </div>

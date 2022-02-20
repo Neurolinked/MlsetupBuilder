@@ -9,17 +9,24 @@ dat.GUI.prototype.removeFolder = function(name) {
    this.onResize();
  }
 
-const NTextarea = document.querySelector("#NotificationCenter div.offcanvas-body");
+function notify3D(message){
+	var NTextarea = document.querySelector("#NotificationCenter div.offcanvas-body");
+	NTextarea.innerHTML = message+'<br/>'+NTextarea.innerHTML;
+}
+
  var err_counter = 0;
  var control_reset = false;
  var control_side = false;
 
+ var getImageData = false;
+ var imgDataShot = null;
  let scene, camera, renderer, controls, axesHelper;
  let pointlight, ambientlight, pointlight_2, pointlight_3, pointlight_4;
  //-------------parameter for Dat Window-----------------------
 const params = {
  autorotation: false,
  rotationspeed: 6,
+ wireframe: false,
  onesided: false
 };
 //-------------Aiming box for the camera ----------------------
@@ -33,13 +40,12 @@ const gui = new dat.GUI({autoPlace:false});
 var GuiSubmesh =gui.addFolder("Submesh Toggle");
 GuiSubmesh.close();//closes the submeshes folder
 
-const renderwidth=512; //width size of the 3d canvas
+const renderwidth=600; //width size of the 3d canvas
 let resized = false; //semaphore for resizing behaviour
 window.addEventListener('resize', function() {  resized = true;  });// resize event listener
 
 var MDLloadingButton = document.getElementById('btnMdlLoader');
 //-------------Material and Object Constant--------------------
-//var cameraData=document.getElementById("cameraData"); //object to display camera Data
 
 function giveToTheAim(textureData,w,h){
  var aimcanvas = document.getElementById('MaskTargettoAim');
@@ -109,7 +115,16 @@ function loadMapOntheFly(path){
   	 let height = headerData[3];
   	 let width = headerData[4];
   	 let size = height * width;
-  	 const luminancedata = new Uint8Array( data, 128, size );
+		 const dx10Data = new Uint32Array( data, 128, 4 );
+		 console.log(dx10Data);
+		 var luminancedata
+		 //wolvenkit 8.4.3+ and cli 1.5.0+ format
+		 if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+			 luminancedata = new Uint8Array( data, 148, size );
+		 }else{
+			 //or legacy
+			 luminancedata = new Uint8Array( data, 128, size );
+		 }
   	 var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType);
   	 dataTex.flipY=true;
   	 material.color.set(0x500000);
@@ -125,7 +140,7 @@ function loadMapOntheFly(path){
     notific.textContent = err_counter;
     material.color.set(0x000055);
     material.map = safeMap;
-    NTextarea.innerHTML = 'An error happened during the load of the file: '+mipreference.value+path+'<br/>'+NTextarea.innerHTML;
+    notify3D('An error happened during the load of the file: '+mipreference.value+path);
   }
 }
 
@@ -154,7 +169,7 @@ function LoadModelOntheFly(path){
 
       if ( child.isMesh ) {
         //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-        strGLBInfo = strGLBInfo + "<p class='eq-lay1 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay1 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='treeColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+        strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
         if (!(/(decals)|(vehicle_lights)|(\bnone\b)|(logo_spacestation.+)|(glass.+)|(multilayer_lizzard)|(phongE1SG1.+)|(stickers.+)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|(decal_.+)|(02_ca_limestone_1.*)|(zip+er.+)|(ziper.+)/g.test(child.userData.materialNames.toString()))){
             child.material = material;
         }else{
@@ -190,7 +205,11 @@ function LoadModelOntheFly(path){
   });
 }
 
-
+document.getElementById("takeashot").addEventListener('click', (e) =>{
+	getImageData = true;
+  animate();
+  //console.debug(imgDataShot);
+});
 
 document.getElementById("maskLayer").addEventListener('fire', e => {
 	 let modelTarget = document.getElementById("modelTarget").value;
@@ -229,7 +248,7 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 	 loadMapOntheFly(theMaskLayer);
 	 material.needUpdates =true; //setup the mask I'll set the material to update
  }else{
-	 NTextarea.innerHTML = 'the texture '+theMaskLayer+' does not exists<br/>'+NTextarea.innerHTML;
+	 notify3D('the texture '+theMaskLayer+' does not exists');
  }
  //search for the right extension
  if (theModel.match(/^[/|\w|\.]+.glb/)){
@@ -254,7 +273,7 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 	 notific.textContent = err_counter;
 	 console.error("The model '"+theModel+"' does not exists, check that the model .glb file is on the path requested");
 	 MDLloadingButton.disabled=false;
-	 NTextarea.innerHTML = 'We are searching for .glb files and then this "'+theModel+'" one showed up, we can\'t open it now<br/>'+NTextarea.innerHTML;
+	 nofity3D('We are searching for .glb files and then this "'+theModel+'" one showed up, we can\'t open it now');
  }
 });
 
@@ -277,7 +296,7 @@ function init() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
 
-  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-200),0.25,10000);
+  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-200),0.012,10000);
   camera.position.set(0.0,-0.4,-8);
   /*
 
@@ -320,6 +339,10 @@ function init() {
   const GuiBasicsetup = gui.addFolder("Basic Setup");
   GuiBasicsetup.add( params, 'autorotation' ).name( 'Auto Rotation' );
   GuiBasicsetup.add( params, 'rotationspeed',2, 10 ).name( 'Rotation speed' );
+	GuiBasicsetup.add( params, 'wireframe').name( 'View wireframe' ).onChange(() => {
+   if (params.wireframe){material.wireframe=true;}else{material.wireframe=false;}
+   material.NeedUpdates;
+   });;
   GuiBasicsetup.add( params, 'onesided').name( '1-side' ).onChange(() => {
    if (params.onesided){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
    material.NeedUpdates;
@@ -349,7 +372,15 @@ function animate() {
   if (control_side){material.needUpdates; control_side=false;}
 
   renderer.render(scene, camera);
-  //cameraData.innerText='x:'+Number(camera.position.x).toFixed(3)+' y:'+Number(camera.position.y).toFixed(3)+' z:'+Number(camera.position.z).toFixed(3)+'\nx:'+Number(controls.target.x).toFixed(3)+' y:'+Number(controls.target.y).toFixed(3)+' z:'+Number(controls.target.z).toFixed(3);
+
+	if(getImageData == true){
+			let a = document.getElementById('takeashot');
+      imgDataShot = renderer.domElement.toDataURL('image/png');
+      getImageData = false;
+			a.href=imgDataShot;
+			a.download = "lastscreen.png";
+			//console.log(imgDataShot);
+  }
   requestAnimationFrame(animate);
 }
 
