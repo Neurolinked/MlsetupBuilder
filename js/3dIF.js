@@ -40,7 +40,7 @@ const gui = new dat.GUI({autoPlace:false});
 var GuiSubmesh =gui.addFolder("Submesh Toggle");
 GuiSubmesh.close();//closes the submeshes folder
 
-const renderwidth=512; //width size of the 3d canvas
+const renderwidth=600; //width size of the 3d canvas
 let resized = false; //semaphore for resizing behaviour
 window.addEventListener('resize', function() {  resized = true;  });// resize event listener
 
@@ -115,7 +115,16 @@ function loadMapOntheFly(path){
   	 let height = headerData[3];
   	 let width = headerData[4];
   	 let size = height * width;
-  	 const luminancedata = new Uint8Array( data, 128, size );
+		 const dx10Data = new Uint32Array( data, 128, 4 );
+		 console.log(dx10Data);
+		 var luminancedata
+		 //wolvenkit 8.4.3+ and cli 1.5.0+ format
+		 if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+			 luminancedata = new Uint8Array( data, 148, size );
+		 }else{
+			 //or legacy
+			 luminancedata = new Uint8Array( data, 128, size );
+		 }
   	 var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType);
   	 dataTex.flipY=true;
   	 material.color.set(0x500000);
