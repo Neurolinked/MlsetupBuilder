@@ -208,7 +208,10 @@ ipcMain.on('main:readFile',(event,percorso,flags)=>{
     event.returnValue = contenutofile
   })
 })
-
+//setup the version of the software where needed
+ipcMain.on('main:getversion',(event, arg) =>{
+	event.reply('preload:setversion',app.getVersion())
+})
 //write the configuration file after the selection of the directory in the
 //preference interface window
 ipcMain.on('main:setupUnbundle',(event, arg) => {

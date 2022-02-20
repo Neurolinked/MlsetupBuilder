@@ -5,11 +5,10 @@ contextBridge.exposeInMainWorld(
   {
 			Versione: () =>{
 				ipcRenderer.send('main:getversion', {})
+				/*
         ipcRenderer.send('main:getargs', {})
+				*/
 			},
-			/*  Preferenze: () =>{
-        ipcRenderer.send('main:readPrefs',{});
-      },*/
       ApriStream: (path,streamcode) =>{
         var filecontent = ipcRenderer.sendSync('main:readFile', path, streamcode);
         return filecontent
