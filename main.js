@@ -1,6 +1,7 @@
 // main.js
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, nativeTheme, dialog, Menu } = require('electron')
+var child = require('child_process').execFile;
 const path = require('path')
 const fs = require('fs')
 const store = require('electron-store');
@@ -267,6 +268,17 @@ ipcMain.on('main:writefile',(event,arg) => {
 						if(errw){
 							dialog.showErrorBox('Error during the writing process of the file')
 							return
+						}else{
+							let test = preferences.get('wcli')
+							if (test.match(/.+WolvenKit\.CLI\.exe$/)){
+								child( test, ["cr2w", "-p",salvataggio.filePath, "-d"],(err, data)=>{
+									if (err){
+										event.reply('preload:logEntry', 'Error: '+err+'\n')
+									}else{
+										 event.reply('preload:logEntry', 'Operation executed '+data.toString().split(/\r\n/).reverse().join('<br/>')+'\n')
+									}
+								})
+							}
 						}
 					})
 					event.reply('preload:logEntry', 'File saved in: '+salvataggio.filePath+'\n')
