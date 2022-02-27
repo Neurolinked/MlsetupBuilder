@@ -1,11 +1,12 @@
 // main.js
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, nativeTheme, dialog, Menu } = require('electron')
+const { app, BrowserWindow, Notification, ipcMain, nativeTheme, dialog, Menu } = require('electron')
 var child = require('child_process').execFile;
 const path = require('path')
 const fs = require('fs')
 const store = require('electron-store');
 
+var objwkitto ={}
 const schema = {
 	unbundle: {
 		type: 'string',
@@ -30,21 +31,16 @@ if (mljson ==''){
   mljson = app.commandLine.getSwitchValue("o")
 }
 
-//setup for the file path configurationa
-/*let configfile, default_config, configJson
-configfile ='mlconfig.json'
-default_config = {'unbundle':''}
-configJson = JSON.stringify(default_config)*
-*/
-const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder') => {
+
+var wkitto = app.commandLine.getSwitchValue("wkit")
+
+const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
   let modal = new BrowserWindow({
     width: width,
     height: height,
     modal: true,
     parent: parentWindow,
-		webPreferences: {
-			preload: path.join(__dirname, 'apps/preloadpref.js'),
-		},
+		webPreferences: preferences,
 		title: title
   })
 	modal.menuBarVisible=false
@@ -62,25 +58,18 @@ const template = [
   // { role: 'appMenu' }
   ...(isMac ? [{
     label: app.name,
-    submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      { role: 'services' },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideOthers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' }
-    ]
+    submenu: [{ role: 'about' },{ type: 'separator' },{ role: 'services' },{ type: 'separator' },{ role: 'hide' },{ role: 'hideOthers' },{ role: 'unhide' },{ type: 'separator' },{ role: 'quit' }]
   }] : []),
   // { role: 'fileMenu' }
   {
     label: 'File',
     submenu: [
 			{label: '&Preferences', click: () =>{
-				createModal("apps/prefs.html",mainWindow,800,300,'Preferences');
-			}},
+				createModal("apps/prefs.html",mainWindow,800,300,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
+			}},/*
+			{label: 'Layers Composer', click: () =>{
+				createModal("apps/composer.html",mainWindow,1024,768,'Layers Composer', {preload: path.join(__dirname, 'apps/preloadcomp.js')} );
+			}},*/
 			{ type: 'separator' },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
@@ -96,53 +85,22 @@ const template = [
       { role: 'copy' },
       { role: 'paste' },
       ...(isMac ? [
-        { role: 'pasteAndMatchStyle' },
-        { role: 'delete' },
-        { role: 'selectAll' },
-        { type: 'separator' },
-        {
-          label: 'Speech',
-          submenu: [
-            { role: 'startSpeaking' },
-            { role: 'stopSpeaking' }
-          ]
-        }
+				{ role: 'pasteAndMatchStyle' },{ role: 'delete' },{ role: 'selectAll' },{ type: 'separator' },{label: 'Speech',submenu: [{ role: 'startSpeaking' },{ role: 'stopSpeaking' }]}
       ] : [
-        { role: 'delete' },
-        { type: 'separator' },
-        { role: 'selectAll' }
+        { role: 'delete' },{ type: 'separator' },{ role: 'selectAll' }
       ])
     ]
   },
   // { role: 'viewMenu' }
   {
     label: 'View',
-    submenu: [
-      { role: 'reload' },
-      { role: 'forceReload' },
-      { role: 'toggleDevTools' },
-      { type: 'separator' },
-      { role: 'resetZoom' },
-      { role: 'zoomIn' },
-      { role: 'zoomOut' },
-      { type: 'separator' },
-      { role: 'togglefullscreen' }
-    ]
+    submenu: [{ role: 'reload' },{ role: 'forceReload' },{ role: 'toggleDevTools' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' }]
   },
   // { role: 'windowMenu' }
   {
     label: 'Window',
-    submenu: [
-      { role: 'minimize' },
-      { role: 'zoom' },
-      ...(isMac ? [
-        { type: 'separator' },
-        { role: 'front' },
-        { type: 'separator' },
-        { role: 'window' }
-      ] : [
-        { role: 'close' }
-      ])
+    submenu: [{ role: 'minimize' },{ role: 'zoom' },
+      ...(isMac ? [{ type: 'separator' },{ role: 'front' },{ type: 'separator' },{ role: 'window' } ] : [ { role: 'close' } ])
     ]
   },
   {
@@ -209,6 +167,78 @@ ipcMain.on('main:readFile',(event,percorso,flags)=>{
     event.returnValue = contenutofile
   })
 })
+//restored arguments reading
+ipcMain.on('main:handle_args', (event, payload) => {
+  if (mljson!=""){
+    fs.stat(mljson,'utf8',function(err, stat) {
+      if (err) {
+        if (err.code=='ENOENT'){
+          dialog.showErrorBox("File opening error","The searched file does not exists")
+        }else{
+          dialog.showErrorBox("File opening error",err.message)
+        }
+        return
+      }else{
+        var mlsetup_content = ""
+        fs.readFile(mljson,'utf8',(err,data) =>{
+          try {
+              mlsetup_content = JSON.parse(data)
+          } catch(e) {
+             dialog.showErrorBox("File error","Reading error: wrong json file format")
+             mlsetup_content = ""
+          }
+          event.reply('preload:load_source',mlsetup_content)
+        })
+      }
+    })
+  }
+	//manage features for WolvenkitCLI
+	if (wkitto!=''){
+		if (/^\d+\.\d+\.\d+(-\w+)?\.\d{4}-\d{2}-\d{2}$/.test(wkitto)){
+			 objwkitto={
+				full:wkitto,
+				major:Number(wkitto.split('.')[0]),
+				minor:Number(wkitto.split('.')[1]),
+				patches:Number(wkitto.split('.')[2].split('-')[0])
+			}
+			event.reply('preload:logEntry', 'MlsetupBuilder is working as Wolvenkit plugin')
+			event.reply('preload:wkitBuild',JSON.stringify(objwkitto))
+		}else if (/^\d+\.\d+\.\d+$/.test(wkitto)){
+			 objwkitto={
+				full:wkitto,
+				major:Number(wkitto.split('.')[0]),
+				minor:Number(wkitto.split('.')[1]),
+				patches:Number(wkitto.split('.')[2])
+			}
+			event.reply('preload:logEntry', 'MlsetupBuilder is working as Wolvenkit plugin')
+			event.reply('preload:wkitBuild',JSON.stringify(objwkitto))
+		}else if (/^\d+\.\d+-rc\d+$/.test(wkitto)){
+			 objwkitto={
+				full:wkitto,
+				major:Number(wkitto.split('.')[0]),
+				minor:Number(wkitto.split('.')[1].split('-')[0]),
+				patches:0
+			}
+			event.reply('preload:logEntry', 'MlsetupBuilder is working as Wolvenkit plugin')
+			event.reply('preload:wkitBuild',JSON.stringify(objwkitto))
+		}
+	}
+})
+
+//Window for reading 3d models
+ipcMain.on('main:read3dFile',(event,percorso,flags)=>{
+  fs.readFile(percorso,flags,(err,contenutofile) =>{
+    if (err) {
+      if (err.code=='ENOENT'){
+        dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(preferences.get('unbundle'),percorso))
+      }else{
+        dialog.showErrorBox("File opening error",err.message)
+      }
+      contenutofile=""
+    }
+    event.returnValue = contenutofile
+  })
+})
 //setup the version of the software where needed
 ipcMain.on('main:getversion',(event, arg) =>{
 	event.reply('preload:setversion',app.getVersion())
@@ -242,6 +272,21 @@ ipcMain.on('main:setupCR2Wr',(event, arg) => {
     dialog.showErrorBox("Preferences setup error",err.message)
   })
 })
+
+ipcMain.on('main:3dialog',(event, arg) => {
+	const result = dialog.showOpenDialog({
+		title:'Load a 3d asset',
+		filters:[ { name: 'Autodesk FBX', extensions: ['fbx'] },{ name: 'GL Transmission Format', extensions: ['glb','gltf'] }],
+		properties :['openFile']
+	}).then(threeDAsset => {
+    if (!threeDAsset.canceled){
+			event.reply('preload:logEntry', 'File choosen : '+threeDAsset.filePaths[0]+'<br/>')
+			event.reply('preload:set_3d_asset_name',threeDAsset.filePaths[0]);
+    }
+  }).catch(err => {
+    dialog.showErrorBox("Error reading the file :",err.message)
+  })
+})
 //Save the preferences
 ipcMain.on('main:saveStore',(event, arg) => {
 	if (arg.hasOwnProperty('unbundle')){
@@ -256,10 +301,17 @@ ipcMain.on('main:saveStore',(event, arg) => {
 })
 //json version of mlsetup file write operation
 ipcMain.on('main:writefile',(event,arg) => {
+	var def_path
+	if (mljson!=''){
+		def_path = path.normalize(mljson)
+	}else{
+		def_path = arg.file
+	}
+	console.log(def_path)
 	if (arg.type=='mlsetup'){
 		const salvataggio = dialog.showSaveDialog({
 			title:'Save the mlsetup jsonized',
-			defaultPath: arg.file,
+			defaultPath: def_path,
 			filters:[ { name: 'All Files', extensions: ['*'] },	{ name: 'Jsons', extensions: ['json'] } ],
 			properties: ['createDirectory']
 		}).then(salvataggio => {
@@ -269,15 +321,22 @@ ipcMain.on('main:writefile',(event,arg) => {
 							dialog.showErrorBox('Error during the writing process of the file')
 							return
 						}else{
-							let test = preferences.get('wcli')
-							if (test.match(/.+WolvenKit\.CLI\.exe$/)){
-								child( test, ["cr2w", "-p",salvataggio.filePath, "-d"],(err, data)=>{
-									if (err){
-										event.reply('preload:logEntry', 'Error: '+err+'\n')
-									}else{
-										 event.reply('preload:logEntry', 'Operation executed '+data.toString().split(/\r\n/).reverse().join('<br/>')+'\n')
-									}
-								})
+							if (!objwkitto.hasOwnProperty('major')){
+								let test = preferences.get('wcli')
+								if (test.match(/.+WolvenKit\.CLI\.exe$/)){
+									child( test, ["cr2w", "-p",salvataggio.filePath, "-d"],(err, data)=>{
+										if (err){
+											event.reply('preload:logEntry', 'Error: '+err+'\n')
+											new Notification({title:'Conversion Error',body: err }).show()
+										}else{
+											 event.reply('preload:logEntry', 'Operation executed '+data.toString().split(/\r\n/).reverse().join('<br/>')+'\n')
+											 new Notification({title:"Conversion executed", body: "Your file has been saved and converted to CR2W format" }).show()
+										}
+									})
+								}
+							}else{
+								 new Notification({title:"Conversion executed", body: "Your file has been saved, remember to convert it back in Wolvenkit. Shutting Down" }).show()
+								 app.exit(0)
 							}
 						}
 					})
@@ -287,6 +346,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 				}
 		})
 	}
+	mljson = ''
 });
 
 //Get request for stored preferences values

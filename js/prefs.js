@@ -1,5 +1,8 @@
 window.$ = window.jQuery;
 $(function(){
+	var arguments = thePIT.Args();
+	var wkitto
+	
 	//thePIT.RConfig();
 	//function to update the form
 	function compiletheform(configurazione){
@@ -14,6 +17,8 @@ $(function(){
 	loading.then(function(result){
 		compiletheform(result);
 	})
+
+
 	//Get a new path for the unbundle
 	$("#prefxunbundle").click(function(){ thePIT.ConfiguraUnbundle($('#prefxunbundle').val()); });
 	//Get a new path for the Wolvekit executables
@@ -30,5 +35,5 @@ $(function(){
 			compiletheform(result);
 		});
 	});
-	
+
 });

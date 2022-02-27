@@ -5,14 +5,20 @@ contextBridge.exposeInMainWorld(
   {
 			Versione: () =>{
 				ipcRenderer.send('main:getversion', {})
-				/*
-        ipcRenderer.send('main:getargs', {})
-				*/
+				ipcRenderer.send('main:handle_args', {}) //load arguments and source json files
 			},
       ApriStream: (path,streamcode) =>{
         var filecontent = ipcRenderer.sendSync('main:readFile', path, streamcode);
         return filecontent
       },
+			EDStream: (path,streamcode) =>{
+        var filecontent = ipcRenderer.sendSync('main:read3dFile', path, streamcode);
+        return filecontent
+      },
+			ThreeDAsset: () =>{
+				var file = ipcRenderer.send('main:3dialog');
+        return file
+			},
       ConfiguraUnbundle:() => {
         ipcRenderer.send('main:setupUnbundle',{});
       },
@@ -33,8 +39,8 @@ ipcRenderer.on('preload:setversion', (event, nuversion) => {
     document.title = document.title + " - " + nuversion
 })
 
-//test function
-ipcRenderer.on('preload:setargs', (event, jsoncontent) => {
+//Load The files in the arguments
+ipcRenderer.on('preload:load_source', (event, jsoncontent) => {
   var textareaDummy = document.querySelector("#passaggio")
   //pass from JSON Object to text
   textareaDummy.value = JSON.stringify(jsoncontent)
@@ -42,9 +48,13 @@ ipcRenderer.on('preload:setargs', (event, jsoncontent) => {
   document.querySelector("#TheMagicIsHere").click();
 })
 
+ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
+	sessionStorage.setItem("wkitBuild",versionchecker);
+})
+
 ipcRenderer.on('preload:logEntry',(event, resultSave) => {
 	var notificationCenter = document.querySelector("#NotificationCenter .offcanvas-body")
-	notificationCenter.innerHTML = resultSave + "\r\n" + notificationCenter.innerHTML;
+	notificationCenter.innerHTML = resultSave + "<br/>" + notificationCenter.innerHTML;
 })
 
 ipcRenderer.on('preload:openlicense',(event, resultSave) => {
@@ -52,6 +62,11 @@ ipcRenderer.on('preload:openlicense',(event, resultSave) => {
 	linklicenze.click()
 })
 
+ipcRenderer.on('preload:set_3d_asset_name',(event,result) => {
+	var fileLoaded = document.querySelector("#lastCustomMDL")
+	fileLoaded.value=result
+	fileLoaded.dispatchEvent(new Event('change', { 'bubbles': true }));
+})
 
 
 window.addEventListener('DOMContentLoaded', () => {

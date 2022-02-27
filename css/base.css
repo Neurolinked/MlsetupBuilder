@@ -27,6 +27,7 @@
   --layer-9:rgba(255,255,255,0.16);
 	--matsizes:256px;
 	--numswatches:16;
+	--rendView:600px;
 }
 
 .no-gutters {
@@ -91,7 +92,7 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 .vakata-contextmenu-sep{background-color:var(--layer-9)!important;border:1px solid var(--layer-9)!important;}
 
 /* Options for three.js */
-#interface canvas{ background: radial-gradient(#010101, #121212);}
+#interface canvas{ background: radial-gradient(#010101, #121212);background-repeat: no-repeat}
 #dat-container {background-color:var(--layer-1); position: absolute; top: 0px; left: 20px; z-index: 10; border:1px solid var(--secondary)!important;z-index:11;}
 #dat-container .dg.main .close-button { border:1px solid var(--secondary)!important; }
 #materialTrees, #layeringsystem, .offcanvas *, .dropdown-menu li,#cagemLibrary div{font-size:0.75rem!important;}
@@ -105,7 +106,7 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 
 #NotificationCenter .offcanvas-body{background-color:var(--layer-0);}
 
-#interface{display:grid;grid-template-columns:600px 2fr 3fr 2fr;grid-template-rows:40px auto;gap: 4px;}
+#interface{display:grid;grid-template-columns:var(--rendView) 2fr 3fr 2fr;grid-template-rows:40px auto;gap: 4px;}
 #withthacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 5;}
 /*#thacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 3;}*/
 #withbones{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1;grid-row-end: 1;z-index:10;text-align:right;}
@@ -305,7 +306,7 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 
 #materialSummary::before{content: 'Material: ';font-size:calc(100% * .8);}
 #materialModal .modal-body,
-#materialChoser{background:radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(39,39,39,1) 100%);}
+#materialChoser{background:radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(39,39,39,1) 100%);background-repeat: no-repeat;}
 #materialChoser{border:1px double var(--secondary);}
 #materialChoser:hover{border-color:var(--active-sel);cursor: pointer;}
 /*#MLibrary{grid-column-start: 2!important;grid-column-end: 2!important;grid-row-start: 2!important;grid-row-end: 3!important;}*/

@@ -3,9 +3,8 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld(
   'thePIT',
   {
-			Versione: () =>{
-				ipcRenderer.send('main:getversion', {})
-        ipcRenderer.send('main:getargs', {})
+			Args: async() =>{
+        ipcRenderer.send('main:handle_args', {})
 			},
       ConfiguraUnbundle:(path) => {
         ipcRenderer.send('main:setupUnbundle',path);
@@ -22,6 +21,32 @@ contextBridge.exposeInMainWorld(
 	},
 
 )
+
+function isValidJSON(text) {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
+	var wkitto
+	if (isValidJSON(versionchecker)){
+		wkitto = JSON.parse(versionchecker);
+		if ((wkitto.hasOwnProperty('major')) && (wkitto.hasOwnProperty('minor'))){
+			if (Number(wkitto.major+'.'+wkitto.minor)>=8.5) {
+				document.querySelector("#wCLIexe").parentNode.classList.add("d-none");
+				document.querySelector("#wCLIexe").readOnly = true;
+			}else{
+				console.log('no suitable version of wkit to integrate');
+			}
+		}
+	}else{
+		//nothing to do
+	}
+})
 
 ipcRenderer.on('preload:upd_config', (event, preferences) => {
 	document.getElementById(preferences.id).value = preferences.value
