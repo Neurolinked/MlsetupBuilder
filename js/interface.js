@@ -1,7 +1,4 @@
 window.$ = window.jQuery;
-
-
-
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 
@@ -9,6 +6,7 @@ Number.prototype.countDecimals = function () {
     if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
     return this.toString().split(".")[1].length || 0;
 }
+//Build the microblends gallery and compile the microblends select options
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
     if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("package")) ){
@@ -20,10 +18,10 @@ async function abuildMB(microblendObj){
   }
   return;
 }
+//Build the material gallery
 async function abuildMaterial(materialArray){
 	if (typeof(materialArray)=="object"){
 		for (k=0, j=materialArray.length;k<j;k++){
-			// background-image: url('./images/material/asphalt.jpg');
 			$("#cagemLibrary").append("<div style=\"background:url('images/material/"+materialArray[k].name+".jpg') no-repeat;background-size:100% auto;\" data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</div>");
 		}
 	}
@@ -220,16 +218,15 @@ $(function(){
     $("#AimV").val(-1*Number((512-e.target.aCoords.br.y)/512));
 	 });
 
-
 	var semaphoreCLKmBlend =false;
 
 	localStorage = window.localStorage;
 	const license = localStorage.getItem('ReadLicense');
-
 	const licenseWindow = document.getElementById('LicenseModal');
 	const licenseModal = new bootstrap.Modal(licenseWindow);
+	//modal information windows for loaded models
 	const wGLBInfo = new bootstrap.Modal(document.getElementById('modalInfo'));
-
+	//modal window used for aiming the microblends over the actual used layer
 	const AimMBlend = new bootstrap.Modal(document.getElementById('AimBlend'));
 	const AimWindows = document.getElementById('AimBlend');
 	//On open of the aiming windows
@@ -1530,7 +1527,7 @@ $("#exportJason_v1").click(function(){
 	for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
 
 		jsonOpacity='';
-		
+
 		if (k!=0){
 			//no Opacity
 			//no offsetu no offsetv

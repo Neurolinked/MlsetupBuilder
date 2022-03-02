@@ -35,6 +35,10 @@
 <!--THREE.js libraries -->
     <script src='./js/threejs/build/three.min.js'></script>
     <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
+		<!--
+		<script src='./js/threejs/examples/js/libs/fflate.min.js'></script>
+		<script src='./js/threejs/examples/js/loaders/FBXLoader.js'></script>
+		-->
     <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
     <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
 <!--model Library -->
@@ -44,9 +48,7 @@
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-command">
-    <div>
-      List of displayable models
-    </div>
+    <div>List of displayable models</div>
     <div class="input-group layer-4">
       <input id="modelFinder" class="form-control " type="text" placeholder="Search in the models library" aria-label="models searcher">
       <button type="button" id="modelFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
@@ -80,8 +82,12 @@
       <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
-    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn ml-2 btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
-    <button type="button" id="btnMdlLoader" class=" btn btn-out-Prim"><i class="fas fa-dolly"></i> Load Model</button>
+		<div class="btn-group me-5" role="group" aria-label="model loading">
+	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn ml-2 btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
+	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-dolly"></i></button>
+		</div>
+		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-truck-loading"></i></button>
+		<input type="text" class='d-none'  id="lastCustomMDL" readonly />
    <div class="mt-3">
       <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
       <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="20"  />
@@ -101,7 +107,9 @@
   </div>
 </div>
   <div id="Filemanager" class="p-2 text-white bs-dark layer-1 rounded" style="display:grid;">
-    <div>
+    <div><!--
+			<button class="btn btn-sm btn-outline-info me-5" type="button" id="NuMagicIsHere" data-toggle="tooltip" data-bs-placement="bottom" title="" data-bs-original-title="Import a json file" aria-label="Import a json file"><i class="fas fa-file-import"></i> Import</button>
+			<button class="btn btn-sm btn-outline-warning" type="button" id="NuMagicIsHere" data-toggle="tooltip" data-bs-placement="bottom" title="" data-bs-original-title="Import a json file" aria-label="Import a json file"><i class="fas fa-save"></i> Export</button>//-->
       <div class="input-group input-group-sm">
         <input type="file" class="form-control" accept=".json" placeholder="Load JSON mlsetup"  id="importTech" />
         <button class="btn btn-Prim" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>
@@ -115,7 +123,7 @@
         <!--<a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>//-->
 				<!--<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>-->
 				<div class="dropdown">
-				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0" type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
+				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0 p-1" type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
 				  <ul id="xport_dm" class="dropdown-menu" aria-labelledby="exportversions">
 				    <li><a class="dropdown-item" href="#" id="exportJason_v1">Json v0.0.1 (Wkit 8.5)</a></li>
 				    <li><a class="dropdown-item" href="#" id="exportJason">pre-Wkit 8.5</a></li>
@@ -159,7 +167,7 @@
     </div>
     <div class="my-2 text-center">
       <div class="btn-group">
-        <button class="btn btn-outline-secondary " type="button" id="clean-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Reset to blank the selected layer"><i class="fas fa-eraser fa-2x"></i></button>
+        <button class="btn btn-sm btn-outline-secondary " type="button" id="clean-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Reset to blank the selected layer"><i class="fas fa-eraser fa-2x"></i></button>
         <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
           <span class="visually-hidden">Toggle Dropdown</span>
         </button>
@@ -168,7 +176,7 @@
           <li><a class="dropdown-item" href="#" id="wash-layers"><i class="fas fa-soap"></i> clean all layers</a></li>
         </ul>
       </div>
-      <button class="btn btn-outline-warning" type="button" id="actlast-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Activate the last unactive layer"><i class="fas fa-plug fa-2x"></i></button>
+      <button class="btn btn-sm btn-outline-warning" type="button" id="actlast-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Activate the last unactive layer"><i class="fas fa-plug fa-2x"></i></button>
       <!--<button class="btn btn-outline-danger" type="button" id="wipe-layer" data-toggle="tooltip" data-bs-placement="bottom" title="Wipe all layers configuration"><i class="fas fa-soap"></i> </button>-->
     </div>
 		<div class="twoColGrid">
@@ -285,20 +293,30 @@
   <div id="micropanel" class="layer-1 rounded">
     <div>
       <span class="badge  w-100 rounded-0">&micro;blends</span>
-      <input type="text" class="form-control rounded-0 mb-1" id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
+			<div class="input-group input-group-sm mb-1">
+      	<input type="text" class="form-control rounded-0 " id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
+				<button class="btn btn-outline-danger rounded-0" id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
+			</div>
       <span class="badge  w-100 rounded-0 ">Preview</span>
-      <div class="btn-group btn-group-sm w-100" role="group" aria-label="microblend fx">
-        <button class="btn btn-outline-danger" id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
-        <button class="btn btn-outline-warning" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
-        <button class="btn btn-outline-warning" id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
-        <!--<button class="btn btn-outline-warning" id="invertFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="far fa-sun"></i></button>-->
-      </div>
+
       <select class="form-select rounded-0" id="mbSelect" aria-label="microblends selection lists">
         <option data-package="source" data-thumbnail="./images/_nopreview.gif" value="" disabled >custom</option>
         <option data-package="source" data-thumbnail="./images/default.gif" value="base\surfaces\microblends\default.xbm" selected >default</option>
       </select>
       <img id="mb-preview" style="background-color:#000;" alt="microblend preview" src='./images/default.gif' >
-      <input id="bg-changer" type="color" value="#000000" data-toggle="tooltip" title="Background color check for microblend">
+			<div class='row gx-0'>
+				<div class="col-10 m-0">
+		      <input id="bg-changer" type="color" value="#000000" data-toggle="tooltip" title="Background color check for microblend">
+				</div>
+				<div class="col-2 m-0">
+					<div class="btn-group btn-group-sm w-100" role="group" aria-label="microblend fx">
+		        <button class="btn btn-outline-info rounded-0" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
+		      </div>
+					<div class="btn-group btn-group-sm  w-100" role="group" aria-label="microblend fx">
+					<button class="btn btn-outline-warning rounded-0" id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
+				</div>
+				</div>
+			</div>
 			<div id="MicroblendsLibrary">
         <span class="badge w-100 rounded-0" >microblends gallery</span>
         <div id="microdisplay" class="layer-1">
@@ -347,7 +365,6 @@
       <div class="modal-body p-0">
 				<div>
 					<div class="input-group">
-					  <span class="input-group-text rounded-0">$</span>
 					  <input type="text" id="matModFinder" class="form-control rounded-0" placeholder="filter by material name" aria-label="Material name">
 						<!--<button class="btn btn-Prim rounded-0" type="button" id="matModSearch">search</button>-->
 						<button type="button" id="matModFinderCleared" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
