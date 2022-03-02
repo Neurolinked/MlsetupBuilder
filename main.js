@@ -276,7 +276,7 @@ ipcMain.on('main:setupCR2Wr',(event, arg) => {
 ipcMain.on('main:3dialog',(event, arg) => {
 	const result = dialog.showOpenDialog({
 		title:'Load a 3d asset',
-		filters:[ { name: 'Autodesk FBX', extensions: ['fbx'] },{ name: 'GL Transmission Format', extensions: ['glb','gltf'] }],
+		filters:[ /*{ name: 'Autodesk FBX', extensions: ['fbx'] },*/{ name: 'GL Transmission Format', extensions: ['glb','gltf'] }],
 		properties :['openFile']
 	}).then(threeDAsset => {
     if (!threeDAsset.canceled){
