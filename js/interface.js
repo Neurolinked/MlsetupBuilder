@@ -521,10 +521,22 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	if ((node.node.type=='man')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')){
     $("#modelTarget").attr('loaded',false);
 		$("#modelTarget").val(node.node.li_attr['model']);
-		$("#masksTemplate").val(node.node.li_attr['masks']);
+    if (node.node.li_attr.hasOwnProperty('masks')) {
+      if (typeof(node.node.li_attr['masks'])=='Array'){
+        $("#masksTemplate").val(maskList[node.node.li_attr['masks'][0]].mask);
+        maxlayers = maskList[node.node.li_attr['masks'][0]].layers
+      }else{
+        $("#masksTemplate").val(maskList[node.node.li_attr['masks']].mask);
+        maxlayers = maskList[node.node.li_attr['masks']].layers
+      }
+    }else{
+      $("#masksTemplate").val('');
+      maxlayers = 0;
+    }
+    /*
 		if (node.node.li_attr.hasOwnProperty('layers')){
 			maxlayers = node.node.li_attr.layers;
-		}
+		}*/
 		$("#maxLayers").val(maxlayers);
 	}
 });

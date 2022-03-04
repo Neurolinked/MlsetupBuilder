@@ -20,7 +20,8 @@
   <script src="./js/jstree/jstree.min.js" data-source='https://www.jstree.com/' ></script>
   <!--End jstree -->
   <!--Parameters features <script src="./js/parameters.js" type="text/javascript"></script> -->
-<!--hardcoded Model DB --><script src="./js/models.js" type="text/javascript"></script><!--hardcoded DB -->
+  <!--hardcoded MaskList DB --><script src="./js/maskList.js" type="text/javascript"></script><!--hardcoded DB -->
+  <!--hardcoded default Model-only  DB --><script src="./js/models.js" type="text/javascript"></script><!--hardcoded DB -->
 <!--Material Tree  --><script src="./js/materialTree.js"></script><!--Material Tree -->
 <!--Tinny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
@@ -77,7 +78,6 @@
 			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
       <!--<input type="checkbox" class="btn-check" id="switchSkinned" checked autocomplete="off"><label class="btn btn-outline-warning" for="switchSkinned">Only Skinned</label>-->
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
-      <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
       <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>
       <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
@@ -87,23 +87,34 @@
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-dolly"></i></button>
 		</div>
 		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-truck-loading"></i></button>
-		<input type="text" class='d-none'  id="lastCustomMDL" readonly />
-   <div class="mt-3">
-      <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
-      <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="20"  />
-      <div class="input-group input-group-sm">
-        <span class="input-group-text bg-dark text-info" ><i class="fas fa-cube"></i></span>
-        <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
-				<button id="CustModelLoad" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Load a custom .glb"><i class="fas fa-box-open"></i></button>
-        <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
+   <!--<div class="mt-3">-->
+     <button class="btn btn-sm btn-outline-info ms-5" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
+     <div class="dropdown dropend d-inline-block ">
+        <a class="btn btn-sm btn-outline-info dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cubes"></i></a>
+         <div class="dropdown-menu eq-lay1 " style="width:40rem">
+          <form class="px-2 py-1">
+            <input type="text" class='d-none'  id="lastCustomMDL" readonly />
+            <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
+            <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="20"  />
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-dark text-info" ><i class="fas fa-cube"></i></span>
+              <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
+      				<button id="CustModelLoad" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Load a custom .glb"><i class="fas fa-box-open"></i></button>
+              <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
+            </div>
+            <div class="input-group input-group-sm border-secondary">
+              <span class="input-group-text bg-dark text-info"><i class="fas fa-mask"></i></span>
+              <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
+      				<button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
+              <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
+            </div>
+          </form>
+          <!-- <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">New around here? Sign up</a>
+          <a class="dropdown-item" href="#">Forgot password?</a> -->
+        </div>
       </div>
-      <div class="input-group input-group-sm border-secondary">
-        <span class="input-group-text bg-dark text-info"><i class="fas fa-mask"></i></span>
-        <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
-				<button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
-        <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
-      </div>
-    </div>
+    <!--</div>-->
   </div>
 </div>
   <div id="Filemanager" class="p-2 text-white bs-dark layer-1 rounded" style="display:grid;">
