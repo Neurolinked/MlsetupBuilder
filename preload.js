@@ -34,6 +34,14 @@ contextBridge.exposeInMainWorld(
 	},
 
 )
+function isValidJSON(text) {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
 //autosetup version from the package
 ipcRenderer.on('preload:setversion', (event, nuversion) => {
     document.title = document.title + " - " + nuversion
@@ -50,6 +58,19 @@ ipcRenderer.on('preload:load_source', (event, jsoncontent) => {
 
 ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 	sessionStorage.setItem("wkitBuild",versionchecker);
+  var wkitto
+	if (isValidJSON(versionchecker)){
+		wkitto = JSON.parse(versionchecker);
+		if ((wkitto.hasOwnProperty('major')) && (wkitto.hasOwnProperty('minor'))){
+			if (Number(wkitto.major+'.'+wkitto.minor)>=8.5) {
+				document.querySelector("#exportJason").classList.add("d-none");
+			}else{
+				console.log('no suitable version of wkit to integrate');
+			}
+		}
+	}else{
+		//nothing to do
+	}
 })
 
 ipcRenderer.on('preload:logEntry',(event, resultSave) => {
