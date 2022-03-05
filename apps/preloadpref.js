@@ -49,5 +49,7 @@ ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 })
 
 ipcRenderer.on('preload:upd_config', (event, preferences) => {
-	document.getElementById(preferences.id).value = preferences.value
+  document.getElementById(preferences.id).value = preferences.value
+  const trig = new Event("blur");
+  document.getElementById(preferences.id).dispatchEvent(trig)
 })

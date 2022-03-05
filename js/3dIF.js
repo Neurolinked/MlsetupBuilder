@@ -390,17 +390,17 @@ function init() {
 
   var thacanvas = document.getElementById('thacanvas');
   renderer = new THREE.WebGLRenderer({canvas:thacanvas,alpha:true,antialias:true});
-  if (window.innerHeight-200<512){
+  if (window.innerHeight-80<512){
    renderer.setSize(renderwidth,renderwidth);
   }else{
-   renderer.setSize(renderwidth,window.innerHeight-200);
+   renderer.setSize(renderwidth,window.innerHeight-80);
   }
 
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
 
-  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-200),0.012,10000);
+  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.012,10000);
   camera.position.set(0.0,-0.4,-8);
   /*
 
@@ -492,10 +492,10 @@ function resize() {
 		 resized = false
 
 		 // update the size
-		 if (window.innerHeight-200<512){
+		 if (window.innerHeight-80<512){
 			 renderer.setSize(renderwidth, 512);
 		 }else{
-			 renderer.setSize(renderwidth, window.innerHeight-200);
+			 renderer.setSize(renderwidth, window.innerHeight-80);
 		 }
 		 // update the camera
 		 const canvas = renderer.domElement

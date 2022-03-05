@@ -105,7 +105,11 @@ const template = [
   },
   {
     role: 'help',
-    submenu: [{label:'License',click: () =>{
+    submenu: [
+			{label:'Documentation',click:()=>{
+				mainWindow.webContents.send('preload:openhelp')
+			}},
+			{label:'License',click: () =>{
 				mainWindow.webContents.send('preload:openlicense')
 		}}]
   }
@@ -299,6 +303,7 @@ ipcMain.on('main:saveStore',(event, arg) => {
 		preferences.set('maskformat',arg.maskformat);
 	}
 })
+
 //json version of mlsetup file write operation
 ipcMain.on('main:writefile',(event,arg) => {
 	var def_path

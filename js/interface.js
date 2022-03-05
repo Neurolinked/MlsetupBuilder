@@ -374,6 +374,12 @@ $(function(){
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
 
+  //activate/deactivate wireframe display
+  $("#wireFrame").click(function(){
+    var sideBox = $("#dat-container ul li:nth-of-type(4) input[type='checkbox']");
+    sideBox.click();//("checked",!sideBox.prop("checked"));
+  });
+
 	var TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
