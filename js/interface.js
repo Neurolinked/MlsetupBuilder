@@ -76,7 +76,7 @@ $(function(){
   });
 
 	$("#matInput").on("change",function(){
-		if ($("#matInput").val() != $("#layeringsystem li.active").data("material")){
+	if ($("#matInput").val() != $("#layeringsystem li.active").data("material")){
 			$("#layeringsystem li.active").addClass("notsync");
 		}else{
 			$("#layeringsystem li.active").removeClass("notsync");
@@ -443,6 +443,7 @@ $(function(){
 
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
 			$("#mbInput").focusout(); //fires up the change of material blending preview
+      $("#mbSelect").trigger('change');
 		}
 	});
 
@@ -905,7 +906,6 @@ scrollMBContainer.addEventListener("wheel", (evt) => {
     let layblend;
 		//get options
 		var turnOnOff = $("#rndOnOff").prop('checked'); //can the randomized set opacity to e from 0 ?
-		var rndmizeAll = $("#rndAll").prop('checked');
 		var rndMBlend = $("#rndMbWild").prop('checked');
 		//get active layers to be randomized
 		var layerSactive = $("#layeringsystem li:not([disabled])").length;
