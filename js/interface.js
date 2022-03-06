@@ -76,7 +76,7 @@ $(function(){
   });
 
 	$("#matInput").on("change",function(){
-		if ($("#matInput").val() != $("#layeringsystem li.active").data("material")){
+	if ($("#matInput").val() != $("#layeringsystem li.active").data("material")){
 			$("#layeringsystem li.active").addClass("notsync");
 		}else{
 			$("#layeringsystem li.active").removeClass("notsync");
@@ -159,7 +159,7 @@ $(function(){
           dataContextual.mbnormal = $("#layeringsystem li").eq(indexLayerContextual).data("mbnormal");
           dataContextual.mboffu = $("#layeringsystem li").eq(indexLayerContextual).data("mboffu");
           dataContextual.mboffv = $("#layeringsystem li").eq(indexLayerContextual).data("mboffv");
-          $("#layers-contextual li").eq(1).addAttr("disabled");
+          $("#layers-contextual li").eq(1).attr("disabled");
           $("#layers-contextual li").eq(3).removeAttr("disabled");
           break;
         case 'pstmb':
@@ -374,6 +374,12 @@ $(function(){
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
 
+  //activate/deactivate wireframe display
+  $("#wireFrame").click(function(){
+    var sideBox = $("#dat-container ul li:nth-of-type(4) input[type='checkbox']");
+    sideBox.click();//("checked",!sideBox.prop("checked"));
+  });
+
 	var TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
@@ -437,6 +443,7 @@ $(function(){
 
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
 			$("#mbInput").focusout(); //fires up the change of material blending preview
+      $("#mbSelect").trigger('change');
 		}
 	});
 
@@ -606,7 +613,14 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	$("#mbSelect").change(function(event){
   		$("#mbInput").val($(this).val());
       if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
+        let MBName = $(this).val().split('.')[0].split("\\").reverse()[0]
+
   			$("#mb-preview").prop("src",$("#mbSelect option:selected").attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif"); console.log("rilevato errore");});
+
+        $("#cagethemicroblends li").removeClass("MBactive");
+        $("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").addClass("MBactive");
+        //$("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index() index child of the
+        $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").width()+2))
   		}
 	});
 
@@ -615,6 +629,9 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   //reset css fx on microblend
   $("#resetMB").click(function(){
 		$("#mbInput").val("base\\surfaces\\microblends\\default.xbm").focusout();
+    $("#cagethemicroblends li").removeClass("MBactive");
+    $("#cagethemicroblends li[data-bs-original-title='default']").addClass("MBactive");
+    $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='default']").index()*($("#cagethemicroblends li[data-bs-original-title='default']").width()+2))
 	});
   $("#cleanFX").click(function(){$("#mb-preview").removeClass('blend-lumi');});
   //apply luminosity on microblend preview
@@ -867,17 +884,28 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	});
 
   $("#cagethemicroblends li").click(function(){
+    $("#cagethemicroblends li").removeClass('MBactive');
+    $(this).addClass("MBactive");
     let theoneselected = $(this).data('bs-original-title');
+    $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").width()+2))
     //console.log(theoneselected+" :contains('"+theoneselected+"')");
-    $("#mbSelect option").removeAttr("selected").filter(function() { return $(this).text() === theoneselected;}).attr('selected', true).change();
+    $("#mbSelect option").removeAttr("selected")
+    let mbZelected = $("#mbSelect option").filter(function() { return $(this).text() === theoneselected;})
+    mbZelected.attr('selected', true).change();
   });
+
+const scrollMBContainer = document.getElementById("microdisplay");
+
+scrollMBContainer.addEventListener("wheel", (evt) => {
+    evt.preventDefault();
+    scrollMBContainer.scrollLeft += evt.deltaY;
+});
 
 	$("#layerRandomizer").click(function(){
     let max_blends = 5;
     let layblend;
 		//get options
 		var turnOnOff = $("#rndOnOff").prop('checked'); //can the randomized set opacity to e from 0 ?
-		var rndmizeAll = $("#rndAll").prop('checked');
 		var rndMBlend = $("#rndMbWild").prop('checked');
 		//get active layers to be randomized
 		var layerSactive = $("#layeringsystem li:not([disabled])").length;

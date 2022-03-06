@@ -30,7 +30,7 @@
   <script type="text/javascript" src='./js/interface.js'></script>
   <link rel="stylesheet" href="./css/base.css" />
   </head>
-  <body>
+  <body class="px-1">
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
     <div id="dat-container"></div>
 <!--THREE.js libraries -->
@@ -72,67 +72,63 @@
   <span id="withbones"><i class="fas fa-bone fa-2x"></i></span>
   <div id="withthacanvas">
   <canvas id="thacanvas"></canvas>
-  <div id="modelsInformation" class="p-2 rounded layer-1 mt-3">
+  <div id="modelsInformation" class="p-2 rounded layer-1">
     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
 			<input type="checkbox" class="d-none" id="prefloaded" disabled />
 			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
       <!--<input type="checkbox" class="btn-check" id="switchSkinned" checked autocomplete="off"><label class="btn btn-outline-warning" for="switchSkinned">Only Skinned</label>-->
+      <!--<button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>//-->
+      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click to see notification messages and errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
-      <button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>
-      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click me to see major errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
+      <input type="checkbox" data-toggle="tooltip" title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off"><label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
-		<div class="btn-group me-5" role="group" aria-label="model loading">
-	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn ml-2 btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
-	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-dolly"></i></button>
+		<div class="btn-group ms-5 me-2" role="group" aria-label="model loading">
+	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
+	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
-		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-truck-loading"></i></button>
+		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
    <!--<div class="mt-3">-->
+   <div class="btn-group " role="group" aria-label="information and data">
      <button class="btn btn-sm btn-outline-info ms-5" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
-     <div class="dropdown dropend d-inline-block ">
-        <a class="btn btn-sm btn-outline-info dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cubes"></i></a>
+     <div class="btn-group dropend ">
+        <a class="btn btn-sm btn-outline-info dropdown-toggle" href="#" role="button" id="dropModelDatas" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cubes"></i></a>
          <div class="dropdown-menu eq-lay1 " style="width:40rem">
           <form class="px-2 py-1">
             <input type="text" class='d-none'  id="lastCustomMDL" readonly />
             <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
-            <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="20"  />
-            <div class="input-group input-group-sm">
+            <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
+            <div class="input-group input-group-sm mb-2">
               <span class="input-group-text bg-dark text-info" ><i class="fas fa-cube"></i></span>
               <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
-      				<button id="CustModelLoad" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Load a custom .glb"><i class="fas fa-box-open"></i></button>
+             <!--<button id="CustModelLoad" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Load a custom .glb"></button>//-->
               <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
             </div>
             <div class="input-group input-group-sm border-secondary">
               <span class="input-group-text bg-dark text-info"><i class="fas fa-mask"></i></span>
               <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
-      				<button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
+             <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
               <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
             </div>
           </form>
-          <!-- <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">New around here? Sign up</a>
-          <a class="dropdown-item" href="#">Forgot password?</a> -->
         </div>
       </div>
+   </div>
     <!--</div>-->
   </div>
 </div>
   <div id="Filemanager" class="p-2 text-white bs-dark layer-1 rounded" style="display:grid;">
-    <div><!--
-			<button class="btn btn-sm btn-outline-info me-5" type="button" id="NuMagicIsHere" data-toggle="tooltip" data-bs-placement="bottom" title="" data-bs-original-title="Import a json file" aria-label="Import a json file"><i class="fas fa-file-import"></i> Import</button>
-			<button class="btn btn-sm btn-outline-warning" type="button" id="NuMagicIsHere" data-toggle="tooltip" data-bs-placement="bottom" title="" data-bs-original-title="Import a json file" aria-label="Import a json file"><i class="fas fa-save"></i> Export</button>//-->
+    <div>
       <div class="input-group input-group-sm">
         <input type="file" class="form-control" accept=".json" placeholder="Load JSON mlsetup"  id="importTech" />
         <button class="btn btn-Prim" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>
       </div>
       <textarea id="passaggio" class="d-none"></textarea>
     </div>
-    <div><!--<div id="load-info" ></div>--></div>
+    <div></div>
     <div>
       <div class="input-group input-group-sm">
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
-        <!--<a id="exportJason" data-toggle="tooltip" data-bs-placement="left"  title="Export the actual layer structure to json format to be transformed by cp77tools in .mlsetup " class="btn btn-Prim " href="#" download="materials.json"><i class="fas fa-save"></i> Export</a>//-->
-				<!--<button id="exportJason" type="button" data-toggle="tooltip" data-bs-placement="left" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup " class="btn btn-Prim" ><i class="fas fa-save"></i> Export</button>-->
 				<div class="dropdown">
 				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0 p-1" type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
 				  <ul id="xport_dm" class="dropdown-menu" aria-labelledby="exportversions">
@@ -172,8 +168,26 @@
       <div class="btn-group btn-group-sm m-1 " role="group" aria-label="Layers randomizer">
 				<button type="button" class="btn btn-outline-warning" id="layerRandomizer" data-toggle="tooltip" title="Randomize layers"><i class="fas fa-random"></i></button>
 				<input id="layerRandomCfg" class="form-control rounded-0 border border-warning" type="text" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
-				<!--<button type="button" class="btn btn-outline-warning" id="randomTrScribe" data-toggle="tooltip" title="Transcribe actual enabled layer setup"><i class="fab fa-buffer"></i></button>//-->
+				<!--<button type="button" class="btn btn-outline-warning" id="randomTrScribe" data-toggle="tooltip" title="Transcribe actual enabled layer setup"><i class="fab fa-buffer"></i></button>
         <button type="button" class="btn btn-outline-warning" id="randomicOpt" data-bs-toggle="modal" data-toggle="tooltip" data-bs-target="#RandOptmodal" title="Option setting for the randomizer"><i class="fas fa-cogs"></i></button>
+        <!--class="dropdown d-inline-block " -->
+        <div class="btn-group dropend" role="group">
+          <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
+            <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu eq-lay1 border border-warning p-2" style="width:22rem;">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="rndOnOff">
+                <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
+              </div><!--
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="rndAll" disabled>
+                <label class="form-check-label" for="rndAll" ><details><summary>Randomize all layers</summary>Without this option ONLY the already active layers can obtain randomized values.</details></label>
+              </div> //-->
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="rndMbWild">
+                <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize microblends</summary>On a basis, the microblend are setup to use the flat default microblend, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
+              </div>
+            </div>
+        </div>
       </div>
     </div>
     <div class="my-2 text-center">
@@ -362,14 +376,12 @@
       </div>
     </div>
       <div id="versionDisplay" class="p-2">
-        <!--<span class="badge rounded-pill bg-warning text-dark"></span>-->
         <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
+        <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#modalHelp">?</a>
       </div>
     </div>
   </div>
 </div>
-
-
 <div class="modal fade " id="materialModal"  tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
     <div class="modal-content rounded-0">
@@ -399,30 +411,6 @@
 </div>
 </div>
 <!-- A modal for the setup of the option randomizer -->
-<div class="modal fade" id="RandOptmodal" tabindex="-1" aria-labelledby="RandOptmodalH" aria-hidden="true" data-focus="true">
-	<div class="modal-dialog modal modal-dialog-centered">
-	  <div class="modal-content ">
-	    <div class="modal-header bg-info text-dark">
-	      <h5 class="modal-title" id="RandOptmodalH">Option settings for the randomizer</h5>
-	      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-	    </div>
-	    <div class="modal-body text-white" style="background-color:#121212;">
-	      <div class="form-check form-switch">
-	        <input class="form-check-input" type="checkbox" id="rndOnOff">
-	        <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
-	      </div>
-	      <div class="form-check form-switch">
-	        <input class="form-check-input" type="checkbox" id="rndAll" disabled>
-	        <label class="form-check-label" for="rndAll" ><details><summary>Randomize all layers</summary>Without this option ONLY the already active layers can obtain randomized values.</details></label>
-	      </div>
-	      <div class="form-check form-switch">
-	        <input class="form-check-input" type="checkbox" id="rndMbWild">
-	        <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize microblends</summary>On a basis, the microblend are setup to use the flat default microblend, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-</div>
 <!-- windows for aiming the microblend over the masks -->
 <div class="modal fade" id="AimBlend" tabindex="-1" aria-labelledby="aimblendLBL" aria-hidden="true">
 <div class="modal-dialog modal-lg">
@@ -496,11 +484,6 @@
 <div class="modal fade " id="LicenseModal" tabindex="-1" aria-labelledby="LicenseModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
     <div class="modal-content rounded-0">
-			<!--
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title" id="LicenseModalLabel">License Display</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>-->
       <div class="modal-body p-0">
 				<div class="row m-0">
 					<div class="col mlsblogo">

@@ -79,8 +79,12 @@ ipcRenderer.on('preload:logEntry',(event, resultSave) => {
 })
 
 ipcRenderer.on('preload:openlicense',(event, resultSave) => {
-	var linklicenze = document.querySelector("#versionDisplay a")
+	var linklicenze = document.querySelector("#versionDisplay a:nth-child(1)")
 	linklicenze.click()
+})
+ipcRenderer.on('preload:openhelp',(event, resultSave) => {
+  var linkhelp = document.querySelector("#versionDisplay a:nth-child(2)")
+	linkhelp.click()
 })
 
 ipcRenderer.on('preload:set_3d_asset_name',(event,result) => {
