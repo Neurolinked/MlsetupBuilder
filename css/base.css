@@ -154,6 +154,7 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 #cagecolors{display:flex;flex-flow: row wrap;justify-content:flex-start;align-content:flex-start;height:calc(calc(var(--swatch-size)* var(--numswatches)) + 7px);}
 #cagecolors span{flex-basis:var(--swatch-size);width:var(--swatch-size);height:var(--swatch-size);display:inline-block;border:1px solid var(--layer-1);margin:0;}
 /*#cagecolors span:active{border-color:var(--active-sel);}*/
+#cagethemicroblends li.MBactive,
 #cagecolors span:active,
 #cagecolors span.active{
 	z-index:1;

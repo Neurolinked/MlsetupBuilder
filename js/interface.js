@@ -612,7 +612,14 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	$("#mbSelect").change(function(event){
   		$("#mbInput").val($(this).val());
       if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
+        let MBName = $(this).val().split('.')[0].split("\\").reverse()[0]
+
   			$("#mb-preview").prop("src",$("#mbSelect option:selected").attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif"); console.log("rilevato errore");});
+
+        $("#cagethemicroblends li").removeClass("MBactive");
+        $("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").addClass("MBactive");
+        //$("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index() index child of the
+        $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").width()+2))
   		}
 	});
 
@@ -621,6 +628,9 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   //reset css fx on microblend
   $("#resetMB").click(function(){
 		$("#mbInput").val("base\\surfaces\\microblends\\default.xbm").focusout();
+    $("#cagethemicroblends li").removeClass("MBactive");
+    $("#cagethemicroblends li[data-bs-original-title='default']").addClass("MBactive");
+    $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='default']").index()*($("#cagethemicroblends li[data-bs-original-title='default']").width()+2))
 	});
   $("#cleanFX").click(function(){$("#mb-preview").removeClass('blend-lumi');});
   //apply luminosity on microblend preview
@@ -873,10 +883,22 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	});
 
   $("#cagethemicroblends li").click(function(){
+    $("#cagethemicroblends li").removeClass('MBactive');
+    $(this).addClass("MBactive");
     let theoneselected = $(this).data('bs-original-title');
+    $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").width()+2))
     //console.log(theoneselected+" :contains('"+theoneselected+"')");
-    $("#mbSelect option").removeAttr("selected").filter(function() { return $(this).text() === theoneselected;}).attr('selected', true).change();
+    $("#mbSelect option").removeAttr("selected")
+    let mbZelected = $("#mbSelect option").filter(function() { return $(this).text() === theoneselected;})
+    mbZelected.attr('selected', true).change();
   });
+
+const scrollMBContainer = document.getElementById("microdisplay");
+
+scrollMBContainer.addEventListener("wheel", (evt) => {
+    evt.preventDefault();
+    scrollMBContainer.scrollLeft += evt.deltaY;
+});
 
 	$("#layerRandomizer").click(function(){
     let max_blends = 5;
