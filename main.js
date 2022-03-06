@@ -312,7 +312,6 @@ ipcMain.on('main:writefile',(event,arg) => {
 	}else{
 		def_path = arg.file
 	}
-	console.log(def_path)
 	if (arg.type=='mlsetup'){
 		const salvataggio = dialog.showSaveDialog({
 			title:'Save the mlsetup jsonized',

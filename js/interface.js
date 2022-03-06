@@ -159,7 +159,7 @@ $(function(){
           dataContextual.mbnormal = $("#layeringsystem li").eq(indexLayerContextual).data("mbnormal");
           dataContextual.mboffu = $("#layeringsystem li").eq(indexLayerContextual).data("mboffu");
           dataContextual.mboffv = $("#layeringsystem li").eq(indexLayerContextual).data("mboffv");
-          $("#layers-contextual li").eq(1).addAttr("disabled");
+          $("#layers-contextual li").eq(1).attr("disabled");
           $("#layers-contextual li").eq(3).removeAttr("disabled");
           break;
         case 'pstmb':
