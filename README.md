@@ -25,3 +25,8 @@ To display the models present in the model library you need a folder with the me
 # Screenshot
 Main window with a melee weapon model and already imported microblends preview images
 ![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_1600.jpg)
+
+# Wanna support ?
+If you really wish you can donate with Ko-fi
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D6APQ78)
