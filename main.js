@@ -2,6 +2,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, Notification, ipcMain, nativeTheme, dialog, Menu } = require('electron')
 var child = require('child_process').execFile;
+var spawner = require('child_process').spawn;
 const path = require('path')
 const fs = require('fs')
 const store = require('electron-store');
@@ -53,6 +54,9 @@ const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilde
 }
 
 const isMac = process.platform === 'darwin'
+var wcliExecutable = new RegExp(/.+WolvenKit\.CLI\.exe$/)
+var normals = new RegExp(/.+n\d{2}\.(xbm|png|dds)$/)
+var buildMenu = wcliExecutable.test(preferences.get('wcli'),'i');
 
 const template = [
   // { role: 'appMenu' }
@@ -66,15 +70,11 @@ const template = [
     submenu: [
 			{label: '&Preferences', click: () =>{
 				createModal("apps/prefs.html",mainWindow,800,300,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
-			}},/*
-			{label: 'Layers Composer', click: () =>{
-				createModal("apps/composer.html",mainWindow,1024,768,'Layers Composer', {preload: path.join(__dirname, 'apps/preloadcomp.js')} );
-			}},*/
+			}},
 			{ type: 'separator' },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },
-  // { role: 'editMenu' }
   {
     label: 'Edit',
     submenu: [
@@ -91,6 +91,21 @@ const template = [
       ])
     ]
   },
+	...(buildMenu ? [
+		{id:99, label: 'Build', submenu:[ {
+			label:'Repository',
+			click: () =>{
+				mainWindow.webContents.send('preload:openModal','uncook')
+			}
+		}, {
+			label:'Microblends',
+			click: () =>{
+				mainWindow.webContents.send('preload:openModal','micro')
+			}
+		}] }
+	] : [
+		{id:99, label: 'Build', submenu:[{label:'Setup first Wolvenkit CLI', enabled:false}] }
+	]),
   // { role: 'viewMenu' }
   {
     label: 'View',
@@ -99,18 +114,20 @@ const template = [
   // { role: 'windowMenu' }
   {
     label: 'Window',
-    submenu: [{ role: 'minimize' },{ role: 'zoom' },
+    submenu: [{ label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},{ role: 'minimize' },{ role: 'zoom' },
       ...(isMac ? [{ type: 'separator' },{ role: 'front' },{ type: 'separator' },{ role: 'window' } ] : [ { role: 'close' } ])
     ]
   },
   {
     role: 'help',
     submenu: [
-			{label:'Documentation',click:()=>{
-				mainWindow.webContents.send('preload:openhelp')
+			{label:'Documentation',
+			accelerator: 'F1',
+			click:()=>{
+				mainWindow.webContents.send('preload:openModal','help')
 			}},
 			{label:'License',click: () =>{
-				mainWindow.webContents.send('preload:openlicense')
+				mainWindow.webContents.send('preload:openModal','license')
 		}}]
   }
 ]
@@ -162,7 +179,11 @@ ipcMain.on('main:readFile',(event,percorso,flags)=>{
   fs.readFile(path.join(preferences.get('unbundle'),percorso),flags,(err,contenutofile) =>{
     if (err) {
       if (err.code=='ENOENT'){
-        dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(preferences.get('unbundle'),percorso))
+				if (normals.test(percorso)){
+					event.reply('preload:logEntry', 'normal map not found in : '+path.join(preferences.get('unbundle'),percorso),true)
+				}else{
+					dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(preferences.get('unbundle'),percorso))
+				}
       }else{
         dialog.showErrorBox("File opening error",err.message)
       }
@@ -322,6 +343,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 		    if (!salvataggio.canceled){
 					fs.writeFile(salvataggio.filePath, arg.content,'utf8',(errw,data) =>{
 						if(errw){
+							event.reply('preload:noBar','')
 							dialog.showErrorBox('Error during the writing process of the file')
 							return
 						}else{
@@ -332,20 +354,24 @@ ipcMain.on('main:writefile',(event,arg) => {
 										if (err){
 											event.reply('preload:logEntry', 'Error: '+err+'\n')
 											new Notification({title:'Conversion Error',body: err }).show()
+											event.reply('preload:noBar','')
 										}else{
 											 event.reply('preload:logEntry', 'Operation executed '+data.toString().split(/\r\n/).reverse().join('<br/>')+'\n')
 											 new Notification({title:"Conversion executed", body: "Your file has been saved and converted to CR2W format" }).show()
+											 event.reply('preload:noBar','')
 										}
 									})
 								}
 							}else{
 								 new Notification({title:"Conversion executed", body: "Your file has been saved, remember to convert it back in Wolvenkit. Shutting Down" }).show()
+								 event.reply('preload:noBar','')
 								 app.exit(0)
 							}
 						}
 					})
 					event.reply('preload:logEntry', 'File saved in: '+salvataggio.filePath+'\n')
 				}else{
+					event.reply('preload:noBar','')
 					event.reply('preload:logEntry', 'Save procedure cancelled')
 				}
 		})
@@ -361,3 +387,207 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 		return preferences.get(key);
 	}
 });
+
+function uncookRun(toggle,params,stepbar){
+	return new Promise((resolve,reject) =>{
+		var subproc
+		if (toggle){
+			let uncooker = preferences.get('wcli')
+			subproc = spawner(uncooker,params).on('error',function(err){
+				mainWindow.webContents.send('preload:uncookErr',err)
+			})
+
+			let oldtxt = ''
+			subproc.stdout.on('data', (data) => {
+
+				if (!(/%/.test(data.toString()))){
+					mainWindow.webContents.send('preload:uncookErr',`${data}`)
+				}else{
+						if (oldtxt != data.toString().split("%")[0]){
+							oldtxt = data.toString().split("%")[0]
+
+							if (oldtxt.length>4){
+								mainWindow.webContents.send('preload:uncookErr',`${data}`)
+							}else{
+								mainWindow.webContents.send('preload:uncookBar',oldtxt,stepbar)
+							}
+						}
+				}
+
+			});
+
+			subproc.stderr.on('data', (data) => {
+				mainWindow.webContents.send('preload:logEntry',`stderr: ${data}`,true)
+				mainWindow.webContents.send('preload:uncookErr',`${data}`)
+			});
+
+			subproc.on('close', (code) => {
+				if (code == 0){
+					switch (stepbar) {
+						case 'step1':
+						case 'step3':
+						case 'step5':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Mesh and mlmasks Done</span>')
+							break;
+						case 'step2':
+						case 'step4':
+						case 'step6':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Normal map Done</span>')
+							break;
+					}
+					mainWindow.webContents.send('preload:uncookBar','100',stepbar)
+					resolve()
+				}else{
+					mainWindow.webContents.send('preload:uncookErr',`child process exited with code ${code}`,true)
+					reject()
+				}
+			})
+
+		}else{
+			resolve()
+		}
+	})
+}
+
+ipcMain.on('main:uncookForRepo',(event,conf)=> {
+	fs.access(path.normalize(preferences.get('unbundle')),fs.constants.W_OK,(err)=>{
+		if (err){
+			// The folder isn't accessible for writing
+			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
+		}else{
+			var archives = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
+			.then(selection => {
+				if (!selection.canceled){
+					let unbundlefoWkit = String(preferences.get('unbundle')).replace(/base$/,'')
+					let uncooker = preferences.get('wcli')
+					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
+						if (typeof(conf)=='object'){
+								//basegame_3_nightcity
+									//try{
+									mainWindow.webContents.send('preload:uncookLogClean')
+
+									uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1')
+										.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
+										.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
+										.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_appearance.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step3'))
+										.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_appearance.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
+										.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_AP4")})
+										.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step5'))
+										.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
+										.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
+										.catch(err => { console.log(err) })
+										.finally(() => { 	mainWindow.webContents.send('preload:enable',"#triggerUncook") })
+									/*
+								var aPromise = new Promise(function(resolve, reject) {
+										if (conf[0]===true){
+											subproc = spawner( uncooker,
+												["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit]
+											).on('error',function(err){
+												mainWindow.webContents.send('preload:uncookErr',err)
+												mainWindow.webContents.send('preload:enable',"#triggerUncook");
+											})
+
+											let oldtxt = ''
+											subproc.stdout.on('data', (data) => {
+
+												if (!(/%/.test(data.toString()))){
+													mainWindow.webContents.send('preload:uncookErr',`${data}`)
+												}else{
+														if (oldtxt != data.toString().split("%")[0]){
+															oldtxt = data.toString().split("%")[0]
+
+															if (oldtxt.length>4){
+																mainWindow.webContents.send('preload:uncookErr',`${data}`)
+															}else{
+																mainWindow.webContents.send('preload:uncookBar',oldtxt,'step1')
+															}
+														}
+												}
+											});
+
+											subproc.stderr.on('data', (data) => {
+												mainWindow.webContents.send('preload:logEntry',`stderr: ${data}`,true)
+												mainWindow.webContents.send('preload:uncookErr',`${data}`)
+											});
+
+											subproc.on('close', (code) => {
+												if (code == 0){
+													mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Mesh and mlmasks Done</span>')
+													mainWindow.webContents.send('preload:uncookBar','100','step1')
+													resolve()
+												}else{
+													mainWindow.webContents.send('preload:uncookErr',`child process exited with code ${code}`,true)
+													reject()
+												}
+											})
+										}else{
+											resolve(true)
+										}
+									})
+
+									aPromise.then((result)=>{
+										if (conf[0]===true){
+											var bPromise = new Promise(function(resolve, reject) {
+												subprocTu = spawner( uncooker,
+													["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit]
+												).on('error',function(err){
+													mainWindow.webContents.send('preload:uncookErr',err)
+													mainWindow.webContents.send('preload:enable',"#triggerUncook");
+												})
+
+												let oldtxt = ''
+												subprocTu.stdout.on('data', (data) => {
+													if (!(/%/.test(data.toString()))){
+														mainWindow.webContents.send('preload:uncookErr',`${data}`)
+													}else{
+															if (oldtxt != data.toString().split("%")[0]){
+																oldtxt = data.toString().split("%")[0]
+
+																if (oldtxt.length>4){
+																	mainWindow.webContents.send('preload:uncookErr',`${data}`)
+																}else{
+																	mainWindow.webContents.send('preload:uncookBar',oldtxt,'step2')
+																}
+															}
+													}
+												});
+
+												subprocTu.stderr.on('data', (data) => {
+													mainWindow.webContents.send('preload:logEntry',`stderr: ${data}`,true)
+													mainWindow.webContents.send('preload:uncookErr',`${data}`)
+												});
+
+												subprocTu.on('close', (code) => {
+													if (code == 0){
+														mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Normal maps Done</span>')
+														mainWindow.webContents.send('preload:uncookBar','100','step2')
+														resolve(true)
+													}else{
+														mainWindow.webContents.send('preload:uncookErr',`child process exited with code ${code}`,true)
+														reject(true)
+													}
+												});
+											}).then(()=>{
+												mainWindow.webContents.send('preload:stepok', '#arc_NC3')
+											}).catch(()=>{
+												mainWindow.webContents.send('preload:logEntry','error')
+											})
+
+											bPromise.then(()=>{
+												if (conf[1]===true){
+													console.log('entrato')
+												}
+											})
+										}
+									}).catch(()=>{
+										mainWindow.webContents.send('preload:logEntry','error')
+										mainWindow.webContents.send('preload:enable',"#triggerUncook")
+									})
+									*/
+							}
+					}
+				}
+			})
+		}
+	})
+})

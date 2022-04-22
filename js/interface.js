@@ -2,6 +2,8 @@ window.$ = window.jQuery;
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 
+var modelType = 'default';
+
 Number.prototype.countDecimals = function () {
     if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
     return this.toString().split(".")[1].length || 0;
@@ -18,6 +20,7 @@ async function abuildMB(microblendObj){
   }
   return;
 }
+
 //Build the material gallery
 async function abuildMaterial(materialArray){
 	if (typeof(materialArray)=="object"){
@@ -27,7 +30,49 @@ async function abuildMaterial(materialArray){
 	}
 }
 
+async function abuildHairs(aHairs){
+	if (typeof(aHairs)=="object"){
+		if (aHairs.hasOwnProperty('profiles')){
+			var hair_colors = shade = ''
+			aHairs.profiles.forEach((hair)=>{
+				hair_colors = '';
+				shade = ''
+				if (hair.colors.hasOwnProperty('rootToTip')){
+					if (hair.colors.rootToTip.length>0){
+						let closeGrad = "%, ";
+						hair.colors.rootToTip.forEach((item, key, arr) => {
+				      if (Object.is(arr.length - 1, key)) {
+								closeGrad = "% ";
+							}
+							hair_colors +=" "+item.c+" "+parseInt(item.p*100)+closeGrad
+				    });
+					}
+				}
+				if (hair.colors.hasOwnProperty('id')){
+					if (hair.colors.id.length>0){
+						let closeGrad = "%, ";
+						hair.colors.id.forEach((item, key, arr) => {
+				      if (Object.is(arr.length - 1, key)) {
+								closeGrad = "% ";
+							}
+							shade +=" "+item.c+" "+parseInt(item.p*100)+closeGrad
+				    });
+					}
+				}
+				//console.log(hair_colors)
+				$("#hairSwatches").append("<span data-toggle='tooltip' data-set='"+hair.set+"'  title='"+hair.name+"' data-name='"+hair.name+"' data-crtt='linear-gradient("+hair_colors+")' data-cid='linear-gradient("+shade+")' style='background:linear-gradient("+hair_colors+");order:"+hair.order+"' >"+"</span>"); //linear-gradient("+shade+");background-blend-mode: multiply
+			});
+			/*
+			for (k=0, j=aHairs.profiles.length;k<j;k++){
+				if
+				$("#hairSwatches").append("<span data-name='"+aHairs.profiles[k].name+"' >"+aHairs.profiles[k].name+"</span>");
+			}*/
+		}
+	}
+}
+
 $(function(){
+
   var shiftSpeedup = false;
   var indexLayerContextual = null; //variable index for the copied Data
   var dataContextual = {};
@@ -37,6 +82,7 @@ $(function(){
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
 	let buildmyNuMaterial = abuildMaterial(materialCore);
+	let buildmyHairs = abuildHairs(hairs);
 
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
@@ -47,17 +93,41 @@ $(function(){
 	}
 
 	function notifyMe(message, warning = true){
-		$("#NotificationCenter .offcanvas-body").prepend(message+"<br/>");
+		let Data = new Date(Date.now());
+		$("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br/>");
 		if (warning){
 			let noterrorz = parseInt($("#notyCounter span").text()+0);
 			$("#notyCounter span").text(parseInt(noterrorz+1));
 		}
 	}
 
+
+
   $(document).on('keydown', function(e) {
     if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
 	}else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}
   });
+
+	function hairToolW(){
+		let leftcorner = $("#Filemanager").offset().left;
+		$('#addedCSS').text('.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
+	}
+
+	$("#HairTool").on('show.bs.offcanvas',function(){
+		hairToolW();
+	});
+	$(window).resize(function(){hairToolW();});
+
+	$("#hairSwatches span").click(function(){
+		$('#sp-gradients div:nth-child(1)').attr('style',"background:"+$(this).data('crtt')+", "+$('#bkgshades').val()+";");
+		$('#sp-gradients div:nth-child(2)').attr('style',"background:"+$(this).data('cid')+", "+$('#bkgshades').val()+";");
+	});
+
+	$('#bkgshades').val(window.getComputedStyle(document.body).getPropertyValue('--eq-lay1'))
+	$('#sp-gradients div').css('background-color',$('#bkgshades').val());
+	$('#bkgshades').on('change',function(){
+		$('#sp-gradients div').css('background-color',$('#bkgshades').val());
+	});
 
   $(document).on('keyup', function(e) { if (e.shiftKey == false) { shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');} });
 /* Contestual menu on layers */
@@ -75,8 +145,26 @@ $(function(){
     }
   });
 
-	$("#matInput").on("change",function(){
-	if ($("#matInput").val() != $("#layeringsystem li.active").data("material")){
+//Change in layer displayer
+	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(){
+		if (
+			($("#matInput").val() != $("#layeringsystem li.active").data("material")) ||
+			(parseFloat($("#layerTile").val()) != parseFloat($("#layeringsystem li.active").data("mattile"))) ||
+			(parseFloat($("#layerOpacity").val()) != parseFloat($("#layeringsystem li.active").data("opacity"))) ||
+			(parseFloat($("#layerOffU").val()) != parseFloat($("#layeringsystem li.active").data("offsetu"))) ||
+			(parseFloat($("#layerOffV").val()) != parseFloat($("#layeringsystem li.active").data("offsetv"))) ||
+			($('#layerNormal').val() != String($("#layeringsystem li.active").data("normal"))) ||
+			($('#layerMetalOut').val() != String($("#layeringsystem li.active").data("metalout"))) ||
+			($('#layerRoughIn').val() != String($("#layeringsystem li.active").data("roughin"))) ||
+			($('#layerRoughOut').val() != String($("#layeringsystem li.active").data("roughout"))) ||
+			($('#layerColor').val() !=$("#layeringsystem li.active").data("color")) ||
+			($("#mbInput").val() != $("#layeringsystem li.active").data("mblend")) ||
+			(parseFloat($("#mbTile").val()) != parseFloat($("#layeringsystem li.active").data("mbtile"))) ||
+			(parseFloat($("#mbCont").val()) != parseFloat($("#layeringsystem li.active").data("mbcontrast"))) ||
+			(parseFloat($("#mbNorm").val()) != parseFloat($("#layeringsystem li.active").data("mbnormal"))) ||
+			(parseFloat($("#mbOffU").val()) != parseFloat($("#layeringsystem li.active").data("mboffu"))) ||
+			(parseFloat($("#mbOffV").val()) != parseFloat($("#layeringsystem li.active").data("mboffv")))
+			){
 			$("#layeringsystem li.active").addClass("notsync");
 		}else{
 			$("#layeringsystem li.active").removeClass("notsync");
@@ -223,6 +311,9 @@ $(function(){
 	localStorage = window.localStorage;
 	const license = localStorage.getItem('ReadLicense');
 	const licenseWindow = document.getElementById('LicenseModal');
+	//modal uncooking progress
+	const unCookModal = new bootstrap.Modal(document.getElementById('unCookModal'));
+	//license modal
 	const licenseModal = new bootstrap.Modal(licenseWindow);
 	//modal information windows for loaded models
 	const wGLBInfo = new bootstrap.Modal(document.getElementById('modalInfo'));
@@ -460,6 +551,7 @@ $(function(){
 							"kiddo" : {"icon": "text-warning fas fa-baby"},
               "layer0" : {"icon": "text-white fas fa-star-half"},
               "custmask" : {"icon":"custom"},
+							"hair" : {"icon":"fa-solid fa-scissors"},
 							},
 		"search":{"show_only_matches": true,"show_only_matches_children":true},
 		"plugins" : [ "search","types","state" ],//"plugins" : [ "search","types","contextmenu","state" ],
@@ -471,6 +563,8 @@ $(function(){
      $('#btnMdlLoader').click();
      // Do my action
   });
+
+
 
   function customMdlMenu(node){
     //console.log(node.type);
@@ -524,8 +618,9 @@ $(function(){
   }
 //When selecting a model from the library it load data in the inputs
 $('#modelsTree').on('select_node.jstree',function(ev,node){
+	modelType = node.node.type;
 	let maxlayers = 19;
-	if ((node.node.type=='man')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')){
+	if ((node.node.type=='man')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='hair')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')){
     $("#modelTarget").attr('loaded',false);
 		$("#modelTarget").val(node.node.li_attr['model']);
     if (node.node.li_attr.hasOwnProperty('masks')) {
@@ -540,6 +635,12 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       $("#masksTemplate").val('');
       maxlayers = 0;
     }
+		// ID of the normal map
+		if (node.node.li_attr.hasOwnProperty('normal')) {
+			$("#normTemplate").val(normList[node.node.li_attr['normal']]);
+		}else{
+			$("#normTemplate").val('');
+		}
     /*
 		if (node.node.li_attr.hasOwnProperty('layers')){
 			maxlayers = node.node.li_attr.layers;
@@ -607,11 +708,13 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   			$("#mb-preview").prop("src",$("#mbSelect option[value='"+test+"']").attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif")});
   		//}
 		}
+		$("#mbInput").change();
 	})
 
 	//load a new texture to display as microblends and fille the name in the microblend file name
 	$("#mbSelect").change(function(event){
   		$("#mbInput").val($(this).val());
+			$("#mbInput").change();
       if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
         let MBName = $(this).val().split('.')[0].split("\\").reverse()[0]
 
@@ -690,17 +793,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#cagemLibrary div").removeClass('active');
 		$("#cagemLibrary div").eq($(this).data('inx')).click();
 	})
-/*
-	var TreeMaterial = $('#materialTrees').jstree({
-		'core' : {"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : materialJson},
-		'types' : {
-							"default" : { "icon" : "text-warning fas fa-folder" },
-							"materials" : { "icon" : "text-info fas fa-box" }
-							},
-		"search":{"show_only_matches": true,"show_only_matches_children":true},
-		"plugins" : [ "search","types" ]
-	});
-*/
+
 	$("#layerOpacity").change(function(){
 			if (Number($(this).val())==0){
 				$("#layerOpacity").addClass('bg-attention');
@@ -708,67 +801,6 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#layerOpacity").removeClass('bg-attention');
 			}
 	});
-
-/*
-	//Material Loading and building
-	TreeMaterial.on('select_node.jstree',function(ev,node){
-		if (node.node.type==='materials'){
-			//the node is a material, then change the material
-			//console.log(node.node);
-			$("#materialSummary").html(node.node.text);
-			$("#matInput").val(node.node.a_attr['data-val']);
-
-			if (ml_libraries.hasOwnProperty(node.node.text)){
-				let materialtoload = node.node.text;
-
-				console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
-        $("#Rough_out_values").html('');//reset optional roughness
-				$("#Rough_In_values").html('');
-				$("#Metal_Out_values").html('');//reset optional metalLevelsOut
-        $("#Norm_Pow_values").html('');
-				$("#materialcolors").html('');
-				$("#cagecolors").html('');
-
-        let toodarkClass;
-
-				Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
-          toodarkClass='';
-          let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
-          //if (!(colorchecking.getBrightness()>90) && (colorchecking.getBrightness()<110)){
-          if (!tinycolor.isReadable(colorchecking,"#3c454d")){
-            toodarkClass='bg-light';
-          }
-					$("#materialcolors").append('<option class="'+toodarkClass+'"  style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-					$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
-					//$("#cagecolors").append('<span style="background-color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
-				});
-
-        //build up the lists of roughness for the current material
-				Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
-					$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
-				});
-
-        Object.entries(ml_libraries[materialtoload].overrides.roughLevelsOut).forEach(([key,value])=>{
-          $("#Rough_out_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
-        });
-
-        Object.entries(ml_libraries[materialtoload].overrides.normalStrength).forEach(([key,value])=>{
-          $("#Norm_Pow_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
-        });
-
-				Object.entries(ml_libraries[materialtoload].overrides.metalLevelsOut).forEach(([key,value])=>{
-          $("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
-        });
-			}else{
-				console.log("%cNo material override entry loaded for:  "+String(node.node.a_attr['data-val']).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
-				$("#materialcolors").html("");
-			}
-
-			$("#cagecolors").find('span').sort(function(a, b) {
-	    	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
-			}).appendTo($("#cagecolors"));
-		}
-	});*/
 
 	$("#materialModal").on('show.bs.modal',function(){
 		//reset the last active material
@@ -881,6 +913,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("body #defaultcolors option:contains('"+colorchanger+"')").prop("selected",false);
 		}
 		$("body #LayerColorL").change();
+		$("#layerColor").change();
 	});
 
   $("#cagethemicroblends li").click(function(){
@@ -1653,6 +1686,7 @@ $("#exportJason_v1").click(function(){
 
 	jsonbody=jsonbody.slice(0,-3); //removes latest commas
 
+	$("#pBar").addClass('show');
 	thePIT.Export({
 		file:nomefile,
 		content:preamble+jsonbody+closing,
@@ -1661,6 +1695,32 @@ $("#exportJason_v1").click(function(){
  }
 });
 
+$("#unCookModal .modal-body .form-check-input").click(function(){
+	if ($(this).is(':checked')){
+		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');
+	}else{
+		$(this).next('span.badge').addClass('bg-dark text-muted').removeClass('bg-warning text-dark');
+	}
+})
+
+$("#arc_GA4, #arc_AP4, #arc_NC3").change(function(){
+	console.log($(this))
+	if ($(this).is(':checked')){
+		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');
+	}else{
+		$(this).next('span.badge').addClass('bg-dark text-muted').removeClass('bg-warning text-dark');
+	}
+});
+
+$("#triggerUncook").click(function(){
+	$("#triggerUncook").prop("disabled",true);
+	$("#uncookCog").removeClass('d-none');
+	let files = new Array()
+	$('#uncookCheck > div > input.form-check-input').each(function(){
+		files.push($(this).is(':checked'))
+	})
+	thePIT.UnCookMe(files);
+});
 
  $("#modelCopyPath").click(function(){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$("#modelTarget").val().replaceAll(/\//g,'\\'));
@@ -1668,7 +1728,9 @@ $("#exportJason_v1").click(function(){
  $("#modelTexPath").click(function(){
    navigator.clipboard.writeText($("#prefxunbundle").val()+$("#masksTemplate").val().replaceAll(/\//g,'\\'));
   });
-
+	$("#modelNorPath").click(function(){
+    navigator.clipboard.writeText($("#prefxunbundle").val()+$("#normTemplate").val().replaceAll(/\//g,'\\'));
+   });
  //Display the counted meshes
 	notifyMe("Mesh linked :"+modelsJson.filter(attri => attri.li_attr!=undefined).length,false);
 });

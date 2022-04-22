@@ -1,9 +1,9 @@
 {
-	package:"neuro_01",
-	microblends:[
-		{name:"graphics_sogol_001"},
-		{name:"pattern_n_arrow"},
-		{name:"pattern_n_turtle"},
-		{name:"pattern_n_dflower"},
+	"package":"neuro_01",
+	"microblends":[
+		{"name":"graphics_sogol_001"},
+		{"name":"pattern_n_arrow"},
+		{"name":"pattern_n_turtle"},
+		{"name":"pattern_n_dflower"}
 		]
 }

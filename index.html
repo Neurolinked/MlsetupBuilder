@@ -8,10 +8,15 @@
   <meta http-equiv="X-Content-Security-Policy" content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; img-src * data: 'unsafe-inline'; connect-src * 'unsafe-inline'">-->
   <meta name="author" content="Valerio Kientz">
   <meta name="date" content="September 2021">
+	<!-- Intro.js -->
+	<link rel="stylesheet" href="./node_modules/intro.js/minified/introjs.min.css" />
+	<link href="./node_modules/intro.js/themes/introjs-dark.css" rel="stylesheet">
+	<!-- End Intro -->
   <!-- BOOtstrap 5 -->
   <link href="./bs511/css/bootstrap.min.css" rel="stylesheet">
   <script type="text/javascript"  src="./bs511/js/bootstrap.bundle.min.js"></script>
-  <!--FontAwesome --><link rel="stylesheet" href="./node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
+  <!--FontAwesome --><link rel="stylesheet" href="./public/fontawesome-free/css/all.min.css" />
+	<!--FontAwesome --><script type="text/javascript" src="./public/fontawesome-free/js/all.min.js" ></script>
   <!-- If the require doesn't work, include first the jQuery file  <script src="jquery-3.0.0.min.js"></script>-->
   <script type="text/javascript" src='./js/jquery-3.6.0.min.js'></script>
   <!--jstree library DB -->
@@ -19,9 +24,11 @@
   <link rel="stylesheet" href="./js/jstree/themes/default-dark/style.min.css" />
   <script src="./js/jstree/jstree.min.js" data-source='https://www.jstree.com/' ></script>
   <!--End jstree -->
-  <!--Parameters features <script src="./js/parameters.js" type="text/javascript"></script> -->
+	<!--hardcoded help tree DB --><script src="./js/help.js" type="text/javascript"></script><!--hardcoded DB -->
+	<!--hardcoded normals DB //--><script src="./js/normList.js" type="text/javascript" ></script><!--hardcoded normal DB//-->
   <!--hardcoded MaskList DB --><script src="./js/maskList.js" type="text/javascript"></script><!--hardcoded DB -->
   <!--hardcoded default Model-only  DB --><script src="./js/models.js" type="text/javascript"></script><!--hardcoded DB -->
+	<!--hardcoded default Model-only  DB --><script src="./js/hairs.js" type="text/javascript"></script><!--hardcoded DB -->
 <!--Material Tree  --><script src="./js/materialTree.js"></script><!--Material Tree -->
 <!--Tinny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
@@ -29,6 +36,7 @@
 	<!--hardcoded material default //--><script type="text/javascript" src="./js/materialcore.js" ></script><!--hardcoded material DB//-->
   <script type="text/javascript" src='./js/interface.js'></script>
   <link rel="stylesheet" href="./css/base.css" />
+	<style id="addedCSS" type="text/css">.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);}</style>
   </head>
   <body class="px-1">
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
@@ -68,8 +76,67 @@
   </div>
   <div class="offcanvas-body m-2 p-2"></div>
 </div>
+<!--  -->
+<div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light" data-bs-backdrop="false" tabindex="-1" id="HairTool" aria-labelledby="HTLabel" >
+  <div class="offcanvas-header bg-dark">
+    <h5 class="offcanvas-title text-light" id="HTLabel">Hair tool</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body m-2 p-2">
+		<span class='experimental'>
+		<div class="row gx-0 ">
+			 <div class="col-11">
+				<div id="hairSwatches" class=''></div>
+				<div id="hairprofileBuilder" class="layer-1 rounded-0 "><!-- maximum shades will be 5 at the start-->
+						<span class="badge layer-0 w-100 rounded-0">Shades planner</span>
+						<div class="p-2">
+							<div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 eq-lay1">RootToTip</span><div class="col-10 grad"> </div></div>
+							<div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 eq-lay1">ID</span><div class="col-10 grad"> </div></div>
+						</div>
+				</div>
+			</div>
+			<div class="col-1 d-flex justify-content-center flex-wrap" id="sp-gradients">
+				<div></div>
+				<div></div>
+				<input type="color" class="d-block m-auto" id="bkgshades">
+			</div>
+
+		</div>
+		</span>
+	</div>
+</div>
+<!-- -->
+<div class="offcanvas offcanvas-end bg-dark bg-gradient text-light" tabindex="-1" id="HowDoI" aria-labelledby="HDILabel" data-bs-backdrop="false">
+  <div class="offcanvas-header bg-info">
+    <h5 class="offcanvas-title text-dark" id="HDILabel">Documentation</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body m-2 p-2">
+		<div id="HelpTree" class="layer-1 px-1 pb-1 mt-2 shadow rounded "></div>
+		<!--
+		The software is ment to help in creating .json files that can be compiled in .mlsetup format and assigned with everything that use the Cyberpunk 2077 multilayer systems
+		<ul>
+		<li>The multilayer editor system does not need a model to be displayed in the viewport to work</li>
+		<li>It has a 3d viewport to load exported 3d models from the game useful to see a corrispondence between masks and the layer you are editing on the mesh.</li>
+		<li>A searchable library with simble indication on model use (car bike, garment for men, woman or kid)</li>
+		<li>It can import .mlsetup files exported to json format</li>
+		<li>There is a material database that include every basic material the game use and automatically load value for normals, colors,metalness and roughness</li>
+		<li>There is a color picker with swatches compiled from the loaded materials</li>
+		<li>There is a microblend preview display</li>
+		<li>Developed a visual system for microblend positioning over the current layer mlmasks, with that you can:
+			<ul>
+				<li>Resize the microblend to fit the masks space</li>
+				<li>Position vertically and horizontally the microblend</li>
+				<li>Sync the microblend values with the layers one. Useful to get the perfect corrispondence when you are placing graphic_logos microblend and materials </li>
+			</ul>
+		</li>
+		<li>You can explicit custom path for materials and microblends</li>
+		<li>Property randomizer for layers with simple configuration window</li>
+	</ul>-->
+	</div>
+</div>
 <div id="interface">
-  <span id="withbones"><i class="fas fa-bone fa-2x"></i></span>
+  <span id="withbones"><i class="fa-solid fa-bone fa-2x"></i> <i class="fa-solid fa-arrow-down-up-across-line fa-2x"></i></span>
   <div id="withthacanvas">
   <canvas id="thacanvas"></canvas>
   <div id="modelsInformation" class="p-2 rounded layer-1">
@@ -78,38 +145,44 @@
 			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
       <!--<input type="checkbox" class="btn-check" id="switchSkinned" checked autocomplete="off"><label class="btn btn-outline-warning" for="switchSkinned">Only Skinned</label>-->
       <!--<button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>//-->
-      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click to see notification messages and errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
+      <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm text-start" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click to see notification messages and errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <input type="checkbox" data-toggle="tooltip" title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off"><label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
-		<div class="btn-group ms-5 me-2" role="group" aria-label="model loading">
+		<div class="btn-group ms-3 me-2" role="group" aria-label="model loading">
 	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
 		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
    <!--<div class="mt-3">-->
    <div class="btn-group " role="group" aria-label="information and data">
-     <button class="btn btn-sm btn-outline-info ms-5" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
+     <button class="btn btn-sm btn-outline-info ms-3" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
      <div class="btn-group dropend ">
         <a class="btn btn-sm btn-outline-info dropdown-toggle" href="#" role="button" id="dropModelDatas" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cubes"></i></a>
          <div class="dropdown-menu eq-lay1 " style="width:40rem">
-          <form class="px-2 py-1">
+          <form id='modelUserDataForm' class="px-2 py-1">
             <input type="text" class='d-none'  id="lastCustomMDL" readonly />
             <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
             <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
             <div class="input-group input-group-sm mb-2">
               <span class="input-group-text bg-dark text-info" ><i class="fas fa-cube"></i></span>
               <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
-             <!--<button id="CustModelLoad" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Load a custom .glb"></button>//-->
               <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
             </div>
-            <div class="input-group input-group-sm border-secondary">
+            <div class="input-group input-group-sm border-secondary mb-2">
               <span class="input-group-text bg-dark text-info"><i class="fas fa-mask"></i></span>
               <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
              <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
               <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
             </div>
+						<div class="input-group input-group-sm border-secondary">
+							<span class="input-group-text bg-dark text-info"><i class="fas fa-compress-alt"></i></span>
+							<input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
+							<!--
+						 <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>-->
+							<button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
+						</div>
           </form>
         </div>
       </div>
@@ -125,7 +198,9 @@
       </div>
       <textarea id="passaggio" class="d-none"></textarea>
     </div>
-    <div></div>
+    <div id="pBar" class="progress fade mx-2">
+  		<div class="progress-bar progress-bar-striped bg-danger progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+		</div>
     <div>
       <div class="input-group input-group-sm">
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
@@ -377,11 +452,15 @@
     </div>
       <div id="versionDisplay" class="p-2">
         <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
-        <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#modalHelp">?</a>
+        <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#HowDoI">?</a>
+				<a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#unCookModal">unCook</a>
+				<a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#HairTool">Hair Tool</a>
+				<a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#uncookMicro">Microblend Build</a>
       </div>
     </div>
   </div>
 </div>
+
 <div class="modal fade " id="materialModal"  tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
     <div class="modal-content rounded-0">
@@ -399,6 +478,86 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade " id="unCookModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
+    <div class="modal-content rounded-0">
+      <div class="modal-body p-0 ">
+				<div class="row no-gutters">
+					<div id='uncookCheck' class="col-7 p-3">
+						<div class="form-check form-switch">
+						  <input class="form-check-input" type="checkbox" role="switch" id="arc_NC3" checked>
+							<span class="badge bg-warning text-dark">basegame_3_nightcity.archive</span>
+						</div>
+						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+						  <div id="uncook_step1" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+							<div id="uncook_step2" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" role="switch" id="arc_AP4" checked>
+							<span class="badge bg-warning text-dark">basegame_4_appearance.archive</span>
+						</div>
+						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+							<div id="uncook_step3" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+							<div id="uncook_step4" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" role="switch" id="arc_GA4" checked>
+							<span class="badge bg-warning text-dark">basegame_4_gamedata.archive</span>
+						</div>
+						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+							<div id="uncook_step5" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+							<div id="uncook_step6" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+						</div>
+						<div class="text-center mt-3"><i id="uncookCog" class="fas fa-cog fa-pulse fa-4x text-danger d-none"></i></div>
+					</div>
+					<div id="uncookLogger" class="col-5 p-1 layer-0" >
+						<div class="text-muted"> </div>
+					</div>
+      </div>
+    </div>
+		<div class="modal-footer justify-content-between p-1">
+				<button type="button" class="btn btn-sm btn-outline-warning" id="triggerUncook" >Uncook</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+  </div>
+</div>
+</div>
+
+<div class="modal fade " id="uncookMicro" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg rounded-0">
+    <div class="modal-content rounded-0">
+      <div class="modal-body p-0 ">
+				<div class="row no-gutters">
+					<div id='microprep' class="col-4 p-3">
+						<span class="experimental ">&micro;blends Creation</span>
+						<span class="badge d-block bg-info text-dark mt-4">Uncook</span>
+						<div class="progress border border-dark  mb-3 layer-0" style="height: 1.5rem;" >
+							<div id="micro_opt01" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+						</div>
+						<span class="badge d-block bg-info text-dark">Resize</span>
+						<div class="progress border border-dark  mb-3 layer-0" style="height: 1.5rem;" >
+							<div id="micro_opt02" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+						</div>
+						<span class="badge d-block bg-info text-dark">Thumb</span>
+						<div class="progress border border-dark  mb-3 layer-0" style="height: 1.5rem;" >
+							<div id="micro_opt03" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+						</div>
+					</div>
+					<div id="microLogger" class="col-8 p-1 layer-0" >
+						<div class="text-muted"> </div>
+					</div>
+      </div>
+    </div>
+		<div class="modal-footer justify-content-between p-1">
+				<button type="button" class="btn btn-sm btn-outline-warning" id="MycroMe" >Start</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+  </div>
+</div>
+</div>
+
+
 <div class="modal fade" id="modalInfo" tabindex="-1" aria-labelledby="modelsInfoH" aria-hidden="true" data-focus="true">
 <div class="modal-dialog modal-xl modal-dialog-centered">
   <div class="modal-content ">
@@ -406,7 +565,10 @@
       <h5 class="modal-title" id="modelsInfoH"><i class="fas fa-info-circle"></i> Model information</h5>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
-    <div class="modal-body text-white" style="background-color:#121212;"></div>
+		<div class="row no-gutter">
+	    <div class="col"><div class="modal-body text-white" style="background-color:#121212;min-height:100%"></div></div>
+			<div class="col text-center"><canvas id="normalMe" class="my-1" ></canvas></div>
+		</div>
   </div>
 </div>
 </div>
@@ -415,15 +577,15 @@
 <div class="modal fade" id="AimBlend" tabindex="-1" aria-labelledby="aimblendLBL" aria-hidden="true">
 <div class="modal-dialog modal-lg">
   <div class="modal-content">
-    <div class="modal-header bg-secondary text-white">
+    <!--<div class="modal-header bg-secondary text-white">
       <h5 class="modal-title" id="aimblendLBL">&micro;blend aiming</h5>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
+    </div>-->
     <div class="modal-body text-white">
       <div id="aimGRID">
         <!--both canvas -->
         <canvas id="MaskTargettoAim" class="border border-dark" height="512" width="512"></canvas>
-        <canvas contenteditable="true" id="maskFabric" style="display: block;position: absolute;float: left;left: calc(1rem + 21px);top: 1rem;"class="border border-info" height="512" width="512" > </canvas>
+        <canvas contenteditable="true" id="maskFabric" style="display: block;position: absolute;float: left;left: calc(1rem + 21px);"class="border border-info" height="512" width="512" > </canvas>
         <!--microblend application -->
         <div id="aimPanels" class="layer-1">
           <span class="badge  w-100 rounded-0 layer-1">horizontal: <span id="dispAimU"></span></span>
@@ -616,5 +778,6 @@ THE SOFTWARE.</p>
   </ul>
   <script defer src='./js/3dIF.js'></script>
   <script src="./renderer.js"></script>
+	<script type="text/javascript" src="./node_modules/intro.js/minified/intro.min.js" ></script>
   </body>
 </html>

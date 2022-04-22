@@ -30,7 +30,10 @@ contextBridge.exposeInMainWorld(
 			},
 			RConfig: async (conf) => {
         return await ipcRenderer.invoke('main:getStoreValue', conf);
-    	}
+    	},
+			UnCookMe: async (conf)=>{
+				ipcRenderer.send('main:uncookForRepo',conf);
+			}
 	},
 
 )
@@ -73,18 +76,77 @@ ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 	}
 })
 
-ipcRenderer.on('preload:logEntry',(event, resultSave) => {
+ipcRenderer.on('preload:logEntry',(event, resultSave, warning = false) => {
+	let Data = new Date(Date.now());
 	var notificationCenter = document.querySelector("#NotificationCenter .offcanvas-body")
-	notificationCenter.innerHTML = resultSave + "<br/>" + notificationCenter.innerHTML;
+	notificationCenter.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + resultSave + "<br/>" + notificationCenter.innerHTML;
+	if (warning){
+		let notiCounter = document.querySelector("#notyCounter span")
+		if (notiCounter.innerText==''){
+			notiCounter.innerText = 0
+		}
+		 let noterrorz = parseInt(notiCounter.innerText)
+		noterrorz++
+		notiCounter.innerText = noterrorz
+	}
 })
 
-ipcRenderer.on('preload:openlicense',(event, resultSave) => {
-	var linklicenze = document.querySelector("#versionDisplay a:nth-child(1)")
-	linklicenze.click()
+ipcRenderer.on('preload:uncookBar',(event,text,selector)=>{
+	let pbar = document.querySelector("#uncook_"+selector)
+	text = text.replaceAll(/[\r|\n]+/g,"").replace("<br>","")
+	pbar.setAttribute("style","width: "+text+"%;")
+	pbar.setAttribute("aria-valuenow",parseInt(text))
+	if (text=='100'){
+			pbar.classList.remove('bg-warning','bg-normal','progress-bar-striped','progress-bar-animated')
+			pbar.classList.add('bg-info')
+	}
+	pbar.innerText=text+'%'
 })
-ipcRenderer.on('preload:openhelp',(event, resultSave) => {
-  var linkhelp = document.querySelector("#versionDisplay a:nth-child(2)")
-	linkhelp.click()
+ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
+	var connection
+	switch(modal2bOpen){
+		case 'license':
+			connection = document.querySelector("#versionDisplay a:nth-child(1)")
+			connection.click()
+			break;
+		case 'help':
+			connection = document.querySelector("#versionDisplay a:nth-child(2)")
+			connection.click()
+			break;
+		case 'uncook' :
+			connection = document.querySelector("#versionDisplay a:nth-child(3)")
+			connection.click()
+			break;
+		case 'hairs' :
+			connection = document.querySelector("#versionDisplay a:nth-child(4)")
+			connection.click()
+			break;
+		case 'micro' :
+			connection = document.querySelector("#versionDisplay a:nth-child(5)")
+			connection.click()
+			break;
+	}
+
+})
+
+ipcRenderer.on('preload:enable',(event,target) => {
+		let obj = document.querySelector(target)
+		obj.disabled = false
+		if (target=='#triggerUncook'){
+			let loadCog = document.querySelector('#uncookCog')
+			loadCog.classList.add('d-none')
+		}
+})
+
+ipcRenderer.on('preload:disable',(event,target) => {
+	let obj = document.querySelector(target)
+	obj.disabled = true
+})
+
+ipcRenderer.on('preload:stepok',(event,target) => {
+	let obj = document.querySelector(target)
+	obj.checked = false
+	obj.dispatchEvent(new Event("change"));
 })
 
 ipcRenderer.on('preload:set_3d_asset_name',(event,result) => {
@@ -93,6 +155,19 @@ ipcRenderer.on('preload:set_3d_asset_name',(event,result) => {
 	fileLoaded.dispatchEvent(new Event('change', { 'bubbles': true }));
 })
 
+ipcRenderer.on('preload:noBar',(event,result)=>{
+	var progBar = document.querySelector('#pBar')
+	progBar.classList.remove('show')
+})
+
+ipcRenderer.on('preload:uncookErr',(event,msg)=>{
+	var logtext = document.querySelector('#uncookLogger div')
+	logtext.innerHTML = msg + logtext.innerHTML
+})
+ipcRenderer.on('preload:uncookLogClean',(event)=>{
+	var logtext = document.querySelector('#uncookLogger div')
+	logtext.innerHTML = ''
+})
 
 window.addEventListener('DOMContentLoaded', () => {
 
