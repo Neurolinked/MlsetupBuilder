@@ -33,6 +33,9 @@ contextBridge.exposeInMainWorld(
     	},
 			UnCookMe: async (conf)=>{
 				ipcRenderer.send('main:uncookForRepo',conf);
+			},
+			microMe: async ()=>{
+				ipcRenderer.send('main:uncookMicroblends');
 			}
 	},
 
@@ -102,6 +105,7 @@ ipcRenderer.on('preload:uncookBar',(event,text,selector)=>{
 	}
 	pbar.innerText=text+'%'
 })
+
 ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
 	var connection
 	switch(modal2bOpen){
@@ -135,6 +139,9 @@ ipcRenderer.on('preload:enable',(event,target) => {
 		if (target=='#triggerUncook'){
 			let loadCog = document.querySelector('#uncookCog')
 			loadCog.classList.add('d-none')
+		}else if(target=='#MycroMe'){
+			let mycroCog = document.querySelector('#mycroCog')
+			mycroCog.classList.add('d-none')
 		}
 })
 
@@ -160,12 +167,12 @@ ipcRenderer.on('preload:noBar',(event,result)=>{
 	progBar.classList.remove('show')
 })
 
-ipcRenderer.on('preload:uncookErr',(event,msg)=>{
-	var logtext = document.querySelector('#uncookLogger div')
+ipcRenderer.on('preload:uncookErr',(event,msg,logger='#uncookLogger')=>{
+	var logtext = document.querySelector(logger+' div')
 	logtext.innerHTML = msg + logtext.innerHTML
 })
-ipcRenderer.on('preload:uncookLogClean',(event)=>{
-	var logtext = document.querySelector('#uncookLogger div')
+ipcRenderer.on('preload:uncookLogClean',(event,logger='#uncookLogger')=>{
+	var logtext = document.querySelector(logger+' div')
 	logtext.innerHTML = ''
 })
 

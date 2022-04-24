@@ -1722,6 +1722,14 @@ $("#triggerUncook").click(function(){
 	thePIT.UnCookMe(files);
 });
 
+$("#MycroMe").click(function(){
+	$("#MycroMe").prop("disabled",true);
+	$("#mycroCog").removeClass('d-none');
+	$("#uncook_micro_opt01, #uncook_micro_opt02, #uncook_micro_opt03, #uncook_mresize, #uncook_mthumbs").attr("style","0%").html('')
+	$("#microLogger div").html('');
+	thePIT.microMe();
+});
+
  $("#modelCopyPath").click(function(){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$("#modelTarget").val().replaceAll(/\//g,'\\'));
   });

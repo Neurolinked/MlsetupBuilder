@@ -279,11 +279,11 @@ Contextual Menu for the layering Systems
 #uncookMicro .modal-footer,
 #unCookModal .modal-footer{border-top-color: var(--bs-info);background-color:var(--layer-0);}
 #microLogger,
-#uncookLogger{height: 19rem;max-height:19rem;border-left: 1px solid var(--bs-danger);padding-top:1rem;}
+#uncookLogger{height: 20rem;max-height:20rem;border-left: 1px solid var(--bs-danger);padding-top:1rem;}
 #microLogger::before{content:'Operations:';color:var(--bs-primary);border-bottom:1px solid var(--bs-primary);display:block;margin-bottom: .5rem;}
 #uncookLogger::before{content:'Errors Logger:';color:var(--bs-danger);border-bottom:1px solid var(--bs-danger);display:block;margin-bottom: .5rem;}
 #microLogger div,
-#uncookLogger div{overflow-y: scroll;max-height:calc(18.5rem - 32px);font-family: monospace;font-size:10pt;}
+#uncookLogger div{overflow-y: scroll;max-height:calc(19.5rem - 32px);font-family: monospace;font-size:10pt;}
 #microLogger div::-webkit-scrollbar,
 #uncookLogger div::-webkit-scrollbar {width:12px;background-color:black;}
 #microLogger div::-webkit-scrollbar-thumb,
