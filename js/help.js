@@ -1,11 +1,11 @@
 var helpJson=[
 {"id": "i_0","parent": "#","text": "What this software do ?","type": "info"},
 {"id": "hdi_0","parent": "#","text": "How do i ...","type": "howdoi","state": {"opened": true}},
-{"id": "hdi_001","parent": "hdi_0","text": " .. start with it","type": "basic"},
+{"id": "hdi_001","parent": "hdi_0","text": " .. start with it","type": "basic"} /*,
 {"id": "hdi_002","parent": "hdi_0","text": " .. import a style","type": "basic"},
 {"id": "hdi_003","parent": "hdi_0","text": " .. apply my edits","type": "basic"},
 {"id": "hdi_004","parent": "hdi_0","text": " .. save my work","type": "basic"},
-{"id": "hdi_005","parent": "hdi_0","text": " .. display a model","type": "basic"}
+{"id": "hdi_005","parent": "hdi_0","text": " .. display a model","type": "basic"}*/
 ];
 
 $(function(){
@@ -99,6 +99,101 @@ $(function(){
 				});
 				break;
 			case 'hdi_001':
+			introJs().setOptions({
+				tooltipClass: 'biggerTooltip',
+				steps: [{
+						title: 'How do I start with it ?',
+						intro: 'First things first, MlsetupBuilder need a repository of datas from the game, let\'s start configuring and building it'
+					},
+					{
+							title: 'First requirements',
+							intro: 'Before doing anything, you need to fulfill some requirements. Create a folder in a disk with at least 31GB of space. <span class="text-warning">It\'s Better if you use a folder name without spaces or strange characters</span>.'
+					},
+					{
+							title: 'Secondary requirements',
+							intro: 'To export datas from the game you need <span class="text-warning">Wolvenkit-CLI</span> software, somewhere in your system. Actually the versions from 1.5.2 work fine. <a class="text-warning" href="https://github.com/WolvenKit">Wolvenkit page on Github</a>'
+					},
+					{
+						title:'Preferences',
+						intro:'<img src="./images/system/prefs.jpg" />'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Preferences..',
+						intro:'From the <span class="text-warning">File</span> Menu, select <span class="text-warning">Preferences</span>.<br />In the displayed windows you need to choose the folder you created in the <span class="badge bg-warning text-dark" >uncook folder</span> field AND select the <span class="badge bg-warning text-dark" >Wolvenkit-CLI executable</span> you wanna use to export the datas'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Save',
+						intro:'Save the unsaved preferences and close the Preferences window'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Build the Repository',
+						intro:'Back to the main window, you can select the operation to export the datas from the menu <span class="text-warning">Build > Repository</span>'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Build the Repository.',
+						intro:' <img src="./images/system/repobuild.jpg" />'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Build the Repository.',
+						intro:'<img src="./images/system/uncook.jpg" />'/*
+						position:'bottom'*/
+					},
+					{
+						title:'Build the Repository..',
+						intro:'For the first time uncook, you just click the Uncook button on the bottom of the last displayed window and wait the execution of the software.'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Build the Repository...',
+						intro:'If it complete without errors, you will see all the switch autoclosing and 3 double bars completed with a log of the operation done on the right that display mostly <span class="badge bg-success" >something done</span> lines.'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Build the Repository....',
+						intro:'The building it\'s done, now let\'s generate the microblends thumbs preview for your interface. Close the repository building window.'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Generate the microblends preview',
+						intro:'Go back to the <span class="badge bg-warning text-dark" >Build menu</span>, now select <span class="badge bg-warning text-dark" >Microblends</span>.'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'Generate the microblends preview.',
+						intro:'<img src="./images/system/blendbuild.jpg" />'/*
+						position:'bottom'*/
+					},
+					{
+						title:'Generate the microblends preview..',
+						intro:'<img src="./images/system/mblends.jpg" />'/*
+						position:'bottom'*/
+					},
+					{
+						title:'Generate the microblends preview...',
+						intro:'To get it done, Click on the <span class="badge bg-warning text-dark" >Start</span> button and wait for the operations to be completed, if anything go as intended, now you\'re ready to go. Close the window and to be sure, close and re-open MlsetupBuilder'/*,
+						position:'bottom'*/
+					},
+					{
+						title:'You\'ve done it, Cheers!',
+						intro:'<span class="h1 d-block text-center">&#128525;</span>'/*,
+						position:'bottom'*/
+					}
+					]
+				}).start()
+					.onbeforechange(function(){
+						//
+					})
+					.oncomplete	(function(){
+						HelpOffcanvas.show();
+					})
+					.onexit(function(){
+						HelpOffcanvas.show();
+					});
 				break;
 		}
 	});
