@@ -20,11 +20,11 @@ How to use it with Wolvenkit: https://youtu.be/uCOHjMPvpgc
 
 ## Displaying the models
 
-To display the models present in the model library you need a folder with the meshes from the game in .glb format and the masks layers in .dds format. More or less the size of the folder at the end of the process would be over 20 GB. You can uncook the main archives yourself or find WCLI-Kommander in the Cyberpunk 2077 Modding Community in discord (https://discord.gg/EgGjBr2Kfj) you'll find the batch file that uses Wolvenkit.CLI under the channel #resources
+To display the models present in the model library you need to setup a folder in the software preferences, choose the Wolvenkit-CLI executable, at least version 1.5.2 and from the build menu Build the repository and then the microblends for the software
 
 # Screenshot
 Main window with a melee weapon model and already imported microblends preview images
-![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_1600.jpg)
+![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_161.jpg)
 
 # Wanna support ?
 If you really wish you can donate with Ko-fi
