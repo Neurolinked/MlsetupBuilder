@@ -37,8 +37,10 @@ ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 		wkitto = JSON.parse(versionchecker);
 		if ((wkitto.hasOwnProperty('major')) && (wkitto.hasOwnProperty('minor'))){
 			if (Number(wkitto.major+'.'+wkitto.minor)>=8.5) {
+				/*
 				document.querySelector("#wCLIexe").parentNode.classList.add("d-none");
 				document.querySelector("#wCLIexe").readOnly = true;
+				*/
 			}else{
 				console.log('no suitable version of wkit to integrate');
 			}

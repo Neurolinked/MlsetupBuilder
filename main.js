@@ -390,7 +390,7 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 	}
 });
 
-function uncookRun(toggle,params,stepbar){
+function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
 		var subproc
 		if (toggle){
@@ -403,13 +403,13 @@ function uncookRun(toggle,params,stepbar){
 			subproc.stdout.on('data', (data) => {
 
 				if (!(/%/.test(data.toString()))){
-					mainWindow.webContents.send('preload:uncookErr',`${data}`)
+					mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
 				}else{
 						if (oldtxt != data.toString().split("%")[0]){
 							oldtxt = data.toString().split("%")[0]
 
 							if (oldtxt.length>4){
-								mainWindow.webContents.send('preload:uncookErr',`${data}`)
+								mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
 							}else{
 								mainWindow.webContents.send('preload:uncookBar',oldtxt,stepbar)
 							}
@@ -420,7 +420,7 @@ function uncookRun(toggle,params,stepbar){
 
 			subproc.stderr.on('data', (data) => {
 				mainWindow.webContents.send('preload:logEntry',`stderr: ${data}`,true)
-				mainWindow.webContents.send('preload:uncookErr',`${data}`)
+				mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
 			});
 
 			subproc.on('close', (code) => {
@@ -439,7 +439,7 @@ function uncookRun(toggle,params,stepbar){
 						case 'micro_opt01':
 						case 'micro_opt02':
 						case 'micro_opt03':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends extracted</span>','#microLogger')
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends step done</span>','#microLogger')
 							break;
 					}
 					mainWindow.webContents.send('preload:uncookBar','100',stepbar)
@@ -506,9 +506,9 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 						mainWindow.webContents.send('preload:uncookLogClean','#microLogger')
 
-						uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_1_engine.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01')
-							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02'))
-							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03'))
+						uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_1_engine.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
+							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
+							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
 							.then(()=> {
 								return new Promise((resolve,reject) =>{
 									fs.readdir(path.join(String(preferences.get('unbundle')),'surfaces/microblends/'),(err,files)=>{
