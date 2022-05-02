@@ -25,6 +25,31 @@ function cleaNormal(){
 	nctx.fillRect(0, 0, nMeKanv.width, nMeKanv.height);
 }
 
+function HairTexture(hairData=[{c:'#002250',p:0},{c:'#002250',p:1}]) {
+	var size = 256;
+	// create canvas
+	canvas = document.getElementById( 'hairTex' );
+	//canvas.width = size;
+	//canvas.height = size;
+
+	// get context
+	var context = canvas.getContext( '2d' );
+
+	// draw gradient
+	context.rect( 0, 0, size, size );
+	var gradient = context.createLinearGradient( 128, 0, 128, size );
+	hairData.forEach((swatch)=>{
+		gradient.addColorStop(swatch.p,swatch.c);
+	})
+	/*
+	gradient.addColorStop(0, '#99ddff'); // light blue
+	gradient.addColorStop(1, 'transparent');*/
+	context.fillStyle = gradient;
+	context.fill();
+
+	//return canvas;
+}
+
 function safeNormal(){
 	nMeKanv.width=128;
 	nMeKanv.height=128;
@@ -42,24 +67,32 @@ function safeNormal(){
  var imgDataShot = null;
  let scene, camera, renderer, controls, axesHelper;
  let pointlight, ambientlight, pointlight_2, pointlight_3, pointlight_4;
+ var changeLumen = false;
  //-------------parameter for Dat Window-----------------------
 const params = {
  autorotation: false,
  rotationspeed: 6,
  wireframe: false,
- onesided: false
+ onesided: false,
+ lightpower:1
 };
 //-------------Aiming box for the camera ----------------------
 
 //-------------Material and Object Constant--------------------
+const safeMap = new THREE.TextureLoader().load( "./images/favicon.png" );
 const material = new THREE.MeshStandardMaterial({color: 0x500000});//
 const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 1, thickness: 0.05});
+//-------------Hairs Materials----------------------------------
+var hairShading = document.getElementById('hairTex');
+HairTexture();
+const hairCText = new THREE.CanvasTexture(hairShading);
+const hair_card = new THREE.MeshStandardMaterial({map:hairCText,transparent:false,side:THREE.DoubleSide,fog:true});
 const hair_cap = new THREE.MeshStandardMaterial({color: 0x502200,side:THREE.FrontSide});//
-const hair_card = new THREE.MeshStandardMaterial({color: 0x002250,side:THREE.DoubleSide});//
+//const hair_card = new THREE.MeshStandardMaterial({color: 0x002250,side:THREE.DoubleSide});//
 const hair_short = new THREE.MeshStandardMaterial({color: 0x225022,side:THREE.DoubleSide});//
 const hair_other = new THREE.MeshStandardMaterial({color: 0x222222,side:THREE.DoubleSide});//
 
-const safeMap = new THREE.TextureLoader().load( "./images/favicon.png" );
+
 safeNormal();
 var normMe = new THREE.CanvasTexture(nMeKanv);
 
@@ -393,9 +426,10 @@ function glbload(arBuffer){
       if ( child.isMesh ) {
 				Decal = false;
         //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
+				child.frustumCulled = false;
 				if (child.hasOwnProperty('userData')){
 					if (child.userData.hasOwnProperty('materialNames')){
-						strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+						strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 		        if (!(/(decal(s)?)|(vehicle_lights)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|(stickers.+)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|(.decal.+)|(02_ca_limestone_1.*)|(zip+er.+)|(ziper.+)/g.test(child.userData.materialNames.toString()))){
 		            child.material = material;
 		        }else{
@@ -469,7 +503,7 @@ function LoadModelOntheFly(path){
 
 	      if ( child.isMesh ) {
 	        //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-	        strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+child.userData.materialNames.toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+	        strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
 	        if (!(/(vehicle_lights)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
 							if (modelType=='hair'){
@@ -479,6 +513,7 @@ function LoadModelOntheFly(path){
 									child.material = hair_short;
 								}else if((/.+_card(s).+/).test(child.userData.materialNames.toString())){
 									child.material = hair_card;
+									hair_card.map.needsUpdate = true;
 								}else if((/lambert/).test(child.userData.materialNames.toString())){
 									child.material = material;
 								}else{
@@ -578,11 +613,26 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 		t3Ddata = str2ab(modello);
 		cleanScene();
 		glbload(t3Ddata);
+
+		let modelname = file.value.split('\\').reverse()[0].split('.')[0] //split the path by slashes, reverse to get the last part, split the extension to get only the name [0] of the split
+		let cstmModels = $('#modelsTree').jstree(true).get_json('custom')
+
+		if (cstmModels.children.length<=0){
+			$('#modelsTree').jstree(true).create_node("custom",{"text":modelname,"type":"custmesh","li_attr":{"model":file.value,layers:0}},"first")
+		}else{
+			let figli = cstmModels.children
+			if (figli.filter(el => el.li_attr.model == file.value).length <= 0){
+					$('#modelsTree').jstree(true).create_node("custom",{"text":modelname,"type":"custmesh","li_attr":{"model":file.value,layers:0}},"first")
+			}
+		}
+
 		layersActive(0);
 		material.needUpdates =true;
 		control_reset = true;
-	}
+		//TODO file.value é il nome del file da aggiungere
+		//Se non ce n'è un'altro con lo stesso path
 
+	}
 });
 
 document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
@@ -665,18 +715,22 @@ function init() {
   /*    const axesHelper = new THREE.AxesHelper( 5 );    scene.add( axesHelper ); to understand position of the objects */
 
   var thacanvas = document.getElementById('thacanvas');
-  renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true, preserveDrawingBuffer: true});
+  renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true});
   if (window.innerHeight-80<512){
    renderer.setSize(renderwidth,renderwidth);
   }else{
    renderer.setSize(renderwidth,window.innerHeight-80);
   }
 
+	renderer.gammaFactor = 2.2;
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
-
-  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.012,10000);
+	//----calculating the shadows
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap
+	//---calculating the shadows
+  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.01,200);
   camera.position.set(0.0,-0.4,-8);
   /*
 
@@ -693,20 +747,32 @@ function init() {
 
   controls.target.set(0.01,0.7,0.07);
 
-  ambientlight = new THREE.AmbientLight( 0x404040 ); // soft white light
-  ambientlight.intensity=4;
+  ambientlight = new THREE.AmbientLight( 0x606060,3 ); // soft white light
+  //ambientlight.intensity=1;
   scene.add( ambientlight );
 
-  pointlight = new THREE.PointLight(0x75cb04,4); //6C5624
-  pointlight_2 = new THREE.PointLight(0xf5f503,4);
-  pointlight_3 = new THREE.PointLight(0x6078F5,4);
-  pointlight_4 = new THREE.PointLight(0x6078F5,4);
+  pointlight = new THREE.PointLight(0x75cb04,params.lightpower); //6C5624
+  pointlight_2 = new THREE.PointLight(0xf5f503,params.lightpower);
+  pointlight_3 = new THREE.PointLight(0x6078F5,params.lightpower+1);
+  pointlight_4 = new THREE.PointLight(0x6078F5,params.lightpower);
 
   pointlight.position.set(5,0,5);
   pointlight_2.position.set(-5,0,-5);
-  pointlight_3.position.set(0.61,0.05,-3);
+  pointlight_3.position.set(0,0.5,-3);
   pointlight_4.position.set(0,3,3);
 
+	/*
+	pointlight.castShadow = true
+
+	pointlight.shadow.mapSize.width = 256; // default
+	pointlight.shadow.mapSize.height = 256; // default
+	pointlight.shadow.camera.near = 0.05; // default
+	pointlight.shadow.camera.far = 20; // default
+	/*
+	pointlight_2.castShadow = true
+	pointlight_3.castShadow = true
+	pointlight_4.castShadow = true
+	*/
   scene.add(pointlight);
   scene.add(pointlight_2);
   scene.add(pointlight_3);
@@ -715,8 +781,10 @@ function init() {
   //load a text file and output the result to the console
   material.map = safeMap;
 	material.normalMap = normMe;
-	//material.normalMapType = THREE.ObjectSpaceNormalMap;
-	//material.normalMap = safeNorm; //reset to a plain 2x2 normal map
+
+	//fog
+	//TODO adding fog to the scene
+	scene.fog = new THREE.Fog( 0x9b9d3f, 10,35);
 
   //Setup the DAT position
   const GuiBasicsetup = gui.addFolder("Basic Setup");
@@ -742,6 +810,9 @@ function init() {
    if (params.onesided){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
    material.NeedUpdates;
    });
+	GuiBasicsetup.add( params, 'lightpower',0.5, 10 ).name( 'Light power' ).onChange(() => {
+		changeLumen = true;
+	});
   GuiBasicsetup.close();
 
   gui.close(); //close the whole dat.gui
@@ -766,7 +837,7 @@ function animate() {
    controls.update();
   }
   if (control_side){material.needUpdates=true; control_side=false;}
-
+	if (changeLumen){pointlight.intensity=params.lightpower;pointlight_2.intensity=params.lightpower;pointlight_3.intensity=params.lightpower+2;pointlight_4.intensity=params.lightpower;changeLumen=false;}
   renderer.render(scene, camera);
 	if(getImageData == true){
 			let a = document.getElementById('takeashot');

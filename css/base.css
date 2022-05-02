@@ -96,10 +96,12 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 /* contextual menu */
 .vakata-context, .vakata-context ul{z-index:2000;background-color:var(--eq-lay1)!important;box-shadow:none!important;border:1px solid var(--layer-9)}
 .vakata-context .vakata-context-hover > a, .vakata-context li>a{background-color:var(--eq-lay1);color:cyan;text-shadow:none!important;}
+.vakata-context li>a{padding:0 1em;}
 .vakata-context li:hover>a{background-color:cyan;color:var(--eq-lay1);}
-.vakata-context>*{font-size:calc(100% - 30%);}
+.vakata-context>*{font-size:calc(100% - 20%);}
 .vakata-contextmenu-sep{background-color:var(--layer-9)!important;border:1px solid var(--layer-9)!important;}
-
+.vakata-context .jstree-contextmenu .jstree-default-dark-contextmenu{padding:0 1em;}
+ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg{min-width:24px;}
 /* Options for three.js */
 #interface canvas{ background: radial-gradient(#010101, #121212);background-repeat: no-repeat}
 #dat-container {background-color:var(--layer-1); position: absolute; top: 0px; left: 20px; z-index: 10; border:1px solid var(--secondary)!important;z-index:11;}

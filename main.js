@@ -25,7 +25,19 @@ const schema = {
 	}
 };
 
-const preferences = new store({schema});
+const preferences = new store({schema,
+	migrations: {
+		'<=1.6.2': store => {
+			if (store.has('unbundle') && (!store.has('pathfix'))){
+				let fixstring = store.get('unbundle')
+				store.set('unbundle',fixstring.replace(/\\base$/,''))
+				store.set('pathfix','1')
+			}
+		},
+		'1.6.3': store => { store.delete('pathfix') }
+	}
+});
+
 preferences.watch = true
 let mainWindow
 
@@ -294,6 +306,7 @@ ipcMain.on('main:setupCR2Wr',(event, arg) => {
 	}).then(result => {
     if (!result.canceled){
 			event.reply('preload:upd_config',{'value':result.filePaths[0],'id':'wCLIexe'})
+			buildMenu = wcliExecutable.test(preferences.get('wcli'),'i');
     }
   }).catch(err => {
     dialog.showErrorBox("Preferences setup error",err.message)
@@ -465,7 +478,7 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 			var archives = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
 			.then(selection => {
 				if (!selection.canceled){
-					let unbundlefoWkit = String(preferences.get('unbundle')).replace(/base$/,'')
+					let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
 					let uncooker = preferences.get('wcli')
 					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 						if (typeof(conf)=='object'){
@@ -499,7 +512,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 			var archives = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
 			.then(selection => {
 				if (!selection.canceled){
-					let unbundlefoWkit = String(preferences.get('unbundle')).replace(/base$/,'')
+					let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
 					let uncooker = preferences.get('wcli')
 					var countingOnYou = 0
 
@@ -511,7 +524,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
 							.then(()=> {
 								return new Promise((resolve,reject) =>{
-									fs.readdir(path.join(String(preferences.get('unbundle')),'surfaces/microblends/'),(err,files)=>{
+									fs.readdir(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/'),(err,files)=>{
 										if (err){
 												mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
 												reject()
@@ -534,7 +547,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 									var k = 1
 									files.forEach((png)=>{
 
-										sharp(path.join(String(preferences.get('unbundle')),'surfaces/microblends/',png))
+										sharp(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/',png))
 											.resize(256)
 											.toFile(path.join(app.getAppPath(),'images/',png), (err, info) => {
 												 if(err){

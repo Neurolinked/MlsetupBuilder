@@ -14,7 +14,7 @@ async function abuildMB(microblendObj){
     if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("package")) ){
       for (k=0, j=microblendObj.microblends.length;k<j;k++){
         $("#mbSelect").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
-        $("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png');'\" data-package='"+microblendObj.package+"'  data-toggle='tooltip' title='"+microblendObj.microblends[k].name+"'> </li>");
+				$("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png'),url('images/thumbs/_nopreview.gif'); '\" data-package='"+microblendObj.package+"'  data-toggle='tooltip' title='"+microblendObj.microblends[k].name+"'> </li>");
       }
     }
   }
@@ -72,7 +72,6 @@ async function abuildHairs(aHairs){
 }
 
 $(function(){
-
   var shiftSpeedup = false;
   var indexLayerContextual = null; //variable index for the copied Data
   var dataContextual = {};
@@ -123,6 +122,8 @@ $(function(){
 		$('#sp-gradients div:nth-child(2)').attr('style',"background:"+$(this).data('cid')+", "+$('#bkgshades').val()+";");
 		$('#hRootToTip').attr('style',"background:"+$(this).data('crtt').replace("linear-gradient(","linear-gradient( 90deg,")+", "+$('#bkgshades').val()+";");
 		$('#hID').attr('style',"background:"+$(this).data('cid').replace("linear-gradient(","linear-gradient( 90deg,")+", "+$('#bkgshades').val()+";");
+		HairTexture(hairs.profiles.filter(el => el.name==$(this).data('name'))[0].colors.rootToTip);
+		hair_card.map.needsUpdate = true;
 	});
 
 	$('#bkgshades').val(window.getComputedStyle(document.body).getPropertyValue('--eq-lay1'))
@@ -461,15 +462,15 @@ $(function(){
 
 	if (license==null){ licenseModal.show();}
 
-  //activate and deactivate double layering
-  $("#onlyOneSide").click(function(){
-    var sideBox = $("#dat-container ul li:nth-of-type(5) input[type='checkbox']");
+	//activate/deactivate wireframe display
+  $("#wireFrame").click(function(){
+    var sideBox = $("#dat-container ul > li:first-child li:nth-child(4) input[type='checkbox']");
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
 
-  //activate/deactivate wireframe display
-  $("#wireFrame").click(function(){
-    var sideBox = $("#dat-container ul li:nth-of-type(4) input[type='checkbox']");
+  //activate and deactivate double layering
+  $("#onlyOneSide").click(function(){
+    var sideBox = $("#dat-container ul > li:first-child  li:nth-child(5) input[type='checkbox']");
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
 
@@ -545,6 +546,7 @@ $(function(){
 		'types' : {
 							"default" : { "icon" : "text-warning fas fa-folder" },
               "custom" : { "icon" : "custom fas fa-folder" },
+							"custmesh" : { "icon" : "custom fas fa-dice-d6" },
 							"man" : { "icon" : "fas fa-mars" },
 							"woman" : { "icon" : "fas fa-venus" },
               "car" : { "icon" : "text-danger fas fa-car-side" },
@@ -556,8 +558,8 @@ $(function(){
 							"hair" : {"icon":"fa-solid fa-scissors"},
 							},
 		"search":{"show_only_matches": true,"show_only_matches_children":true},
-		"plugins" : [ "search","types","state" ],//"plugins" : [ "search","types","contextmenu","state" ],
-    //"contextmenu":{ "items": customMdlMenu }
+		"plugins" : [ "search","types","state","contextmenu"],//"plugins" : [ "search","types","contextmenu","state" ],
+    "contextmenu":{ "items": customMdlMenu }
 	}).bind("dblclick.jstree", function (event) {
     /*
      var node = $(event.target).closest("li");
@@ -570,6 +572,7 @@ $(function(){
 
   function customMdlMenu(node){
     //console.log(node.type);
+		let radix = $('#modelsTree').jstree(true);
     switch (node.type){
       case 'default':
         return false;
@@ -585,21 +588,42 @@ $(function(){
           }
         };
         break;
-      case 'custom':
-      return {
-          "Export": {
-              "separator_before": false,
-              "separator_after": false,
-              "label": "Export",
-              "icon": "fas fa-file-export",
-              "action": function (obj) {
-                let test = $('#modelsTree').jstree(true).get_json(node,{flat:true});
-                console.log(test);
-              }
-          },
-        }
+			case 'custom':
+				return {
+						"save":{
+							"separator_before": false,
+							"separator_after": false,
+							"label": "Save list",
+							"icon": "fas fa-save",
+							"action": function (obj) {}
+						}
+				}
+      case 'custmesh':
+	      return {
+	          "chooseMask": {
+	              "separator_before": false,
+	              "separator_after": false,
+	              "label": "Choose Mask",
+	              "icon": "fas fa-file-export",
+	              "action": function (obj) {
+	                let test = radix.get_json(node,{flat:true});
+	                console.log(test);
+	              }
+	          },
+						"remove":{
+							"separator_before": false,
+							"separator_after": false,
+							"label": "Delete",
+							"icon": "fas fa-trash-can",
+							"action": function (obj) {
+								radix.delete_node(radix.get_selected());
+							}
+						}
+	        }
         break;
       default:
+				return false;
+				/*
         return {
             "Customize": {
                 "separator_before": false,
@@ -615,7 +639,7 @@ $(function(){
                   });
                 }
             },
-          }
+          }*/
     }
   }
 //When selecting a model from the library it load data in the inputs
