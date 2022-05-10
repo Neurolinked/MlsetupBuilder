@@ -52,6 +52,9 @@
 .btn-outline-primary{color:var(--primary);border-color:var(--primary);}
 
 .btn-secondary{background-color:var(--secondary);}
+.btn-error{background-color:var(--error);}
+.btn-outline-error{border:1px solid var(--error);color:var(--error);}
+.btn-outline-error:hover{color:var(--active-sel);}
 
 .btn-check:active+.btn-outline-primary, .btn-check:checked+.btn-outline-primary, .btn-outline-primary.active, .btn-outline-primary.dropdown-toggle.show, .btn-outline-primary:active {
     color: #000;
@@ -228,8 +231,12 @@ Contextual Menu for the layering Systems
 #layers-contextual li:hover:not([disabled]) {
   background: var(--active);
 }
+#layers-contextual li svg {color:var(--bright-sel);}
+#layers-contextual li:hover:not([disabled]) svg {color:white;}
 
 #layers-contextual.visible{display:block;}
+
+#masksModal input[type='text'],
 
 #materialModal input[type='text'],
 #interface input[type='text'],
@@ -252,7 +259,9 @@ Contextual Menu for the layering Systems
 .bg-md-dark{background-color:var(--med-dark);}
 
 /* information windows */
+#masksModal select,
 #LicenseModal .modal-content{background-color:var(--layer-0)!important;}
+#masksModal .modal-content,
 #AimBlend .modal-content,
 #modalInfo .modal-content,
 #unCookModal .modal-content,
@@ -264,6 +273,13 @@ Contextual Menu for the layering Systems
 #AimBlend .modal-header{border:0 none;}
 #AimBlend .modal-body{background-color:var(--layer-1)!important;}
 
+#masksModal select option{color:white;font-size:0.8rem;border:1px solid transparent;margin:2pt 0;padding:2pt;}
+
+#masksModal select option:hover,
+#masksModal select option:focus,
+#masksModal select option:active,
+#masksModal select option:checked{background-color:var(--secondary);border:1px solid var(--error);}
+/*{background-color:var(--active-sel);color:black;}*/
 #uncookMicro .modal-content{min-height: 200px;}
 
 #LicenseModal .modal-body .nav-tabs .nav-item.show .nav-link,
@@ -280,14 +296,20 @@ Contextual Menu for the layering Systems
 #unCookModal div.modal-content{box-shadow: 0 0 2em black;}
 #uncookMicro .modal-footer,
 #unCookModal .modal-footer{border-top-color: var(--bs-info);background-color:var(--layer-0);}
+
+
+#customMaskSelector{border: 1px solid var(--bs-danger);padding-top:1rem;}
 #microLogger,
 #uncookLogger{height: 20rem;max-height:20rem;border-left: 1px solid var(--bs-danger);padding-top:1rem;}
 #microLogger::before{content:'Operations:';color:var(--bs-primary);border-bottom:1px solid var(--bs-primary);display:block;margin-bottom: .5rem;}
 #uncookLogger::before{content:'Errors Logger:';color:var(--bs-danger);border-bottom:1px solid var(--bs-danger);display:block;margin-bottom: .5rem;}
 #microLogger div,
 #uncookLogger div{overflow-y: scroll;max-height:calc(19.5rem - 32px);font-family: monospace;font-size:10pt;}
+#customMaskSelector::-webkit-scrollbar,
+#microLogger div::-webkit-scrollbar,
 #microLogger div::-webkit-scrollbar,
 #uncookLogger div::-webkit-scrollbar {width:12px;background-color:black;}
+#customMaskSelector::-webkit-scrollbar-thumb,
 #microLogger div::-webkit-scrollbar-thumb,
 #uncookLogger div::-webkit-scrollbar-thumb{background: var(--eq-lay3);border:1px solid var(--bs-danger);background-color: rgba(220,53,69,0.5);}
 #microLogger div span,

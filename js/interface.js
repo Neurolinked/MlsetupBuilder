@@ -8,6 +8,15 @@ Number.prototype.countDecimals = function () {
     if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
     return this.toString().split(".")[1].length || 0;
 }
+
+async function abuildMaskSelector(listOfMasks){
+	if (typeof(listOfMasks)=="object"){
+			for (k=0, j=listOfMasks.length;k<j;k++){
+				//$("#customMaskSelector").append("<option data-layers='"+listOfMasks[k].layers+"' >"+(listOfMasks[k].mask).replace(/_X\.dds$/,'.mlmask')+"</option>");
+        $("#customMaskSelector").append("<option value='"+k+"' >"+listOfMasks[k].mask+"</option>");
+      }
+	}
+}
 //Build the microblends gallery and compile the microblends select options
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
@@ -77,11 +86,19 @@ $(function(){
   var dataContextual = {};
 
 	const materialsize = window.getComputedStyle(document.body).getPropertyValue('--matsizes').replace(/px/,'');
+	const masksModal  = new bootstrap.Modal(document.getElementById('masksModal'));
+
+	document.getElementById('masksModal').addEventListener('show.bs.modal', function () {
+		$('#customMaskSelector option:selected').prop("selected", false); //remove selection from the last mask
+		$("#lblmaskselected").text('none').removeClass('text-white').addClass('text-muted')
+		$("#masksCFinder").val('').keyup();
+	});
 
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
 	let buildmyNuMaterial = abuildMaterial(materialCore);
 	let buildmyHairs = abuildHairs(hairs);
+	let buildmyMasks = abuildMaskSelector(maskList)
 
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
@@ -101,6 +118,8 @@ $(function(){
 	}
 
 
+	var matChooser = document.getElementById('materialChoser')
+	var tooltipMat = new bootstrap.Tooltip(matChooser,{placement:'left'})
 
   $(document).on('keydown', function(e) {
     if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
@@ -179,7 +198,6 @@ $(function(){
       switch ($(this).data("action")) {
         case 'cpall':
           dataContextual = {};
-          console.log(dataContextual);
           dataContextual.labels = $("#layeringsystem li").eq(indexLayerContextual).attr("data-labels");
           dataContextual.mattile = $("#layeringsystem li").eq(indexLayerContextual).data("mattile");
           dataContextual.material = $("#layeringsystem li").eq(indexLayerContextual).data("material");
@@ -200,6 +218,7 @@ $(function(){
           dataContextual.mboffv = $("#layeringsystem li").eq(indexLayerContextual).data("mboffv");
           $("#layers-contextual li").eq(1).removeAttr("disabled");
           $("#layers-contextual li").eq(3).removeAttr("disabled");
+					$("#layers-contextual li").eq(5).removeAttr("disabled");
           break;
         case 'pstall':
           $("#layeringsystem li").eq(indexLayerContextual).data("labels",dataContextual.labels);
@@ -250,8 +269,9 @@ $(function(){
           dataContextual.mbnormal = $("#layeringsystem li").eq(indexLayerContextual).data("mbnormal");
           dataContextual.mboffu = $("#layeringsystem li").eq(indexLayerContextual).data("mboffu");
           dataContextual.mboffv = $("#layeringsystem li").eq(indexLayerContextual).data("mboffv");
-          $("#layers-contextual li").eq(1).attr("disabled");
+          $("#layers-contextual li").eq(1).attr("disabled","disabled");
           $("#layers-contextual li").eq(3).removeAttr("disabled");
+					$("#layers-contextual li").eq(5).attr("disabled","disabled");
           break;
         case 'pstmb':
           $("#layeringsystem li").eq(indexLayerContextual).data("mblend",dataContextual.mblend);
@@ -270,6 +290,18 @@ $(function(){
           });
           $("#layeringsystem li").eq(indexLayerContextual).click();
           break;
+				case 'cpcol':
+					dataContextual = {};
+					dataContextual.color = $("#layeringsystem li").eq(indexLayerContextual).data("color");
+					$("#layers-contextual li").eq(1).attr("disabled","disabled");
+          $("#layers-contextual li").eq(3).attr("disabled","disabled");
+					$("#layers-contextual li").eq(5).removeAttr("disabled");
+					break;
+				case 'pstcol':
+					$("#layeringsystem li").eq(indexLayerContextual).data("color",dataContextual.color);
+					$('#layeringsystem li').eq(indexLayerContextual).attr({"data-color":dataContextual.color});
+					$("#layeringsystem li").eq(indexLayerContextual).click();
+					break;
         default:
       }
       //console.log(dataContextual);
@@ -350,7 +382,7 @@ $(function(){
       //oImg.originY="bottom";
 			//oImg.hasControls = false;
       oImg.flipY=true;
-      console.log(oImg.height+" "+oImg.width);
+      //console.log(oImg.height+" "+oImg.width);
 			oImg.opacity=0.7;
 
       var patternSourceCanvas = new fabric.StaticCanvas();
@@ -541,8 +573,11 @@ $(function(){
 		}
 	});
 
+
+
+
 	var ModelsLibrary = $('#modelsTree').jstree({
-		'core' : {"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : modelsJson},
+		'core' : {"dblclick_toggle":false,"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : modelsJson},
 		'types' : {
 							"default" : { "icon" : "text-warning fas fa-folder" },
               "custom" : { "icon" : "custom fas fa-folder" },
@@ -554,20 +589,48 @@ $(function(){
               "weapons" : { "icon" : "text-primary fas fa-skull-crossbones" },
 							"kiddo" : {"icon": "text-warning fas fa-baby"},
               "layer0" : {"icon": "text-white fas fa-star-half"},
-              "custmask" : {"icon":"custom"},
+              "custmask" : {"icon":"custom fas fa-mask-face"},
 							"hair" : {"icon":"fa-solid fa-scissors"},
 							},
 		"search":{"show_only_matches": true,"show_only_matches_children":true},
 		"plugins" : [ "search","types","state","contextmenu"],//"plugins" : [ "search","types","contextmenu","state" ],
     "contextmenu":{ "items": customMdlMenu }
 	}).bind("dblclick.jstree", function (event) {
-    /*
-     var node = $(event.target).closest("li");
-     var data = node.data("jstree");*/
-     $('#btnMdlLoader').click();
+			let nodo = $('#modelsTree').jstree(true).get_selected(true)[0]
+			//console.log(nodo);
+			switch (nodo.type){
+				case 'custmesh':
+				case 'custmask':
+					$('#btnMdlLoader').click();
+					break;
+				default:
+					$('#btnMdlLoader').click();
+			}
      // Do my action
-  });
+  }).on('loaded.jstree',function(event){
+		joinModels() //down below the oexplanation of what it does
+	});
 
+/*
+* it take the content of the file customModels.json in the userdata folder
+* and it append every child to the branch with custom D in the models tree
+*/
+	function joinModels(){
+		var model_load = thePIT.getModels();
+		if ((typeof(model_load)=='object') && (model_load.length>0)){
+			model_load.forEach((item, i) => {
+				if (item.text!="custom"){
+					if (item.li_attr.hasOwnProperty("masks")){
+						//console.log(item.li_attr)
+						$('#modelsTree').jstree(true).create_node('#'+item.parent,{"id":item.id,"text":item.text,"icon":item.icon,"type":item.type,"li_attr":{"model":item.li_attr.model,"masks":Number(item.li_attr.masks)}},'first')
+					}else{
+						$('#modelsTree').jstree(true).create_node('#'+item.parent,{"id":item.id,"text":item.text,"icon":item.icon,"type":item.type,"li_attr":{"model":item.li_attr.model}},"first")
+					}
+				}
+			});
+			$('#modelsTree').jstree(true).redraw();
+		}
+	}
 
 
   function customMdlMenu(node){
@@ -579,13 +642,15 @@ $(function(){
         break;
       case 'custmask':
         return {
-          "AddMaskset": {
-            "separator_before": false,
-            "separator_after": false,
-            "label": "Add Maskset",
-            "icon": "fas fa-plus",
-            "action": function (obj) { }
-          }
+					"remove":{
+						"separator_before": false,
+						"separator_after": false,
+						"label": "Delete",
+						"icon": "fas fa-trash-can",
+						"action": function (obj) {
+							radix.delete_node(radix.get_selected());
+						}
+					}
         };
         break;
 			case 'custom':
@@ -595,7 +660,18 @@ $(function(){
 							"separator_after": false,
 							"label": "Save list",
 							"icon": "fas fa-save",
-							"action": function (obj) {}
+							"action": function (obj) {
+								let myCustomTree = ModelsLibrary.jstree(true).get_json("#custom",{"flat":true,"no_data":true,"no_state":true,"no_a_attr":true});
+								//myCustomTree.children
+								let textedJSON = JSON.stringify(myCustomTree)
+								if (textedJSON!==undefined){
+									thePIT.Export({
+										file:'customModels.json',
+										content:textedJSON,
+										type:'customlist'
+									});
+								}
+							}
 						}
 				}
       case 'custmesh':
@@ -607,7 +683,7 @@ $(function(){
 	              "icon": "fas fa-file-export",
 	              "action": function (obj) {
 	                let test = radix.get_json(node,{flat:true});
-	                console.log(test);
+									masksModal.show();
 	              }
 	          },
 						"remove":{
@@ -621,6 +697,17 @@ $(function(){
 						}
 	        }
         break;
+			case 'layer0':{
+				return {
+          "AddMaskset": {
+            "separator_before": false,
+            "separator_after": false,
+            "label": "Add Maskset",
+            "icon": "fas fa-plus",
+            "action": function (obj) { }
+          }
+				}
+			}
       default:
 				return false;
 				/*
@@ -646,7 +733,7 @@ $(function(){
 $('#modelsTree').on('select_node.jstree',function(ev,node){
 	modelType = node.node.type;
 	let maxlayers = 19;
-	if ((node.node.type=='man')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='hair')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')){
+	if ((node.node.type=='man')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='hair')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')||(node.node.type=='custmesh')||(node.node.type=='custmask')){
     $("#modelTarget").attr('loaded',false);
 		$("#modelTarget").val(node.node.li_attr['model']);
     if (node.node.li_attr.hasOwnProperty('masks')) {
@@ -1729,8 +1816,8 @@ $("#unCookModal .modal-body .form-check-input").click(function(){
 	}
 })
 
-$("#arc_GA4, #arc_AP4, #arc_NC3").change(function(){
-	console.log($(this))
+$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_DEC4").change(function(){
+	//console.log($(this))
 	if ($(this).is(':checked')){
 		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');
 	}else{
@@ -1756,6 +1843,44 @@ $("#MycroMe").click(function(){
 	thePIT.microMe();
 });
 
+// masks selector modal
+$("body").on("click","#customMaskSelector option",function(ev){
+	$("#lblmaskselected").text($( this ).text().split("\/").reverse()[0])
+	$("#lblmaskselected").removeClass("text-muted").addClass("text-white")
+});
+
+$("#masksCFinder").on('keyup',function(ev){
+	if ($("#masksCFinder").val()!=''){
+		$("#customMaskSelector option:contains('"+escape($("#masksCFinder").val())+"')").removeClass('d-none');
+		$("#customMaskSelector option").not(":contains('"+escape($("#masksCFinder").val())+"')").addClass('d-none');
+	}else{
+		$("#customMaskSelector option").removeClass('d-none');
+	}
+});
+
+$("#masksFinderClearer").click(function(){
+	$("#masksCFinder").val("");
+	$("#masksCFinder").keyup();
+})
+
+$("#choseThisMask").click(function(){
+	let selectedNode = ModelsLibrary.jstree("get_selected",true)
+	if (selectedNode[0].hasOwnProperty('children')){
+		if (selectedNode[0].children.length==0){
+			ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
+		}else{
+			let figli = ModelsLibrary.jstree(true).get_json('#'+selectedNode[0].li_attr.id).children
+			if (figli.filter(el => el.li_attr.masks == $("#customMaskSelector").val()).length <= 0){
+				ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
+			}
+		}
+	}else{
+		ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
+	}
+
+})
+
+//use the copy function for paths
  $("#modelCopyPath").click(function(){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$("#modelTarget").val().replaceAll(/\//g,'\\'));
   });

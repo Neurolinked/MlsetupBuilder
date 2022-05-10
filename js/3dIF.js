@@ -74,7 +74,7 @@ const params = {
  rotationspeed: 6,
  wireframe: false,
  onesided: false,
- lightpower:1
+ lightpower:2
 };
 //-------------Aiming box for the camera ----------------------
 
@@ -82,6 +82,15 @@ const params = {
 const safeMap = new THREE.TextureLoader().load( "./images/favicon.png" );
 const material = new THREE.MeshStandardMaterial({color: 0x500000});//
 const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 1, thickness: 0.05});
+//material for stitches zip and other things
+const stitchMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_d01.png");
+const stitchNorMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_n01.png");
+stitchMap.wrapS = THREE.RepeatWrapping;
+stitchMap.wrapT = THREE.RepeatWrapping;
+stitchNorMap.wrapS = THREE.RepeatWrapping;
+stitchNorMap.wrapT = THREE.RepeatWrapping;
+stitchNorMap.premultiplyAlpha = true;
+const stitches = new THREE.MeshStandardMaterial({map:stitchMap,normalMap:stitchNorMap, transparent: true,opacity: 0.7, color: 0xFFffff});
 //-------------Hairs Materials----------------------------------
 var hairShading = document.getElementById('hairTex');
 HairTexture();
@@ -429,7 +438,7 @@ function glbload(arBuffer){
 				child.frustumCulled = false;
 				if (child.hasOwnProperty('userData')){
 					if (child.userData.hasOwnProperty('materialNames')){
-						strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+						strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 		        if (!(/(decal(s)?)|(vehicle_lights)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|(stickers.+)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|(.decal.+)|(02_ca_limestone_1.*)|(zip+er.+)|(ziper.+)/g.test(child.userData.materialNames.toString()))){
 		            child.material = material;
 		        }else{
@@ -479,6 +488,7 @@ function glbload(arBuffer){
 }
 
 function LoadModelOntheFly(path){
+	const repOut = new RegExp('');
   path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
   let oMdlInfo = document.getElementById("modalInfo");
   oMdlInfo.querySelector(".modal-body").innerHTML="";
@@ -489,7 +499,11 @@ function LoadModelOntheFly(path){
 
   var modelfile, Decal
 
-  modelfile = thePIT.ApriStream(path,'binary');
+	if (/^[\w|\W]:\\.+/.test(path)){
+		modelfile = thePIT.ApriStream(path,'binary',true);
+	}else{
+		modelfile = thePIT.ApriStream(path,'binary');
+	}
   data = str2ab(modelfile);
 
 	if (data.byteLength>0){
@@ -503,8 +517,49 @@ function LoadModelOntheFly(path){
 
 	      if ( child.isMesh ) {
 	        //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-	        strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div class='twoColGrid'><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+					strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><span class='px-2'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</span> <span class='px-2'>")+"</span></details></p>";
+	        //strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
+					if (child.hasOwnProperty('userData')){
+						if (child.userData.hasOwnProperty('materialNames')){
+							if (!(/(vehicle_lights)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
+									if (modelType=='hair'){
+										if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
+											child.material = hair_cap;
+										}else if((/.+_short.+/).test(child.userData.materialNames.toString())){
+											child.material = hair_short;
+										}else if((/.+_card(s).+/).test(child.userData.materialNames.toString())){
+											child.material = hair_card;
+											hair_card.map.needsUpdate = true;
+										}else if((/lambert/).test(child.userData.materialNames.toString())){
+											child.material = material;
+										}else{
+											child.material = hair_other;
+										}
+									}else{
+										child.material = material;
+									}
+							}else if(/(stiti.+)|(stit?ch.+)|(dec_stitches.+)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString())){
+								child.material = stitches;
+			        }else{
+			          //if is a decoration, a zipper a stiches apply a semitransparent material with autogenerated color
+			          if (/.+(masksset).+/g.test(child.userData.materialNames.toString())){
+			            child.material = material;
+								}else if (/(.+)?glass(.+)?/g.test(child.userData.materialNames.toString())) {
+									child.material = glass;
+									Decal = true;
+			          }else{
+			            child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(20*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 255)"), opacity:0.3,transparent:true});
+									Decal = true;
+			          }
+							}
+						}else{
+							child.material = material;
+		        }
+					}else{
+						child.material = material;
+					}
+					/*
 	        if (!(/(vehicle_lights)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
 							if (modelType=='hair'){
 								if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
@@ -534,7 +589,7 @@ function LoadModelOntheFly(path){
 							Decal = true;
 	          }
 
-	        }
+	        }*/
 	        child.visible = true;
 
 					if (Decal){
@@ -591,10 +646,17 @@ document.getElementById("maskLayer").addEventListener('fire', e => {
 
 //custom 3d assets file loading
 document.getElementById('cstMdlLoader').addEventListener('click',(e)=>{
+	cleanScene()
 	let maxLayers = 0;
 	layersActive(maxLayers);
+	cleaNormal()
+	material.map = safeMap;
+	var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
+  material.normalMap = texture;
 	CustomLoadButton.setAttribute('disabled','disabled');
 	thePIT.ThreeDAsset();
+	let Normed = document.querySelector('#withbones svg:nth-child(2) path');
+	Normed.setAttribute("fill",'currentColor');
 });
 
 document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
@@ -680,7 +742,7 @@ if (theNormal.match(/^[/|\w|\.]+.xbm/)){
 
  material.needUpdates =true;
  //search for the right extension
- if (theModel.match(/^[/|\w|\.]+.glb/)){
+ if (theModel.match(/.+\.glb$/)){
 	 cleanScene();
 	 if (modelType=='hair'){
 		 if (!(/show/.test(document.getElementById('HairTool')))){

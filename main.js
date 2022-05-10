@@ -8,8 +8,8 @@ const fs = require('fs')
 const store = require('electron-store');
 const sharp = require('sharp');
 
-
-var objwkitto ={}
+var customModels
+var objwkitto = {}
 const schema = {
 	unbundle: {
 		type: 'string',
@@ -188,15 +188,43 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
+
+
+
+ipcMain.on('main:giveModels',(event) => {
+	//read custom models json file and try to inject it in the main body
+	fs.readFile(path.join(app.getPath('userData'),'customModels.json'),(err,contenutofile) =>{
+		if (err) {
+			//maybethere is only no file to read
+			//mainWindow.webContents.send('preload:logEntry', err)
+			event.returnValue = []
+		}else{
+			try{
+				customModels = JSON.parse(contenutofile)
+				event.returnValue = customModels
+			}catch(err){
+				mainWindow.webContents.send('preload:logEntry', "Not a readable content for the file of the custom models",true)
+				event.returnValue = []
+			}
+		}
+	})
+})
 //read file on disk
-ipcMain.on('main:readFile',(event,percorso,flags)=>{
-  fs.readFile(path.join(preferences.get('unbundle'),percorso),flags,(err,contenutofile) =>{
+ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
+	var whereLoadFrom
+	if (no_repo){
+		whereLoadFrom = path.normalize(percorso)
+	}else{
+		whereLoadFrom = path.join(preferences.get('unbundle'),percorso)
+	}
+
+  fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
     if (err) {
       if (err.code=='ENOENT'){
-				if (normals.test(percorso)){
-					event.reply('preload:logEntry', 'normal map not found in : '+path.join(preferences.get('unbundle'),percorso),true)
+				if (normals.test(whereLoadFrom)){
+					event.reply('preload:logEntry', 'normal map not found in : '+whereLoadFrom,true)
 				}else{
-					dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(preferences.get('unbundle'),percorso))
+					dialog.showErrorBox("File opening error","The searched file does not exists "+whereLoadFrom)
 				}
       }else{
         dialog.showErrorBox("File opening error",err.message)
@@ -390,6 +418,17 @@ ipcMain.on('main:writefile',(event,arg) => {
 					event.reply('preload:logEntry', 'Save procedure cancelled')
 				}
 		})
+	}else if(arg.type=='customlist'){
+		fs.writeFile(path.join(app.getPath('userData'),arg.file), arg.content,'utf8',(errw, data) =>{
+			if(errw){
+				event.reply('preload:logEntry', 'Save procedure aborted',true)
+				dialog.showErrorBox('Error during the writing process of the file')
+				return
+			}else{
+				new Notification({title:"Save List", body: "Your file has been saved" }).show()
+				event.reply('preload:logEntry', 'models list saved')
+			}
+		})
 	}
 	mljson = ''
 });
@@ -449,6 +488,9 @@ function uncookRun(toggle,params,stepbar,logger){
 						case 'step6':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Normal map Done</span>')
 							break;
+						case 'step7':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals uncooked</span>')
+							break;
 						case 'micro_opt01':
 						case 'micro_opt02':
 						case 'micro_opt03':
@@ -493,6 +535,67 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step5'))
 								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
 								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
+								.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_appearance.archive'), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
+								.then(()=> {
+									return new Promise((resolve,reject) =>{
+										fs.readdir(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/'),(err,files)=>{
+											if (err){
+													mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+													reject()
+										  }else {
+												var decalfiles = []
+												files.forEach((el)=>{
+													if (el.match(/garment_decals_[d|n]\d{2}\.png$/))
+													decalfiles.push(el)
+												})
+												mainWindow.webContents.send('preload:uncookErr','Found '+decalfiles.length+' decals to process','#uncookLogger')
+												resolve(decalfiles)
+											}
+										})
+									})
+								})
+								.then((files)=>{
+									try{
+										var perc = Number(100/files.length).toFixed(2)
+										var k = 0
+										files.forEach((png)=>{
+											if (/.+n\d{2}\.png$/.test(png)){
+												k++
+												sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
+												.raw()
+												.toBuffer({ resolveWithObject: true })
+											  .then(({ data, info }) => {
+													const { width, height, channels } = info;
+													for (let i = 0, l=data.length; i < l; i += 4) {
+													 data[i + 2] = 255;  // B value
+												 	}
+													sharp(data, { raw: { width, height, channels } })
+													.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
+														 if(err){
+															 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+														 }
+													 })
+												})
+											  .catch(err => { console.log(err) })
+											}else{
+												sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
+													.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
+														 if(err){
+															 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+														 }else{
+															 k++
+															 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'step8')
+														 }
+													  })
+											}
+
+										})
+										mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals copied and edited</span>')
+									}catch(err){
+										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+									}
+								})
+								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_DEC4")})
 								.catch(err => { console.log(err) })
 								.finally(() => { 	mainWindow.webContents.send('preload:enable',"#triggerUncook") })
 							}

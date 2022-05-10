@@ -89,7 +89,7 @@
 <div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light" data-bs-backdrop="false" tabindex="-1" id="HairTool" aria-labelledby="HTLabel" >
   <div class="offcanvas-header bg-dark">
     <h5 class="offcanvas-title text-light" id="HTLabel">Hair tool</h5>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <button type="button" class="btn text-reset text-light" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="offcanvas-body m-2 p-2">
 		<span class='experimental'>
@@ -127,7 +127,7 @@
 	</div>
 </div>
 <div id="interface">
-  <span id="withbones"><i class="fa-solid fa-bone fa-2x"></i> <i class="fa-solid fa-arrow-down-up-across-line fa-2x"></i></span>
+  <span id="withbones"><i class="fa-solid fa-bone fa-2x"></i> <i class="fa-solid fa-arrow-down-up-across-line fa-2x"></i></span><!--  -->
   <div id="withthacanvas">
   <canvas id="thacanvas"></canvas>
   <div id="modelsInformation" class="p-2 rounded layer-1">
@@ -470,6 +470,32 @@
   </div>
 </div>
 
+<div class="modal fade " id="masksModal"  tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
+    <div class="modal-content rounded-0">
+      <div class="modal-body p-0">
+				<div>
+					<div class="input-group">
+					  <input type="text" id="masksCFinder" class="form-control rounded-0" placeholder="search in the masklist" aria-label="Masks paths">
+						<!--<button class="btn btn-Prim rounded-0" type="button" id="matModSearch">search</button>-->
+						<button type="button" id="masksFinderClearer" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
+					</div>
+
+				</div>
+				<div>
+					<div class="input-group input-group-sm">
+						<span class="input-group-text bg-secondary text-dark border-0 rounded-0"><i class="fas fa-mask"></i></span>
+						<span id="lblmaskselected" class="input-group-text text-secondary flex-grow-1 border-0 rounded-0 fs-80">none</span>
+						<button type="button" id="choseThisMask" class="btn btn-outline-error rounded-0">Choose</button>
+					</div>
+					<select id="customMaskSelector" class="form-select rounded-0 p-0" size="20" aria-label="size 3 select example">
+					</select>
+				</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade " id="unCookModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
     <div class="modal-content rounded-0">
@@ -500,6 +526,16 @@
 							<div id="uncook_step5" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_step6" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
+						<!-- TODO to this code-->
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" role="switch" id="arc_DEC4" checked>
+							<span class="badge bg-warning text-dark">Decal materials</span>
+						</div>
+						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+							<div id="uncook_step7" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+							<div id="uncook_step8" class="border-start border-dark progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+						</div>
+						<!-- TODO to this code-->
 						<div class="text-center mt-3"><i id="uncookCog" class="fas fa-cog fa-pulse fa-4x text-danger d-none"></i></div>
 					</div>
 					<div id="uncookLogger" class="col-5 p-1 layer-0" >
@@ -765,10 +801,12 @@ THE SOFTWARE.</p>
   </div>
 </div>
   <ul id="layers-contextual">
-    <li data-action="cpall">Copy all attributes</li>
-    <li data-action="pstall" disabled>Paste attributes</li>
-    <li data-action="cpmb">Copy microblends data</li>
-    <li data-action="pstmb" disabled>Paste microblends data</li>
+    <li data-action="cpall"><i class="fa-solid fa-copy"></i> Copy all attributes</li>
+    <li data-action="pstall" disabled><i class="fa-solid fa-square"></i> Paste attributes</li>
+    <li data-action="cpmb"><i class="fa-solid fa-shapes"></i> Copy microblends data</li>
+    <li data-action="pstmb" disabled><i class="fa-solid fa-paste"></i> Paste microblends data</li>
+		<li data-action="cpcol"><i class="fa-solid fa-eye-dropper"></i> Copy color</li>
+		<li data-action="pstcol" disabled><i class="fa-solid fa-paintbrush"></i> Paste color</li>
   </ul>
   <script defer src='./js/3dIF.js'></script>
   <script src="./renderer.js"></script>

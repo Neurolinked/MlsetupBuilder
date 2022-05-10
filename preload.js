@@ -7,8 +7,8 @@ contextBridge.exposeInMainWorld(
 				ipcRenderer.send('main:getversion', {})
 				ipcRenderer.send('main:handle_args', {}) //load arguments and source json files
 			},
-      ApriStream: (path,streamcode) =>{
-        var filecontent = ipcRenderer.sendSync('main:readFile', path, streamcode);
+      ApriStream: (path,streamcode,no_repo = false) =>{
+        var filecontent = ipcRenderer.sendSync('main:readFile', path, streamcode, no_repo);
         return filecontent
       },
 			EDStream: (path,streamcode) =>{
@@ -36,6 +36,10 @@ contextBridge.exposeInMainWorld(
 			},
 			microMe: async ()=>{
 				ipcRenderer.send('main:uncookMicroblends');
+			},
+			getModels: ()=>{
+				var additionalModels = ipcRenderer.sendSync('main:giveModels');
+				return additionalModels;
 			}
 	},
 
