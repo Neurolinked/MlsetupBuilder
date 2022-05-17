@@ -312,9 +312,17 @@
 
 				</div>
 			</div>
-			<details><summary id="materialSummary" data-toggle="tooltip" title="Click to edit to a custom material">unused</summary>
+			<details><summary id="materialSummary" >unused</summary>
 			<div class="input-group mb-1">
 				<input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
+			</div>
+			<div class="input-group layer-4">
+				<input id="legacyMatFinder" class="form-control" type="text" placeholder="Filter the materials" aria-label="material searcher">
+				<button type="button" id="legacyMatFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
+			</div>
+			<div id="legacyMaterial" >
+				<ul class="p-0" id="materiaList">
+				</ul>
 			</div>
 			</details>
       <div class="twoColGrid layer-1">
