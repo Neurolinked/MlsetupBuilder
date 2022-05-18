@@ -40,6 +40,9 @@ contextBridge.exposeInMainWorld(
 			getModels: ()=>{
 				var additionalModels = ipcRenderer.sendSync('main:giveModels');
 				return additionalModels;
+			},
+			savePref: (conf)=>{
+				ipcRenderer.send('main:saveStore',conf);
 			}
 	},
 

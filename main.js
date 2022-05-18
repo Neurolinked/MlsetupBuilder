@@ -22,6 +22,10 @@ const schema = {
 	maskformat:{
 		type: 'string',
 		default: 'dds'
+	},
+	legacymaterial:{
+		type:'boolean',
+		default: false
 	}
 };
 
@@ -34,7 +38,10 @@ const preferences = new store({schema,
 				store.set('pathfix','1')
 			}
 		},
-		'1.6.3': store => { store.delete('pathfix') }
+		'1.6.3': store => {
+			store.delete('pathfix')
+			store.set('legacymaterial',false)
+		}
 	}
 });
 
@@ -48,6 +55,7 @@ if (mljson ==''){
 
 
 var wkitto = app.commandLine.getSwitchValue("wkit")
+
 
 const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
   let modal = new BrowserWindow({
@@ -188,7 +196,6 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
-
 
 
 ipcMain.on('main:giveModels',(event) => {
@@ -365,6 +372,9 @@ ipcMain.on('main:saveStore',(event, arg) => {
 	}
 	if (arg.hasOwnProperty('maskformat')){
 		preferences.set('maskformat',arg.maskformat);
+	}
+	if (arg.hasOwnProperty('legacymaterial')){
+		preferences.set('legacymaterial',arg.legacymaterial);
 	}
 })
 

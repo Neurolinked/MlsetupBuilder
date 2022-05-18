@@ -35,7 +35,7 @@ async function abuildMaterial(materialArray){
 	if (typeof(materialArray)=="object"){
 		for (k=0, j=materialArray.length;k<j;k++){
 			$("#cagemLibrary").append("<div style=\"background:url('images/material/"+materialArray[k].name+".jpg') no-repeat;background-size:100% auto;\" data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</div>");
-			$("#legacyMaterial ul").append("<li class='p-1 fs-80' data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</li>");
+			$("#materiaList").append("<li class='p-1 fs-80' data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</li>"); //<i class='fa-solid fa-magnifying-glass float-end'></i>
 		}
 	}
 }
@@ -79,6 +79,11 @@ async function abuildHairs(aHairs){
 			}*/
 		}
 	}
+}
+
+function switchLegacyMat(material){
+	$("#materiaList li").removeClass("active");
+	$("#materiaList li[data-ref='"+material+"']").addClass("active");
 }
 
 $(function(){
@@ -153,6 +158,16 @@ $(function(){
 	});
 
   $(document).on('keyup', function(e) { if (e.shiftKey == false) { shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');} });
+
+	$("#legacyMatSector").click(function(ev){
+		console.log($("#legacyMatSector").prop('open'))
+		if ($("#legacyMatSector").prop('open')==false){
+			thePIT.savePref({legacymaterial:true});
+		}else{
+			thePIT.savePref({legacymaterial:false});
+		}
+	});
+
 /* Contestual menu on layers */
   const contextMenu = document.getElementById("layers-contextual");
   const layerscope = document.querySelector("#layeringsystem");
@@ -531,6 +546,7 @@ $(function(){
 			//Reset material Library 1.5.99
 			$("#cagemLibrary > div").removeClass("active");
 			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
+			switchLegacyMat(materialByClick);
 			$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
 			slideMaterials($("#cagemLibrary > div.active").index());
 			$("#materialSummary").html(materialByClick);
@@ -1015,7 +1031,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#matInput").trigger("change");
 		if (ml_libraries.hasOwnProperty($(this).data('ref'))){
 			let materialtoload = $(this).data('ref');
-
+			switchLegacyMat(materialtoload);
 			console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
 
 			$("#Rough_out_values").html('');//reset optional roughness
@@ -1964,4 +1980,9 @@ $("#choseThisMask").click(function(){
    });
  //Display the counted meshes
 	notifyMe("Mesh linked :"+modelsJson.filter(attri => attri.li_attr!=undefined).length,false);
+
+	var legacyMatOpen = thePIT.RConfig('legacymaterial')
+	legacyMatOpen.then((isopen)=>{
+		$('#legacyMatSector').attr('open',isopen);
+	});
 });
