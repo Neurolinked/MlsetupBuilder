@@ -20,11 +20,11 @@ How to use it with Wolvenkit: https://youtu.be/uCOHjMPvpgc
 
 ## Displaying the models
 
-To display the models present in the model library you need to setup a folder in the software preferences, choose the Wolvenkit-CLI executable, at least version 1.5.2 and from the build menu Build the repository and then the microblends for the software
+To display the models present in the model library you need to setup a folder in the software preferences, choose the Wolvenkit-CLI executable, at least version 1.5.2 and from the build menu Build the repository, then the microblends normals and decals for the software
 
 # Screenshot
-Main window with a melee weapon model and already imported microblends preview images
-![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_161.png)
+Main window with a jacket with displaying stitches and zipper decals
+![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_162.jpg)
 
 # Wanna support ?
 If you really wish you can donate with Ko-fi
