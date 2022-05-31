@@ -43,6 +43,7 @@
   <script type="text/javascript" src='./js/interface.js'></script>
   <link rel="stylesheet" href="./css/base.css" />
 	<style id="addedCSS" type="text/css">.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);}</style>
+	<style id="mlLibCSS" type="text/css"> </style>
   </head>
   <body class="px-1">
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
@@ -60,7 +61,7 @@
     <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
     <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
 <!--model Library -->
-<div class="offcanvas offcanvas-start bg-dark bg-gradient text-light" tabindex="-1" id="ModelLibrary" aria-labelledby="ModelLibraryLabel">
+<div class="offcanvas offcanvas-start offcanvas-models bg-dark bg-gradient text-light" tabindex="-1" id="ModelLibrary" aria-labelledby="ModelLibraryLabel" data-bs-backdrop="false">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title " id="ModelLibraryLabel">Model Library</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -71,7 +72,15 @@
       <input id="modelFinder" class="form-control " type="text" placeholder="Search in the models library" aria-label="models searcher">
       <button type="button" id="modelFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
     </div>
-    <div class="btn-group w-100 mt-1" role="group" aria-label="models filtering"><button type="button" id="modelFinderCloser" data-toggle="tooltip" title="Reset the tree to the default state" class="btn bg-transparent text-warning"><i class="fas fa-door-closed"></i> </button><button type="button" class="btn btn-outline-warning" disabled>...category filtering...</button></div>
+		<nav class="navbar navbar-expand-lg navbar-dark ">
+  		<div class="container-fluid">
+		<button type="button" class="btn btn-outline-warning" id="mlPosX" title='Move me'><i class="fas fa-caret-right"></i></button>
+    <div class="btn-group w-100 mt-1" role="group" aria-label="models filtering">
+			<button type="button" id="modelFinderCloser" data-toggle="tooltip" title="Reset the tree to the default state" class="btn bg-transparent text-warning"><i class="fas fa-door-closed"></i> </button>
+			<button type="button" class="btn btn-outline-warning" disabled>...category filtering...</button>
+		</div>
+			</div>
+		</nav>
   </div>
   <div class="offcanvas-body">
     <div id="modelsTree" class="layer-1 px-1 pb-1 mt-2 shadow"></div>

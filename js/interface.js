@@ -137,10 +137,43 @@ $(function(){
 		$('#addedCSS').text('.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
 	}
 
+
 	$("#HairTool").on('show.bs.offcanvas',function(){
 		hairToolW();
 	});
-	$(window).resize(function(){hairToolW();});
+
+	$(window).resize(function(){
+		hairToolW();
+		if ($('#ModelLibrary').hasClass('offcanvas-end')){
+			modelLibW();
+		}
+	});
+
+	function modelLibW(){
+		if ($("#ModelLibrary").hasClass('offcanvas-start')){
+			$('#mlLibCSS').text('');
+			localStorage.removeItem('MLibX');
+		}else{
+			localStorage.setItem('MLibX',1);
+			let corner = $("#layer_settings").offset().left;
+			//$('#addedCSS').text('.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
+			$('#mlLibCSS').text('#ModelLibrary.offcanvas-models {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);width:'+parseInt($( window ).width()-corner+2)+'px !important;}');
+		}
+	}
+
+	$("#ModelLibrary").on('show.bs.offcanvas',function(){
+		modelLibW();
+	});
+
+	$("#mlPosX").click(function(){
+		swapModelClass();
+		modelLibW();
+	})
+
+	function swapModelClass(){
+		$("#mlPosX svg").toggleClass('fa-caret-right fa-caret-left');
+		$("#ModelLibrary").toggleClass('offcanvas-start offcanvas-end')
+	}
 
 	$("#hairSwatches span").click(function(){
 		$('#sp-gradients div:nth-child(1)').attr('style',"background:"+$(this).data('crtt')+", "+$('#bkgshades').val()+";");
@@ -362,6 +395,11 @@ $(function(){
 	localStorage = window.localStorage;
 	const license = localStorage.getItem('ReadLicense');
 	const licenseWindow = document.getElementById('LicenseModal');
+
+	const modelPlace = localStorage.getItem('MLibX');
+	if (Number(modelPlace)>0){
+		swapModelClass();
+	}
 	//modal uncooking progress
 	const unCookModal = new bootstrap.Modal(document.getElementById('unCookModal'));
 	//license modal

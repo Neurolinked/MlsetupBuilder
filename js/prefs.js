@@ -43,7 +43,6 @@ $(function(){
 	});
 
 	$("#prefxunbundle, #wCLIexe").on('focusout',function(){
-		console.log('entered');
 		if ($("#wCLIexe").hasClass('d-none')){
 			if ($("#prefxunbundle").val()==pref_recent.unbundle){
 				$("#alertmessage").addClass('d-none');
