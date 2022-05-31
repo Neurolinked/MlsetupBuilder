@@ -1304,4 +1304,9 @@ const maskList = [
 		{"layers": 19,"mask": "/base/characters/boss/adam_smasher/textures/ml_t0_020_mm_legs__adam_smasher_masksset_X.dds"},
 		{"layers": 1,"mask": "/base/characters/boss/adam_smasher_young/textures/ml_t0_001_mm_body__adam_smasher_young_jaw_masksset_X.dds"},
 		{"layers": 19,"mask": "/base/characters/common/base_bodies/man_average/cyberware/corp_arasaka/a0_006_ma_arasaka__arms/textures/ml_a0_006_ma_arasaka__arms_shoulder_masksset_X.dds"},
+		{"layers": 19,"mask": "/base/characters/main_npc/silverhand/textures/ml_i1_001_ma_neck__silverhand_pendant_alternative_masksset_X.dds"},
+		{"layers": 18,"mask": "/base/characters/main_npc/silverhand/textures/ml_l1_001_ma_pants__silverhand_alternative_masksset_X.dds"},
+		{"layers": 16,"mask": "/base/characters/main_npc/silverhand/textures/ml_s1_001_ma_shoe__silverhand_alternative_masksset_X.dds"},
+		{"layers": 16,"mask": "/base/characters/main_npc/silverhand/textures/ml_t1_001_ma_shirt__silverhand_alternative_masksset_X.dds"},
+		{"layers": 17,"mask": "/base/characters/main_npc/silverhand/textures/ml_t2_001_ma_jacket__silverhand_alternative_masksset_X.dds"},
 ]
