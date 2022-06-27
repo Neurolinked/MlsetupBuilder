@@ -46,6 +46,7 @@
 	<style id="mlLibCSS" type="text/css"> </style>
   </head>
   <body class="px-1">
+		<div id="floatMat" class="d-none position-absolute"> </div>
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
     <div id="dat-container"></div>
 <!--THREE.js libraries -->
@@ -493,9 +494,10 @@
       <div class="modal-body p-0">
 				<div>
 					<div class="input-group">
+						<button type="button" id="masksFinderClearer" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
 					  <input type="text" id="masksCFinder" class="form-control rounded-0" placeholder="search in the masklist" aria-label="Masks paths">
 						<!--<button class="btn btn-Prim rounded-0" type="button" id="matModSearch">search</button>-->
-						<button type="button" id="masksFinderClearer" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
+
 					</div>
 
 				</div>

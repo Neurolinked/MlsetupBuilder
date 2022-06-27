@@ -11,10 +11,14 @@ Number.prototype.countDecimals = function () {
 
 async function abuildMaskSelector(listOfMasks){
 	if (typeof(listOfMasks)=="object"){
+			var maskSel = document.querySelector("#customMaskSelector");
+			let dummytxt = '';
 			for (k=0, j=listOfMasks.length;k<j;k++){
-				//$("#customMaskSelector").append("<option data-layers='"+listOfMasks[k].layers+"' >"+(listOfMasks[k].mask).replace(/_X\.dds$/,'.mlmask')+"</option>");
-        $("#customMaskSelector").append("<option value='"+k+"' >"+listOfMasks[k].mask+"</option>");
+				dummytxt +="<option value='"+k+"' >"+listOfMasks[k].mask+"</option>";
+        //$("#customMaskSelector").append("<option value='"+k+"' >"+listOfMasks[k].mask+"</option>");
       }
+			maskSel.innerHTML+=dummytxt;
+			return;
 	}
 }
 //Build the microblends gallery and compile the microblends select options
@@ -752,6 +756,12 @@ $(function(){
 						}
 	        }
         break;
+			case "man" :
+			case "woman":
+			case "car" :
+			case "moto" :
+			case "weapons" :
+			case "kiddo" :
 			case 'layer0':{
 				return {
           "AddMaskset": {
@@ -759,7 +769,18 @@ $(function(){
             "separator_after": false,
             "label": "Add Maskset",
             "icon": "fas fa-plus",
-            "action": function (obj) { }
+            "action": function (obj) {
+							let radix = $('#modelsTree').jstree(true);
+							let last = radix.copy_node(node,'custom','last',function(child,father,pos){
+								oldtype = String(child.icon).replace('text-white','');
+								radix.set_type(child,'custmesh');
+								radix.set_icon(child,"custom "+oldtype);
+							});
+							radix.deselect_all();
+							radix.select_node(last);
+							$("#ModelLibrary .offcanvas-body").scrollTop(0);
+							masksModal.show();
+						}
           }
 				}
 			}
@@ -940,6 +961,18 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#materiaList li:not(:contains('"+$(this).val()+"'))").addClass('d-none');
 			$("#materiaList li:contains('"+$(this).val()+"')").removeClass('d-none');
 		}
+	});
+
+	$("#materiaList li").mousemove(function(e){
+			mouseX = e.clientX;
+		  mouseY = e.clientY;
+		  $("#floatMat").css({"left":(mouseX + 30) + "px","top":(mouseY + 10)+"px","z-index":1090,"background":"url(images/material/"+$(this).data('ref')+".jpg) 0 0 no-repeat","background-size":" 128px,128px"});
+			$("#floatMat").removeClass('d-none');
+		}
+	);
+
+	$("#materiaList").mouseout(function(e){
+		$("#floatMat").addClass('d-none');
 	});
 
 	$("body").on("click","#materiaList li", function(){
@@ -1990,20 +2023,22 @@ $("#masksFinderClearer").click(function(){
 })
 
 $("#choseThisMask").click(function(){
-	let selectedNode = ModelsLibrary.jstree("get_selected",true)
-	if (selectedNode[0].hasOwnProperty('children')){
-		if (selectedNode[0].children.length==0){
-			ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
-		}else{
-			let figli = ModelsLibrary.jstree(true).get_json('#'+selectedNode[0].li_attr.id).children
-			if (figli.filter(el => el.li_attr.masks == $("#customMaskSelector").val()).length <= 0){
-				ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
+	if ($("#customMaskSelector option:selected").length==1){
+		let selectedNode = ModelsLibrary.jstree("get_selected",true)
+		if (selectedNode[0].hasOwnProperty('children')){
+			if (selectedNode[0].children.length==0){
+				ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val(),"layers":maskList[$("#customMaskSelector").val()].layers}},"first")
+			}else{
+				let figli = ModelsLibrary.jstree(true).get_json('#'+selectedNode[0].li_attr.id).children
+				if (figli.filter(el => el.li_attr.masks == $("#customMaskSelector").val()).length <= 0){
+					ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val(),"layers":maskList[$("#customMaskSelector").val()].layers}},"first")
+				}
 			}
+		}else{
+			ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
 		}
-	}else{
-		ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
+		$("#customMaskSelector").prop('selectedIndex',-1);
 	}
-
 })
 
 //use the copy function for paths

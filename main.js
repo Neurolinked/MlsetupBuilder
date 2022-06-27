@@ -75,6 +75,24 @@ const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilde
   return modal;
 }
 
+const childWindow = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
+  let mywin = new BrowserWindow({
+    width: width,
+    height: height,
+    modal: false,
+    parent: parentWindow,
+		webPreferences: preferences,
+		title: title
+  })
+	mywin.menuBarVisible=false
+	mywin.minimizable=true
+  mywin.loadFile(htmlFile)
+	mywin.once('ready-to-show', () => {
+		mywin.show()
+	})
+  return mywin;
+}
+
 const isMac = process.platform === 'darwin'
 var wcliExecutable = new RegExp(/.+WolvenKit\.CLI\.exe$/)
 var normals = new RegExp(/.+n\d{2}\.(xbm|png|dds)$/)
@@ -131,15 +149,24 @@ const template = [
   // { role: 'viewMenu' }
   {
     label: 'View',
-    submenu: [{ role: 'reload' },{ role: 'forceReload' },{ role: 'toggleDevTools' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' }]
+    submenu: [{ label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},{ type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
   },
-  // { role: 'windowMenu' }
+  { role: 'windowMenu' },
+	/*
   {
     label: 'Window',
-    submenu: [{ label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},{ role: 'minimize' },{ role: 'zoom' },
+    submenu: [
+			/*
+			{label: 'Model Library',accelerator: 'CTRL+L',click:()=>{
+						childWindow("apps/models.html",mainWindow,800,600,'Model Library', {preload: path.join(__dirname, 'apps/preloadmodel.js')} );
+				}},
+			{label: 'Databases Editor',click:()=>{
+						childWindow("apps/editor.html",mainWindow,1200,600,'Databases Editor', {preload: path.join(__dirname, 'apps/preloaDb.js')} );
+				}},
+			{ type: 'separator' },{ role: 'minimize' },{ role: 'zoom' },
       ...(isMac ? [{ type: 'separator' },{ role: 'front' },{ type: 'separator' },{ role: 'window' } ] : [ { role: 'close' } ])
     ]
-  },
+  },*/
   {
     role: 'help',
     submenu: [
