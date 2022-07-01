@@ -417,11 +417,35 @@ function cleanScene(){
 	}
 }
 
-function glbload(arBuffer){
-	let oMdlInfo = document.getElementById("modalInfo");
-  oMdlInfo.querySelector(".modal-body").innerHTML="";
+function mBuildInfo(model){
+  var oMdlPills = document.getElementById("v-pills-sMesh");
+  oMdlPills.innerHTML="";
+  var oMdlTabs = document.getElementById("v-pills-tabContent");
+  oMdlTabs.innerHTML="";
+  
+  if ((model.length>0) && (typeof(model)=='object')){
+    model.forEach((submesh)=>{
+      if (submesh.hasOwnProperty("name")){
+        oMdlPills.innerHTML+='<button class="nav-link rounded-0 " id="pill-'+submesh.name+'" data-bs-toggle="pill" data-bs-target="#tab-'+submesh.name+'" type="button" role="tab" aria-controls="#tab-'+submesh.name+'" aria-selected="false">'+submesh.name+'</button>';
+        if (submesh.hasOwnProperty("materials")){
+          oMdlTabs.innerHTML+='<div class="tab-pane fade show" id="tab-'+submesh.name+'" role="tabpanel" aria-labelledby="pill-'+submesh.name+'"><span class="badge layer-1 rounded-0">Material list: </span>'+submesh.materials+'</div>';
+        }else{
+          oMdlTabs.innerHTML+='<div class="tab-pane fade show" id="tab-'+submesh.name+'" role="tabpanel" aria-labelledby="pill-'+submesh.name+'"> </div>';
+        }
+      }
+    })
+    var enMdlPills = document.querySelector("#pill-"+model[0].name);
+    enMdlPills.click();
+  }
+}
 
-  let strGLBInfo = "";
+function glbload(arBuffer){
+	/*// TODO: remove
+  let oMdlInfo = document.getElementById("modalInfo");
+  oMdlInfo.querySelector(".modal-body").innerHTML="";*/
+  var mobjInfo = [];
+
+  /*// TODO: remove let strGLBInfo = "";*/
   let Boned = false;
   let MasksOn = document.querySelector('#withbones svg:nth-child(1)');
 	var Decal
@@ -438,7 +462,7 @@ function glbload(arBuffer){
 				child.frustumCulled = false;
 				if (child.hasOwnProperty('userData')){
 					if (child.userData.hasOwnProperty('materialNames')){
-						strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
+						//strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 		        if (!(/(decal(s)?)|(vehicle_lights)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|(stickers.+)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|(.decal.+)|(02_ca_limestone_1.*)|(zip+er.+)|(ziper.+)/g.test(child.userData.materialNames.toString()))){
 		            child.material = material;
 		        }else{
@@ -465,6 +489,7 @@ function glbload(arBuffer){
 				}
       }
     });
+    mBuildInfo(mobjInfo);
     if (Boned){MasksOn.classList.add('on');}else{MasksOn.classList.remove('on');}
 
     if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
@@ -483,17 +508,21 @@ function glbload(arBuffer){
 	centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
 	camera.target = centerPoint;
 	controls.target = centerPoint;
-	oMdlInfo.querySelector(".modal-body").insertAdjacentHTML('afterbegin',strGLBInfo);
+	//oMdlInfo.querySelector(".modal-body").insertAdjacentHTML('afterbegin',strGLBInfo);
 
 }
 
 function LoadModelOntheFly(path){
 	const repOut = new RegExp('');
   path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
-  let oMdlInfo = document.getElementById("modalInfo");
-  oMdlInfo.querySelector(".modal-body").innerHTML="";
 
-  let strGLBInfo = "";
+  /*let oMdlInfo = document.getElementById("modalInfo");
+  oMdlInfo.querySelector(".modal-body").innerHTML="";*/
+
+  var mobjInfo = [];
+
+  //let strGLBInfo = "";
+
   let Boned = false;
   let MasksOn = document.querySelector('#withbones svg:nth-child(1) path');
 
@@ -517,7 +546,8 @@ function LoadModelOntheFly(path){
 
 	      if ( child.isMesh ) {
 	        //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-					strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><span class='px-2'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</span> <span class='px-2'>")+"</span></details></p>";
+          mobjInfo.push({"name":child.name,"materials":[...new Set(child.userData.materialNames)].toString().replaceAll(",",", ")});
+					//strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><span class='px-2'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</span> <span class='px-2'>")+"</span></details></p>";
 	        //strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
 					if (child.hasOwnProperty('userData')){
@@ -597,9 +627,10 @@ function LoadModelOntheFly(path){
 					}else{
 						GuiSubmesh.add(child, 'visible').name( child.name );
 					}
+
 	      }
 	    });
-
+      mBuildInfo(mobjInfo);
 	    //if (Boned){MasksOn.classList.add('on');}else{MasksOn.classList.remove('on');}
 			if (Boned){MasksOn.setAttribute("fill","red");}else{MasksOn.setAttribute("fill","currentColor");}
 	    if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
@@ -615,7 +646,7 @@ function LoadModelOntheFly(path){
 	    centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
 	    camera.target = centerPoint;
 	    controls.target = centerPoint;
-	    oMdlInfo.querySelector(".modal-body").insertAdjacentHTML('afterbegin',strGLBInfo);
+	    //oMdlInfo.querySelector(".modal-body").insertAdjacentHTML('afterbegin',strGLBInfo);
 	  }, (error) => {
 	    notify3D(error);
 	  });

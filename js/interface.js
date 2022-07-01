@@ -414,7 +414,7 @@ $(function(){
 	//license modal
 	const licenseModal = new bootstrap.Modal(licenseWindow);
 	//modal information windows for loaded models
-	const wGLBInfo = new bootstrap.Modal(document.getElementById('modalInfo'));
+	//const wGLBInfo = new bootstrap.Modal(document.getElementById('modalInfo'));
 	//modal window used for aiming the microblends over the actual used layer
 	const AimMBlend = new bootstrap.Modal(document.getElementById('AimBlend'));
 	const AimWindows = document.getElementById('AimBlend');
