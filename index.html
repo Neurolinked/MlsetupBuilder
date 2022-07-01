@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="./css/base.css" />
 	<style id="addedCSS" type="text/css">.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);}</style>
 	<style id="mlLibCSS" type="text/css"> </style>
+  <style id="minfoCSS" type="text/css"> </style>
   </head>
   <body class="px-1">
 		<div id="floatMat" class="d-none position-absolute"> </div>
@@ -126,6 +127,53 @@
 		</span>
 	</div>
 </div>
+<!-- offcanvas for model information -->
+<div class="offcanvas offcanvas-end ocModelInfo bg-dark text-light" data-bs-backdrop="false" tabindex="-1" id="InfoModel" aria-labelledby="HTLabel" >
+  <div class="offcanvas-header border border-info p-1">
+    <h5 class="offcanvas-title text-info" id="HTLabel">Model Information</h5>
+    <button type="button" class="btn text-reset text-dark" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="offcanvas-body m-1 p-0 experimental">
+    <div>
+      <span class='d-block p-1'>Object Paths</span>
+      <form id='modelUserDataForm' class="p-2 eq-lay1">
+        <input type="text" class='d-none'  id="lastCustomMDL" readonly />
+        <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
+        <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text bg-dark text-info border-info" ><i class="fas fa-cube"></i></span>
+          <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
+          <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
+        </div>
+        <div class="input-group input-group-sm border-secondary mb-2">
+          <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-mask"></i></span>
+          <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
+         <!--<button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>-->
+          <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
+        </div>
+        <div class="input-group input-group-sm border-secondary">
+          <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-compress-alt"></i></span>
+          <input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
+          <!--
+         <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>-->
+          <button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
+        </div>
+      </form>
+    </div><!--end first element -->
+    <div class="d-flex align-items-start p-1">
+      <div class="nav flex-column nav-pills me-3" id="v-pills-sMesh" role="tablist" aria-orientation="vertical">
+        <button class="nav-link" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</button>
+      </div>
+      <div class="tab-content" id="v-pills-tabContent">
+        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">...</div>
+      </div>
+    </div><!--end second element -->
+    <div class="text-center">
+      <span class='d-block p-1 text-start'>Normal map</span>
+      <canvas id="normalMe" class="my-1" ></canvas>
+    </div>
+	</div>
+</div>
 <!-- -->
 <div class="offcanvas offcanvas-end bg-dark bg-gradient text-light" tabindex="-1" id="HowDoI" aria-labelledby="HDILabel" data-bs-backdrop="false">
   <div class="offcanvas-header bg-info">
@@ -159,6 +207,9 @@
    <!--<div class="mt-3">-->
    <div class="btn-group " role="group" aria-label="information and data">
      <button class="btn btn-sm btn-outline-info ms-3" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>
+     <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#InfoModel" ><i class="fas fa-cube "></i></button>
+     <!--
+
      <div class="btn-group dropend ">
         <a class="btn btn-sm btn-outline-info dropdown-toggle" href="#" role="button" id="dropModelDatas" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cubes"></i></a>
          <div class="dropdown-menu eq-lay1 " style="width:40rem">
@@ -181,12 +232,12 @@
 							<span class="input-group-text bg-dark text-info"><i class="fas fa-compress-alt"></i></span>
 							<input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
 							<!--
-						 <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>-->
+						 <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
 							<button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
 						</div>
           </form>
         </div>
-      </div>
+      </div>-->
    </div>
     <!--</div>-->
   </div>
@@ -208,8 +259,9 @@
 				<div class="dropdown">
 				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0 p-1" type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
 				  <ul id="xport_dm" class="dropdown-menu" aria-labelledby="exportversions">
-				    <li><a class="dropdown-item" href="#" id="exportJason_v1">Json v0.0.1 (Wkit 8.5)</a></li>
-				    <li><a class="dropdown-item" href="#" id="exportJason">pre-Wkit 8.5</a></li>
+            <li><a class="dropdown-item xportJSON" href="#" id="exportJason_v2" data-version="2">Json v0.0.2 (Wkit 8.7)</a></li>
+				    <li><a class="dropdown-item xportJSON" href="#" id="exportJason_v1" data-version="1">Json v0.0.1 (Wkit 8.5)</a></li>
+				    <li><a class="dropdown-item xportJSON" href="#" id="exportJason" data-version="0">pre-Wkit 8.5</a></li>
 				  </ul>
 				</div>
       </div>
@@ -354,7 +406,6 @@
 						<optgroup id="Metal_Out_values" label='material'></optgroup>
           </select>
         </div>
-
         <div>
           <span class="badge w-100 rounded-0 ">Rough In</span>
           <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
@@ -369,7 +420,6 @@
             <optgroup label="Material specific" id="Rough_out_values"></optgroup>
           </select>
         </div>
-
       </div>
       <div id="colorGrid">
         <div><span class="badge  w-100 rounded-0">ColorCode</span><input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13"></div>
@@ -383,6 +433,11 @@
           </select>
         </div>
         <div><span class="badge  w-100 rounded-0" id="colorPntage">rgb();</span><span class="badge border border-secondary w-100 rounded-0 tint" > </span></div>
+        <div class="text-center"><span class="badge  w-100 rounded-0"> </span>
+          <!--<button type="button" id=""  data-toggle="tooltip" title="resort colors by" class="btn  btn-sm btn-outline-warning"><i class="fa-solid fa-sort"></i></button>-->
+          <input type="checkbox" class="btn-check" id="colororder" checked autocomplete="off">
+          <label class="btn btn-outline-warning btn-sm" for="colororder"><i class="fa-solid fa-sort"></i></label>
+        </div>
       </div>
       <div id="colordisplay" class="layer-1">
         <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" title='null_null' >&nbsp;</span></div>
@@ -406,12 +461,11 @@
       	<input type="text" class="form-control rounded-0 " id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
 				<button class="btn btn-outline-danger rounded-0" id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
 			</div>
-      <span class="badge  w-100 rounded-0 ">Preview</span>
-
       <select class="form-select rounded-0" id="mbSelect" aria-label="microblends selection lists">
         <option data-package="source" data-thumbnail="./images/_nopreview.gif" value="" disabled >custom</option>
         <option data-package="source" data-thumbnail="./images/default.gif" value="base\surfaces\microblends\default.xbm" selected >default</option>
       </select>
+      <span class="badge  w-100 rounded-0 ">Preview</span>
       <img id="mb-preview" style="background-color:#000;" alt="microblend preview" src='./images/default.gif' >
 			<div class='row gx-0'>
 				<div class="col-10 m-0">
@@ -427,11 +481,18 @@
 				</div>
 			</div>
 			<div id="MicroblendsLibrary">
-        <span class="badge w-100 rounded-0" >microblends gallery</span>
+        <span class="badge w-100 rounded-0" >core microblends</span>
         <div id="microdisplay" class="layer-1">
           <div id="cagethemicroblends" >
             <li style="background-image:url('./images/thumbs/default.gif');" data-package='source' data-toggle="tooltip" title="default"> </li>
           </div>
+        </div>
+      </div>
+      <div id="CustMicroblendsGallery">
+        <span class="badge w-100 rounded-0" >custom microblends <div class="btn-group btn-tiny" role="group" aria-label="Custom microblends button">
+          <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye"></i></button>
+        </div></span>
+        <div id="cu_mu_display" class="layer-1 d-none">
         </div>
       </div>
       <!-- microblends-data -->
@@ -616,7 +677,7 @@
     </div>
 		<div class="row no-gutter">
 	    <div class="col-4"><div class="modal-body text-white" style="background-color:#121212;min-height:100%"></div></div>
-			<div class="col-8 text-center"><canvas id="normalMe" class="my-1" ></canvas></div>
+			<div class="col-8 text-center"> </div>
 		</div>
   </div>
 </div>

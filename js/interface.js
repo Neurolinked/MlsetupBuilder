@@ -151,6 +151,7 @@ $(function(){
 		if ($('#ModelLibrary').hasClass('offcanvas-end')){
 			modelLibW();
 		}
+    modelInfW();
 	});
 
 	function modelLibW(){
@@ -165,9 +166,13 @@ $(function(){
 		}
 	}
 
-	$("#ModelLibrary").on('show.bs.offcanvas',function(){
-		modelLibW();
-	});
+  function modelInfW(){
+    let leftcorner = $("#Filemanager").offset().left;
+		$('#minfoCSS').text('.ocModelInfo {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
+  }
+
+	$("#ModelLibrary").on('show.bs.offcanvas',function(){	modelLibW(); }); //model library offcanvas end panel  size calculator
+  $("#InfoModel").on('show.bs.offcanvas',function(){	modelInfW(); }); //model info offcanvas panel size calculator
 
 	$("#mlPosX").click(function(){
 		swapModelClass();
@@ -935,6 +940,16 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	  $(this).toggleClass("flip");
 	  $('i.fa-hand-point-down').toggleClass("fa-hand-point-up");
 	});
+
+  /* custom microblends behaviours*/
+  $("#btn_dis_cBlend").click(function(){
+    $("#btn_dis_cBlend svg").toggleClass("fa-eye fa-eye-slash");
+    if ($("#btn_dis_cBlend svg").hasClass("fa-eye-slash")){
+      $("#cu_mu_display").removeClass("d-none");
+    }else{
+      $("#cu_mu_display").addClass("d-none");
+    }
+  });
 	//Material libraries and search
 	var matToSearch=false;
 /*
@@ -1003,7 +1018,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 					toodarkClass='bg-light';
 				}
 				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
+				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
 
 			//build up the lists of data loaded from the material chosen
@@ -1030,10 +1045,29 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#materialcolors").html("");
 		}
 
-		$("#cagecolors").find('span').sort(function(a, b) {
-    	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
-		}).appendTo($("#cagecolors"));
+    if ($("#colororder").is(":checked")){
+      $("#cagecolors").find('span').sort(function(a, b) {
+      	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
+  		}).appendTo($("#cagecolors"));
+    }else{
+      $("#cagecolors").find('span').sort(function(a, b) {
+      	return +a.getAttribute('data-order') - +b.getAttribute('data-order');
+  		}).appendTo($("#cagecolors"));
+    }
+
 	});
+
+  $("#colororder").change(function(){
+    if ($("#colororder").is(":checked")){
+      $("#cagecolors").find('span').sort(function(a, b) {
+      	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
+  		}).appendTo($("#cagecolors"));
+    }else{
+      $("#cagecolors").find('span').sort(function(a, b) {
+      	return +a.getAttribute('data-order') - +b.getAttribute('data-order');
+  		}).appendTo($("#cagecolors"));
+    }
+  });
 //filter materials by name and display badge links to select them
 	$("#matModFinder").keyup(function () {
 		if(matToSearch) { clearTimeout(matToSearch); }
@@ -1569,9 +1603,9 @@ $("#TheMagicIsHere").click(function(){
 					if (theArcOfNOA.Header.hasOwnProperty('WKitJsonVersion')){
 						//if the format change i need another version of the structure loading
 						var jsonformat = theArcOfNOA.Header.WKitJsonVersion;
+            notifyMe('Wolvenkit Version: '+theArcOfNOA.Header.WolvenKitVersion+" - JSON encode v.: "+theArcOfNOA.Header.WKitJsonVersion, false);
 						switch(jsonformat) {
 							case '0.0.1':
-								notifyMe('Wolvenkit Version: '+theArcOfNOA.Header.WolvenKitVersion+" - JSON encode v.: "+theArcOfNOA.Header.WKitJsonVersion, false);
 								vacuumCleaner();
 								if (theArcOfNOA.hasOwnProperty("Data")){
 									notifyMe("Version: "+theArcOfNOA.Data.Version+" (BuildVersion: "+theArcOfNOA.Data.BuildVersion+")", false);
@@ -1686,8 +1720,112 @@ $("#TheMagicIsHere").click(function(){
 								}
 								notifyMe(k+' layer/s found',false);
 								break;
+              case "0.0.2":
+                vacuumCleaner();
+                if (theArcOfNOA.hasOwnProperty("Data")){
+                  notifyMe("Version: "+theArcOfNOA.Data.Version+" (BuildVersion: "+theArcOfNOA.Data.BuildVersion+")", false);
+                  var tempArray=[];
+                  tempArray=theArcOfNOA.Data.RootChunk.layers;
+                  k=0;
+                  let basicOpacity,tempTile,tempMat,tempNorm,tempMetalIN,tempMetalOUT,tempRoughIN,tempRoughOUT,tempCol
+                  let tempoffU,tempoffV
+                  let tempMBlend,tempMBTile,tempMBNS,tempMBCon,tempMBoffU,tempMBoffV;
+                  tempArray.forEach(function(element) {
+                    // Layer - Reset
+                    basicOpacity='1.0';
+                    tempTile ="1.0";
+                    tempMat='base\\surfaces\\materials\\special\\unused.mltemplate';
+                    tempCol='null_null';
+                    tempNorm = 'null';
+                    tempMetalIN ="null";
+                    tempMetalOUT ="null";
+                    tempRoughIN ="null";
+                    tempRoughOUT ="null";
+                    tempoffU ='0';
+                    tempoffV ='0';
+                    // Multiblend Reset
+                    tempMBTile ='1.0';
+                    tempMBlend = "base\\surfaces\\microblends\\default.xbm";
+                    tempMBNS='1.0';
+                    tempMBCon='1.0';
+                    tempMBoffU ='0';
+                    tempMBoffV ='0';
+
+                    if (element.hasOwnProperty('matTile')){tempTile=element.matTile;}
+                    if (element.hasOwnProperty('opacity')){ basicOpacity=element.opacity;	}
+                    if (element.hasOwnProperty('material')){ tempMat=element.material.DepotPath;}
+
+                    if (element.hasOwnProperty('colorScale')){ tempCol=element.colorScale;}
+                    if (element.hasOwnProperty('normalStrength')){ tempNorm=element.normalStrength;}
+                    if (element.hasOwnProperty('metalLevelsIn')){ tempMetalIN=element.metalLevelsIn;}
+                    if (element.hasOwnProperty('metalLevelsOut')){ tempMetalOUT=element.metalLevelsOut;}
+                    if (element.hasOwnProperty('roughLevelsin')){ tempRoughIN=element.roughLevelsin;}
+                    if (element.hasOwnProperty('roughLevelsOut')){ tempRoughOUT=element.roughLevelsOut;}
+
+                    if (element.hasOwnProperty('offsetU')){ tempoffU=element.offsetU;}
+                    if (element.hasOwnProperty('offsetV')){ tempoffV=element.offsetV;}
+
+                    if (element.hasOwnProperty('microblend')){  if(element.microblend.DepotPath!=''){ tempMBlend=element.microblend.DepotPath; } }
+                    if (element.hasOwnProperty('mbTile')){ tempMBTile=element.mbTile;}
+                    if (element.hasOwnProperty('microblendNormalStrength')){ tempMBNS=element.microblendNormalStrength;}
+                    if (element.hasOwnProperty('microblendContrast')){ tempMBCon=element.microblendContrast;}
+
+                    if (element.hasOwnProperty('microblendOffsetU')){ tempMBoffU=element.microblendOffsetU;}
+                    if (element.hasOwnProperty('microblendOffsetV')){ tempMBoffV=element.microblendOffsetV;}
+                    if ($('#layeringsystem li').eq(k).attr('disabled')!=='disabled'){
+                      $('#layeringsystem li').eq(k).data({
+                        mattile:tempTile,
+                        labels:'('+tempCol+') '+ String(tempMat).replace(/^.*[\\\/]/, '').split('.')[0],
+                        material:tempMat,
+                        opacity:basicOpacity,
+                        color:tempCol,
+                        normal:tempNorm,
+                        roughin:tempRoughIN,
+                        roughout:tempRoughOUT,
+                        metalin:tempMetalIN,
+                        metalout:tempMetalOUT,
+                        offsetU:tempoffU,
+                        offsetV:tempoffV,
+                        mblend:tempMBlend,
+                        mbtile:tempMBTile,
+                        mbcontrast:tempMBCon,
+                        mbnormal:tempMBNS,
+                        mboffu:tempMBoffU,
+                        mboffv:tempMBoffV
+                      });
+                      $('#layeringsystem li').eq(k).attr({
+                        "data-mattile":tempTile,
+                        "data-labels":'('+tempCol+') '+ String(tempMat).replace(/^.*[\\\/]/, '').split('.')[0],
+                        "data-material":tempMat,
+                        "data-opacity":basicOpacity,
+                        "data-color":tempCol,
+                        "data-normal":tempNorm,
+                        "data-roughin":tempRoughIN,
+                        "data-roughout":tempRoughOUT,
+                        "data-metalin":tempMetalIN,
+                        "data-metalout":tempMetalOUT,
+                        "data-offsetU":tempoffU,
+                        "data-offsetV":tempoffV,
+                        "data-mblend":tempMBlend,
+                        "data-mbtile":tempMBTile,
+                        "data-mbcontrast":tempMBCon,
+                        "data-mbnormal":tempMBNS,
+                        "data-mboffu":tempMBoffU,
+                        "data-mboffv":tempMBoffV
+                      });
+                    }
+                    k++;
+                  });
+                  console.log("%c- Imported "+$("#importTech").val()+", Now cleanup -","background-color:green;color:yellow;")
+                  //$("#load-info").html('<span class="badge bg-info text-dark">Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1)+' </span>');
+                  notifyMe('Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1),false);
+                  $("#importTech").val("");
+                  $("#layeringsystem li.active").click();
+                }
+                notifyMe(k+' layer/s found',false);
+                break;
 							default:
-								notifyMe('Unkown version of mlsetup json, the new format need new code to be interpreted')
+								notifyMe('Unkown version of mlsetup json, the new format need new code to be interpreted',true)
 						}
 					}
 				}else{
@@ -1699,272 +1837,254 @@ $("#TheMagicIsHere").click(function(){
 		}
 	});
 
-  //Event to export your setup
-  $("#exportJason").click(function(){
-		let nomefile = 'commonlayer.json';
-    //check if there is already a chosed Names
-		if (String($("#nametoexport").val()).trim()!==''){
-			nomefile = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
-			//$("#exportJason").attr("download",nomefile+".json");
-		}/*else{
-			$("#exportJason").attr("download","material.json");
-		}*/
 
-    //if there are a system of layers setup
-	  if ($("#layeringsystem li").length > 0 ){
-      //file header
-			//let preamble ='{\r\n  "Extension": ".mlsetup",\r\n'
-			let preamble ='{\r\n'
-										+'  "Chunks": {\r\n'
-										+'    "0": {\r\n'
-										+'      "Type": "Multilayer_Setup",\r\n'
-										+'      "ParentIndex": -1,\r\n'
-										+'      "Properties": {\r\n'
-										+'        "cookingPlatform": [\r\n'
-										+'          "PLATFORM_PC"\r\n'
-										+'        ],\r\n'
-										+'        "layers": [\r\n';
-      let ratiovalue='\r\n';
-      let ratioIVal = $("#layerRatio").val();
-      if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined) && (Number(ratioIVal)!=1)){
-          ratiovalue = ',\r\n        "ratio": '+Number(ratioIVal)+'\r\n';
-      }
-      //file tail
-			let closing = '\r\n        ]'+ratiovalue+'      }\r\n    }\r\n  }\r\n}';
-			let jsonbody = '';
 
-		for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
-			jsonOpacity='';
-			jsonOffsetU='';
-			jsonOffsetV='';
-			jsonMbOffU='';
-			jsonMbOffV='';
-			jsonMBTile='';
-      jsonlayerRoughIn='            "roughLevelsIn": "null",\r\n';
+//3 export versions for Wkit
+$(".xportJSON").click(function(){
+  ver = $(this).data("version");
 
-			if (k!=0){
-				//no Opacity
-				//no offsetu no offsetv
-				jsonOpacity='            "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n';
-			}
-			if ($("#layeringsystem li").eq(k).data('opacity')==1){
-				jsonOpacity='';
-			}
-			if ($("#layeringsystem li").eq(k).data('offsetu')>0) {
-				jsonOffsetU='            "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n';
-			}
+  let nomefile = 'commonlayer.json';
+  //check if there is already a chosed Names
+  if (String($("#nametoexport").val()).trim()!==''){
+    nomefile = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
+  }
 
-			if ($("#layeringsystem li").eq(k).data('offsetv')>0) {
-				jsonOffsetV='            "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n';
-			}
+  if ($("#layeringsystem li").length > 0 ){
+    var jsonDate = (new Date()).toJSON();
+    var preamble, ratiovalue, ratioIVal, useNormal, closing, jsonbody = "";
 
-			if ($("#layeringsystem li").eq(k).data('mboffu')>0) {
-				jsonMbOffU='            "microblendOffsetU": '+Number($("#layeringsystem li").eq(k).data('mboffu')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffu')).countDecimals())+',\r\n';
-			}
-			if ($("#layeringsystem li").eq(k).data('mboffv')>0) {
-				jsonMbOffV='            "microblendOffsetV": '+Number($("#layeringsystem li").eq(k).data('mboffv')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffv')).countDecimals())+',\r\n';
-			}
-			if ($("#layeringsystem li").eq(k).data('mblend').replace(/^.*[\\\/]/, '').split('.')[0]!="default"){
-				if (Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(2)!=1.00){
-					jsonMBTile='            "mbTile": '+Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(Number($("#layeringsystem li").eq(k).data('mbtile')).countDecimals())+',\r\n';
-				}
-			}
-      if ($("#layeringsystem li").eq(k).data('roughin')!='null'){
-        if(($("#layeringsystem li").eq(k).data('roughin')=='2e977a') || ($("#layeringsystem li").eq(k).data('roughin')=='48a1ae')){
-          jsonlayerRoughIn='            "roughLevelsIn": "'+$("#layeringsystem li").eq(k).data('roughin')+'",\r\n'
+    switch(ver){
+      case 0:
+          preamble ='{\r\n'
+            +'  "Chunks": {\r\n'
+            +'    "0": {\r\n'
+            +'      "Type": "Multilayer_Setup",\r\n'
+            +'      "ParentIndex": -1,\r\n'
+            +'      "Properties": {\r\n'
+            +'        "cookingPlatform": [\r\n'
+            +'          "PLATFORM_PC"\r\n'
+            +'        ],\r\n'
+            +'        "layers": [\r\n';
+          ratiovalue='\r\n';
+          ratioIVal = $("#layerRatio").val();
+          if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined) && (Number(ratioIVal)!=1)){
+              ratiovalue = ',\r\n        "ratio": '+Number(ratioIVal)+'\r\n';
+          }
+          closing = '\r\n        ]'+ratiovalue+'      }\r\n    }\r\n  }\r\n}'; //file tail
+          jsonbody = '';
+
+          for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
+            jsonOpacity='';
+            jsonOffsetU='';
+            jsonOffsetV='';
+            jsonMbOffU='';
+            jsonMbOffV='';
+            jsonMBTile='';
+            jsonlayerRoughIn='            "roughLevelsIn": "null",\r\n';
+
+            if (k!=0){
+              //no Opacity
+              //no offsetu no offsetv
+              jsonOpacity='            "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n';
+            }
+            if ($("#layeringsystem li").eq(k).data('opacity')==1){
+              jsonOpacity='';
+            }
+            if ($("#layeringsystem li").eq(k).data('offsetu')>0) {
+              jsonOffsetU='            "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n';
+            }
+
+            if ($("#layeringsystem li").eq(k).data('offsetv')>0) {
+              jsonOffsetV='            "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n';
+            }
+
+            if ($("#layeringsystem li").eq(k).data('mboffu')>0) {
+              jsonMbOffU='            "microblendOffsetU": '+Number($("#layeringsystem li").eq(k).data('mboffu')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffu')).countDecimals())+',\r\n';
+            }
+            if ($("#layeringsystem li").eq(k).data('mboffv')>0) {
+              jsonMbOffV='            "microblendOffsetV": '+Number($("#layeringsystem li").eq(k).data('mboffv')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffv')).countDecimals())+',\r\n';
+            }
+            if ($("#layeringsystem li").eq(k).data('mblend').replace(/^.*[\\\/]/, '').split('.')[0]!="default"){
+              if (Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(2)!=1.00){
+                jsonMBTile='            "mbTile": '+Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(Number($("#layeringsystem li").eq(k).data('mbtile')).countDecimals())+',\r\n';
+              }
+            }
+            if ($("#layeringsystem li").eq(k).data('roughin')!='null'){
+              if(($("#layeringsystem li").eq(k).data('roughin')=='2e977a') || ($("#layeringsystem li").eq(k).data('roughin')=='48a1ae')){
+                jsonlayerRoughIn='            "roughLevelsIn": "'+$("#layeringsystem li").eq(k).data('roughin')+'",\r\n'
+              }
+            }
+
+              jsonbody += '          {\r\n            "matTile": '+Number($("#layeringsystem li").eq(k).data('mattile')).toFixed(2)+',\r\n'
+                  +jsonMBTile
+                  +'            "microblend": "'+$("#layeringsystem li").eq(k).data('mblend').replaceAll(/\\/g, '\\\\')+'",\r\n'
+                  +'            "microblendContrast": '+Number($("#layeringsystem li").eq(k).data('mbcontrast')).toFixed(2)+',\r\n'
+                  +'            "microblendNormalStrength": '+Number($("#layeringsystem li").eq(k).data('mbnormal')).toFixed(2)+',\r\n'
+                  +jsonMbOffU+jsonMbOffV+jsonOpacity+jsonOffsetU+jsonOffsetV
+                  +'            "material": "'+$("#layeringsystem li").eq(k).data('material').replaceAll(/\\/g, '\\\\')+'",\r\n'
+                  +'            "colorScale": "'+$("#layeringsystem li").eq(k).data('color')+'",\r\n'
+                  +'            "normalStrength": "'+$("#layeringsystem li").eq(k).data('normal')+'",\r\n'
+                  +jsonlayerRoughIn
+                  +'            "roughLevelsOut": "'+$("#layeringsystem li").eq(k).data('roughout')+'",\r\n'
+                  +'            "metalLevelsIn": "null",\r\n'
+                  +'            "metalLevelsOut": "'+$("#layeringsystem li").eq(k).data('metalout')+'"\r\n'
+                  +'          },\r\n';
+
+          }
+        break;
+      case 1:
+        preamble ='{\r\n'
+            +'  "Header": {\r\n'
+            +'    "WolvenKitVersion": "8.5.0",\r\n'
+            +'    "WKitJsonVersion": "0.0.1",\r\n'
+            +'    "ExportedDateTime": "'+jsonDate+'",\r\n'
+            +'    "DataType": "CR2W",\r\n'
+            +'    "ArchiveFileName": ""\r\n'
+            +'  },\r\n'
+            +'  "Data": {\r\n'
+            +'    "Version": 195,\r\n'
+            +'    "BuildVersion": 0,\r\n'
+            +'    "RootChunk": {\r\n'
+            +'      "Type": "Multilayer_Setup",\r\n'
+            +'      "Properties": {\r\n'
+            +'        "cookingPlatform": "PLATFORM_PC",\r\n'
+            +'        "layers": [\r\n';
+
+        ratiovalue='\r\n';
+        ratioIVal = $("#layerRatio").val();
+        if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined)){
+            ratiovalue = ',\r\n        "ratio": '+Number(ratioIVal)+',\r\n';
+        }else{
+            ratiovalue = ',\r\n        "ratio": 1,\r\n';
         }
-      }
+        if ($('#useNormals').is(':checked')){
+          useNormal = '        "useNormal": 1\r\n'
+        }else{
+          useNormal = '        "useNormal": 0\r\n'
+        }
+        closing = '\r\n        ]'+ratiovalue+useNormal+'      }\r\n    },\r\n    "EmbeddedFiles": []\r\n  }\r\n}'; //file tail
+        jsonbody = '';
+        for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
+          jsonOpacity='';
+          if (k!=0){
+        //no Opacity
+        //no offsetu no offsetv
+            jsonOpacity='              "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed( Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n';
+          }
+          if ($("#layeringsystem li").eq(k).data('opacity')==1){ jsonOpacity=''; }
+            jsonbody += '          {\r\n            "Type": "Multilayer_Layer",\r\n            "Properties": {\r\n'
+              +'              "colorScale": "'+$("#layeringsystem li").eq(k).data('color')+'",\r\n'
+              +'              "material": {\r\n'
+              +'                "DepotPath": "'+$("#layeringsystem li").eq(k).data('material').replaceAll(/\\/g, '\\\\')+'",\r\n'
+              +'                "Flags": "Default"\r\n'
+              +'              },\r\n'
+              +'              "matTile": '+Number($("#layeringsystem li").eq(k).data('mattile')).toFixed(2)+',\r\n'
+              +'              "mbTile": '+Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(Number($("#layeringsystem li").eq(k).data('mbtile')).countDecimals())+',\r\n'
+              +'              "metalLevelsIn": "null",\r\n'
+              +'              "metalLevelsOut": "'+$("#layeringsystem li").eq(k).data('metalout')+'",\r\n'
+              +'              "microblend": {\r\n'
+              +'                "DepotPath": "'+$("#layeringsystem li").eq(k).data('mblend').replaceAll(/\\/g, '\\\\')+'",\r\n'
+              +'                "Flags": "Default"\r\n'
+              +'              },\r\n'
+              +'              "microblendContrast": '+Number($("#layeringsystem li").eq(k).data('mbcontrast')).toFixed(2)+',\r\n'
+              +'              "microblendNormalStrength": '+Number($("#layeringsystem li").eq(k).data('mbnormal')).toFixed(2)+',\r\n'
+              +'              "microblendOffsetU": '+Number($("#layeringsystem li").eq(k).data('mboffu')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffu')).countDecimals())+',\r\n'
+              +'              "microblendOffsetV": '+Number($("#layeringsystem li").eq(k).data('mboffv')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffv')).countDecimals())+',\r\n'
+              +'              "normalStrength": "'+$("#layeringsystem li").eq(k).data('normal')+'",\r\n'
+              +'              "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n'
+              +'              "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n'
+              +'              "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n'
+              +jsonOpacity
+              +'              "overrides": 0,\r\n'
+              +'              "roughLevelsIn": "null",\r\n'
+              +'              "roughLevelsOut": "'+$("#layeringsystem li").eq(k).data('roughout')+'"\r\n'
+              +'            }\r\n          },\r\n';
+          }
 
-				jsonbody += '          {\r\n            "matTile": '+Number($("#layeringsystem li").eq(k).data('mattile')).toFixed(2)+',\r\n'
-						+jsonMBTile
-						+'            "microblend": "'+$("#layeringsystem li").eq(k).data('mblend').replaceAll(/\\/g, '\\\\')+'",\r\n'
-						+'            "microblendContrast": '+Number($("#layeringsystem li").eq(k).data('mbcontrast')).toFixed(2)+',\r\n'
-						+'            "microblendNormalStrength": '+Number($("#layeringsystem li").eq(k).data('mbnormal')).toFixed(2)+',\r\n'
-						+jsonMbOffU+jsonMbOffV+jsonOpacity+jsonOffsetU+jsonOffsetV
-						+'            "material": "'+$("#layeringsystem li").eq(k).data('material').replaceAll(/\\/g, '\\\\')+'",\r\n'
-						+'            "colorScale": "'+$("#layeringsystem li").eq(k).data('color')+'",\r\n'
-						+'            "normalStrength": "'+$("#layeringsystem li").eq(k).data('normal')+'",\r\n'
-						+jsonlayerRoughIn
-						+'            "roughLevelsOut": "'+$("#layeringsystem li").eq(k).data('roughout')+'",\r\n'
-						+'            "metalLevelsIn": "null",\r\n'
-						+'            "metalLevelsOut": "'+$("#layeringsystem li").eq(k).data('metalout')+'"\r\n'
-						+'          },\r\n';
+        break;
+      case 2:
+        preamble ='{\r\n'
+                      +'  "Header": {\r\n'
+                      +'    "WolvenKitVersion": "8.7.0",\r\n'
+                      +'    "WKitJsonVersion": "0.0.2",\r\n'
+                      +'    "GameVersion": 1520,\r\n'
+                      +'    "ExportedDateTime": "'+jsonDate+'",\r\n'
+                      +'    "DataType": "CR2W",\r\n'
+                      +'    "ArchiveFileName": ""\r\n'
+                      +'  },\r\n'
+                      +'  "Data": {\r\n'
+                      +'    "Version": 195,\r\n'
+                      +'    "BuildVersion": 0,\r\n'
+                      +'    "RootChunk": {\r\n'
+                      +'      "$type": "Multilayer_Setup",\r\n'
+                      +'      "cookingPlatform": "PLATFORM_PC",\r\n'
+                      +'      "layers": [\r\n';
+        ratiovalue='\r\n';
+    		ratioIVal = $("#layerRatio").val();
+    		if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined)){
+    				ratiovalue = ',\r\n      "ratio": '+Number(ratioIVal)+',\r\n';
+    		}else{
+    				ratiovalue = ',\r\n      "ratio": 1,\r\n';
+    		}
 
-		}
+    		if ($('#useNormals').is(':checked')){
+    			useNormal = '      "useNormal": 1\r\n'
+    		}else{
+    			useNormal = '      "useNormal": 0\r\n'
+    		}
+        closing = '\r\n      ]'+ratiovalue+useNormal+'    },\r\n    "EmbeddedFiles": []\r\n  }\r\n}';
+        jsonbody = '';
 
-		jsonbody=jsonbody.slice(0,-3); //removes latest commas
-		thePIT.Export({
-			file:nomefile,
-			content:preamble+jsonbody+closing,
-			type:'mlsetup'
-		});
-		/*var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(preamble+jsonbody+closing); //pack the text to be sent
-		var link = document.getElementById('exportJason').href = dataUri;*/
-	 }
- });
+        //The Layers
+        for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
+          jsonOpacity='';
+          if (k!=0){
+      			//no Opacity
+      			//no offsetu no offsetv
+      			jsonOpacity='          "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n';
+      		}
+          if ($("#layeringsystem li").eq(k).data('opacity')==1){ jsonOpacity=''; }
+          jsonbody += '        {\r\n          "$type": "Multilayer_Layer",\r\n'
+    					+'          "colorScale": "'+$("#layeringsystem li").eq(k).data('color')+'",\r\n'
+    					+'          "material": {\r\n'
+    					+'            "DepotPath": "'+$("#layeringsystem li").eq(k).data('material').replaceAll(/\\/g, '\\\\')+'",\r\n'
+    					+'            "Flags": "Default"\r\n'
+    					+'          },\r\n'
+    					+'          "matTile": '+Number($("#layeringsystem li").eq(k).data('mattile')).toFixed(2)+',\r\n'
+    					+'          "mbTile": '+Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(Number($("#layeringsystem li").eq(k).data('mbtile')).countDecimals())+',\r\n'
+    					+'          "metalLevelsIn": "null",\r\n'
+    					+'          "metalLevelsOut": "'+$("#layeringsystem li").eq(k).data('metalout')+'",\r\n'
+    					+'          "microblend": {\r\n'
+    					+'            "DepotPath": "'+$("#layeringsystem li").eq(k).data('mblend').replaceAll(/\\/g, '\\\\')+'",\r\n'
+    					+'            "Flags": "Default"\r\n'
+    					+'          },\r\n'
+    					+'          "microblendContrast": '+Number($("#layeringsystem li").eq(k).data('mbcontrast')).toFixed(2)+',\r\n'
+    					+'          "microblendNormalStrength": '+Number($("#layeringsystem li").eq(k).data('mbnormal')).toFixed(2)+',\r\n'
+    					+'          "microblendOffsetU": '+Number($("#layeringsystem li").eq(k).data('mboffu')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffu')).countDecimals())+',\r\n'
+    					+'          "microblendOffsetV": '+Number($("#layeringsystem li").eq(k).data('mboffv')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffv')).countDecimals())+',\r\n'
+    					+'          "normalStrength": "'+$("#layeringsystem li").eq(k).data('normal')+'",\r\n'
+    					+'          "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n'
+    					+'          "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n'
+    					+'          "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n'
+    					+jsonOpacity
+    					+'          "overrides": 0,\r\n'
+    					+'          "roughLevelsIn": "null",\r\n'
+    					+'          "roughLevelsOut": "'+$("#layeringsystem li").eq(k).data('roughout')+'"\r\n'
+    					+'        },\r\n';
+        }
 
-//version 0.0.1 of the Json version of mlsetup 4 Wkit 8.5
+        break;
+    }
 
-$("#exportJason_v1").click(function(){
-	let nomefile = 'commonlayer.json';
-	//check if there is already a chosed Names
-	if (String($("#nametoexport").val()).trim()!==''){
-		nomefile = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
-	}
+    jsonbody = jsonbody.slice(0,-3); //removes latest commas
 
-	//if there are a system of layers setup
-	if ($("#layeringsystem li").length > 0 ){
-		//file header
-		let jsonDate = (new Date()).toJSON();
-		/*
-		{
-		  "Header": {
-		    "WolvenKitVersion": "8.5.0",
-		    "WKitJsonVersion": "0.0.1",
-		    "ExportedDateTime": "2022-02-17T22:49:03.1341647Z",
-		    "DataType": "CR2W",
-		    "ArchiveFileName": "E:\\Cyberpunk Mods\\TestRetexture\\source\\archive\\base\\characters\\garment\\citizen_casual\\torso\\t1_080_tank__judy\\t1_080__purple_joker.mlsetup"
-		  },
-			"Data": {
-		    "Version": 195,
-		    "BuildVersion": 0,
-		    "RootChunk": {
-		      "Type": "Multilayer_Setup",
-		      "Properties": {
-		        "cookingPlatform": "PLATFORM_PC",
-		        "layers": [
-							*/
-		let preamble ='{\r\n'
-									+'  "Header": {\r\n'
-									+'    "WolvenKitVersion": "8.5.0",\r\n'
-									+'    "WKitJsonVersion": "0.0.1",\r\n'
-									+'    "ExportedDateTime": "'+jsonDate+'",\r\n'
-									+'    "DataType": "CR2W",\r\n'
-									+'    "ArchiveFileName": ""\r\n'
-									+'  },\r\n'
-									+'  "Data": {\r\n'
-									+'    "Version": 195,\r\n'
-									+'    "BuildVersion": 0,\r\n'
-									+'    "RootChunk": {\r\n'
-									+'      "Type": "Multilayer_Setup",\r\n'
-									+'      "Properties": {\r\n'
-									+'        "cookingPlatform": "PLATFORM_PC",\r\n'
-									+'        "layers": [\r\n';
-
-		let ratiovalue='\r\n';
-		let ratioIVal = $("#layerRatio").val();
-		if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined)){
-				ratiovalue = ',\r\n        "ratio": '+Number(ratioIVal)+',\r\n';
-		}else{
-				ratiovalue = ',\r\n        "ratio": 1,\r\n';
-		}
-		let useNormal
-		if ($('#useNormals').is(':checked')){
-			useNormal = '        "useNormal": 1\r\n'
-		}else{
-			useNormal = '        "useNormal": 0\r\n'
-		}
-
-		//file tail
-		let closing = '\r\n        ]'+ratiovalue+useNormal+'      }\r\n    },\r\n    "EmbeddedFiles": []\r\n  }\r\n}';
-		let jsonbody = '';
-
-	for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
-
-		jsonOpacity='';
-
-		if (k!=0){
-			//no Opacity
-			//no offsetu no offsetv
-			jsonOpacity='              "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n';
-		}
-		if ($("#layeringsystem li").eq(k).data('opacity')==1){ jsonOpacity=''; }
-		/*
-		jsonOffsetU='';
-		jsonOffsetV='';
-		jsonMbOffU='';
-		jsonMbOffV='';
-		jsonMBTile='';
-		jsonlayerRoughIn='            "roughLevelsIn": "null",\r\n';
-
-		if ($("#layeringsystem li").eq(k).data('offsetu')>0) {
-			jsonOffsetU='            "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n';
-		}
-
-		if ($("#layeringsystem li").eq(k).data('offsetv')>0) {
-			jsonOffsetV='            "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n';
-		}
-
-		if ($("#layeringsystem li").eq(k).data('mboffu')>0) {
-			jsonMbOffU='            "microblendOffsetU": '+Number($("#layeringsystem li").eq(k).data('mboffu')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffu')).countDecimals())+',\r\n';
-		}
-		if ($("#layeringsystem li").eq(k).data('mboffv')>0) {
-			jsonMbOffV='            "microblendOffsetV": '+Number($("#layeringsystem li").eq(k).data('mboffv')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffv')).countDecimals())+',\r\n';
-		}
-		if ($("#layeringsystem li").eq(k).data('mblend').replace(/^.*[\\\/]/, '').split('.')[0]!="default"){
-			if (Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(2)!=1.00){
-				jsonMBTile='            "mbTile": '+Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(Number($("#layeringsystem li").eq(k).data('mbtile')).countDecimals())+',\r\n';
-			}
-		}
-		if ($("#layeringsystem li").eq(k).data('roughin')!='null'){
-			if(($("#layeringsystem li").eq(k).data('roughin')=='2e977a') || ($("#layeringsystem li").eq(k).data('roughin')=='48a1ae')){
-				jsonlayerRoughIn='            "roughLevelsIn": "'+$("#layeringsystem li").eq(k).data('roughin')+'",\r\n'
-			}
-		}*/
-			jsonbody += '          {\r\n            "Type": "Multilayer_Layer",\r\n            "Properties": {\r\n'
-					+'              "colorScale": "'+$("#layeringsystem li").eq(k).data('color')+'",\r\n'
-					+'              "material": {\r\n'
-					+'                "DepotPath": "'+$("#layeringsystem li").eq(k).data('material').replaceAll(/\\/g, '\\\\')+'",\r\n'
-					+'                "Flags": "Default"\r\n'
-					+'              },\r\n'
-					+'              "matTile": '+Number($("#layeringsystem li").eq(k).data('mattile')).toFixed(2)+',\r\n'
-					+'              "mbTile": '+Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(Number($("#layeringsystem li").eq(k).data('mbtile')).countDecimals())+',\r\n'
-					+'              "metalLevelsIn": "null",\r\n'
-					+'              "metalLevelsOut": "'+$("#layeringsystem li").eq(k).data('metalout')+'",\r\n'
-					+'              "microblend": {\r\n'
-					+'                "DepotPath": "'+$("#layeringsystem li").eq(k).data('mblend').replaceAll(/\\/g, '\\\\')+'",\r\n'
-					+'                "Flags": "Default"\r\n'
-					+'              },\r\n'
-					+'              "microblendContrast": '+Number($("#layeringsystem li").eq(k).data('mbcontrast')).toFixed(2)+',\r\n'
-					+'              "microblendNormalStrength": '+Number($("#layeringsystem li").eq(k).data('mbnormal')).toFixed(2)+',\r\n'
-					+'              "microblendOffsetU": '+Number($("#layeringsystem li").eq(k).data('mboffu')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffu')).countDecimals())+',\r\n'
-					+'              "microblendOffsetV": '+Number($("#layeringsystem li").eq(k).data('mboffv')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffv')).countDecimals())+',\r\n'
-					+'              "normalStrength": "'+$("#layeringsystem li").eq(k).data('normal')+'",\r\n'
-					+'              "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n'
-					+'              "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n'
-					+'              "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n'
-					+jsonOpacity
-					+'              "overrides": 0,\r\n'
-					+'              "roughLevelsIn": "null",\r\n'
-					+'              "roughLevelsOut": "'+$("#layeringsystem li").eq(k).data('roughout')+'"\r\n'
-					+'            }\r\n          },\r\n';
-					/*
-			jsonbody += '          {\r\n            "matTile": '+Number($("#layeringsystem li").eq(k).data('mattile')).toFixed(2)+',\r\n'
-					+jsonMBTile
-					+'            "microblend": "'+$("#layeringsystem li").eq(k).data('mblend').replaceAll(/\\/g, '\\\\')+'",\r\n'
-					+'            "microblendContrast": '+Number($("#layeringsystem li").eq(k).data('mbcontrast')).toFixed(2)+',\r\n'
-					+'            "microblendNormalStrength": '+Number($("#layeringsystem li").eq(k).data('mbnormal')).toFixed(2)+',\r\n'
-					+jsonMbOffU+jsonMbOffV+jsonOpacity+jsonOffsetU+jsonOffsetV
-					+'            "material": "'+$("#layeringsystem li").eq(k).data('material').replaceAll(/\\/g, '\\\\')+'",\r\n'
-
-					+'            "normalStrength": "'+$("#layeringsystem li").eq(k).data('normal')+'",\r\n'
-					+jsonlayerRoughIn
-					+'            "roughLevelsOut": "'+$("#layeringsystem li").eq(k).data('roughout')+'",\r\n'
-					+'            "metalLevelsIn": "null",\r\n'
-					+'            "metalLevelsOut": "'+$("#layeringsystem li").eq(k).data('metalout')+'"\r\n'
-					+'          },\r\n';*/
-
-	}
-
-	jsonbody=jsonbody.slice(0,-3); //removes latest commas
-
-	$("#pBar").addClass('show');
-	thePIT.Export({
-		file:nomefile,
-		content:preamble+jsonbody+closing,
-		type:'mlsetup'
-	});
- }
+    $("#pBar").addClass('show');
+    thePIT.Export({
+      file:nomefile,
+      content:preamble+jsonbody+closing,
+      type:'mlsetup'
+    });
+  }
 });
 
 $("#unCookModal .modal-body .form-check-input").click(function(){
