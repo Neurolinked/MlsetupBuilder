@@ -95,6 +95,20 @@ $(function(){
   var indexLayerContextual = null; //variable index for the copied Data
   var dataContextual = {};
 
+  const FolderImport = {
+    groups:{},
+    add : function(elm = {},type){
+      if (!$.isEmptyObject(elm)){
+        this.groups[type].push(elm);
+      }
+    },
+    reset: function(){
+      this.groups = {models:[],masks:[],textures:[],dirs:[]};
+    }
+  };
+
+  FolderImport.reset();
+
 	const materialsize = window.getComputedStyle(document.body).getPropertyValue('--matsizes').replace(/px/,'');
 	const masksModal  = new bootstrap.Modal(document.getElementById('masksModal'));
 
@@ -644,6 +658,7 @@ $(function(){
 		'core' : {"dblclick_toggle":false,"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : modelsJson},
 		'types' : {
 							"default" : { "icon" : "text-warning fas fa-folder" },
+              "scan" : {"icon" : "text-danger fas fa-magnifying-glass"},
               "custom" : { "icon" : "custom fas fa-folder" },
 							"custmesh" : { "icon" : "custom fas fa-dice-d6" },
 							"man" : { "icon" : "fas fa-mars" },
@@ -665,8 +680,11 @@ $(function(){
 			switch (nodo.type){
 				case 'custmesh':
 				case 'custmask':
+        case 'custmask':
 					$('#btnMdlLoader').click();
 					break;
+        case 'default':
+          break;
 				default:
 					$('#btnMdlLoader').click();
 			}
@@ -697,6 +715,7 @@ $(function(){
 	}
 
 
+
   function customMdlMenu(node){
     //console.log(node.type);
 		let radix = $('#modelsTree').jstree(true);
@@ -704,6 +723,20 @@ $(function(){
       case 'default':
         return false;
         break;
+        /*
+      case 'scan':
+      return {
+        "scan":{
+          "separator_before": false,
+          "separator_after": false,
+          "label": "Start a new folder scan",
+          "icon": "fas fa-folder-tree",
+          "action": function (obj) {
+              thePIT.Scan();
+            }
+          }
+        };
+        break;*/
       case 'custmask':
         return {
 					"remove":{
@@ -2178,4 +2211,90 @@ $("#choseThisMask").click(function(){
 	legacyMatOpen.then((isopen)=>{
 		$('#legacyMatSector').attr('open',isopen);
 	});
+
+/*
+https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-values-to-a-single-depth-object/#:~:text=Single%20Depth%20Object-,To%20flatten%20JavaScript%20object%20keys%20and%20values%20to%20a%20single,the%20object%20we're%20flattening.&text=to%20create%20the%20obj%20object,%2C%20parent%20%2C%20and%20res%20objects.
+  const flattenObj = (obj, parent, res = {}) => {
+    for (const key of Object.keys(obj)) {
+      const propName = parent ? parent + '.' + key : key;
+      if (key=='childrens'){
+        flattenObj(obj[key], parent.hash, res);
+      }
+      if (typeof obj[key] === 'object') {
+        flattenObj(obj[key], propName, res);
+      } else {
+        res[propName] = obj[key];
+      }
+    }
+    return res;
+  }
+  */
+
+  const prepTheList = (obj, parent) =>{
+    if (obj!==null && obj!==undefined){
+      if (obj.hasOwnProperty("children")){
+        obj.children.forEach((figlio)=>{
+          prepTheList(figlio,obj)
+        })
+        /*
+        for (i=0,k=obj.children.length;i<k;i++){
+          prepTheList(obj.children[i],obj)
+          console.log(FolderImport);
+        }
+        */
+      }
+      if (obj.type=="directory"){
+        if (obj.relativePath==='.'){
+          FolderImport.add({id:obj.hash,text:obj.name,parent:'folderScan'},'dirs');
+        }else{
+          FolderImport.add({id:obj.hash,text:obj.name,parent:parent.hash},'dirs');
+        }
+      }else{
+        if (obj.name.match(/.+\.glb$/)){
+          FolderImport.add({id:obj.hash,text:obj.name,type:'mesh',parent:parent.hash,path:obj.path},'models');
+        }else if (obj.name.match(/.+\.(png|dds|xbm)$/)){
+          FolderImport.add({id:obj.hash,text:obj.name,type:'texture',parent:parent.hash,path:obj.path},'textures');
+        }else if (obj.name.match(/.+\.(mlmask)$/)){
+          FolderImport.add({id:obj.hash,text:obj.name,type:'mask',parent:parent.hash,path:obj.path},'masks');
+        }
+      }
+    }
+  }
+
+  $("#FolderScan").click(function(){
+    thePIT.Scan();
+  });
+
+  $("#txtFolderScanner").change(function(){
+    if ($(this).val()!=''){
+      try{
+        var albero = JSON.parse($(this).val());
+        FolderImport.reset();
+
+        prepTheList(albero);//prepare the list
+        //console.log(FolderImport);
+        let radix = $('#modelsTree').jstree(true);
+
+        if (FolderImport.groups.models.length>0){
+          if (FolderImport.groups.dirs.length>0){
+            FolderImport.groups.dirs.reverse().forEach((cartella)=>{
+              //se non esiste entra e crea il link
+              if (!radix.get_node('#'+cartella.id)){
+                radix.create_node('#'+cartella.parent,{'id':cartella.id,'text':cartella.text,'type':'default'})
+              }
+            });
+          }
+          FolderImport.groups.models.forEach((modello)=>{
+            //se non esiste entra e crea il link
+            if (!radix.get_node('#'+modello.id)){
+              radix.create_node('#'+modello.parent,{'id':modello.id,'text':modello.text,'type':'custmesh','li_attr':{"model":modello.path}})
+            }
+          });
+        }
+        radix.open_all('#folderScan');
+      }catch(error){
+        notifyMe(error,true);
+      }
+    }
+  })
 });

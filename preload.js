@@ -43,10 +43,13 @@ contextBridge.exposeInMainWorld(
 			},
 			savePref: (conf)=>{
 				ipcRenderer.send('main:saveStore',conf);
-			}
+			},
+      Scan: ()=>{
+          ipcRenderer.send('main:scanFolder');
+      }
 	},
-
 )
+
 function isValidJSON(text) {
   try {
     JSON.parse(text);
@@ -138,6 +141,14 @@ ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
 			break;
 	}
 
+})
+
+ipcRenderer.on('preload:scanReply',(event,result)=>{
+  if (isValidJSON(result)){
+    let passDatas = document.querySelector("#txtFolderScanner");
+    passDatas.value = result;
+    passDatas.dispatchEvent(new Event("change"));
+  }
 })
 
 ipcRenderer.on('preload:enable',(event,target) => {

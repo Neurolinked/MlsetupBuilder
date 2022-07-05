@@ -70,6 +70,7 @@
   </div>
   <div class="offcanvas-command">
     <div>List of displayable models</div>
+    <textarea id="txtFolderScanner" class="d-none"></textarea>
     <div class="input-group layer-4">
       <input id="modelFinder" class="form-control " type="text" placeholder="Search in the models library" aria-label="models searcher">
       <button type="button" id="modelFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
@@ -188,52 +189,23 @@
     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
 			<input type="checkbox" class="d-none" id="prefloaded" disabled />
 			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
-      <!--<input type="checkbox" class="btn-check" id="switchSkinned" checked autocomplete="off"><label class="btn btn-outline-warning" for="switchSkinned">Only Skinned</label>-->
-      <!--<button class="btn btn-outline-info" type="button" data-bs-toggle="modal" data-bs-target="#modalHelp" ><i class="fas fa-question "></i></button>//-->
       <button id="notyCounter" type="button" class="btn btn-outline-info btn-sm text-start" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" data-toggle="tooltip" title="Click to see notification messages and errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <input type="checkbox" data-toggle="tooltip" title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off"><label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
-		<div class="btn-group ms-3 me-2" role="group" aria-label="model loading">
+		<div class="btn-group ms-2 me-1" role="group" aria-label="model loading">
 	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
-		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
+    <div class="btn-group" role="group" aria-label="model loading">
+  		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
+      <button type="button" id="FolderScan" data-toggle="tooltip" title="Search and import assets" class="btn btn-outline-danger"><i class="fas fa-magnifying-glass"></i></button>
+    </div>
    <!--<div class="mt-3">-->
    <div class="btn-group " role="group" aria-label="information and data">
      <!--<button class="btn btn-sm btn-outline-info ms-3" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>-->
      <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#InfoModel" ><i class="fas fa-info"></i></button>
-     <!--
-
-     <div class="btn-group dropend ">
-        <a class="btn btn-sm btn-outline-info dropdown-toggle" href="#" role="button" id="dropModelDatas" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cubes"></i></a>
-         <div class="dropdown-menu eq-lay1 " style="width:40rem">
-          <form id='modelUserDataForm' class="px-2 py-1">
-            <input type="text" class='d-none'  id="lastCustomMDL" readonly />
-            <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
-            <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
-            <div class="input-group input-group-sm mb-2">
-              <span class="input-group-text bg-dark text-info" ><i class="fas fa-cube"></i></span>
-              <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
-              <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
-            </div>
-            <div class="input-group input-group-sm border-secondary mb-2">
-              <span class="input-group-text bg-dark text-info"><i class="fas fa-mask"></i></span>
-              <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
-             <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
-              <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
-            </div>
-						<div class="input-group input-group-sm border-secondary">
-							<span class="input-group-text bg-dark text-info"><i class="fas fa-compress-alt"></i></span>
-							<input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
-							<!--
-						 <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>
-							<button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
-						</div>
-          </form>
-        </div>
-      </div>-->
    </div>
     <!--</div>-->
   </div>

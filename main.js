@@ -8,6 +8,19 @@ const fs = require('fs')
 const store = require('electron-store');
 const sharp = require('sharp');
 
+const dree = require('dree');
+
+const dreeOptions = {
+	stat:false,
+	followLinks:false,
+	hash:true,
+	sizeInBytes: false,
+	size: false,
+	extensions: ["glb","png","dds","mlmask"],
+	normalize:true,
+	excludeEmptyDirectories:true
+}
+
 var customModels
 var objwkitto = {}
 const schema = {
@@ -199,7 +212,7 @@ function createWindow () {
   mainWindow.loadFile('index.html')
   nativeTheme.themeSource = 'dark';
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 const prefupdate = preferences.onDidAnyChange(()=>{
@@ -717,4 +730,20 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 			})
 		}
 	})
+})
+
+ipcMain.on('main:scanFolder',()=>{
+	var archives = dialog.showOpenDialog({title:'Select a folder you want to scan',properties: ['openDirectory'],defaultPath:app.getPath('recent')})
+		.then(selection => {
+			if (!selection.canceled){
+				if (selection.filePaths[0] == preferences.get('unbundle')){
+					mainWindow.webContents.send('preload:scanreply',"");
+				}else{
+					var foldertree = dree.scanAsync(selection.filePaths[0],dreeOptions)
+					foldertree.then( tree_leaf => {
+						mainWindow.webContents.send('preload:scanReply',JSON.stringify(tree_leaf));
+					});
+				}
+			}
+		});
 })
