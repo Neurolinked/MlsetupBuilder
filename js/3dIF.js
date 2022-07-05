@@ -422,15 +422,19 @@ function mBuildInfo(model){
   oMdlPills.innerHTML="";
   var oMdlTabs = document.getElementById("v-pills-tabContent");
   oMdlTabs.innerHTML="";
-  
+
   if ((model.length>0) && (typeof(model)=='object')){
     model.forEach((submesh)=>{
       if (submesh.hasOwnProperty("name")){
+        //There is a Submesh
         oMdlPills.innerHTML+='<button class="nav-link rounded-0 " id="pill-'+submesh.name+'" data-bs-toggle="pill" data-bs-target="#tab-'+submesh.name+'" type="button" role="tab" aria-controls="#tab-'+submesh.name+'" aria-selected="false">'+submesh.name+'</button>';
-        if (submesh.hasOwnProperty("materials")){
-          oMdlTabs.innerHTML+='<div class="tab-pane fade show" id="tab-'+submesh.name+'" role="tabpanel" aria-labelledby="pill-'+submesh.name+'"><span class="badge layer-1 rounded-0">Material list: </span>'+submesh.materials+'</div>';
-        }else{
-          oMdlTabs.innerHTML+='<div class="tab-pane fade show" id="tab-'+submesh.name+'" role="tabpanel" aria-labelledby="pill-'+submesh.name+'"> </div>';
+        //Tab Creation
+        oMdlTabs.innerHTML+='<div class="tab-pane fade show" id="tab-'+submesh.name+'" role="tabpanel" aria-labelledby="pill-'+submesh.name+'"></div>';
+
+        let tab = document.getElementById("tab-"+submesh.name); //point the newly created tab
+
+        if (submesh.hasOwnProperty("vertexes")){ tab.innerHTML +='<div class="mb-1"><span class="badge bg-info text-dark rounded-0">Vertex count</span> '+submesh.vertexes+'</div>'; } //vertexes
+        if (submesh.hasOwnProperty("materials")){ tab.innerHTML +='<span class="badge bg-info text-dark rounded-0">Material list: </span> '+submesh.materials; //material list
         }
       }
     })
@@ -546,7 +550,7 @@ function LoadModelOntheFly(path){
 
 	      if ( child.isMesh ) {
 	        //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-          mobjInfo.push({"name":child.name,"materials":[...new Set(child.userData.materialNames)].toString().replaceAll(",",", ")});
+          mobjInfo.push({"name":child.name,"materials":[...new Set(child.userData.materialNames)].toString().replaceAll(",",", "),"vertexes":child.geometry.attributes.uv.count});
 					//strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><span class='px-2'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</span> <span class='px-2'>")+"</span></details></p>";
 	        //strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
