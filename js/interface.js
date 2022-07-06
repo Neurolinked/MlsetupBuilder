@@ -26,9 +26,35 @@ async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
     if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("package")) ){
       for (k=0, j=microblendObj.microblends.length;k<j;k++){
-        $("#mbSelect").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
+        $("#mbSelect optgroup[label='core']").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
+        //select
 				$("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png'); '\" data-package='"+microblendObj.package+"'  data-toggle='tooltip' title='"+microblendObj.microblends[k].name+"'> </li>");
       }
+    }
+  }
+  return;
+}
+
+async function nubuildMB(microblendObj){
+  if ((typeof(microblendObj)=="object" ) ) {
+    if (microblendObj.hasOwnProperty("packages")){
+      var pkgName;
+      microblendObj.packages.forEach((package)=>{
+        pkgName = "";
+        if (package.hasOwnProperty("name")){
+            pkgName = package.name;
+            $("#mbSelect").append("<optgroup label='"+pkgName+"'>");
+        }
+        if (package.hasOwnProperty("microblends")){
+          package.microblends.forEach((microblend)=>{
+            let tmpName = microblend.path.split('.')[0].split("\\").reverse()[0];
+
+            $("#mbSelect optgroup[label='"+pkgName+"']").append("<option data-package='"+pkgName+"' data-thumbnail='./images/mblend/"+pkgName.toLowerCase()+"/"+tmpName+".png' value='"+microblend.path+"'>"+tmpName+"</option>");
+
+            $("#cagetheCuMBlends").append("<li style=\"background-image:url('./images/mblend/"+pkgName.toLowerCase()+"/thumbs/"+tmpName+".png'); '\" data-package='"+pkgName+"' data-path='"+microblend.path+"' title='"+tmpName+"' > </li>");
+          });
+        }
+      })
     }
   }
   return;
@@ -120,9 +146,21 @@ $(function(){
 
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
+
+  var readCustomMicroblends = thePIT.getMuBlends();
+
+  readCustomMicroblends
+    .then((listaMU) => {
+      nubuildMB(listaMU);
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+
 	let buildmyNuMaterial = abuildMaterial(materialCore);
 	let buildmyHairs = abuildHairs(hairs);
 	let buildmyMasks = abuildMaskSelector(maskList)
+
 
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
@@ -942,15 +980,26 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	$("#mbSelect").change(function(event){
   		$("#mbInput").val($(this).val());
 			$("#mbInput").change();
+
       if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
         let MBName = $(this).val().split('.')[0].split("\\").reverse()[0]
 
   			$("#mb-preview").prop("src",$("#mbSelect option:selected").attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif"); console.log("rilevato errore");});
 
-        $("#cagethemicroblends li").removeClass("MBactive");
-        $("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").addClass("MBactive");
-        //$("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index() index child of the
-        $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").width()+2))
+        $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass("MBactive");
+
+        if ($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']")){
+          $("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").addClass("MBactive");
+          $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").width()+2))
+        }
+
+        let customSelected = $("#cagetheCuMBlends li").filter(function(el) {
+           return $(this).data('path') === $("#mbSelect").val();
+        })
+        if (customSelected.length>0){
+          customSelected.addClass("MBactive");
+          $("#cu_mu_display").scrollLeft($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").index()*($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").width()+2))
+        }
   		}
 	});
 
@@ -959,7 +1008,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   //reset css fx on microblend
   $("#resetMB").click(function(){
 		$("#mbInput").val("base\\surfaces\\microblends\\default.xbm").focusout();
-    $("#cagethemicroblends li").removeClass("MBactive");
+    $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass("MBactive");
     $("#cagethemicroblends li[data-bs-original-title='default']").addClass("MBactive");
     $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='default']").index()*($("#cagethemicroblends li[data-bs-original-title='default']").width()+2))
 	});
@@ -1256,7 +1305,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	});
 
   $("#cagethemicroblends li").click(function(){
-    $("#cagethemicroblends li").removeClass('MBactive');
+    $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
     $(this).addClass("MBactive");
     let theoneselected = $(this).data('bs-original-title');
     $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").width()+2))
@@ -1266,11 +1315,31 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     mbZelected.attr('selected', true).change();
   });
 
+  $("body").on("click","#cagetheCuMBlends li",function(){
+    $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
+    $(this).addClass("MBactive");
+    let theoneselected = $(this).data('path');
+
+    $("#cu_mu_display").scrollLeft($("#cagetheCuMBlends li[data-path='"+theoneselected+"']").index()*($("#cagetheCuMBlends li[data-path='"+theoneselected+"']").width()+2))
+    //console.log(theoneselected+" :contains('"+theoneselected+"')");
+    $("#mbSelect option").removeAttr("selected");
+    let mbZelected = $("#mbSelect option").filter(function() {
+       return $(this).val() === theoneselected;
+     })
+    mbZelected.attr('selected', true).change();
+  })
+
 const scrollMBContainer = document.getElementById("microdisplay");
+const scrollCustMBContainer = document.getElementById("cu_mu_display");
 
 scrollMBContainer.addEventListener("wheel", (evt) => {
     evt.preventDefault();
     scrollMBContainer.scrollLeft += evt.deltaY;
+});
+
+scrollCustMBContainer.addEventListener("wheel", (evt) => {
+    evt.preventDefault();
+    scrollCustMBContainer.scrollLeft += evt.deltaY;
 });
 
 	$("#layerRandomizer").click(function(){

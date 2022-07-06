@@ -39,8 +39,12 @@ contextBridge.exposeInMainWorld(
 			},
 			getModels: ()=>{
 				var additionalModels = ipcRenderer.sendSync('main:giveModels');
-				return additionalModels;
+				return additionalModels
 			},
+      getMuBlends: async ()=>{
+        return await ipcRenderer.invoke('main:loadMuBlend');
+      },
+      setMuBlends: ()=>{},
 			savePref: (conf)=>{
 				ipcRenderer.send('main:saveStore',conf);
 			},

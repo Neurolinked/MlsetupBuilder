@@ -22,6 +22,7 @@ const dreeOptions = {
 }
 
 var customModels
+
 var objwkitto = {}
 const schema = {
 	unbundle: {
@@ -66,9 +67,25 @@ if (mljson ==''){
   mljson = app.commandLine.getSwitchValue("o")
 }
 
-
 var wkitto = app.commandLine.getSwitchValue("wkit")
 
+function MuReading(){
+	return new Promise((resolve,reject) =>{
+		fs.readFile(path.join(app.getAppPath(),'jsons/mbcustom.json'),(err,contenutofile) =>{
+			if (err) {
+				reject()
+			}else{
+				try{
+					let test = JSON.parse(contenutofile)
+					resolve(test)
+				}catch(err){
+					console.log(err)
+					reject()
+				}
+			}
+		})
+	})
+}
 
 const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
   let modal = new BrowserWindow({
@@ -416,6 +433,11 @@ ipcMain.on('main:saveStore',(event, arg) => {
 	if (arg.hasOwnProperty('legacymaterial')){
 		preferences.set('legacymaterial',arg.legacymaterial);
 	}
+})
+
+
+ipcMain.handle('main:loadMuBlend',(event) => {
+	return MuReading()
 })
 
 //json version of mlsetup file write operation

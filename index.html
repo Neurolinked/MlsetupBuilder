@@ -430,8 +430,9 @@
 				<button class="btn btn-outline-danger rounded-0" id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
 			</div>
       <select class="form-select rounded-0" id="mbSelect" aria-label="microblends selection lists">
-        <option data-package="source" data-thumbnail="./images/_nopreview.gif" value="" disabled >custom</option>
-        <option data-package="source" data-thumbnail="./images/default.gif" value="base\surfaces\microblends\default.xbm" selected >default</option>
+        <optgroup label='core'>
+          <option data-package="source" data-thumbnail="./images/default.gif" value="base\surfaces\microblends\default.xbm" selected >default</option>
+        </optgroup>
       </select>
       <span class="badge  w-100 rounded-0 ">Preview</span>
       <img id="mb-preview" style="background-color:#000;" alt="microblend preview" src='./images/default.gif' >
@@ -461,6 +462,7 @@
           <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye"></i></button>
         </div></span>
         <div id="cu_mu_display" class="layer-1 d-none">
+          <div id="cagetheCuMBlends" ></div>
         </div>
       </div>
       <!-- microblends-data -->
