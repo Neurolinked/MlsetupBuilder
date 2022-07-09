@@ -277,6 +277,11 @@ $(function(){
     }
   });
 
+$("#masksPanel li").click(function(){
+  $("#masksPanel li.active").removeClass("active");
+  $(this).addClass("active");
+  $("#layeringsystem li").eq($(this).index()).click();
+})
 //Change in layer displayer
 	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(){
 		if (
@@ -436,7 +441,12 @@ $(function(){
     if ($("#mbNorm").val() % 1 == 0){ $("#mbNorm").val(Number($("#mbNorm").val()).toFixed(1)); }
   }
 
+  //const maskUVs = new fabric.Canvas('fabUVDis');
+
+
+  const uvmSize = $("#maskPainter").attr('width');
 	const microBlend = new fabric.Canvas('maskFabric');//initialize the fabric Element
+  
 	microBlend.selection=false;
 	microBlend.uniformScaling = true; //only scaling 1:1
 	microBlend.uniScaleKey = 'null'; //remove non-uniform scaling
@@ -604,6 +614,17 @@ $(function(){
     $('#dispAimTile').text($("#AimMTile").val());
   });
 
+  $("#slidemask").on("input",function(){
+
+    let hexacol = Number($(this).val()).toString(16)+"0000";
+    console.log(hexacol);
+    $("#maskoolor").data("color",hexacol);
+    $("#maskoolor").css("background-color","#"+hexacol);
+  });
+
+  $("#maskoolor").on("dblclick",function(){
+    $("#slidemask").val(128).change();
+  });
 	//Displays of the license
 	licenseWindow.addEventListener('hidden.bs.modal', function (event) { localStorage.setItem('ReadLicense',Date.now()); });
 
@@ -628,6 +649,10 @@ $(function(){
 		if (!$(this).attr("disabled")){
       //activate the new one only if isn't disabled
 			$('#layeringsystem li').removeClass('active notsync');
+
+      //sync with the mask paint editor
+      $("#masksPanel li.active").removeClass("active");
+      $("#masksPanel li").eq($(this).index()).addClass("active");
 
 			$(this).addClass('active');
 			$("#maskLayer").attr("value",$(this).text());
@@ -690,7 +715,10 @@ $(function(){
 	});
 
 
-
+  $("span.choose").click(function(){
+    $("span.choose.active").removeClass("active");
+    $(this).addClass("active");
+  })
 
 	var ModelsLibrary = $('#modelsTree').jstree({
 		'core' : {"dblclick_toggle":false,"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : modelsJson},

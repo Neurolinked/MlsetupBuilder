@@ -17,24 +17,15 @@ function notify3D(message){
 
 
 var nMeKanv = document.getElementById('normalMe');
-
-function cleaNormal(){
-	nctx = nMeKanv.getContext('2d');
-	nctx.clearRect(0, 0, nMeKanv.width, nMeKanv.height);
-	nctx.fillStyle = `rgb(120,119,255)`;
-	nctx.fillRect(0, 0, nMeKanv.width, nMeKanv.height);
-}
+var paintMask = document.getElementById('maskPainter').getContext('2d');
+paintMask.save();
 
 function HairTexture(hairData=[{c:'#002250',p:0},{c:'#002250',p:1}]) {
 	var size = 256;
-	// create canvas
-	canvas = document.getElementById( 'hairTex' );
-	//canvas.width = size;
-	//canvas.height = size;
-
+	// get canvas
+	canvas = document.getElementById( 'hairTex' );//canvas.height = size; //canvas.width = size;
 	// get context
 	var context = canvas.getContext( '2d' );
-
 	// draw gradient
 	context.rect( 0, 0, size, size );
 	var gradient = context.createLinearGradient( 128, 0, 128, size );
@@ -46,8 +37,15 @@ function HairTexture(hairData=[{c:'#002250',p:0},{c:'#002250',p:1}]) {
 	gradient.addColorStop(1, 'transparent');*/
 	context.fillStyle = gradient;
 	context.fill();
+}
 
-	//return canvas;
+function clearCanvas(target,fillStyle='', squareSize = 0){
+  let t_canvas = target.getContext('2d');
+  t_canvas.clearRect(0,0,squareSize,squareSize)
+  if (fillStyle!=''){
+    t_canvas.fillStyle = fillStyle;
+    t_canvas.fillRect(0,0,squareSize,squareSize)
+  }
 }
 
 function safeNormal(){
@@ -59,10 +57,27 @@ function safeNormal(){
 	nctx.fillRect(0, 0, 128, 128);
 }
 
+function theChecked( sons ){
+  /*Find the index of the checked submesh to unwrap their UVs */
+  var checked = [];
+   if (sons.length != 0 ){
+     for (let i = 0 , k = sons.length; i < k; i++){
+       if (sons[i].checked){
+         checked.push(i);
+       }
+     }
+   }
+   return checked;
+   /*return an array of indexes*/
+}
+
+function safetexturer(target){
+
+}
+
  var err_counter = 0;
  var control_reset = false;
  var control_side = false;
-
  var getImageData = false;
  var imgDataShot = null;
  let scene, camera, renderer, controls, axesHelper;
@@ -78,22 +93,31 @@ const params = {
 };
 //-------------Aiming box for the camera ----------------------
 
+//basic material map
+
 //-------------Material and Object Constant--------------------
 const safeMap = new THREE.TextureLoader().load( "./images/favicon.png" );
+const canvasPaint = new THREE.CanvasTexture(document.getElementById('maskPainter'));
+
 const material = new THREE.MeshStandardMaterial({color: 0x500000});//
+const materialPaint = new THREE.MeshStandardMaterial({map:canvasPaint});//
+
 const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 1, thickness: 0.05});
 //material for stitches zip and other things
 const stitchMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_d01.png");
 const stitchNorMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_n01.png");
+const raycaster = new THREE.Raycaster();
+
 stitchMap.wrapS = THREE.RepeatWrapping;
 stitchMap.wrapT = THREE.RepeatWrapping;
 stitchNorMap.wrapS = THREE.RepeatWrapping;
 stitchNorMap.wrapT = THREE.RepeatWrapping;
 stitchNorMap.premultiplyAlpha = true;
-const stitches = new THREE.MeshStandardMaterial({map:stitchMap,normalMap:stitchNorMap, transparent: true,opacity: 0.7, color: 0xFFffff});
+const stitches = new THREE.MeshStandardMaterial({map:stitchMap,normalMap:stitchNorMap, transparent: true,opacity: 0.7, color: 0xffffff});
 //-------------Hairs Materials----------------------------------
 var hairShading = document.getElementById('hairTex');
 HairTexture();
+
 const hairCText = new THREE.CanvasTexture(hairShading);
 const hair_card = new THREE.MeshStandardMaterial({map:hairCText,transparent:false,side:THREE.DoubleSide,fog:true});
 const hair_cap = new THREE.MeshStandardMaterial({color: 0x502200,side:THREE.FrontSide});//
@@ -104,6 +128,7 @@ const hair_other = new THREE.MeshStandardMaterial({color: 0x222222,side:THREE.Do
 
 safeNormal();
 var normMe = new THREE.CanvasTexture(nMeKanv);
+var canvUVWrapped = document.getElementById('UVMapMe');
 
 //const maploader = new THREE.FileLoader().setResponseType('arraybuffer');
 const loader = new THREE.GLTFLoader(); //loader for Gltf and glb models
@@ -119,8 +144,93 @@ const renderwidth = Number(getComputedStyle(document.documentElement).getPropert
 let resized = false; //semaphore for resizing behaviour
 window.addEventListener('resize', function() {  resized = true;  });// resize event listener
 
+document.getElementById("UVSave").addEventListener('click', (e) =>{
+  let down = document.getElementById("UVSave")
+  let UWUnwrapped = canvUVWrapped.toDataURL('image/png');
+  down.href = UWUnwrapped;
+  down.download = "uvmap.png";
+});
+
+document.getElementById("UVGen").addEventListener('click', (e) =>{
+  canvUVWrapped.dispatchEvent(new Event("dblclick"));
+});
+
+canvUVWrapped.addEventListener('dblclick',function(){
+  try{
+    if (scene.children.filter(elm => elm.type.toLowerCase=='group')){
+      var scena = scene.children.filter(elm => elm.type=='Group')
+      if (scena[0].hasOwnProperty("children")){
+        var sbmeshs = scena[0].children.filter( elm => elm.type == 'SkinnedMesh'||elm.type == 'Mesh')
+        var sz = 768;
+
+
+        clearCanvas(canvUVWrapped,'',768);
+
+        const ctxxxx = canvUVWrapped.getContext('2d');
+
+        const abc = 'abc';
+        const a = new THREE.Vector2();
+        const b = new THREE.Vector2();
+        const uvs = [ new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2() ];
+        const face = [];
+        const width = height =768;
+
+        let container = document.getElementById("unChecksMesh");
+        let tocompute = theChecked(container.querySelectorAll("input[type='checkbox']"))
+
+        var lod
+        tocompute.forEach((x)=>{
+          lod = sbmeshs[x]
+
+          const index = lod.geometry.index;
+    			const uvAttribute = lod.geometry.attributes.uv;
+          ctxxxx.strokeStyle = "#"+tinycolor.fromRatio({r:(Math.random()*.5),g:(Math.random()*.4+.6),b:(Math.random()*.4+.6)}).toHex();
+          ctxxxx.lineWidth = .2;
+
+          var il
+          if ( index ) {
+            il = index.count
+          }else{
+            il = uvAttribute.count
+          }
+
+          for ( let i = 0; i < il; i=i+3 ) {
+  					face[ 0 ] = index.getX( i );
+  					face[ 1 ] = index.getX( i + 1 );
+  					face[ 2 ] = index.getX( i + 2 );
+  					uvs[ 0 ].fromBufferAttribute( uvAttribute, face[ 0 ] );
+  					uvs[ 1 ].fromBufferAttribute( uvAttribute, face[ 1 ] );
+  					uvs[ 2 ].fromBufferAttribute( uvAttribute, face[ 2 ] );
+  					//processFace( face, uvs, i / 3 );
+            // draw contour of face
+            ctxxxx.beginPath();
+            a.set( 0, 0 );
+            for ( let j = 0, jl = uvs.length; j < jl; j++ ) {
+              const uv = uvs[ j ];
+              a.x += uv.x;
+              a.y += uv.y;
+              if ( j === 0 ) {
+                ctxxxx.moveTo( uv.x * ( width - 2 ) + 0.5, ( 1 - uv.y ) * ( height - 2 ) + 0.5 );
+              } else {
+                ctxxxx.lineTo( uv.x * ( width - 2 ) + 0.5, ( 1 - uv.y ) * ( height - 2 ) + 0.5 );
+              }
+            }
+            ctxxxx.closePath();
+            ctxxxx.stroke();
+  				}
+        })
+      }
+    }
+  }catch(error){
+    console.log(error);
+    notify3D("Errore di lettura",true);
+  }
+
+});
+
 var MDLloadingButton = document.getElementById('btnMdlLoader');
 var CustomLoadButton = document.getElementById('cstMdlLoader');
+var UVSbmeshENA = document.getElementById('unChecksMesh');
 //-------------Material and Object Constant--------------------
 
 function giveToTheAim(textureData,w,h){
@@ -148,6 +258,8 @@ function giveToTheAim(textureData,w,h){
   octx.scale(512/w,512/h);
   octx.setTransform(1,0,0,-1,0,0);
   ctx.drawImage(oc,0,0,512,512);
+
+  paintMask.drawImage(oc,0,0,768,768);
   oc.remove();
 }
 
@@ -238,68 +350,23 @@ function loadNormOntheFly(path){
 						 imageData.data[i + 2] = 255;  // B value
 						}
 						context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
-						normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
-						material.normalMap = normMe;
-						material.map.needsUpdate = true;
+						//normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
+						//material.normalMap = normMe;
+            material.normalMap.needsUpdate = true
+						//material.map.needsUpdate = true;
 						material.normalMap.flipY = false;
 						Normed.setAttribute("fill",'rgb(120,119,255)'); //display the normal flag
 					}
 					nMap.src = dataURI;
 
-					/*
-					//context.drawImage(nMap, 0, 0);
-					//texture.image = nMap;
-					const normloadNow = new Promise(function(resolve, reject){
-					   nMap.onload = resolve();
-					   nMap.onerror = reject();
-					})
-
-					normloadNow.then(()=>{
-						console.log('start :');
-						var imageData = context.getImageData(0,0,pngWidth,pngHeight);
-						for (let i = 0, l=imageData.data.length; i < l; i += 4) {
-						 // Modify pixel data
-						 imageData.data[i + 2] = 255;  // B value
-						}
-						context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
-						console.log('stop');
-					})
-					.catch(function(error){
-						notify3D(error)
-					}).then(()=>{
-						//Normed.setAttribute("fill",'rgb(120,119,255)');
-						console.log('meload');
-						normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
-						normMe.needUpdates = true;
-						material.normalMap = normMe;
-						material.map.needsUpdate = true;
-						material.normalMap.flipY = false;
-						material.needUpdates = true;
-					})
-					/*
-					nMap.onload = function () {
-							var imageData = context.getImageData(0,0,pngWidth,pngHeight);
-						  for (let i = 0; i < imageData.data.length; i += 4) {
-						 	 // Modify pixel data
-						 	 imageData.data[i + 2] = 255;  // B value
-						  }
-							context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
-							//context.save();
-							normMe = new THREE.CanvasTexture(nMeKanv)
-							normMe.needUpdates = true;
-							material.normalMap = normMe;
-							material.normalMap.flipY = false;
-							material.needUpdates = true;
-					};
-					*/
-					//
 				}else{
 					//console.log('no sizes found');
 					notify3D('no sizes found');
 					safeNormal();
 					Normed.setAttribute("fill",'currentColor');
-					var texture = new THREE.CanvasTexture(nMeKanv)
-					material.normalMap = texture;
+					//var texture = new THREE.CanvasTexture(nMeKanv)
+					//material.normalMap = texture;
+          material.normalMap.needsUpdate = true
 				}
 
 			}else{
@@ -394,7 +461,7 @@ function loadMapOntheFly(path){
   	 material.map = dataTex;
   	 giveToTheAim(luminancedata,width,height);
   	 //console.log(height+","+width);
-  	 material.needUpdates =true;
+  	 //material.needsUpdates =true;
   }else{
     let notific = document.querySelector("#notyCounter span");
     let mipreference = document.getElementById("prefxunbundle");
@@ -499,21 +566,19 @@ function glbload(arBuffer){
     if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
     scene.add(glbscene.scene);
 
+    var helper = new THREE.BoxHelper(glbscene.scene,0xffff00);
+    helper.geometry.computeBoundingBox();
+  	var centerPoint = new THREE.Vector3();
+  	centerPoint.x = (helper.geometry.boundingBox.max.x + helper.geometry.boundingBox.min.x) / 2;
+  	centerPoint.y = (helper.geometry.boundingBox.max.y + helper.geometry.boundingBox.min.y) / 2;
+  	centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
+  	camera.target = centerPoint;
+  	controls.target = centerPoint;
+
   }, (error) => {
     notify3D(error);
-  });
-	//console.log(scene);
-	//Autocentering
-	var helper = new THREE.BoxHelper(scene);
-	helper.geometry.computeBoundingBox();
-	var centerPoint = new THREE.Vector3();
-	centerPoint.x = (helper.geometry.boundingBox.max.x + helper.geometry.boundingBox.min.x) / 2;
-	centerPoint.y = (helper.geometry.boundingBox.max.y + helper.geometry.boundingBox.min.y) / 2;
-	centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
-	camera.target = centerPoint;
-	controls.target = centerPoint;
-	//oMdlInfo.querySelector(".modal-body").insertAdjacentHTML('afterbegin',strGLBInfo);
 
+  });
 }
 
 function LoadModelOntheFly(path){
@@ -540,8 +605,11 @@ function LoadModelOntheFly(path){
   data = str2ab(modelfile);
 
 	if (data.byteLength>0){
-	  loader.parse( data ,'', ( glbscene ) => {
+	    loader.parse( data ,'', ( glbscene ) => {
 	    gui.removeFolder("Submesh Toggle");
+
+      UVSbmeshENA.innerHTML=""; //remove all the buttons in the uv calculator
+      clearCanvas(canvUVWrapped,'',768)
 
 	    GuiSubmesh = gui.addFolder("Submesh Toggle");
 	     glbscene.scene.traverse( function ( child ) {
@@ -554,8 +622,7 @@ function LoadModelOntheFly(path){
 					//strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><span class='px-2'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</span> <span class='px-2'>")+"</span></details></p>";
 	        //strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
-					if (child.hasOwnProperty('userData')){
-						if (child.userData.hasOwnProperty('materialNames')){
+					if ((child.userData?.materialNames!=null) && (child.userData?.materialNames!=undefined)){
 							if (!(/(vehicle_lights)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
 									if (modelType=='hair'){
 										if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
@@ -590,40 +657,7 @@ function LoadModelOntheFly(path){
 						}else{
 							child.material = material;
 		        }
-					}else{
-						child.material = material;
-					}
-					/*
-	        if (!(/(vehicle_lights)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
-							if (modelType=='hair'){
-								if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
-									child.material = hair_cap;
-								}else if((/.+_short.+/).test(child.userData.materialNames.toString())){
-									child.material = hair_short;
-								}else if((/.+_card(s).+/).test(child.userData.materialNames.toString())){
-									child.material = hair_card;
-									hair_card.map.needsUpdate = true;
-								}else if((/lambert/).test(child.userData.materialNames.toString())){
-									child.material = material;
-								}else{
-									child.material = hair_other;
-								}
-							}else{
-								child.material = material;
-							}
-	        }else{
-	          //if is a decoration, a zipper a stiches apply a semitransparent material with autogenerated color
-	          if (/.+(masksset).+/g.test(child.userData.materialNames.toString())){
-	            child.material = material;
-						}else if (/(.+)?glass(.+)?/g.test(child.userData.materialNames.toString())) {
-							child.material = glass;
-							Decal = true;
-	          }else{
-	            child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(20*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 255)"), opacity:0.3,transparent:true});
-							Decal = true;
-	          }
 
-	        }*/
 	        child.visible = true;
 
 					if (Decal){
@@ -631,6 +665,8 @@ function LoadModelOntheFly(path){
 					}else{
 						GuiSubmesh.add(child, 'visible').name( child.name );
 					}
+
+          UVSbmeshENA.innerHTML+='<input type="checkbox" class="btn-check" id="uvchk_'+child.name+'" checked  ><label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_'+child.name+'" autocomplete="off">'+child.name+'</label>';
 
 	      }
 	    });
@@ -640,17 +676,15 @@ function LoadModelOntheFly(path){
 	    if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
 	    scene.add(glbscene.scene);
 	    //Autocentering
-			//console.log(glbscene.scene.children.filter(child =>child.name=='submesh_00_LOD_1'));
-	    var helper = new THREE.BoxHelper(glbscene.scene);
-
+			var helper = new THREE.BoxHelper(glbscene.scene);
 	    helper.geometry.computeBoundingBox();
 	    var centerPoint = new THREE.Vector3();
 	    centerPoint.x = (helper.geometry.boundingBox.max.x + helper.geometry.boundingBox.min.x) / 2;
 	    centerPoint.y = (helper.geometry.boundingBox.max.y + helper.geometry.boundingBox.min.y) / 2;
 	    centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
-	    camera.target = centerPoint;
+	    //camera.target = centerPoint;
 	    controls.target = centerPoint;
-	    //oMdlInfo.querySelector(".modal-body").insertAdjacentHTML('afterbegin',strGLBInfo);
+
 	  }, (error) => {
 	    notify3D(error);
 	  });
@@ -684,10 +718,11 @@ document.getElementById('cstMdlLoader').addEventListener('click',(e)=>{
 	cleanScene()
 	let maxLayers = 0;
 	layersActive(maxLayers);
-	cleaNormal()
+  safeNormal()
 	material.map = safeMap;
-	var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
-  material.normalMap = texture;
+	//var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
+  material.normalMap.needsUpdate = true // = texture;
+  material.map.needsUpdate = true;
 	CustomLoadButton.setAttribute('disabled','disabled');
 	thePIT.ThreeDAsset();
 	let Normed = document.querySelector('#withbones svg:nth-child(2) path');
@@ -724,11 +759,10 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 		}
 
 		layersActive(0);
-		material.needUpdates =true;
+		material.map.needsUpdate =true;
 		control_reset = true;
 		//TODO file.value é il nome del file da aggiungere
 		//Se non ce n'è un'altro con lo stesso path
-
 	}
 });
 
@@ -769,13 +803,14 @@ if (theNormal.match(/^[/|\w|\.]+.xbm/)){
 }else{
  safeNormal();
  Normed.setAttribute("fill",'currentColor');
- var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
- material.normalMap = texture;
+ //var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
+ //material.normalMap = texture;
+ material.normalMap.needsUpdate = true
  notify3D('No Normal, reset to safeNorm');
 }
 
 
- material.needUpdates =true;
+ //material.needUpdates = true;
  //search for the right extension
  if (theModel.match(/.+\.glb$/)){
 	 cleanScene();
@@ -787,6 +822,8 @@ if (theNormal.match(/^[/|\w|\.]+.xbm/)){
 	 LoadModelOntheFly(theModel);
 	 //Disattivazione livelli non utilizzabili
 	 layersActive(maxLayer_thisModel);
+   //defUVUnwrap()
+   clearCanvas(canvUVWrapped,',768');
 	 //material.needUpdates =true;
 	 document.getElementById("modelTarget").setAttribute('loaded',true);
 	 MDLloadingButton.disabled=false;
@@ -800,8 +837,6 @@ if (theNormal.match(/^[/|\w|\.]+.xbm/)){
 	 notify3D('We are searching for .glb files and then this "'+theModel+'" one showed up, we can\'t open it now');
  }
 
-
-
 });
 
 init();
@@ -812,7 +847,9 @@ function init() {
   /*    const axesHelper = new THREE.AxesHelper( 5 );    scene.add( axesHelper ); to understand position of the objects */
 
   var thacanvas = document.getElementById('thacanvas');
+
   renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true});
+
   if (window.innerHeight-80<512){
    renderer.setSize(renderwidth,renderwidth);
   }else{
@@ -901,11 +938,11 @@ function init() {
 		 hair_short.wireframe = false;
 		 hair_other.wireframe = false;
 	 }
-   material.NeedUpdates;
+   //material.NeedUpdates;
    });;
   GuiBasicsetup.add( params, 'onesided').name( '1-side' ).onChange(() => {
    if (params.onesided){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
-   material.NeedUpdates;
+   //material.NeedUpdates;
    });
 	GuiBasicsetup.add( params, 'lightpower',0.5, 10 ).name( 'Light power' ).onChange(() => {
 		changeLumen = true;
@@ -921,8 +958,6 @@ function init() {
 
 
 function animate() {
-
-
   if (resized) resize()
   controls.autoRotate = params.autorotation;
   controls.autoRotateSpeed = params.rotationspeed;
@@ -933,8 +968,14 @@ function animate() {
   }else{
    controls.update();
   }
-  if (control_side){material.needUpdates=true; control_side=false;}
-	if (changeLumen){pointlight.intensity=params.lightpower;pointlight_2.intensity=params.lightpower;pointlight_3.intensity=params.lightpower+2;pointlight_4.intensity=params.lightpower;changeLumen=false;}
+  if (control_side){control_side=false;}
+	if (changeLumen) {
+    pointlight.intensity=params.lightpower;
+    pointlight_2.intensity=params.lightpower;
+    pointlight_3.intensity=params.lightpower+2;
+    pointlight_4.intensity=params.lightpower;
+    changeLumen=false;
+  }
   renderer.render(scene, camera);
 	if(getImageData == true){
 			let a = document.getElementById('takeashot');
@@ -945,12 +986,10 @@ function animate() {
 			//console.log(imgDataShot);
 	}
   requestAnimationFrame(animate);
-
 }
 
 function resize() {
 		 resized = false
-
 		 // update the size
 		 if (window.innerHeight-80<512){
 			 renderer.setSize(renderwidth, 512);
