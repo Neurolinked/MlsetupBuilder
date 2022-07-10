@@ -192,9 +192,9 @@
         </div>
         <div class="tab-pane fade " id="maskstab" role="tabpanel" aria-labelledby="masks-tab">
           <div class="row no-gutters">
-            <div class="col-2">
+            <div class="col-2" id="panelPain">
               <div class="my-2">
-                <span class="d-block badge rounded-0">layers</span>
+                <span class="d-block badge rounded-0 txt-secondary">layers</span>
                 <ul id="masksPanel" class="list-group rounded-0 list-group-horizontal justify-content-center">
                   <li class="list-group-item rounded-0">0</li>
                   <li class="list-group-item">1</li>
@@ -217,17 +217,29 @@
                   <li class="list-group-item">18</li>
                   <li class="list-group-item rounded-0">19</li>
                 </ul>
-                <div class="text-center my-1">
-                  <span class="d-block badge rounded-0">Tools</span>
-                  <span id="wipeMsk" class="btn btn-sm text-secondary"><i class="fas fa-eraser fa-2x"></i></span>
-                  <a href="#" id="expMsk" class="btn btn-sm text-secondary"><i class="fas fa-file-export fa-2x"></i></a>
+                <div class="text-center my-1 py-1 layer-1 rounded">
+                  <span class="d-block badge rounded-0 txt-secondary">Tools</span>
+                  <span id="wipeMsk" class="btn btn-sm text-secondary" title="Revert to the last loaded"><i class="fas fa-eraser fa-2x"></i></span>
+                  <span id="stepbackMsk" class="btn btn-sm text-secondary" title="Back one snapshot" ><i class="fa-solid fa-clock-rotate-left fa-2x"></i></span>
+                  <hr class="dropdown-divider">
+                  <span id="snapsMsk" class="btn btn-sm text-secondary" title="Take a snapshot"><i class="fa-solid fa-camera-retro fa-2x"></i></span>
+                  <a href="#" id="expMsk" class="btn btn-sm text-secondary" title="Export the current image"><i class="fas fa-file-export fa-2x"></i></a>
                 </div>
-                <div id="resetShades" class="d-flex justify-content-center my-1">
-                  <span class="choose" data-color="000000" style="background-color:000000"> </span>
+                <div  class="d-flex justify-content-center my-1 py-1 layer-1 rounded">
+                  <input id="strokeMsk" type="range" min="0.2" max="30" value="0.2" step="0.1">
+                </div>
+                <div id="resetShades" class="d-flex justify-content-center my-1 py-1 layer-1 rounded">
+                  <span class="choose" data-color="000000" style="background-color:#000000"> </span>
                   <span class="choose" data-color="FF0000" style="background-color:#FF0000"> </span>
                 </div>
-                <span id="maskoolor" class="choose" data-color="800000" style="background-color:#800000"> </span>
-                <input id="slidemask" type="range" min="0" max="256" value="128" step="1">
+                <div class="my-1 py-1 layer-1 rounded">
+                  <span id="maskoolor" class="choose" data-color="800000" style="background-color:#800000"> </span>
+                  <input id="slidemask" type="range" min="0" max="255" value="128" step="1">
+                </div>
+                <div class="my-2 border outline-secondary rounded" style="min-height:2rem;">
+                  <span class="d-block badge rounded-0 txt-secondary"><i class="fa-solid fa-camera-retro"></i> States</span>
+                  <div id="Snapshots" class="py-1"> </div>
+                </div>
               </div>
             </div>
               <div class="col-10">
@@ -289,7 +301,7 @@
    <!--<div class="mt-3">-->
    <div class="btn-group " role="group" aria-label="information and data">
      <!--<button class="btn btn-sm btn-outline-info ms-3" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>-->
-     <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#InfoModel" ><i class="fas fa-info"></i></button>
+     <button class="btn btn-outline-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#InfoModel" ><i class="fas fa-info"></i></button>
    </div>
     <!--</div>-->
   </div>

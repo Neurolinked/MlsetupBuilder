@@ -18,8 +18,10 @@ function notify3D(message){
 
 
 var nMeKanv = document.getElementById('normalMe');
-const paintMaskHT = document.getElementById('maskPainter')
+const paintMaskHT = document.getElementById('maskPainter');
 const paintMaskCTX = paintMaskHT.getContext('2d');
+
+var snapsManager = document.getElementById('Snapshots');
 
 paintMaskCTX.save();
 
@@ -74,10 +76,6 @@ function theChecked( sons ){
    /*return an array of indexes*/
 }
 
-function safetexturer(target){
-
-}
-
  var err_counter = 0;
  var control_reset = false;
  var control_side = false;
@@ -113,8 +111,6 @@ const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 
 //material for stitches zip and other things
 const stitchMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_d01.png");
 const stitchNorMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_n01.png");
-const raycaster = new THREE.Raycaster();
-
 stitchMap.wrapS = THREE.RepeatWrapping;
 stitchMap.wrapT = THREE.RepeatWrapping;
 stitchNorMap.wrapS = THREE.RepeatWrapping;
@@ -133,6 +129,20 @@ const hair_cap = new THREE.MeshStandardMaterial({color: 0x502200,side:THREE.Fron
 const hair_short = new THREE.MeshStandardMaterial({color: 0x225022,side:THREE.DoubleSide});//
 const hair_other = new THREE.MeshStandardMaterial({color: 0x222222,side:THREE.DoubleSide});//
 
+//__this will be for direct painting purpose
+const raycaster = new THREE.Raycaster();
+let line;
+const intersection = {
+	intersects: false,
+	point: new THREE.Vector3(),
+	normal: new THREE.Vector3()
+};
+const mouse = new THREE.Vector2();
+const intersects = [];
+let mouseHelper;
+const position = new THREE.Vector3();
+const orientation = new THREE.Euler();
+//
 
 safeNormal();
 var normMe = new THREE.CanvasTexture(nMeKanv);
@@ -172,6 +182,7 @@ document.getElementById("UVGen").addEventListener('click', (e) =>{
 });
 
 let paint = false;
+paintMaskCTX.lineWidth = 0.2;
 let originalLayer = '';
 
 // add canvas event listeners
@@ -317,10 +328,6 @@ function draw( drawContext, x, y ) {
 				material.map.needsUpdate = true;
 			}
 
-document.getElementById('wipeMsk').addEventListener('click', (e) =>{
-  paintMaskCTX.restore();
-})
-
 function layersActive(index){
   let indicators = document.getElementById('layeringsystem');
   let listlayers = indicators.getElementsByTagName("li");
@@ -340,6 +347,66 @@ function layersActive(index){
     }
   }
 }
+
+//Revert to the original layer
+document.getElementById('wipeMsk').addEventListener('click', (e) =>{
+  if (originalLayer!=''){
+    let img = new Image;
+    img.onload = function(){
+      paintMaskCTX.drawImage(img,0,0,768,768); // Or at whatever offset you like
+    };
+    img.src = originalLayer;
+    //img=null;
+    material.map.needsUpdate = true;
+  }
+});
+//get the actual snapshot in an image and it push in the interface
+document.getElementById('snapsMsk').addEventListener('click' , (event)=>{
+  if (snapsManager.children.length > 9){
+    snapsManager.firstElementChild.remove();
+  }
+  let crapimg = paintMaskHT.toDataURL('image/png');
+  snapsManager.innerHTML +="<img src='"+crapimg+"' >";
+});
+
+/* Back One snapshot */
+document.getElementById('stepbackMsk').addEventListener('click', (event) =>{
+  if (snapsManager.children.length >= 1){
+    snapsManager.lastElementChild.remove();
+    //snapsManager.lastElementChild.dispatchEvent(new Event('click'));
+    let sourceimage;
+    if (snapsManager.lastElementChild!=null){
+      sourceimage = snapsManager.lastElementChild;
+    }else{
+      sourceimage = originalLayer;
+    }
+    let img = new Image;
+    img.onload = function(){
+      paintMaskCTX.drawImage(img,0,0,768,768); // Or at whatever offset you like
+    };
+    img.src = sourceimage.src;
+    //img=null;
+    material.map.needsUpdate = true;
+  }
+});
+
+document.querySelector('#Snapshots').addEventListener('click', (event) =>{
+  if (event.target && event.target.tagName=="IMG"){
+    let sourceimage = event.target;
+
+    let img = new Image;
+    img.onload = function(){
+      paintMaskCTX.drawImage(img,0,0,768,768); // Or at whatever offset you like
+    };
+    img.src = sourceimage.src;
+    //img=null;
+    material.map.needsUpdate = true;
+  }
+});
+
+document.getElementById('strokeMsk').addEventListener('input', (event) =>{
+  paintMaskCTX.lineWidth = event.target.value;
+})
 
 function str2ab(str) {
  var buf = new ArrayBuffer(str.length); // 2 bytes for each char
