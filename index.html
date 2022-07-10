@@ -191,36 +191,49 @@
           <canvas id="normalMe" class="my-1" ></canvas>
         </div>
         <div class="tab-pane fade " id="maskstab" role="tabpanel" aria-labelledby="masks-tab">
-          <span class="d-block badge rounded-0">layers</span>
-          <ul id="masksPanel" class="list-group list-group-horizontal justify-content-center">
-            <li class="list-group-item">0</li>
-            <li class="list-group-item">1</li>
-            <li class="list-group-item">2</li>
-            <li class="list-group-item">3</li>
-            <li class="list-group-item">4</li>
-            <li class="list-group-item">5</li>
-            <li class="list-group-item">6</li>
-            <li class="list-group-item">7</li>
-            <li class="list-group-item">8</li>
-            <li class="list-group-item">9</li>
-            <li class="list-group-item">10</li>
-            <li class="list-group-item">11</li>
-            <li class="list-group-item">12</li>
-            <li class="list-group-item">13</li>
-            <li class="list-group-item">14</li>
-            <li class="list-group-item">15</li>
-            <li class="list-group-item">16</li>
-            <li class="list-group-item">17</li>
-            <li class="list-group-item">18</li>
-            <li class="list-group-item">19</li>
-          </ul>
-          <div class="d-flex justify-content-center mt-1">
-            <span class="choose" data-color="000000" style="background-color:000000"> </span>
-            <span class="choose" data-color="FF0000" style="background-color:#FF0000"> </span>
-            <span id="maskoolor" class="choose" data-color="800000" style="background-color:#800000"> </span>
-            <input id="slidemask" type="range" min="0" max="256" value="128" step="1">
-          </div>
-          <canvas id="maskPainter" class="my-1" width="768" height="768" ></canvas>
+          <div class="row no-gutters">
+            <div class="col-2">
+              <div class="my-2">
+                <span class="d-block badge rounded-0">layers</span>
+                <ul id="masksPanel" class="list-group rounded-0 list-group-horizontal justify-content-center">
+                  <li class="list-group-item rounded-0">0</li>
+                  <li class="list-group-item">1</li>
+                  <li class="list-group-item">2</li>
+                  <li class="list-group-item">3</li>
+                  <li class="list-group-item">4</li>
+                  <li class="list-group-item">5</li>
+                  <li class="list-group-item">6</li>
+                  <li class="list-group-item">7</li>
+                  <li class="list-group-item">8</li>
+                  <li class="list-group-item">9</li>
+                  <li class="list-group-item">10</li>
+                  <li class="list-group-item">11</li>
+                  <li class="list-group-item">12</li>
+                  <li class="list-group-item">13</li>
+                  <li class="list-group-item">14</li>
+                  <li class="list-group-item">15</li>
+                  <li class="list-group-item">16</li>
+                  <li class="list-group-item">17</li>
+                  <li class="list-group-item">18</li>
+                  <li class="list-group-item rounded-0">19</li>
+                </ul>
+                <div class="text-center my-1">
+                  <span class="d-block badge rounded-0">Tools</span>
+                  <span id="wipeMsk" class="btn btn-sm text-secondary"><i class="fas fa-eraser fa-2x"></i></span>
+                  <a href="#" id="expMsk" class="btn btn-sm text-secondary"><i class="fas fa-file-export fa-2x"></i></a>
+                </div>
+                <div id="resetShades" class="d-flex justify-content-center my-1">
+                  <span class="choose" data-color="000000" style="background-color:000000"> </span>
+                  <span class="choose" data-color="FF0000" style="background-color:#FF0000"> </span>
+                </div>
+                <span id="maskoolor" class="choose" data-color="800000" style="background-color:#800000"> </span>
+                <input id="slidemask" type="range" min="0" max="256" value="128" step="1">
+              </div>
+            </div>
+              <div class="col-10">
+                <canvas id="maskPainter" class="my-1" width="768" height="768" ></canvas>
+              </div>
+            </div>
         </div>
         <div class="tab-pane fade" id="uvmaptab" role="tabpanel" aria-labelledby="uvmap-tab">
           <div class="row no-gutters">

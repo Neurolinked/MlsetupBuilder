@@ -16,9 +16,12 @@ function notify3D(message){
 }
 
 
+
 var nMeKanv = document.getElementById('normalMe');
-var paintMask = document.getElementById('maskPainter').getContext('2d');
-paintMask.save();
+const paintMaskHT = document.getElementById('maskPainter')
+const paintMaskCTX = paintMaskHT.getContext('2d');
+
+paintMaskCTX.save();
 
 function HairTexture(hairData=[{c:'#002250',p:0},{c:'#002250',p:1}]) {
 	var size = 256;
@@ -96,11 +99,15 @@ const params = {
 //basic material map
 
 //-------------Material and Object Constant--------------------
-const safeMap = new THREE.TextureLoader().load( "./images/favicon.png" );
-const canvasPaint = new THREE.CanvasTexture(document.getElementById('maskPainter'));
+//const safeMap = new THREE.TextureLoader().load( "./images/favicon.png" );
+const canvasPaint = new THREE.CanvasTexture(paintMaskCTX.canvas);
+canvasPaint.format = THREE.LuminanceFormat
+canvasPaint.wrapS = THREE.RepeatWrapping
+canvasPaint.wrapT = THREE.RepeatWrapping
+const drawStartPos = new THREE.Vector2();
 
-const material = new THREE.MeshStandardMaterial({color: 0x500000});//
-const materialPaint = new THREE.MeshStandardMaterial({map:canvasPaint});//
+
+const material = new THREE.MeshStandardMaterial({color: 0x500000,map:canvasPaint});
 
 const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 1, thickness: 0.05});
 //material for stitches zip and other things
@@ -113,6 +120,7 @@ stitchMap.wrapT = THREE.RepeatWrapping;
 stitchNorMap.wrapS = THREE.RepeatWrapping;
 stitchNorMap.wrapT = THREE.RepeatWrapping;
 stitchNorMap.premultiplyAlpha = true;
+
 const stitches = new THREE.MeshStandardMaterial({map:stitchMap,normalMap:stitchNorMap, transparent: true,opacity: 0.7, color: 0xffffff});
 //-------------Hairs Materials----------------------------------
 var hairShading = document.getElementById('hairTex');
@@ -151,9 +159,42 @@ document.getElementById("UVSave").addEventListener('click', (e) =>{
   down.download = "uvmap.png";
 });
 
+document.getElementById("expMsk").addEventListener('click', (e) =>{
+  let mylayer = document.querySelector("#masksPanel li.active").innerText;
+  let down = document.getElementById("expMsk")
+  let UWUPaintedMask = paintMaskHT.toDataURL('image/png');
+  down.href = UWUPaintedMask;
+  down.download = "newmask_layer_"+mylayer+".png";
+});
+
 document.getElementById("UVGen").addEventListener('click', (e) =>{
   canvUVWrapped.dispatchEvent(new Event("dblclick"));
 });
+
+let paint = false;
+let originalLayer = '';
+
+// add canvas event listeners
+paintMaskHT.addEventListener( 'pointerdown', function ( e ) {
+	paint = true;
+	drawStartPos.set( e.offsetX, e.offsetY );
+} );
+
+paintMaskHT.addEventListener( 'pointermove', function ( e ) {
+	if ( paint ) draw( paintMaskCTX, e.offsetX, e.offsetY );
+} );
+
+paintMaskHT.addEventListener( 'pointerup', function () {
+	paint = false;
+  paintMaskCTX.beginPath();
+});
+
+paintMaskHT.addEventListener( 'pointerleave', function () {
+	paint = false;
+  paintMaskCTX.beginPath();
+});
+
+
 
 canvUVWrapped.addEventListener('dblclick',function(){
   try{
@@ -259,21 +300,43 @@ function giveToTheAim(textureData,w,h){
   octx.setTransform(1,0,0,-1,0,0);
   ctx.drawImage(oc,0,0,512,512);
 
-  paintMask.drawImage(oc,0,0,768,768);
+  paintMaskCTX.drawImage(oc,0,0,768,768);
   oc.remove();
 }
+
+function draw( drawContext, x, y ) {
+        let color = document.getElementById("maskoolor").getAttribute('data-color');
+        console.log(color);
+				drawContext.moveTo( drawStartPos.x, drawStartPos.y );
+				drawContext.strokeStyle = '#'+color;
+				drawContext.lineTo( x, y );
+				drawContext.stroke();
+				// reset drawing start position to current position.
+				drawStartPos.set( x, y );
+				// need to flag the map as needing updating.
+				material.map.needsUpdate = true;
+			}
+
+document.getElementById('wipeMsk').addEventListener('click', (e) =>{
+  paintMaskCTX.restore();
+})
 
 function layersActive(index){
   let indicators = document.getElementById('layeringsystem');
   let listlayers = indicators.getElementsByTagName("li");
+
+  let paintLayer = document.getElementById('masksPanel');
+  let paint_L_ena = paintLayer.getElementsByTagName("li");
 
   for (var i=1; i < listlayers.length; i++) {
     if (Number(listlayers[i].innerText)>index){
      listlayers[i].setAttribute('disabled','disabled');
      listlayers[i].classList.remove('active');
     	 //console.log("this -> "+i+" has to be disabled");
+     paint_L_ena[i].classList.add('off');
     }else{
      listlayers[i].removeAttribute('disabled');
+     paint_L_ena[i].classList.remove('off');
     }
   }
 }
@@ -458,10 +521,12 @@ function loadMapOntheFly(path){
   	 var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType,THREE.UVMapping,THREE.RepeatWrapping);
   	 dataTex.flipY=true;
   	 material.color.set(0x500000);
-  	 material.map = dataTex;
+
+  	 //material.map = canvasPaint //material.map = dataTex;
   	 giveToTheAim(luminancedata,width,height);
+     originalLayer = paintMaskHT.toDataURL('image/png');
   	 //console.log(height+","+width);
-  	 //material.needsUpdates =true;
+     material.map.needsUpdate = true;
   }else{
     let notific = document.querySelector("#notyCounter span");
     let mipreference = document.getElementById("prefxunbundle");
@@ -469,7 +534,7 @@ function loadMapOntheFly(path){
     err_counter = err_counter+1;
     notific.textContent = err_counter;
     material.color.set(0x000055);
-    material.map = safeMap;
+    clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
     notify3D('An error happened during the load of the file: '+mipreference.value+path);
   }
 }
@@ -719,10 +784,10 @@ document.getElementById('cstMdlLoader').addEventListener('click',(e)=>{
 	let maxLayers = 0;
 	layersActive(maxLayers);
   safeNormal()
-	material.map = safeMap;
+	clearCanvas(paintMaskHT,'rgb(256,256,256)',768); //material.map = safeMap;
 	//var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
   material.normalMap.needsUpdate = true // = texture;
-  material.map.needsUpdate = true;
+  //material.map.needsUpdate = true;
 	CustomLoadButton.setAttribute('disabled','disabled');
 	thePIT.ThreeDAsset();
 	let Normed = document.querySelector('#withbones svg:nth-child(2) path');
@@ -791,7 +856,8 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 	 loadMapOntheFly(theMaskLayer);
 	 //material.needUpdates =true; //setup the mask I'll set the material to update
  }else{
-	 material.map = safeMap;
+   material.color.set(0x000055);
+	 clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
 	 notify3D('the texture '+theMaskLayer+' does not exists');
  }
 
@@ -913,7 +979,7 @@ function init() {
   scene.add(pointlight_4);
 
   //load a text file and output the result to the console
-  material.map = safeMap;
+  //material.map = safeMap;
 	material.normalMap = normMe;
 
 	//fog

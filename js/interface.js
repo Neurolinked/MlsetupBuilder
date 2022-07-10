@@ -281,7 +281,15 @@ $("#masksPanel li").click(function(){
   $("#masksPanel li.active").removeClass("active");
   $(this).addClass("active");
   $("#layeringsystem li").eq($(this).index()).click();
-})
+});
+
+$("#resetShades span.choose").click(function(){
+  let theshade = $(this).data("color").substring(0,2);
+  $("#slidemask").val(parseInt(theshade,16)).change();
+  $("#maskoolor").data("color",theshade+'0000');
+  $("#maskoolor").attr("data-color",theshade+'0000');
+  $("#maskoolor").css("background-color","#"+theshade+'0000');
+});
 //Change in layer displayer
 	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(){
 		if (
@@ -446,7 +454,7 @@ $("#masksPanel li").click(function(){
 
   const uvmSize = $("#maskPainter").attr('width');
 	const microBlend = new fabric.Canvas('maskFabric');//initialize the fabric Element
-  
+
 	microBlend.selection=false;
 	microBlend.uniformScaling = true; //only scaling 1:1
 	microBlend.uniScaleKey = 'null'; //remove non-uniform scaling
@@ -615,15 +623,17 @@ $("#masksPanel li").click(function(){
   });
 
   $("#slidemask").on("input",function(){
-
     let hexacol = Number($(this).val()).toString(16)+"0000";
-    console.log(hexacol);
     $("#maskoolor").data("color",hexacol);
+    $("#maskoolor").attr("data-color",hexacol);
     $("#maskoolor").css("background-color","#"+hexacol);
   });
 
   $("#maskoolor").on("dblclick",function(){
     $("#slidemask").val(128).change();
+    $("#maskoolor").data("color","800000");
+    $("#maskoolor").attr("data-color","800000");
+    $("#maskoolor").css("background-color","#800000");
   });
 	//Displays of the license
 	licenseWindow.addEventListener('hidden.bs.modal', function (event) { localStorage.setItem('ReadLicense',Date.now()); });
