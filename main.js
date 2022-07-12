@@ -476,6 +476,10 @@ ipcMain.on('main:writefile',(event,arg) => {
 											 event.reply('preload:noBar','')
 										}
 									})
+								}else{
+									event.reply('preload:logEntry', 'Operation executed, the file is saved there >'+salvataggio.filePath+'\nYou haven\'t setup a wolvenkit-cli executable to compile, so it\'s up to you the conversion')
+									new Notification({title:"Conversion executed", body: "Your file has been saved in JSON format" }).show()
+									event.reply('preload:noBar','')
 								}
 							}else{
 								 new Notification({title:"Conversion executed", body: "Your file has been saved, remember to convert it back in Wolvenkit. Shutting Down" }).show()

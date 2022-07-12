@@ -183,26 +183,30 @@ document.getElementById("UVGen").addEventListener('click', (e) =>{
 
 let paint = false;
 paintMaskCTX.lineWidth = 0.2;
+
 let originalLayer = '';
 
 // add canvas event listeners
 paintMaskHT.addEventListener( 'pointerdown', function ( e ) {
+  console.log(e.pressure);
 	paint = true;
 	drawStartPos.set( e.offsetX, e.offsetY );
-} );
+});
 
 paintMaskHT.addEventListener( 'pointermove', function ( e ) {
 	if ( paint ) draw( paintMaskCTX, e.offsetX, e.offsetY );
-} );
+});
 
 paintMaskHT.addEventListener( 'pointerup', function () {
+  console.log('pointerup');
 	paint = false;
   paintMaskCTX.beginPath();
 });
 
 paintMaskHT.addEventListener( 'pointerleave', function () {
+  console.log('pointerleave');
 	paint = false;
-  paintMaskCTX.beginPath();
+  paintMaskCTX.closePath();
 });
 
 
@@ -317,7 +321,6 @@ function giveToTheAim(textureData,w,h){
 
 function draw( drawContext, x, y ) {
         let color = document.getElementById("maskoolor").getAttribute('data-color');
-        console.log(color);
 				drawContext.moveTo( drawStartPos.x, drawStartPos.y );
 				drawContext.strokeStyle = '#'+color;
 				drawContext.lineTo( x, y );

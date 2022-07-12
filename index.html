@@ -618,21 +618,22 @@
 <div class="modal fade " id="masksModal"  tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
     <div class="modal-content rounded-0">
+      <div class="modal-header bg-secondary text-warning p-1 border-bottom-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
       <div class="modal-body p-0">
 				<div>
-					<div class="input-group">
-						<button type="button" id="masksFinderClearer" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
+					<div class="input-group input-group-sm">
+						<button type="button" id="masksFinderClearer" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-eraser"></i></button>
 					  <input type="text" id="masksCFinder" class="form-control rounded-0" placeholder="search in the masklist" aria-label="Masks paths">
 						<!--<button class="btn btn-Prim rounded-0" type="button" id="matModSearch">search</button>-->
-
 					</div>
-
 				</div>
 				<div>
 					<div class="input-group input-group-sm">
 						<span class="input-group-text bg-secondary text-dark border-0 rounded-0"><i class="fas fa-mask"></i></span>
 						<span id="lblmaskselected" class="input-group-text text-secondary flex-grow-1 border-0 rounded-0 fs-80">none</span>
-						<button type="button" id="choseThisMask" class="btn btn-outline-error rounded-0">Choose</button>
+						<button type="button" id="choseThisMask" class="btn btn-outline-error rounded-0"><i class="fa fa-link"></i> Choose</button>
 					</div>
 					<select id="customMaskSelector" class="form-select rounded-0 p-0" size="20" aria-label="size 3 select example">
 					</select>
