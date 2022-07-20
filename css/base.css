@@ -97,6 +97,7 @@ body{width: 100vw;height: 95vh;background-color:var(--layer-0);color:white;}
 
 select optgroup:label{display:none;}
 
+input[type='color']{border:0 none!important;padding:0;height:auto;}
 input[type='file']::-webkit-file-upload-button{display:none;}
 
 .bg-attention{background-color:var(--active-sel)!important;}
@@ -352,11 +353,18 @@ Contextual Menu for the layering Systems
 
 input[type=range]{-webkit-appearance: none;}
 input[type=range]::-webkit-slider-runnable-track {width: 300px;height: 5px;background: var(--secondary);border: none;}
+input[type=range].grayscale::-webkit-slider-runnable-track {background: rgb(77, 77, 77);}
 input[type=range]::-webkit-slider-thumb {-webkit-appearance: none;border: none;height: 12px;width: 12px;border-radius: 50%;background: var(--active);margin-top: -4px;}
+input[type=range].grayscale::-webkit-slider-thumb {background: rgb(102, 102, 102);}
+
 input[type=range]:focus::-webkit-slider-runnable-track,
 input[type=range]:active::-webkit-slider-runnable-track{background: var(--active-sel);}
+input[type=range].grayscale:focus::-webkit-slider-runnable-track,
+input[type=range].grayscale:active::-webkit-slider-runnable-track{background: rgb(110, 110, 110);}
 input[type=range]:focus::-webkit-slider-thumb ,
 input[type=range]:active::-webkit-slider-thumb {background: var(--active);}
+input[type=range].grayscale:focus::-webkit-slider-thumb ,
+input[type=range].grayscale:active::-webkit-slider-thumb{background: rgb(102, 102, 102);}
 input[type=range]:focus {outline: none;}
 
 
@@ -464,3 +472,4 @@ span.choose.active{border-color:var(--active-sel);}
 #Snapshots img:nth-child(even){margin-right:0;}
 
 #strokeMsk:before{content:"";font-family: "Font Awesome 6 Free";font-weight:900;color:var(--active-sel)!important;padding-right:.5rem;font-size:1.5rem!important;}
+#maskPainter{touch-action: none;/*it fixes the fadeoff*/}

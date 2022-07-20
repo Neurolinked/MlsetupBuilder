@@ -15,15 +15,67 @@ function notify3D(message){
 	NTextarea.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+'<br/>'+NTextarea.innerHTML;
 }
 
+/*thacanvas events*/
 
+thacanvas.addEventListener('mousedown',(event)=>{
+	event.preventDefault();
+	if (event.shiftKey && (event.button==0)){
+		paintMaskCTX.beginPath();
+	}
+});
+thacanvas.addEventListener('mouseup',(event)=>{
+	event.preventDefault();
+	if (event.shiftKey &&  (event.button==0)){
+		console.log('mouseup',event.button)
+		paintMaskCTX.closePath();
+	}
+});
+
+thacanvas.addEventListener( 'mousemove', (event)=>{
+	event.preventDefault();
+
+});
+
+function onMouseMove( event ) {
+	event.preventDefault();
+	if (paintMask3D){
+		const array = getMousePosition( thacanvas, event.clientX, event.clientY );
+		onClickPosition.fromArray( array );
+		if (scene.children.filter(el => el.type.toLowerCase()=='group').length>0){
+			const intersects = getIntersects( onClickPosition, scene.children.filter(el => el.type.toLowerCase()=='group')[0].children); //fix for GLB loaded scene
+			if ( intersects.length > 0 && intersects[ 0 ].uv ) {
+
+				const uv = intersects[ 0 ].uv;
+				uvPaint.fromArray(intersects[ 0 ].uv)
+				//canvas.setCrossPosition( uv.x, uv.y );
+				//draw( paintMaskCTX, uv.x * 768, 768 - uv.y * 768 );
+			}
+		}
+	}
+}
+
+/*TODO Aggiungere filtro dell'attuale scena con solo i membri in gruppo filtrati per rimuovere inutili mesh da controllare.*/
+
+function getMousePosition( dom, x, y ) {
+	const rect = dom.getBoundingClientRect();
+	return [ ( x - rect.left ) / rect.width, ( y - rect.top ) / rect.height ];
+}
+
+function getIntersects( point, objects ) {
+	mouseCurPos.set( ( point.x * 2 ) - 1, - ( point.y * 2 ) + 1 );
+	raycaster.setFromCamera( mouseCurPos, camera );
+	return raycaster.intersectObjects( objects, false );
+}
 
 var nMeKanv = document.getElementById('normalMe');
 const paintMaskHT = document.getElementById('maskPainter');
 const paintMaskCTX = paintMaskHT.getContext('2d');
-
+paintMaskCTX.lineCap = "round";
+var pressure = 0.2;
 var snapsManager = document.getElementById('Snapshots');
-
 paintMaskCTX.save();
+
+grayscaleCheck = document.getElementById('gScalePaint');
 
 function HairTexture(hairData=[{c:'#002250',p:0},{c:'#002250',p:1}]) {
 	var size = 256;
@@ -76,6 +128,7 @@ function theChecked( sons ){
    /*return an array of indexes*/
 }
 
+ var paintMask3D = false;
  var err_counter = 0;
  var control_reset = false;
  var control_side = false;
@@ -131,17 +184,13 @@ const hair_other = new THREE.MeshStandardMaterial({color: 0x222222,side:THREE.Do
 
 //__this will be for direct painting purpose
 const raycaster = new THREE.Raycaster();
-let line;
-const intersection = {
-	intersects: false,
-	point: new THREE.Vector3(),
-	normal: new THREE.Vector3()
-};
 const mouse = new THREE.Vector2();
 const intersects = [];
-let mouseHelper;
-const position = new THREE.Vector3();
-const orientation = new THREE.Euler();
+
+const mouseCurPos = new THREE.Vector2();
+const onClickPosition = new THREE.Vector2();
+const uvPaint = new THREE.Vector2();
+
 //
 
 safeNormal();
@@ -188,16 +237,19 @@ let originalLayer = '';
 
 // add canvas event listeners
 paintMaskHT.addEventListener( 'pointerdown', function ( e ) {
-  console.log(e.pressure);
+	//pressure = Number(document.getElementById("strokeMsk").value) + (Number(document.getElementById("strokeMsk").value) * e.pressure)
+	pressure = Number(document.getElementById("strokeMsk").value);
 	paint = true;
 	drawStartPos.set( e.offsetX, e.offsetY );
 });
 
 paintMaskHT.addEventListener( 'pointermove', function ( e ) {
+	//pressure = Number(document.getElementById("strokeMsk").value) + (Number(document.getElementById("strokeMsk").value) * e.pressure)
+	pressure = Number(document.getElementById("strokeMsk").value);
 	if ( paint ) draw( paintMaskCTX, e.offsetX, e.offsetY );
 });
 
-paintMaskHT.addEventListener( 'pointerup', function () {
+paintMaskHT.addEventListener( 'pointerup', function (e) {
   console.log('pointerup');
 	paint = false;
   paintMaskCTX.beginPath();
@@ -300,8 +352,13 @@ function giveToTheAim(textureData,w,h){
  for (let i = 0; i < imageData.data.length; i += 4) {
 	 // Modify pixel data
 	 imageData.data[i] = textureData[k];  // R value
-	 imageData.data[i + 1] = 0    // G value
-	 imageData.data[i + 2] = 0  // B value
+	 if (grayscaleCheck.checked){
+		 imageData.data[i + 1] =  textureData[k]    // G value
+		 imageData.data[i + 2] =  textureData[k]  // B value
+	 }else{
+		 imageData.data[i + 1] = 0    // G value
+		 imageData.data[i + 2] = 0  // B value
+	 }
 	 imageData.data[i + 3] = 255;  // A value
 	 k++;
  }
@@ -321,6 +378,7 @@ function giveToTheAim(textureData,w,h){
 
 function draw( drawContext, x, y ) {
         let color = document.getElementById("maskoolor").getAttribute('data-color');
+				drawContext.lineWidth = pressure;
 				drawContext.moveTo( drawStartPos.x, drawStartPos.y );
 				drawContext.strokeStyle = '#'+color;
 				drawContext.lineTo( x, y );
@@ -330,6 +388,48 @@ function draw( drawContext, x, y ) {
 				// need to flag the map as needing updating.
 				material.map.needsUpdate = true;
 			}
+
+	grayscaleCheck.addEventListener('click', ( event )=>{
+		let paintDisplay = document.querySelectorAll("span.choose")
+		let basecode
+
+		let rangeshift = document.querySelectorAll('#panelPain input[type="range"]')
+		rangeshift.forEach((range, i)=>{
+			range.classList.toggle('grayscale');
+		})
+
+		if (grayscaleCheck.checked){
+
+			const imageData = paintMaskCTX.getImageData(0, 0, paintMaskHT.width, paintMaskHT.height);
+			const data = imageData.data;
+			for (let i = 0; i < data.length; i += 4) {
+					//const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+					data[i]     = data[i]; // red
+					data[i + 1] = data[i]; // green
+					data[i + 2] = data[i]; // blue
+			}
+			paintMaskCTX.putImageData(imageData, 0, 0);
+
+			paintDisplay.forEach((spans, i) => {
+				basecode = spans.getAttribute('data-color').substring(0,2);
+				spans.setAttribute('data-color',basecode.repeat(3));
+				spans.setAttribute('style','background-color:#'+basecode.repeat(3));
+			});
+
+		}else{
+
+			const imageData = paintMaskCTX.getImageData(0, 0, paintMaskHT.width, paintMaskHT.height);
+			const data = imageData.data;
+			for (let i = 0; i < data.length; i += 4) {
+					//const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+					data[i]     = data[i]; // red
+					data[i + 1] = 0; // green
+					data[i + 2] = 0; // blue
+			}
+			paintMaskCTX.putImageData(imageData, 0, 0);
+		}
+		material.map.needsUpdate = true
+	})
 
 function layersActive(index){
   let indicators = document.getElementById('layeringsystem');
@@ -357,10 +457,10 @@ document.getElementById('wipeMsk').addEventListener('click', (e) =>{
     let img = new Image;
     img.onload = function(){
       paintMaskCTX.drawImage(img,0,0,768,768); // Or at whatever offset you like
+			material.map.needsUpdate = true;
     };
     img.src = originalLayer;
-    //img=null;
-    material.map.needsUpdate = true;
+
   }
 });
 //get the actual snapshot in an image and it push in the interface
@@ -371,6 +471,7 @@ document.getElementById('snapsMsk').addEventListener('click' , (event)=>{
   let crapimg = paintMaskHT.toDataURL('image/png');
   snapsManager.innerHTML +="<img src='"+crapimg+"' >";
 });
+
 
 /* Back One snapshot */
 document.getElementById('stepbackMsk').addEventListener('click', (event) =>{
@@ -390,7 +491,9 @@ document.getElementById('stepbackMsk').addEventListener('click', (event) =>{
     img.src = sourceimage.src;
     //img=null;
     material.map.needsUpdate = true;
-  }
+  }else{
+		document.getElementById("wipeMsk").dispatchEvent(new Event('click'));
+	}
 });
 
 document.querySelector('#Snapshots').addEventListener('click', (event) =>{
@@ -406,10 +509,6 @@ document.querySelector('#Snapshots').addEventListener('click', (event) =>{
     material.map.needsUpdate = true;
   }
 });
-
-document.getElementById('strokeMsk').addEventListener('input', (event) =>{
-  paintMaskCTX.lineWidth = event.target.value;
-})
 
 function str2ab(str) {
  var buf = new ArrayBuffer(str.length); // 2 bytes for each char
@@ -509,58 +608,6 @@ function loadNormOntheFly(path){
 	}else{
 		Normed.setAttribute("fill",'rgb(255,128,0)');
 	}
-	/*
-  if ((typeof(bufferimage)!="object") && (bufferimage!="") ){
-			/*
-		//ddsWay
-		var data = str2ab(bufferimage);
-  	 let offsetHeight = 3;
-  	 let offsetwidth = 4;
-  	 const headerData = new Uint32Array( data, 0, 124 );
-  	 let height = headerData[3];
-  	 let width = headerData[4];
-  	 let size = height * width;
-		 const dx10Data = new Uint32Array( data, 128, 4 );
-
-		 var luminancedata
-		 //wolvenkit 8.4.3+ and cli 1.5.0+ format
-		 if ((dx10Data[0]==0x3D) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
-			 //DXGI_FORMAT_R8_UNORM
-			 luminancedata = new Uint8Array( data, 148, size );
-		 }else if ((dx10Data[0]==0x61) && (dx10Data[1]==0x3)&& (dx10Data[2]==0x0)&& (dx10Data[3]==0x1)){
-			 //BC7-UNORM normals
-			 console.log('Trovata bc7-typeless');
-			 luminancedata = safeNorm;
-		 }else if ((dx10Data[0]==0x62) && (dx10Data[1]==0x3)&& (dx10Data[2]==0x0)&& (dx10Data[3]==0x1)){
-			 //BC7-UNORM normals
-			 console.log('Trovata bc7-unorm RGB');
-			 var test = new Uint16Array( data, 148 )
-			 console.log(test);
-			 luminancedata = safeNorm;
-		 }else if ((dx10Data[0]==0x63) && (dx10Data[1]==0x3)&& (dx10Data[2]==0x0)&& (dx10Data[3]==0x1)){
-		 	//BC7-UNORM normals
-		 	console.log('Trovata bc7-unorm SRGB');
-		 	luminancedata = safeNorm;
-		 }else{
-			 //or legacy
-			 luminancedata = new Uint8Array( data, 128, size );
-		 }
-
-  	 var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.RGBAFormat, THREE.UnsignedByteType);
-  	 dataTex.flipY=true;
-  	 material.normalMap = dataTex;
-  	 material.needUpdates =true;
-
-  }else{
-    let notific = document.querySelector("#notyCounter span");
-    let mipreference = document.getElementById("prefxunbundle");
-    err_counter = err_counter+1;
-    notific.textContent = err_counter;
-		safeNormal();
-    //material.normalMap = safeNorm;
-    notify3D('An error happened during the load of the file: '+mipreference.value+path);
-  }
-	*/
 }
 
 function loadMapOntheFly(path){
@@ -934,7 +981,6 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
  let Normed = document.querySelector('#withbones svg:nth-child(2) path');
 
 if (theNormal.match(/^[/|\w|\.]+.xbm/)){
-	//safeNormal();
  loadNormOntheFly(theNormal);
 }else{
  safeNormal();
@@ -983,7 +1029,7 @@ function init() {
   /*    const axesHelper = new THREE.AxesHelper( 5 );    scene.add( axesHelper ); to understand position of the objects */
 
   var thacanvas = document.getElementById('thacanvas');
-
+	thacanvas.setAttribute('data-engine',THREE.REVISION);
   renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true});
 
   if (window.innerHeight-80<512){
@@ -999,9 +1045,13 @@ function init() {
 	//----calculating the shadows
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+	//Canvas events for painting
+
 	//---calculating the shadows
   camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.01,200);
   camera.position.set(0.0,-0.4,-8);
+	camera.updateProjectionMatrix();
   /*
 
   const helper = new THREE.CameraHelper( camera );
@@ -1095,8 +1145,14 @@ function init() {
 
 function animate() {
   if (resized) resize()
-  controls.autoRotate = params.autorotation;
-  controls.autoRotateSpeed = params.rotationspeed;
+
+	if (!paintMask3D){
+		controls.autoRotate = params.autorotation;
+		controls.autoRotateSpeed = params.rotationspeed;
+	}else{
+		controls.autoRotate = false;
+	}
+
   //check mesh reload
   if (control_reset){
    control_reset = false;
@@ -1137,3 +1193,25 @@ function resize() {
 		 camera.aspect = canvas.clientWidth/canvas.clientHeight
 		 camera.updateProjectionMatrix()
  }
+
+
+
+
+ document.querySelector('body').addEventListener('keydown', (event)=>{
+	 if (event.shiftKey){
+		paintMask3D=true;
+		controls.enabled=false;
+	}else{
+		paintMask3D=false;
+		controls.enabled=true;
+	}
+ });
+ document.querySelector('body').addEventListener('keyup', (e)=>{
+	 if (event.shiftKey){
+		 paintMask3D=true;
+		 controls.enabled=false;
+	 }else{
+ 		paintMask3D=false;
+		controls.enabled = true;
+ 	}
+ });

@@ -623,10 +623,15 @@ $("#resetShades span.choose").click(function(){
   });
 
   $("#slidemask").on("input",function(){
-    let hexacol = Number($(this).val()).toString(16)+"0000";
-    $("#maskoolor").data("color",hexacol);
-    $("#maskoolor").attr("data-color",hexacol);
-    $("#maskoolor").css("background-color","#"+hexacol);
+		let hexacol
+		if ($("#gScalePaint").is(":checked")){
+			hexacol = String(Number($(this).val()).toString(16)).repeat(3);
+		}else{
+			hexacol = Number($(this).val()).toString(16)+"0000";
+		}
+		$("#maskoolor").data("color",hexacol);
+		$("#maskoolor").attr("data-color",hexacol);
+		$("#maskoolor").css("background-color","#"+hexacol);
   });
 
   $("#maskoolor").on("dblclick",function(){

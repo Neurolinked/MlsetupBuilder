@@ -226,14 +226,20 @@
                   <a href="#" id="expMsk" class="btn btn-sm text-secondary" title="Export the current image"><i class="fas fa-file-export fa-2x"></i></a>
                 </div>
                 <div  class="d-flex justify-content-center my-1 py-1 layer-1 rounded">
-                  <input id="strokeMsk" type="range" min="0.2" max="30" value="0.2" step="0.1">
+                  <input id="strokeMsk" type="range" min="0.2" max="50" value="0.2" step="0.1">
                 </div>
+								<div class="d-flex justify-content-center my-1 py-1 layer-1 rounded">
+									<div class="form-check form-switch">
+									  <input class="form-check-input" type="checkbox" role="switch" id="gScalePaint">
+									  <label class="form-check-label" for="gScalePaint">Grayscale</label>
+									</div>
+								</div>
                 <div id="resetShades" class="d-flex justify-content-center my-1 py-1 layer-1 rounded">
                   <span class="choose" data-color="000000" style="background-color:#000000"> </span>
                   <span class="choose" data-color="FF0000" style="background-color:#FF0000"> </span>
                 </div>
                 <div class="my-1 py-1 layer-1 rounded">
-                  <span id="maskoolor" class="choose" data-color="800000" style="background-color:#800000"> </span>
+                  <span id="maskoolor" class="choose mx-auto d-block" data-color="800000" style="background-color:#800000"> </span>
                   <input id="slidemask" type="range" min="0" max="255" value="128" step="1">
                 </div>
                 <div class="my-2 border outline-secondary rounded" style="min-height:2rem;">
@@ -291,7 +297,7 @@
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
 		<div class="btn-group ms-2 me-1" role="group" aria-label="model loading">
-	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn btn-out-Prim"><i class="fas fa-cubes"></i> Models library</button>
+	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn btn-out-Prim"><i class="fas fa-cubes"></i> Library</button>
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
     <div class="btn-group" role="group" aria-label="model loading">
@@ -303,6 +309,7 @@
      <!--<button class="btn btn-sm btn-outline-info ms-3" type="button" data-bs-toggle="modal" data-bs-target="#modalInfo" ><i class="fas fa-info "></i></button>-->
      <button class="btn btn-outline-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#InfoModel" ><i class="fas fa-info"></i></button>
    </div>
+	 <i id="paintActive" class="text-secondary fa-solid fa-brush fa-2x ms-2 align-bottom"></i>
     <!--</div>-->
   </div>
 </div>
@@ -479,10 +486,10 @@
         </div>
         <div>
           <span class="badge  w-100 rounded-0 ">Rough Out</span>
-          <select class="form-select rounded-0" id="layerRoughOut" aria-label="RoughnessOut">
-            <optgroup label="Reset"><option value="null" >null</option></optgroup>
-            <optgroup label="Material specific" id="Rough_out_values"></optgroup>
-          </select>
+	          <select class="form-select rounded-0" id="layerRoughOut" aria-label="RoughnessOut">
+	            <optgroup label="Reset"><option value="null" >null</option></optgroup>
+	            <optgroup label="Material specific" id="Rough_out_values"></optgroup>
+	          </select>
         </div>
       </div>
       <div id="colorGrid">
@@ -506,17 +513,6 @@
       <div id="colordisplay" class="layer-1">
         <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" title='null_null' >&nbsp;</span></div>
       </div>
-			<!--
-      <div id="MaterialLibrary" class="mt-3">
-        <span class="badge w-100 rounded-0" >Material library search</span>
-        <div class="input-group input-group-sm mb-1">
-          <input type="text" class="form-control rounded-0" id="matFinder" placeholder="search for a material in the library">
-          <button type="button" id="matFinderCleared" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
-        </div>
-        <div id="cagethematerials"  >
-          <div id="materialTrees" class="layer-1" ></div>
-        </div>
-      </div>-->
   </div>
   <div id="micropanel" class="layer-1 rounded">
     <div>
