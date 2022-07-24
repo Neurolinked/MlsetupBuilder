@@ -23,15 +23,15 @@ How to use it with Wolvenkit: https://youtu.be/uCOHjMPvpgc
 To display the models present in the model library you need to setup a folder in the software preferences, choose the Wolvenkit-CLI executable, at least version 1.5.2 and from the build menu Build the repository, then the microblends normals and decals for the software
 
 # Screenshot
-Main window with Johnny Silverhad pants alternate appearance and swappable model library position
+Main window with the new info/tool panel and layer mask visualizer/painter
 
-![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_163.jpg)
+![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_164_1.jpg)
 
-The material choosing window with static images of the materials in their default appearance
-![A static material preview](https://www.kientzproduction.com/gitcontent/mlsb_material.jpg)
+model info panel with UV map visualizer and extractor
+![UVextractor](https://www.kientzproduction.com/gitcontent/mlsb_164_2.jpg)
 
-The models tree with the last imported custom glb, with an assigned vanilla masks
-![Custom model Loading](https://www.kientzproduction.com/gitcontent/mlsb_custom.jpg)
+Direct Painting on the linked texture mask
+![Painting on masks](https://www.kientzproduction.com/gitcontent/mlsb_164_3.jpg)
 
 # Wanna support ?
 If you really wish you can donate with Ko-fi
