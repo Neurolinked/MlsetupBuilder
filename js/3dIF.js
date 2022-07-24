@@ -115,6 +115,7 @@ function safeNormal(){
 }
 
 function theChecked( sons ){
+  console.log(sons);
   /*Find the index of the checked submesh to unwrap their UVs */
   var checked = [];
    if (sons.length != 0 ){
@@ -265,13 +266,11 @@ paintMaskHT.addEventListener( 'pointerleave', function () {
 
 canvUVWrapped.addEventListener('dblclick',function(){
   try{
-    if (scene.children.filter(elm => elm.type.toLowerCase=='group')){
+    if (scene.children.filter(elm => elm.type.toLowerCase()=='group')){
       var scena = scene.children.filter(elm => elm.type=='Group')
       if (scena[0].hasOwnProperty("children")){
-        var sbmeshs = scena[0].children.filter( elm => elm.type == 'SkinnedMesh'||elm.type == 'Mesh')
+        var sbmeshs = scena[0].children.filter( elm => elm.type == 'SkinnedMesh'|| elm.type == 'Mesh')
         var sz = 768;
-
-
         clearCanvas(canvUVWrapped,'',768);
 
         const ctxxxx = canvUVWrapped.getContext('2d');
@@ -289,7 +288,6 @@ canvUVWrapped.addEventListener('dblclick',function(){
         var lod
         tocompute.forEach((x)=>{
           lod = sbmeshs[x]
-
           const index = lod.geometry.index;
     			const uvAttribute = lod.geometry.attributes.uv;
           ctxxxx.strokeStyle = "#"+tinycolor.fromRatio({r:(Math.random()*.5),g:(Math.random()*.4+.6),b:(Math.random()*.4+.6)}).toHex();
@@ -330,7 +328,7 @@ canvUVWrapped.addEventListener('dblclick',function(){
       }
     }
   }catch(error){
-    console.log(error);
+    console.log(error,scena);
     notify3D("Errore di lettura",true);
   }
 
@@ -427,6 +425,11 @@ function draw( drawContext, x, y ) {
 					data[i + 2] = 0; // blue
 			}
 			paintMaskCTX.putImageData(imageData, 0, 0);
+      paintDisplay.forEach((spans, i) => {
+				basecode = spans.getAttribute('data-color').substring(0,2);
+				spans.setAttribute('data-color',basecode+"0000");
+				spans.setAttribute('style','background-color:#'+basecode+"0000");
+			});
 		}
 		material.map.needsUpdate = true
 	})
@@ -520,7 +523,8 @@ function str2ab(str) {
 }
 
 function loadNormOntheFly(path){
-	let Normed = document.querySelector('#withbones svg:nth-child(2) path');
+	//let Normed = document.querySelector('#withbones svg:nth-child(2) path');
+  let Normed = document.querySelector('#withbones i.icon-normals');
   //const encoder = new TextEncoder()
 	path = path.replaceAll(/\//g,'\\').replace(/\.xbm$/,".png"); //pngWay
 	//path = path.replaceAll(/\//g,'\\');
@@ -587,7 +591,8 @@ function loadNormOntheFly(path){
             material.normalMap.needsUpdate = true
 						//material.map.needsUpdate = true;
 						material.normalMap.flipY = false;
-						Normed.setAttribute("fill",'rgb(120,119,255)'); //display the normal flag
+            Normed.style.color = 'var(--normal)';
+						//Normed.setAttribute("fill",'rgb(120,119,255)'); //display the normal flag
 					}
 					nMap.src = dataURI;
 
@@ -595,25 +600,28 @@ function loadNormOntheFly(path){
 					//console.log('no sizes found');
 					notify3D('no sizes found');
 					safeNormal();
-					Normed.setAttribute("fill",'currentColor');
+					//Normed.setAttribute("fill",'currentColor');
+          Normed.style.color = '';
 					//var texture = new THREE.CanvasTexture(nMeKanv)
 					//material.normalMap = texture;
           material.normalMap.needsUpdate = true
 				}
 
 			}else{
-				Normed.setAttribute("fill",'rgb(255,0,0)');
+				//Normed.setAttribute("fill",'rgb(255,0,0)');
+        Normed.style.color = 'rgb(255,0,0)';
 				notify3D('another format');
 			}
 	}else{
-		Normed.setAttribute("fill",'rgb(255,128,0)');
+		//Normed.setAttribute("fill",'rgb(255,128,0)');
+    Normed.style.color = 'rgb(255,128,0)';
 	}
 }
 
 function loadMapOntheFly(path){
   //const encoder = new TextEncoder()
   path = path.replaceAll(/\//g,'\\');
-
+  console.log(path)
   var bufferimage
   bufferimage = thePIT.ApriStream(path,'binary');
   //bufferimage = JSON.parse(bufferimage);
@@ -635,8 +643,9 @@ function loadMapOntheFly(path){
 			 //or legacy
 			 luminancedata = new Uint8Array( data, 128, size );
 		 }
-  	 var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType,THREE.UVMapping,THREE.RepeatWrapping);
-  	 dataTex.flipY=true;
+  	 //var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType,THREE.UVMapping,THREE.RepeatWrapping);
+  	 //dataTex.flipY=true;
+
   	 material.color.set(0x500000);
 
   	 //material.map = canvasPaint //material.map = dataTex;
@@ -702,7 +711,7 @@ function glbload(arBuffer){
   let Boned = false;
   let MasksOn = document.querySelector('#withbones svg:nth-child(1)');
 	var Decal
-
+  UVSbmeshENA.innerHTML='';
 	loader.parse( arBuffer ,'', ( glbscene ) => {
     gui.removeFolder("Submesh Toggle");
     GuiSubmesh = gui.addFolder("Submesh Toggle");
@@ -710,6 +719,7 @@ function glbload(arBuffer){
       if ((child.type=="SkinnedMesh") && (!Boned)){Boned=true;}
 
       if ( child.isMesh ) {
+        UVSbmeshENA.innerHTML+='<input type="checkbox" class="btn-check" id="uvchk_'+child.name+'" checked  ><label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_'+child.name+'" autocomplete="off">'+child.name+'</label>';
 				Decal = false;
         //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
 				child.frustumCulled = false;
@@ -907,8 +917,10 @@ document.getElementById('cstMdlLoader').addEventListener('click',(e)=>{
   //material.map.needsUpdate = true;
 	CustomLoadButton.setAttribute('disabled','disabled');
 	thePIT.ThreeDAsset();
-	let Normed = document.querySelector('#withbones svg:nth-child(2) path');
-	Normed.setAttribute("fill",'currentColor');
+	//let Normed = document.querySelector('#withbones svg:nth-child(2) path');
+  let Normed = document.querySelector('#withbones i.icon-normals');
+	//Normed.setAttribute("fill",'currentColor');
+  Normed.style.color='';
 });
 
 document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
@@ -972,19 +984,23 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 	 //load textures
 	 loadMapOntheFly(theMaskLayer);
 	 //material.needUpdates =true; //setup the mask I'll set the material to update
+ }else if(theMaskLayer.match(/^[/|\w|\.]+.png/)){
+   loadMapOntheFly(theMaskLayer);
  }else{
    material.color.set(0x000055);
 	 clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
 	 notify3D('the texture '+theMaskLayer+' does not exists');
  }
 
- let Normed = document.querySelector('#withbones svg:nth-child(2) path');
+ //let Normed = document.querySelector('#withbones svg:nth-child(2) path');
+let Normed = document.querySelector('#withbones i.icon-normals');
 
 if (theNormal.match(/^[/|\w|\.]+.xbm/)){
  loadNormOntheFly(theNormal);
 }else{
  safeNormal();
- Normed.setAttribute("fill",'currentColor');
+ //Normed.setAttribute("fill",'currentColor');
+ Normed.style.color = '';
  //var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
  //material.normalMap = texture;
  material.normalMap.needsUpdate = true

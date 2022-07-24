@@ -620,6 +620,8 @@ $("#resetShades span.choose").click(function(){
     $('#dispAimU').text($("#AimU").val());
     $('#dispAimV').text($("#AimV").val());
     $('#dispAimTile').text($("#AimMTile").val());
+    $('#AimMTile, #AimU, #AimV').trigger('input');
+
   });
 
   $("#slidemask").on("input",function(){

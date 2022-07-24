@@ -9,8 +9,8 @@ $(function(){
 	function compiletheform(configurazione){
 		$("#prefxunbundle").val(configurazione.unbundle);
 		$("#wCLIexe").val(configurazione.wcli);
-		$("input [name='maskExtFormat']").prop("checked", false);
-		$("input [name='maskExtFormat'][value='"+configurazione.maskformat+"']").prop("checked", true);
+		$("input[name='maskExtFormat']").prop("checked", false);
+		$("input[name='maskExtFormat'][value='"+configurazione.maskformat+"']").prop("checked", true);
 	}
 	//loading of the datas from configuration
 	loading = thePIT.RConfig();
@@ -27,7 +27,8 @@ $(function(){
 	$("#wCLIexe").click(function(){thePIT.ConfiguraWkitCli($('#wCLIexe').val());});
 
 	$("#writePreferences").click(function(){
-		var dummy = {unbundle:$('#prefxunbundle').val(), wcli:$('#wCLIexe').val(),maskformat:'dds'}
+		console.log($("input[name='maskExtFormat']:checked").val());
+		var dummy = {unbundle:$('#prefxunbundle').val(), wcli:$('#wCLIexe').val(),maskformat:	$("input[name='maskExtFormat']:checked").val()}
 		thePIT.SaveAll(dummy);
 		$("#alertmessage").addClass('d-none');
 		pref_recent = dummy;

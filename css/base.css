@@ -437,7 +437,9 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #sp-gradients div{border:1px solid var(--layer-9);min-height:calc(100% - 40px);width:1.5rem;margin:0 .5em;}
 #bkgshades{border: 0 none!important;padding: 0;}
 
-#modelsTree li[normal] a::after{content:' ';font-family: "Font Awesome 6 Free";font-weight:900;color:var(--normal)!important;}
+/*#modelsTree li[normal] a::after{content:' ';font-family: "Font Awesome 6 Free";font-weight:900;color:var(--normal)!important;}*/
+#modelsTree li[normal] a::after{content:' \e900';font-family: "icomoon";font-weight:900;color:var(--normal)!important;}
+
 .grad{border: 1px solid var(--layer-9);display: inline-block;min-width:300px;min-height:1.8rem;}
 
 #legacyMaterial ul{list-style: none;}
