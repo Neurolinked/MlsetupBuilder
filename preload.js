@@ -50,6 +50,12 @@ contextBridge.exposeInMainWorld(
 			},
       Scan: ()=>{
           ipcRenderer.send('main:scanFolder');
+      },
+      SupportMe : ()=> {
+        ipcRenderer.send('main:supportNeuro');
+      },
+      extMedia : (code)=> {
+        ipcRenderer.send('main:openmedia', code);
       }
 	},
 )

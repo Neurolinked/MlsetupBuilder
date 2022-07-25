@@ -475,3 +475,5 @@ span.choose.active{border-color:var(--active-sel);}
 
 #strokeMsk:before{content:"";font-family: "Font Awesome 6 Free";font-weight:900;color:var(--active-sel)!important;padding-right:.5rem;font-size:1.5rem!important;}
 #maskPainter{touch-action: none;/*it fixes the fadeoff*/}
+
+#KofiSupportPage{margin:1em 0;cursor: pointer;}

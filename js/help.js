@@ -1,11 +1,11 @@
 var helpJson=[
 {"id": "i_0","parent": "#","text": "What this software do ?","type": "info"},
 {"id": "hdi_0","parent": "#","text": "How do i ...","type": "howdoi","state": {"opened": true}},
-{"id": "hdi_001","parent": "hdi_0","text": " .. start with it","type": "basic"} /*,
-{"id": "hdi_002","parent": "hdi_0","text": " .. import a style","type": "basic"},
-{"id": "hdi_003","parent": "hdi_0","text": " .. apply my edits","type": "basic"},
-{"id": "hdi_004","parent": "hdi_0","text": " .. save my work","type": "basic"},
-{"id": "hdi_005","parent": "hdi_0","text": " .. display a model","type": "basic"}*/
+{"id": "hdi_001","parent": "hdi_0","text": " .. start with it","type": "basic"} ,
+/* Video Section */
+{"id": "vid_0","parent": "#","text": "Videos","type": "videoroot"},
+{"id": "vid_001","parent": "vid_0","text": "Official features video channel" , "type":"video"},
+{"id": "vid_002","parent": "vid_0","text": "Cyberpunk 2077 Color and Material [MLSETUP BUILDER] Modding Tutorial 2022" , "type":"video"}
 ];
 
 $(function(){
@@ -22,12 +22,21 @@ $(function(){
 				"howdoi" : { "icon" : "text-warning fa-solid fa-circle-question" },
 				"basic" : {"icon" : "text-warning fa-solid fa-question"},
         "advanced" : { "icon" : "fa-solid fa-brain" },
+				"videoroot" : {"icon" : "text-danger fa-solid fa-clapperboard"},
+				"video" : {"icon" : "text-danger fa-solid fa-video"},
 			},
 			"plugins" : ["types" ]
 	}).on('select_node.jstree',function(ev,node){
     HelpOffcanvas.hide();
 
 		switch (node.node.id) {
+			case 'vid_0':
+				ev.preventDefault();
+			break;
+			case 'vid_001':
+			case 'vid_002':
+				thePIT.extMedia(node.node.id);
+			break;
 			case 'i_0':
 				introJs().setOptions({
 					tooltipClass: 'biggerTooltip',

@@ -472,7 +472,7 @@ $("#resetShades span.choose").click(function(){
 	var semaphoreCLKmBlend =false;
 
 	localStorage = window.localStorage;
-	const license = localStorage.getItem('ReadLicense');
+	const license = localStorage.getItem('LicenseRead');
 	const licenseWindow = document.getElementById('LicenseModal');
 
 	const modelPlace = localStorage.getItem('MLibX');
@@ -643,7 +643,7 @@ $("#resetShades span.choose").click(function(){
     $("#maskoolor").css("background-color","#800000");
   });
 	//Displays of the license
-	licenseWindow.addEventListener('hidden.bs.modal', function (event) { localStorage.setItem('ReadLicense',Date.now()); });
+	licenseWindow.addEventListener('hidden.bs.modal', function (event) { localStorage.setItem('LicenseRead',Date.now()); });
 
 	if (license==null){ licenseModal.show();}
 
@@ -2410,5 +2410,9 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
         notifyMe(error,true);
       }
     }
+  });
+
+  $("#KofiSupportPage").click(function(){
+    thePIT.SupportMe();
   })
 });

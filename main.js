@@ -7,8 +7,8 @@ const path = require('path')
 const fs = require('fs')
 const store = require('electron-store');
 const sharp = require('sharp');
-
 const dree = require('dree');
+const outside = require('electron').shell;
 
 const dreeOptions = {
 	stat:false,
@@ -229,7 +229,7 @@ function createWindow () {
   mainWindow.loadFile('index.html')
   nativeTheme.themeSource = 'dark';
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 }
 
 const prefupdate = preferences.onDidAnyChange(()=>{
@@ -773,3 +773,18 @@ ipcMain.on('main:scanFolder',()=>{
 			}
 		});
 })
+
+ipcMain.on('main:supportNeuro',()=>{
+	outside.openExternal("https://ko-fi.com/neurolinked99888");
+});
+
+ipcMain.on('main:openmedia',(event,code)=>{
+	switch (code){
+		case 'vid_001':
+			outside.openExternal("https://youtube.com/playlist?list=PLViyQUe4oow0l-amhDzneys9nzJxyH64n");
+		break;
+		case 'vid_002':
+			outside.openExternal("https://youtu.be/uCOHjMPvpgc");
+		break;
+	}
+});
