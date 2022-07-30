@@ -466,6 +466,12 @@ document.getElementById('wipeMsk').addEventListener('click', (e) =>{
 
   }
 });
+
+document.getElementById('fillMsk').addEventListener('click', (e) =>{
+  //Fills with the current colors
+  clearCanvas(paintMaskHT,tinycolor('#'+$('#maskoolor').data('color')).toRgbString(),768)
+});
+
 //get the actual snapshot in an image and it push in the interface
 document.getElementById('snapsMsk').addEventListener('click' , (event)=>{
   if (snapsManager.children.length > 9){
