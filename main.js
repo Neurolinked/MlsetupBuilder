@@ -229,7 +229,7 @@ function createWindow () {
   mainWindow.loadFile('index.html')
   nativeTheme.themeSource = 'dark';
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 const prefupdate = preferences.onDidAnyChange(()=>{
@@ -567,6 +567,9 @@ function uncookRun(toggle,params,stepbar,logger){
 						case 'step7':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals uncooked</span>')
 							break;
+						case 'step9':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Fonts exported</span>')
+							break;
 						case 'micro_opt01':
 						case 'micro_opt02':
 						case 'micro_opt03':
@@ -614,20 +617,24 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 								.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_appearance.archive'), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
 								.then(()=> {
 									return new Promise((resolve,reject) =>{
-										fs.readdir(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/'),(err,files)=>{
-											if (err){
-													mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
-													reject()
-										  }else {
-												var decalfiles = []
-												files.forEach((el)=>{
-													if (el.match(/garment_decals_[d|n]\d{2}\.png$/))
-													decalfiles.push(el)
-												})
-												mainWindow.webContents.send('preload:uncookErr','Found '+decalfiles.length+' decals to process','#uncookLogger')
-												resolve(decalfiles)
-											}
-										})
+										if (conf[3]){
+											fs.readdir(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/'),(err,files)=>{
+												if (err){
+														mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+														reject()
+											  }else {
+													var decalfiles = []
+													files.forEach((el)=>{
+														if (el.match(/garment_decals_[d|n]\d{2}\.png$/))
+														decalfiles.push(el)
+													})
+													mainWindow.webContents.send('preload:uncookErr','Found '+decalfiles.length+' decals to process','#uncookLogger')
+													resolve(decalfiles)
+												}
+											})
+										}else{
+											resolve([])
+										}
 									})
 								})
 								.then((files)=>{
@@ -666,12 +673,14 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 											}
 
 										})
-										mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals copied and edited</span>')
+										if (conf[3]) mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals copied and edited</span>')
 									}catch(err){
-										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+										if (conf[3]) mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
 									}
 								})
-								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_DEC4")})
+								.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_DEC4") })
+								.then(()=>uncookRun(conf[4],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
+								.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
 								.catch(err => { console.log(err) })
 								.finally(() => { 	mainWindow.webContents.send('preload:enable',"#triggerUncook") })
 							}
@@ -772,6 +781,10 @@ ipcMain.on('main:scanFolder',()=>{
 				}
 			}
 		});
+})
+
+ipcMain.on('main:openFolder',(event,folder)=>{
+	outside.showItemInFolder(path.normalize(folder));
 })
 
 ipcMain.on('main:supportNeuro',()=>{
