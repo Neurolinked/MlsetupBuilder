@@ -49,7 +49,10 @@ contextBridge.exposeInMainWorld(
 				ipcRenderer.send('main:saveStore',conf);
 			},
       Scan: ()=>{
-          ipcRenderer.send('main:scanFolder');
+        ipcRenderer.send('main:scanFolder');
+      },
+      Foldering : (path) =>{
+        ipcRenderer.send('main:openFolder',path);
       },
       SupportMe : ()=> {
         ipcRenderer.send('main:supportNeuro');

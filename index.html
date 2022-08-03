@@ -130,6 +130,17 @@
 		</span>
 	</div>
 </div>
+<div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" id="off-MLab" aria-labelledby="offcanvasLabel">
+  <div class="offcanvas-header border border-dark p-1">
+    <h5 class="offcanvas-title text-dark" id="offcanvasLabel"><i class="fa-solid fa-puzzle-piece"></i> Microblends Lab</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div id="mbHierarchy" class="m-1 border border-dark list-group rounded-0" > </div>
+    <span class="badge d-block pb-2">Drop images here:</span>
+    <div id="dropzone" class="bg-black rounded text-center" ><i class="fa-solid fa-circle-plus text-black fa-2x"></i></div>
+  </div>
+</div>
 <!-- offcanvas for model information -->
 <div class="offcanvas offcanvas-end ocModelInfo bg-dark text-light" data-bs-backdrop="false" tabindex="-1" id="InfoModel" aria-labelledby="HTLabel" >
   <div class="offcanvas-header border border-info p-1">
@@ -168,12 +179,14 @@
                 <span class="input-group-text bg-dark text-info border-info" ><i class="fas fa-cube"></i></span>
                 <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
                 <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
+                <button id="modelOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fa-solid fa-folder-open"></i></button>
               </div>
               <div class="input-group input-group-sm border-secondary mb-2">
                 <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-mask"></i></span>
                 <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
                <!--<button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>-->
                 <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
+                <button id="masksOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fa-solid fa-folder-open"></i></button>
               </div>
               <div class="input-group input-group-sm border-secondary">
                 <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-compress-alt"></i></span>
@@ -181,6 +194,7 @@
                 <!--
                <button id="CusModelTex" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Connect a masksset "><i class="fas fa-anchor"></i></button>-->
                 <button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
+                <button id="NormOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fa-solid fa-folder-open"></i></button>
               </div>
             </form>
           </div>
@@ -553,6 +567,7 @@
       <div id="CustMicroblendsGallery">
         <span class="badge w-100 rounded-0" >custom microblends <div class="btn-group btn-tiny" role="group" aria-label="Custom microblends button">
           <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye"></i></button>
+          <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
         </div></span>
         <div id="cu_mu_display" class="layer-1 d-none">
           <div id="cagetheCuMBlends" ></div>
@@ -680,6 +695,13 @@
 							<div id="uncook_step7" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_step8" class="border-start border-dark progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="arc_FNT4" checked>
+              <span class="badge bg-warning text-dark">Fonts</span>
+            </div>
+            <div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+              <div id="uncook_step9" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
 						<!-- TODO to this code-->
 						<div class="text-center mt-3"><i id="uncookCog" class="fas fa-cog fa-pulse fa-4x text-danger d-none"></i></div>
 					</div>

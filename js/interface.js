@@ -44,6 +44,7 @@ async function nubuildMB(microblendObj){
         if (package.hasOwnProperty("name")){
             pkgName = package.name;
             $("#mbSelect").append("<optgroup label='"+pkgName+"'>");
+            $("#mbHierarchy").append("<ul class='list-group list-group-flush' data-package='"+pkgName+"' ></ul>");
         }
         if (package.hasOwnProperty("microblends")){
           package.microblends.forEach((microblend)=>{
@@ -52,6 +53,8 @@ async function nubuildMB(microblendObj){
             $("#mbSelect optgroup[label='"+pkgName+"']").append("<option data-package='"+pkgName+"' data-thumbnail='./images/mblend/"+pkgName.toLowerCase()+"/"+tmpName+".png' value='"+microblend.path+"'>"+tmpName+"</option>");
 
             $("#cagetheCuMBlends").append("<li style=\"background-image:url('./images/mblend/"+pkgName.toLowerCase()+"/thumbs/"+tmpName+".png'); '\" data-package='"+pkgName+"' data-path='"+microblend.path+"' title='"+tmpName+"' > </li>");
+
+            $("#mbHierarchy ul[data-package='"+pkgName+"']").append("<li class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> "+tmpName+"</li>");
           });
         }
       })
@@ -235,6 +238,30 @@ $(function(){
 		$("#mlPosX svg").toggleClass('fa-caret-right fa-caret-left');
 		$("#ModelLibrary").toggleClass('offcanvas-start offcanvas-end')
 	}
+
+  const mbDropZone = document.getElementById('dropzone');
+
+  mbDropZone.addEventListener('dragleave', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    mbDropZone.classList.remove('active');
+  });
+
+  mbDropZone.addEventListener('dragover', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    // Style the drag-and-drop as a "copy file" operation.
+    event.dataTransfer.dropEffect = 'copy';
+    mbDropZone.classList.add('active');
+  });
+
+  mbDropZone.addEventListener('drop', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const fileList = event.dataTransfer.files;
+    mbDropZone.classList.remove('active');
+    console.log(fileList);
+  });
 
 	$("#hairSwatches span").click(function(){
 		$('#sp-gradients div:nth-child(1)').attr('style',"background:"+$(this).data('crtt')+", "+$('#bkgshades').val()+";");
@@ -627,9 +654,9 @@ $("#resetShades span.choose").click(function(){
   $("#slidemask").on("input",function(){
 		let hexacol
 		if ($("#gScalePaint").is(":checked")){
-			hexacol = String(Number($(this).val()).toString(16)).repeat(3);
+			hexacol = String(Number($(this).val()).toString(16)).padStart(2, '0').repeat(3);
 		}else{
-			hexacol = Number($(this).val()).toString(16)+"0000";
+			hexacol = Number($(this).val()).toString(16).padStart(2, '0')+"0000";
 		}
 		$("#maskoolor").data("color",hexacol);
 		$("#maskoolor").attr("data-color",hexacol);
@@ -638,9 +665,15 @@ $("#resetShades span.choose").click(function(){
 
   $("#maskoolor").on("dblclick",function(){
     $("#slidemask").val(128).change();
-    $("#maskoolor").data("color","800000");
-    $("#maskoolor").attr("data-color","800000");
-    $("#maskoolor").css("background-color","#800000");
+    let middleColor
+    if ($("#gScalePaint").is(":checked")){
+      middlecolor="808080";
+    }else{
+      middlecolor="800000";
+    }
+    $("#maskoolor").data("color",middlecolor);
+    $("#maskoolor").attr("data-color",middlecolor);
+    $("#maskoolor").css("background-color","#"+middlecolor);
   });
 	//Displays of the license
 	licenseWindow.addEventListener('hidden.bs.modal', function (event) { localStorage.setItem('LicenseRead',Date.now()); });
@@ -2242,7 +2275,7 @@ $("#unCookModal .modal-body .form-check-input").click(function(){
 	}
 })
 
-$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_DEC4").change(function(){
+$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_DEC4, #arc_FNT4").change(function(){
 	//console.log($(this))
 	if ($(this).is(':checked')){
 		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');
@@ -2308,6 +2341,16 @@ $("#choseThisMask").click(function(){
 	}
 })
 
+
+$("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
+  let percorso = $(this).parent().children("input[type='text']").val();
+  if (percorso!=""){
+    let getinfo = thePIT.RConfig('unbundle')
+    getinfo.then((uncook)=>{
+      thePIT.Foldering(uncook+percorso.substring(0,percorso.lastIndexOf('\/')+1));
+    })
+  }
+});
 //use the copy function for paths
  $("#modelCopyPath").click(function(){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$("#modelTarget").val().replaceAll(/\//g,'\\'));
