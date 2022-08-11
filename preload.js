@@ -195,7 +195,7 @@ ipcRenderer.on('preload:set_3d_asset_name',(event,result) => {
 
 ipcRenderer.on('preload:noBar',(event,result)=>{
 	var progBar = document.querySelector('#pBar')
-	progBar.classList.remove('show')
+	progBar.classList.remove("progress-bar","progress-bar-striped","bg-danger","progress-bar-animated")
 })
 
 ipcRenderer.on('preload:uncookErr',(event,msg,logger='#uncookLogger')=>{

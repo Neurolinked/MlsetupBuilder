@@ -56,7 +56,7 @@ $(function(){
 						},
 						{
 							title: 'Model Library',
-							element: document.querySelector('#modelsInformation div.btn-group:nth-child(2)'),
+							element: document.querySelector('#modelsNavbar div.btn-group:nth-child(2)'),
 							intro:'A searchable model library with simple icon that display the type of 3d model (man, woman or kid target models, car pieces, weapons ecc...)',
 						},
 						{

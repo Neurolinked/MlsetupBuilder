@@ -32,6 +32,17 @@
 	--rendView:600px;
 }
 
+footer{
+  padding-top:2px;
+  position:fixed;
+  bottom:0;
+  border-top:1px solid var(--layer-1);
+  display:grid;
+  grid-template-columns: 5rem 20px 3fr 2fr 5rem;
+  gap: 4px;
+}
+
+footer>div{border:1px solid var(--layer-1);font-size:0.75rem;}
 .no-gutters {
 	margin-left: 0;
 	margin-right: 0;
@@ -141,7 +152,7 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #withbones{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1;grid-row-end: 1;z-index:10;text-align:right;}
 #Filemanager{grid-column-start: 2; grid-column-end: 5; grid-row-start: 1; grid-row-end: 1;display:grid;grid-template-columns:1fr 2fr 1fr;text-align: center;}
 #MlEditor{grid-column-start: 2; grid-column-end: 2;grid-row-start: 2; grid-row-end: 3;}
-#modelsInformation{grid-column-start: 1; grid-column-end: 2; grid-row-start: 3; grid-row-end: 3;}
+#modelsNavbar{grid-column-start: 1; grid-column-end: 2; grid-row-start: 3; grid-row-end: 3;}
 #micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 2; grid-row-end: 4;}
 #layer_settings{grid-column-start: 3; grid-column-end: 3; grid-row-start: 2; grid-row-end: 3;}
 #colorGrid{display:grid;grid-template-columns:1fr 2fr 1fr .3fr;}
@@ -199,7 +210,7 @@ input[type="range" i] {
 
 .tint{-moz-box-shadow:inset 0 0 5px #000; -webkit-box-shadow: inset 0 0 5px #000; box-shadow:inset 0 0 5px #000;height:32px !important;background-blend-mode: overlay;}
 #AimBlend .modal-body *:not(button, i),
-#modelsInformation .input-group-text {border-color:var(--bs-info)!important;}
+#modelsNavbar .input-group-text {border-color:var(--bs-info)!important;}
 
 /* correct JSTree*/
 .jstree-default .jstree-anchor{color:var(--active-sel);}

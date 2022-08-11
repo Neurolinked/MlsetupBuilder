@@ -2258,7 +2258,7 @@ $(".xportJSON").click(function(){
 
     jsonbody = jsonbody.slice(0,-3); //removes latest commas
 
-    $("#pBar").addClass('show');
+    $("#pBar").addClass('progress-bar progress-bar-striped bg-danger progress-bar-animated');
     thePIT.Export({
       file:nomefile,
       content:preamble+jsonbody+closing,
