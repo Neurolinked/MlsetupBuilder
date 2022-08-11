@@ -22,6 +22,12 @@ const dreeOptions = {
 }
 
 var customModels
+var userResourcesPath = '/_Migrate/'
+var userRScheme = [
+		'mblend',
+		'decals',
+		'jsons'
+		]
 
 var objwkitto = {}
 const schema = {
@@ -38,6 +44,10 @@ const schema = {
 		default: 'dds'
 	},
 	legacymaterial:{
+		type:'boolean',
+		default: false
+	},
+	usermigration:{
 		type:'boolean',
 		default: false
 	}
@@ -86,6 +96,32 @@ function MuReading(){
 		})
 	})
 }
+
+function customResource(){
+	let pathMigration = path.join(app.getPath('userData'),userResourcesPath)
+
+	try {
+    if (!fs.existsSync(pathMigration)){
+			fs.mkdir(pathMigration, { recursive: true }, (err) => {
+				if (err) dialog.showErrorBox("The migration folder isn't accessible, trying to create one : -",err.message)
+			})
+		}
+		userRScheme.forEach((item, i) => {
+			let dirToMake = path.join(pathMigration,item)
+			if (!fs.existsSync(dirToMake)){
+				fs.mkdir(dirToMake, { recursive: true }, (err) => {
+					if (err) dialog.showErrorBox(`The ${dirToMake} folder isn't accessible, trying to create one : - ${err.message}`)
+				})
+			}
+		});
+    // The check succeeded
+	} catch (error) {
+	    // The check failed
+			dialog.showErrorBox("The migration folder isn't accessible, trying to create one",error)
+	}
+}
+
+customResource()
 
 const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
   let modal = new BrowserWindow({
@@ -157,7 +193,10 @@ const template = [
       ...(isMac ? [
 				{ role: 'pasteAndMatchStyle' },{ role: 'delete' },{ role: 'selectAll' },{ type: 'separator' },{label: 'Speech',submenu: [{ role: 'startSpeaking' },{ role: 'stopSpeaking' }]}
       ] : [
-        { role: 'delete' },{ type: 'separator' },{ role: 'selectAll' }
+        { role: 'delete' },{ type: 'separator' },{ role: 'selectAll' },{ type: 'separator' },
+				{id:98,label:'My resources',click:()=>{
+					outside.openPath(path.join(app.getPath('userData'),userResourcesPath));
+				}}
       ])
     ]
   },
