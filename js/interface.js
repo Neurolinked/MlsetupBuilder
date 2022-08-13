@@ -3,7 +3,10 @@ window.$ = window.jQuery;
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 
 var modelType = 'default';
-
+/**
+  * This function will extend the Numbercasting type
+  * adding the feature of returning the lenght of numbers after the dot
+*/
 Number.prototype.countDecimals = function () {
     if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
     return this.toString().split(".")[1].length || 0;
@@ -259,8 +262,18 @@ $(function(){
     event.stopPropagation();
     event.preventDefault();
     const fileList = event.dataTransfer.files;
+    var filteredFiles = {}
     mbDropZone.classList.remove('active');
-    console.log(fileList);
+    var md5
+    console.log(CryptoJS);
+    Object.entries(fileList).forEach(([key, file]) => {
+      if (file.name.match(/\.png$/)){
+        filteredFiles[key]=file
+
+        $("#mblendUserManager").append(`<div data-filename='${file.name}' data-filepath='${file.path}'><input type="text" class="form-control form-control-sm" value="${file.name.replace(/\.png/,'.xbm')}"></div>`);
+      }
+    });
+    console.log(filteredFiles);
   });
 
 	$("#hairSwatches span").click(function(){

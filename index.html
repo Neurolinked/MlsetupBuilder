@@ -40,6 +40,7 @@
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
   <!--hardcoded microblends default //--><script type="text/javascript" src="./jsons/mbcore.json" ></script><!--hardcoded microblend DB//-->
 	<!--hardcoded material default //--><script type="text/javascript" src="./js/materialcore.js" ></script><!--hardcoded material DB//-->
+  <script type="text/javascript" src='./public/cryptojs/cryptojs.min.js'></script>
   <script type="text/javascript" src='./js/interface.js'></script>
   <link rel="stylesheet" href="./css/base.css" />
   <link rel="stylesheet" href="./css/iconmoon.css" />
@@ -137,8 +138,16 @@
   </div>
   <div class="offcanvas-body">
     <div id="mbHierarchy" class="m-1 border border-dark list-group rounded-0" > </div>
-    <span class="badge d-block pb-2">Drop images here:</span>
+    <span class="badge d-block pb-2">Drop .pngs here:</span>
     <div id="dropzone" class="bg-black rounded text-center" ><i class="fa-solid fa-circle-plus text-black fa-2x"></i></div>
+    <div id="mblendCageManager" class="border outline-secondary mt-4">
+      <span class='d-block text-center layer-9' >Write every path as in the archives</span>
+      <div id="mblendUserManager" >
+      </div>
+    </div>
+    <div class="d-grid mt-2">
+      <button type="button" class="btn btn-sm btn-outline-danger rounded-0" ><i class="fa-solid fa-plus"></i> Check &amp; save </button>
+    </div>
   </div>
 </div>
 <!-- offcanvas for model information -->
