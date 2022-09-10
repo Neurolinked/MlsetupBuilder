@@ -21,6 +21,10 @@ const dreeOptions = {
 	excludeEmptyDirectories:true
 }
 
+const _microblends = 0
+const _decals = 1
+const _jsons = 2
+
 var customModels
 var userResourcesPath = '/_Migrate/'
 var userRScheme = [
@@ -81,7 +85,9 @@ var wkitto = app.commandLine.getSwitchValue("wkit")
 
 function MuReading(){
 	return new Promise((resolve,reject) =>{
-		fs.readFile(path.join(app.getAppPath(),'jsons/mbcustom.json'),(err,contenutofile) =>{
+		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],'/mbcustom.json')/* application file  */
+
+		fs.readFile(app_custom_json,(err,contenutofile) =>{
 			if (err) {
 				reject()
 			}else{
@@ -89,9 +95,28 @@ function MuReading(){
 					let test = JSON.parse(contenutofile)
 					resolve(test)
 				}catch(err){
-					console.log(err)
 					reject()
 				}
+			}
+		})
+	})
+}
+
+function MuWriting(contenuto){
+	return new Promise((resolve,reject) =>{
+		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],'/mbcustom.json')/* application file  */
+		let bk_custom_json = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_jsons],'/mbcustom.json')/* application file  */
+
+		fs.writeFile(app_custom_json,contenuto,(err) =>{
+			if (err) {
+				reject()
+			}else{
+				fs.copyFile(app_custom_json,bk_custom_json,fs.constants.COPYFILE_FICLONE,(err) =>{
+					if (err) {
+						mainWindow.webContents.send('preload:logEntry', "it's impossible to create the copy backup",true)
+					}
+					resolve(true)
+				})
 			}
 		})
 	})
@@ -218,7 +243,7 @@ const template = [
   // { role: 'viewMenu' }
   {
     label: 'View',
-    submenu: [{ label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},{ type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
+    submenu: [{ label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},{label:'Microblend Lab',accelerator: 'Ctrl+B',click:()=>{ mainWindow.webContents.send('preload:openModal','micromanager')}},{ type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
   },
   { role: 'windowMenu' },
 	/*
@@ -805,6 +830,136 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 		}
 	})
 })
+
+ipcMain.on('main:mBlender',(event,package)=>{
+	var pathPackage = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_microblends],package.packageName.toLowerCase())
+	var folderPackage = path.join(app.getAppPath(),'images/mblend/',package.packageName.toLowerCase())
+
+	try{
+		if (package.files.length>0){
+			if (!fs.existsSync(folderPackage)){
+				fs.mkdirSync(path.join(folderPackage,'/thumbs/'), { recursive: true}, (err) => {
+					if (err) {dialog.showErrorBox("The folder isn't accessible, trying to create one : -",err.message)}
+				})
+			}
+			if (!fs.existsSync(pathPackage)){
+				fs.mkdirSync(pathPackage, { recursive: true }, (err) => {
+					if (err) {dialog.showErrorBox("The folder isn't accessible, trying to create one : -",err.message)}
+				})
+			}
+
+			package.files.forEach((mblend,index)=>{
+				if (!fs.existsSync(path.join(pathPackage,mblend.name))){
+					sharp(path.normalize(mblend.source))
+					.resize(256)
+					.toFile(path.join(pathPackage,mblend.name), (err, info) => {
+						 if(err){
+							 mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+						 }else{
+							 mainWindow.webContents.send('preload:logEntry',`Wrote backup to ${path.join(pathPackage,mblend.name)}`)
+						 }
+					})
+					.toFile(path.join(folderPackage,mblend.name), (err, info) => {
+						 if(err){
+							 mainWindow.webContents.send('preload:logEntry',`${err} `,true)
+						 }else{
+							 mainWindow.webContents.send('preload:logEntry',`${mblend.name} processed for package ${package.packageName}`)
+						 }
+					})
+					.resize(64)
+					.toFile(path.join(folderPackage,'/thumbs/',mblend.name), (err, info) => {
+							if(err){
+								mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+							}else{
+								mainWindow.webContents.send('preload:logEntry',`Thumbs for ${mblend.name} processed for package ${package.packageName}`)
+							}
+					 })
+				}
+			})
+			MuReading()
+			.then((contenuto)=>{
+				let listaPath = package.files.map(elm => {return {"path":elm.gamepath,"hash":elm.hash}})
+				let indexPackage = contenuto.packages.findIndex((pkg,index) => { if (pkg.name==package.packageName){ return index	}})
+				if (indexPackage>=0){
+					//TODO push only the microblends not already there
+					//listaPath.filter(elm => contenuto.packages[indexPackage].microblends)
+					let myBlock = contenuto.packages[indexPackage].microblends.map(mb => mb.path)
+
+					listaPath.forEach((file, index)=>{
+						if (!myBlock.includes(file.path)){
+							contenuto.packages[indexPackage].microblends.push({"path":file.path})
+						}
+					})
+				}else{
+					contenuto.packages.push({"name":package.packageName,"microblends":listaPath})
+				}
+
+				MuWriting(JSON.stringify(contenuto,null,"  "))
+				.then((e) =>event.reply('preload:packageDone',true))
+				.catch((error)=>{ event.reply('preload:logEntry',`${error}`) })
+			})
+			.catch((error)=>{ event.reply('preload:logEntry',`${error}`) })
+		}
+	}catch(error){
+		event.reply('preload:logEntry',`${error}`)
+		event.reply('preload:packageDone',false)
+	}
+})
+
+ipcMain.on('main:delmBlend', (event,micro)=>{
+	var pathPackage = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_microblends],micro.package.toLowerCase())
+	var folderPackage = path.join(app.getAppPath(),'images/mblend/',micro.package.toLowerCase())
+
+	try{
+		//remove the files
+		fs.rm(path.join(pathPackage,micro.file), (err, info) => {
+			if (err){
+				mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+			}
+		})
+		fs.rm(path.join(folderPackage,micro.file), (err, info) => {
+			if (err){
+				mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+			}
+		})
+		fs.rm(path.join(folderPackage,"/thumbs/",micro.file), (err, info) => {
+			if (err){
+				mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+			}
+		})
+		//delete from the Mbcustom.json the entry
+		MuReading()
+		.then((contenuto)=>{
+			let indexPackage = contenuto.packages.findIndex((pkg,index) => { if (pkg.name==micro.package){ return index	}})
+			let toremove
+			if (indexPackage>=0){
+
+				//TODO push only the microblends not already there
+				if (toremove = contenuto.packages[indexPackage].microblends.findIndex((pkg,index) => { if (pkg.path==micro.path){ return index	}})){
+					contenuto.packages[indexPackage].microblends.splice(toremove,1)
+				}else{
+					mainWindow.webContents.send('preload:logEntry',`${error}`,true)
+				}
+
+				if (contenuto.packages[indexPackage].microblends.length==0){
+					contenuto.packages.splice(indexPackage,1)
+				}
+
+				MuWriting(JSON.stringify(contenuto,null,"  "))
+				.then(()=>{
+					event.reply('preload:MuReload',true)
+				})
+				.catch((error)=>{ mainWindow.webContents.send('preload:logEntry',`${error}`,true) })
+			}
+		})
+		.catch((error)=>{ mainWindow.webContents.send('preload:logEntry',`${error}`,true) })
+
+	}catch(error){
+		mainWindow.webContents.send('preload:logEntry',`${error}`,true)
+	}
+
+})
+
 
 ipcMain.on('main:scanFolder',()=>{
 	var archives = dialog.showOpenDialog({title:'Select a folder you want to scan',properties: ['openDirectory'],defaultPath:app.getPath('recent')})

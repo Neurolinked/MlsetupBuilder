@@ -1,14 +1,24 @@
 {
-	"packages":[
-		{
-			"name":"Neurolinked",
-			"microblends":[
-				{"path":"base\\surfaces\\microblends\\graphics_sogol_001.xbm"},
-				{"path":"base\\surfaces\\microblends\\pattern_n_arrow.xbm"},
-				{"path":"base\\surfaces\\microblends\\pattern_n_turtle.xbm"},
-				{"path":"base\\surfaces\\microblends\\pattern_n_dflower.xbm"},
-				{"path":"base\\surfaces\\microblends\\pattern_n_tri.xbm"}
-			]
-		}
-	]
+  "packages": [
+    {
+      "name": "Neurolinked",
+      "microblends": [
+        {
+          "path": "base\\surfaces\\microblends\\graphics_sogol_001.xbm"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_arrow.xbm"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_turtle.xbm"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_dflower.xbm"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_tri.xbm"
+        }
+      ]
+    }
+  ]
 }

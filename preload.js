@@ -59,6 +59,12 @@ contextBridge.exposeInMainWorld(
       },
       extMedia : (code)=> {
         ipcRenderer.send('main:openmedia', code);
+      },
+      importMBlend : (package)=>{
+        ipcRenderer.send('main:mBlender', package);
+      },
+      delMBlend : (toBeDeleted)=>{
+        ipcRenderer.send('main:delmBlend',toBeDeleted);
       }
 	},
 )
@@ -71,6 +77,11 @@ function isValidJSON(text) {
     return false;
   }
 }
+/*
+Firable events
+*/
+const updblends = new Event('updMBlends');
+
 //autosetup version from the package
 ipcRenderer.on('preload:setversion', (event, nuversion) => {
     document.title = document.title + " - " + nuversion
@@ -134,26 +145,28 @@ ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
 	switch(modal2bOpen){
 		case 'license':
 			connection = document.querySelector("#versionDisplay a:nth-child(1)")
-			connection.click()
 			break;
 		case 'help':
 			connection = document.querySelector("#versionDisplay a:nth-child(2)")
-			connection.click()
 			break;
 		case 'uncook' :
 			connection = document.querySelector("#versionDisplay a:nth-child(3)")
-			connection.click()
 			break;
 		case 'hairs' :
 			connection = document.querySelector("#versionDisplay a:nth-child(4)")
-			connection.click()
 			break;
 		case 'micro' :
 			connection = document.querySelector("#versionDisplay a:nth-child(5)")
-			connection.click()
 			break;
+    case 'micromanager' :
+      connection = document.querySelector("#versionDisplay a:nth-child(6)")
+      break;
 	}
-
+  try{
+    connection.click()
+  }catch(error){
+    console.error(error);
+  }
 })
 
 ipcRenderer.on('preload:scanReply',(event,result)=>{
@@ -205,6 +218,27 @@ ipcRenderer.on('preload:uncookErr',(event,msg,logger='#uncookLogger')=>{
 ipcRenderer.on('preload:uncookLogClean',(event,logger='#uncookLogger')=>{
 	var logtext = document.querySelector(logger+' div')
 	logtext.innerHTML = ''
+})
+
+ipcRenderer.on('preload:packageDone',(event,result)=>{
+  var mbloading = document.querySelector('#CheckSaveMblend div')
+  var mblogload = document.querySelector('#mbLogPackager')
+  if (result) {
+    var package = document.getElementById('mbListPackage')
+    var files = document.getElementById('mblendUserManager')
+    package.value = ''
+    files.innerHTML = ''
+    mblogload.innerHTML='Custom microblends uploaded'
+  }else{
+    mblogload.innerHTML='Error during the operations'
+  }
+  mblogload.classList.add("show")
+  mbloading.remove()
+  document.dispatchEvent(updblends);
+})
+
+ipcRenderer.on('preload:MuReload',(event,result)=>{
+  document.dispatchEvent(updblends);
 })
 
 window.addEventListener('DOMContentLoaded', () => {

@@ -1,6 +1,10 @@
 window.$ = window.jQuery;
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
+const mLsetup = new Mlsetup();
+mLsetup.Layers[19].tiles = 5.0
+
+var layerSwapstart = null;
 
 var modelType = 'default';
 /**
@@ -42,22 +46,33 @@ async function nubuildMB(microblendObj){
   if ((typeof(microblendObj)=="object" ) ) {
     if (microblendObj.hasOwnProperty("packages")){
       var pkgName;
+      var pkgList = document.getElementById('mbListPackages');
+      /* Cleanup*/
+      pkgList.innerHTML="";
+      $("#mbHierarchy").html("");
+      $("#mbSelect optgroup:not([label='core'])").html("");
+      $("#mbSelect").val($("#mbSelect option:first").val()).change();
+      $("#cagetheCuMBlends").html("");
+      /* Cleanup*/
       microblendObj.packages.forEach((package)=>{
         pkgName = "";
         if (package.hasOwnProperty("name")){
             pkgName = package.name;
+            pkgList.innerHTML+="<option value='"+pkgName+"' />";
             $("#mbSelect").append("<optgroup label='"+pkgName+"'>");
             $("#mbHierarchy").append("<ul class='list-group list-group-flush' data-package='"+pkgName+"' ></ul>");
         }
         if (package.hasOwnProperty("microblends")){
+
           package.microblends.forEach((microblend)=>{
             let tmpName = microblend.path.split('.')[0].split("\\").reverse()[0];
+            let hash = microblend?.hash != undefined ? `data-hash='${microblend.hash}'` : "";
 
             $("#mbSelect optgroup[label='"+pkgName+"']").append("<option data-package='"+pkgName+"' data-thumbnail='./images/mblend/"+pkgName.toLowerCase()+"/"+tmpName+".png' value='"+microblend.path+"'>"+tmpName+"</option>");
 
             $("#cagetheCuMBlends").append("<li style=\"background-image:url('./images/mblend/"+pkgName.toLowerCase()+"/thumbs/"+tmpName+".png'); '\" data-package='"+pkgName+"' data-path='"+microblend.path+"' title='"+tmpName+"' > </li>");
 
-            $("#mbHierarchy ul[data-package='"+pkgName+"']").append("<li class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> "+tmpName+"</li>");
+            $("#mbHierarchy ul[data-package='"+pkgName+"']").append(`<li ${hash} data-path[${microblend.path}] class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> ${tmpName}</li>`);
           });
         }
       })
@@ -108,11 +123,6 @@ async function abuildHairs(aHairs){
 				//console.log(hair_colors)
 				$("#hairSwatches").append("<span data-toggle='tooltip' data-set='"+hair.set+"'  title='"+hair.name+"' data-name='"+hair.name+"' data-crtt='linear-gradient("+hair_colors+")' data-cid='linear-gradient("+shade+")' style='background:linear-gradient("+hair_colors+");order:"+hair.order+"' >"+"</span>"); //linear-gradient("+shade+");background-blend-mode: multiply
 			});
-			/*
-			for (k=0, j=aHairs.profiles.length;k<j;k++){
-				if
-				$("#hairSwatches").append("<span data-name='"+aHairs.profiles[k].name+"' >"+aHairs.profiles[k].name+"</span>");
-			}*/
 		}
 	}
 }
@@ -123,9 +133,22 @@ function switchLegacyMat(material){
 }
 
 $(function(){
+
+  const updblends = new Event('updMBlends');
+  document.addEventListener('updMBlends',(e)=>{
+      var updCustomMicroblends = thePIT.getMuBlends();
+      updCustomMicroblends.then((listaMU) => {
+        nubuildMB(listaMU);
+      }).catch((error) => {
+        console.log(error)
+      })
+  })
+
+
   var shiftSpeedup = false;
   var indexLayerContextual = null; //variable index for the copied Data
   var dataContextual = {};
+  var newMBlendMan = {packageName:"",files:[]};
 
   const FolderImport = {
     groups:{},
@@ -153,15 +176,17 @@ $(function(){
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
 
-  var readCustomMicroblends = thePIT.getMuBlends();
 
-  readCustomMicroblends
-    .then((listaMU) => {
-      nubuildMB(listaMU);
-    })
-    .catch((error) => {
-      console.log(error)
-    })
+
+    var readCustomMicroblends = thePIT.getMuBlends();
+
+    readCustomMicroblends
+      .then((listaMU) => {
+        nubuildMB(listaMU);
+      })
+      .catch((error) => {
+        console.log(error)
+      })
 
 	let buildmyNuMaterial = abuildMaterial(materialCore);
 	let buildmyHairs = abuildHairs(hairs);
@@ -183,6 +208,7 @@ $(function(){
 			let noterrorz = parseInt($("#notyCounter span").text()+0);
 			$("#notyCounter span").text(parseInt(noterrorz+1));
 		}
+    $("#foot-message").text(message);
 	}
 
 
@@ -265,15 +291,52 @@ $(function(){
     var filteredFiles = {}
     mbDropZone.classList.remove('active');
     var md5
-    console.log(CryptoJS);
     Object.entries(fileList).forEach(([key, file]) => {
       if (file.name.match(/\.png$/)){
         filteredFiles[key]=file
-
-        $("#mblendUserManager").append(`<div data-filename='${file.name}' data-filepath='${file.path}'><input type="text" class="form-control form-control-sm" value="${file.name.replace(/\.png/,'.xbm')}"></div>`);
+        if ($("#mblendUserManager div[data-filepath='"+file.path+"']").length==0){
+          md5 = CryptoJS.MD5(file.path)
+          if ($(`#mblendUserManager div[data-hash='${md5}']`).length==0){
+            $("#mblendUserManager").append(`<div data-filename='${file.name}' data-filepath='${file.path}' data-hash='${md5}'><input type="text" class="form-control form-control-sm" value="${file.name.replace(/\.png/,'.xbm').toLowerCase()}"></div>`);
+          }
+        }
       }
     });
-    console.log(filteredFiles);
+    md5=null;
+  });
+
+  $("body").on("click","#mbHierarchy ul[data-package] li svg.fa-circle-minus",function(e){
+    let name = $(this).parent().text();
+    let package = $(this).parent().parent().data("package");
+    let patapackage = $(this).parent().data("path");
+    thePIT.delMBlend({package:package, file:name.trim()+".png", path:patapackage});
+  });
+
+
+  $("#CheckSaveMblend").click(function(){
+    if (/^[a-zA-z0-9_\-]+$/.test($("#mbListPackage").val())) {
+      newMBlendMan.packageName = $("#mbListPackage").val();
+      var md5
+      $("#mblendUserManager div[data-filename]").each((index)=>{
+        if (/^[a-z0-9_\-\\\/]+\.xbm$/.test($("#mblendUserManager div[data-filename]").eq(index).children().val())){
+          md5 = CryptoJS.MD5($("#mblendUserManager div[data-filename]").eq(index).children().val());
+          newMBlendMan.files.push({
+              name:$("#mblendUserManager div[data-filename]").eq(index).data('filename'),
+              source:$("#mblendUserManager div[data-filename]").eq(index).data("filepath"),
+              gamepath:$("#mblendUserManager div[data-filename]").eq(index).children().val(),
+              hash:CryptoJS.enc.Hex.stringify(md5)
+            })
+        }
+      })
+      if (newMBlendMan.files.length>0){
+        $("#CheckSaveMblend").append(`<div class="spinner-grow text-warning microspin" role="status"><span class="visually-hidden">Loading...</span></div>`);
+        thePIT.importMBlend(newMBlendMan);
+      }
+      if ($("#mbLogPackager").hasClass("show")) { $("#mbLogPackager").removeClass("show");}
+      newMBlendMan = {packageName:"",files:[]};
+    }else{
+      $("#mbLogPackager").addClass("show").html("the package name cannot be empty")
+    }
   });
 
 	$("#hairSwatches span").click(function(){
@@ -465,6 +528,43 @@ $("#resetShades span.choose").click(function(){
 					$('#layeringsystem li').eq(indexLayerContextual).attr({"data-color":dataContextual.color});
 					$("#layeringsystem li").eq(indexLayerContextual).click();
 					break;
+        case 'swapsrc':
+          layerSwapstart = indexLayerContextual
+          $("#layers-contextual li").eq(7).removeAttr("disabled");
+          break;
+        case 'swapdest':
+          if (layerSwapstart!=indexLayerContextual){
+            mLsetup.swap(layerSwapstart,indexLayerContextual)
+            $("#layers-contextual li").eq(7).attr("disabled",'disabled');
+            console.log(mLsetup);
+          }else{
+            notifyMe(`You really won't swap the layer with itself, right ?!?!??!`, true);
+          }
+          break;
+        case 'clean':
+          mLsetup.reset(indexLayerContextual)
+          //--- to Be resetted ---
+          if ($("#layeringsystem li.active").length>0){
+        		$("#matInput").val("base\\surfaces\\materials\\special\\unused.mltemplate");//clean the material
+        		$("#layerOpacity").val("0.0").change();//zeroing the opacity
+        		$("#layerColor").val("null_null");//color replace
+        		$("#applytoMyLayer").click(); //trigger the application to layer
+      			$("#layeringsystem li.active").click() //reselect the layer to updates the material
+        	}
+          break;
+        case 'cleanall':
+          vacuumCleaner();
+          $("#layeringsystem li.active").click();
+          break;
+        case 'wipeall':
+          vacuumCleaner(false);
+          $("#layeringsystem li.active").click();
+          break;
+        case 'plug':
+            if ($("#layeringsystem li[disabled]").length>0){
+              $("#layeringsystem li[disabled]").eq(0).removeAttr('disabled');
+            }
+          break;
         default:
       }
       //console.log(dataContextual);
@@ -1039,6 +1139,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	 });
   $("#modelFinderCloser").click(function(){$('#modelsTree').jstree(true).close_all();});
 
+
   //when the loading of the layer configuration setup a microblend
   //it activate the display onto the preview
 
@@ -1125,17 +1226,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   });
 	//Material libraries and search
 	var matToSearch=false;
-/*
-	$("#matFinder").keyup(function () {
 
-    if(matToSearch) { clearTimeout(matToSearch); }
-
-    matToSearch = setTimeout(function () {
-      var v = $('#matFinder').val();
-      $('#materialTrees').jstree(true).search(v);
-    }, 250);
-  });
-	*/
   //every time the switch skin it's clicked, it reload automatically the mesh
 
 	$("#legacyMatFinderCleared").click(function(){$("#legacyMatFinder").val("").keyup()})
@@ -1913,6 +2004,7 @@ $("#TheMagicIsHere").click(function(){
 								}
 								notifyMe(k+' layer/s found',false);
 								break;
+              case "0.0.3":
               case "0.0.2":
                 vacuumCleaner();
                 if (theArcOfNOA.hasOwnProperty("Data")){
