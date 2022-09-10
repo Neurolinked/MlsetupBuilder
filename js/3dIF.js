@@ -1,3 +1,24 @@
+var imgWorker
+const normalMapInfo = {
+  width : 128,
+  height : 128
+}
+
+if (window.Worker) {
+  imgWorker = new Worker('js/workers/imgWork.js');
+
+  imgWorker.onmessage = (event) =>{
+    context = nMeKanv.getContext('2d');
+    context.putImageData(event.data,0,0,0,0,normalMapInfo.width,normalMapInfo.height);
+    //normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
+    //material.normalMap = normMe;
+    material.normalMap.needsUpdate = true
+    //material.map.needsUpdate = true;
+    material.normalMap.flipY = false;
+  }
+}
+
+
 dat.GUI.prototype.removeFolder = function(name) {
    var folder = this.__folders[name];
    if (!folder) {
@@ -577,25 +598,27 @@ function loadNormOntheFly(path){
 					context = nMeKanv.getContext('2d');
 					//console.log(pngWidth,pngHeight);
 					/* Size is setted up */
-					nMeKanv.width  = pngWidth;
-  				nMeKanv.height = pngHeight;
+          normalMapInfo.width = pngWidth;
+          normalMapInfo.height = pngHeight;
 
 					var encodedData = btoa(bufferimage);
 					var dataURI = "data:image/png;base64," + encodedData;
 					var nMap = new Image();
 					nMap.onload = function(){
-						context.drawImage(nMap, 0, 0, nMeKanv.width,nMeKanv.height);
-						var imageData = context.getImageData(0,0,pngWidth,pngHeight);
+						context.drawImage(nMap, 0, 0, normalMapInfo.width,normalMapInfo.height);
+						var imageData = context.getImageData(0,0,normalMapInfo.width,normalMapInfo.height);
+            if (window.Worker) { imgWorker.postMessage(imageData) }
+            /*
 						for (let i = 0, l=imageData.data.length; i < l; i += 4) {
 						 // Modify pixel data
 						 imageData.data[i + 2] = 255;  // B value
-						}
-						context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
+           }*/
+						//context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
 						//normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
 						//material.normalMap = normMe;
-            material.normalMap.needsUpdate = true
+            //material.normalMap.needsUpdate = true
 						//material.map.needsUpdate = true;
-						material.normalMap.flipY = false;
+						//material.normalMap.flipY = false;
             Normed.style.color = 'var(--normal)';
 						//Normed.setAttribute("fill",'rgb(120,119,255)'); //display the normal flag
 					}
@@ -680,11 +703,39 @@ function cleanScene(){
 	}
 }
 
+function mBuildAppearances(model){
+  var oAppeinfo = document.getElementById("appeInfo");
+  oAppeinfo.innerHTML="";
+  var overtInfo = document.getElementById("vertInfo");
+
+  if ((model.length>0) && (typeof(model)=='object')){
+    if (model.length<=0){
+      return
+    }
+    if (model[0]?.appearanceCode.length <= 0) {
+      return
+    }
+    //oAppeinfo.innerHTML+=`<span class="badge d-block txt-secondary rounded-0 mt-2"></span>`;
+    let names = model.map(x=> x.name.replace('_LOD_1',''));
+    model.forEach((el,index)=>{
+      overtInfo.innerHTML+=`<span class="badge eq-lay${(index % 2)*2+1} m-1">${el.name} ${el.vertexes} vertex</span> `
+    });
+    let template
+    for (i=0,j=model[0].appearanceCode.length;i<j;i++){
+      template = `<div class="col"><div class="card"><div class="card-body"><span class="badge d-block text-info rounded-0 mt-2">BufferArray ${i}</span>`
+      for (x=0,y=names.length;x<y;x++){
+        template += `<span class="badge d-block txt-secondary rounded-0 mt-2">${names[x]}</span>${model[x].appearanceCode[i]}`
+      }
+      oAppeinfo.innerHTML+=`${template}</ul></div></div></div>`
+    }
+  }
+}
+
 function mBuildInfo(model){
   var oMdlPills = document.getElementById("v-pills-sMesh");
-  oMdlPills.innerHTML="";
+  //oMdlPills.innerHTML="";
   var oMdlTabs = document.getElementById("v-pills-tabContent");
-  oMdlTabs.innerHTML="";
+  //oMdlTabs.innerHTML="";
 
   if ((model.length>0) && (typeof(model)=='object')){
     model.forEach((submesh)=>{
@@ -744,7 +795,7 @@ function LoadModelOntheFly(path){
 
 	      if ( child.isMesh ) {
 	        //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
-          mobjInfo.push({"name":child.name,"materials":[...new Set(child.userData.materialNames)].toString().replaceAll(",",", "),"vertexes":child.geometry.attributes.uv.count});
+          mobjInfo.push({"name":child.name,"appearanceCode":child.userData.materialNames,"materials":[...new Set(child.userData.materialNames)].toString().replaceAll(",",", "),"vertexes":child.geometry.attributes.uv.count});
 					//strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><span class='px-2'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</span> <span class='px-2'>")+"</span></details></p>";
 	        //strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
@@ -799,7 +850,8 @@ function LoadModelOntheFly(path){
 
 	      }
 	    });
-      mBuildInfo(mobjInfo);
+      //mBuildInfo(mobjInfo);
+      mBuildAppearances(mobjInfo);
 	    //if (Boned){MasksOn.classList.add('on');}else{MasksOn.classList.remove('on');}
 			if (Boned){MasksOn.setAttribute("fill","red");}else{MasksOn.setAttribute("fill","currentColor");}
 	    if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
