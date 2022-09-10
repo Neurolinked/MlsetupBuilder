@@ -25,13 +25,11 @@ To display the models present in the model library you need to setup a folder in
 # Screenshot
 Main window with the new info/tool panel and layer mask visualizer/painter
 
-![MlsetupBuilder main window](https://www.kientzproduction.com/gitcontent/mlsb_164_1.png)
+![Custom microblends interface](https://www.kientzproduction.com/gitcontent/mlsb_165_1.png)
 
-model info panel with UV map visualizer and extractor
-![UVextractor](https://www.kientzproduction.com/gitcontent/mlsb_164_2.png)
+New model info panel
+![Info Panel](https://www.kientzproduction.com/gitcontent/mlsb_165_2.png)
 
-Direct Painting on the linked texture mask
-![Painting on masks](https://www.kientzproduction.com/gitcontent/mlsb_164_3.png)
 
 # Wanna support ?
 If you really wish you can donate with Ko-fi
