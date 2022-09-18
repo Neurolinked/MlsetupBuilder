@@ -2561,6 +2561,6 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
   });
 
   $("#KofiSupportPage").click(function(){
-    thePIT.SupportMe();
+    thePIT.ExtOpen({type:'url',param:'ko-fi'})
   })
 });

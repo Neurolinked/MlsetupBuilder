@@ -82,6 +82,7 @@ if (mljson ==''){
 }
 
 var wkitto = app.commandLine.getSwitchValue("wkit")
+var dev = app.commandLine.getSwitchValue("dev")
 
 function MuReading(){
 	return new Promise((resolve,reject) =>{
@@ -293,7 +294,9 @@ function createWindow () {
   mainWindow.loadFile('index.html')
   nativeTheme.themeSource = 'dark';
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+	if (!!dev){
+		mainWindow.webContents.openDevTools()
+	}
 }
 
 const prefupdate = preferences.onDidAnyChange(()=>{
@@ -981,17 +984,23 @@ ipcMain.on('main:openFolder',(event,folder)=>{
 	outside.showItemInFolder(path.normalize(folder));
 })
 
-ipcMain.on('main:supportNeuro',()=>{
-	outside.openExternal("https://ko-fi.com/neurolinked99888");
-});
-
-ipcMain.on('main:openmedia',(event,code)=>{
-	switch (code){
-		case 'vid_001':
-			outside.openExternal("https://youtube.com/playlist?list=PLViyQUe4oow0l-amhDzneys9nzJxyH64n");
-		break;
-		case 'vid_002':
-			outside.openExternal("https://youtu.be/uCOHjMPvpgc");
-		break;
+ipcMain.on('main:WindopenExt',(event,resource)=>{
+	switch (resource?.type){
+		case 'video':
+			if (resource?.param=='vid_001'){
+				outside.openExternal("https://youtube.com/playlist?list=PLViyQUe4oow0l-amhDzneys9nzJxyH64n");
+			}else if (resource?.param=='vid_002') {
+				outside.openExternal("https://youtu.be/uCOHjMPvpgc");
+			}
+			break
+		case 'url':
+			if (resource?.param=='ko-fi'){
+				outside.openExternal("https://ko-fi.com/neurolinked99888");
+			}else if (resource?.param=='redwiki') {
+				outside.openExternal("https://wiki.redmodding.org/cyberpunk-2077-modding/developers/modding-tools/mlsetup-builder");
+			}
+			break
+		default:
+			break
 	}
-});
+})

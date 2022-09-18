@@ -54,11 +54,8 @@ contextBridge.exposeInMainWorld(
       Foldering : (path) =>{
         ipcRenderer.send('main:openFolder',path);
       },
-      SupportMe : ()=> {
-        ipcRenderer.send('main:supportNeuro');
-      },
-      extMedia : (code)=> {
-        ipcRenderer.send('main:openmedia', code);
+      ExtOpen :(content)=>{
+        ipcRenderer.send('main:WindopenExt',content);
       },
       importMBlend : (package)=>{
         ipcRenderer.send('main:mBlender', package);
