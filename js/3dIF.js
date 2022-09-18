@@ -870,7 +870,7 @@ function LoadModelOntheFly(path){
 	    notify3D(error);
 	  });
 	}else{
-		notify3D("The 3dmodel wasn't there when i try to load it : "+path);
+		notify3D("The 3d model wasn't there when i try to load it : "+mipreference.value+path); //https://github.com/Neurolinked/MlsetupBuilder/issues/8
 	}
 }
 
