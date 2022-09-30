@@ -1855,5 +1855,6 @@ const normList = ["/base/characters/boss/adam_smasher/textures/i1_001_mm_slot__a
 "/base/weapons/turrets/portable_turret/entities/meshes/textures/w_turret__portable_turret__base1_01_n01.xbm",
 "/base/characters/common/base_bodies/man_average/cyberware/corp_arasaka/a0_006_ma_arasaka__arms/textures/a0_006_ma_arasaka__arms.xbm",
 "/base/characters/garment/gang_aldecaldos/torso/t2_091_jacket__racing/tsma_n01.xbm",
-"/base/items/quest/q101__bomb/textures/q101_bomb_bag_n.xbm"
+"/base/items/quest/q101__bomb/textures/q101_bomb_bag_n.xbm",
+"/base/characters/garment/player_equipment/torso/t2_161_jacket__edgerunners/textures/t2_161_pma_jacket__edgerunners_n01.xbm"
 ];

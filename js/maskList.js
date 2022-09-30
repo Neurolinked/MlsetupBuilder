@@ -1453,4 +1453,5 @@ const maskList = [
 		{"layers": 19,"mask": "/base/weapons/firearms/rifle_sniper/tsunami_nekomata/entities/meshes/textures/ml_w_rifle_sniper__tsunami_nekomata__rcv1_01_default_masksset_X.dds"},
 		{"layers": 19,"mask": "/base/weapons/firearms/rifle_sniper/tsunami_nekomata/entities/meshes/textures/ml_w_rifle_sniper__tsunami_nekomata__rcv1_01_default_maskssettpp_X.dds"},
 		{"layers": 19,"mask": "/base/weapons/firearms/rifle_sniper/tsunami_nekomata/entities/meshes/textures/ml_w_rifle_sniper__tsunami_nekomata__rcv1_01_military1_masksset_X.dds"},
+    {"layers": 19,"mask": "/base/characters/garment/player_equipment/torso/t2_161_jacket__edgerunners/textures/t2_161_pma_jacket__edgerunners_X.dds"},
 ]
