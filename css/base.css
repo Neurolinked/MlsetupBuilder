@@ -36,13 +36,19 @@ footer{
   padding-top:2px;
   position:fixed;
   bottom:0;
+  display:block;
+}
+footer.main{
+  padding-top:2px;
+  position:fixed;
+  bottom:0;
   border-top:1px solid var(--layer-1);
   display:grid;
   grid-template-columns: 5rem 20px 3fr 2fr 5rem;
   gap: 4px;
 }
 
-footer>div{border:1px solid var(--layer-1);font-size:0.75rem;}
+footer.main>div{border:1px solid var(--layer-1);font-size:0.75rem;}
 .no-gutters {
 	margin-left: 0;
 	margin-right: 0;
@@ -276,6 +282,7 @@ Contextual Menu for the layering Systems
 
 #masksModal input[type='text'],
 
+input[type='text'],
 #materialModal input[type='text'],
 #interface input[type='text'],
 #interface input[type='number'],
@@ -526,3 +533,5 @@ span.choose.active{border-color:var(--active-sel);}
 .card{background-color: var(--layer-1);}
 #appeInfo div:nth-child(even) .card{background-color: var(--layer-3)!important;}
 .card .card-body{padding:4px 0;}
+
+.samewidth span.input-group-text{min-width: 150px;text-align: right!important;justify-content:flex-end;}
