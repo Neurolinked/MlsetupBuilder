@@ -54,6 +54,14 @@ const schema = {
 	usermigration:{
 		type:'boolean',
 		default: false
+	},
+	game:{
+		type:'string',
+		default: ''
+	},
+	depot:{
+		type:'string',
+		default: ''
 	}
 };
 
@@ -147,6 +155,15 @@ function customResource(){
 	}
 }
 
+async function dirOpen(event,arg) {
+	const {canceled,filePaths } = await dialog.showOpenDialog({title:arg.title, properties: ['openDirectory'], defaultPath:path.normalize(arg.path)})
+	if (canceled){
+		return
+	}else{
+		return filePaths[0]
+	}
+}
+
 customResource()
 
 const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
@@ -201,7 +218,7 @@ const template = [
     label: 'File',
     submenu: [
 			{label: '&Preferences', click: () =>{
-				createModal("apps/prefs.html",mainWindow,800,300,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
+				createModal("apps/prefs.html",mainWindow,800,350,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
 			}},
 			{ type: 'separator' },
       isMac ? { role: 'close' } : { role: 'quit' }
@@ -355,7 +372,8 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 				if (normals.test(whereLoadFrom)){
 					event.reply('preload:logEntry', 'normal map not found in : '+whereLoadFrom,true)
 				}else{
-					dialog.showErrorBox("File opening error","The searched file does not exists "+whereLoadFrom)
+					dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
+					event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 				}
       }else{
         dialog.showErrorBox("File opening error",err.message)
@@ -429,6 +447,7 @@ ipcMain.on('main:read3dFile',(event,percorso,flags)=>{
     if (err) {
       if (err.code=='ENOENT'){
         dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(preferences.get('unbundle'),percorso))
+				event.reply('preload:logEntry', 'Missing file:'+path.join(preferences.get('unbundle'),percorso),true)
       }else{
         dialog.showErrorBox("File opening error",err.message)
       }
@@ -441,6 +460,8 @@ ipcMain.on('main:read3dFile',(event,percorso,flags)=>{
 ipcMain.on('main:getversion',(event, arg) =>{
 	event.reply('preload:setversion',app.getVersion())
 })
+
+ipcMain.handle('main:folderSetup',dirOpen)
 //write the configuration file after the selection of the directory in the
 //preference interface window
 ipcMain.on('main:setupUnbundle',(event, arg) => {
@@ -456,6 +477,7 @@ ipcMain.on('main:setupUnbundle',(event, arg) => {
     dialog.showErrorBox("Preferences error",err.message)
   })
 })
+
 //dialog for getting the WolvenkitCLI.exe command
 ipcMain.on('main:setupCR2Wr',(event, arg) => {
   const result = dialog.showOpenDialog({
@@ -499,6 +521,12 @@ ipcMain.on('main:saveStore',(event, arg) => {
 	}
 	if (arg.hasOwnProperty('legacymaterial')){
 		preferences.set('legacymaterial',arg.legacymaterial);
+	}
+	if (arg.hasOwnProperty('game')){
+		preferences.set('game',arg.game);
+	}
+	if (arg.hasOwnProperty('depot')){
+		preferences.set('depot',arg.depot);
 	}
 })
 

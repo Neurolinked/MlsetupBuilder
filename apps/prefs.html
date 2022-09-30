@@ -17,15 +17,23 @@
   <link rel="stylesheet" href="../css/base.css" />
   </head>
   <body class="d-flex flex-column h-100">
-		<div class='m-2'>
+		<div class='m-2 samewidth'>
 			<input type="checkbox" class="d-none" id="prefloaded" disabled />
+      <div class="input-group input-group-sm mb-3 fs-75">
+				<span class="input-group-text">Game archives folder</span>
+					<input class="form-control " type="text" name="gameArch" id="gameArch" val="" />
+			</div>
 			<div class="input-group input-group-sm mb-3">
 				<span class="input-group-text">uncook folder</span>
 				<input class="form-control" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
 				<label class="custom-file-label" for="prefxunbundle"></label>
 			</div>
+      <div class="input-group input-group-sm mb-3">
+				<span class="input-group-text">Wolvenkit Depot Path</span>
+					<input class="form-control" type="text" name="wCLIDep" id="wCLIDep" val="" />
+			</div>
 			<div class="input-group input-group-sm mb-3">
-				<span class="input-group-text">wolvenkit-CLI executable</span>
+				<span class="input-group-text">Wolvenkit-CLI.exe</span>
 					<input class="form-control" type="text" name="wCLIexe" id="wCLIexe" val="" />
 			</div>
 			<div class="btn-group btn-group-sm mb-2 " role="group" aria-label="texture format">
@@ -34,14 +42,14 @@
 				<input type="radio" class="btn-check" name="maskExtFormat" id="maskPNGFormat" disabled autocomplete="off" value='png'>
 				<label class="btn btn-outline-primary" for="maskPNGFormat">PNG</label>
 			</div>
-      <div id='alertmessage' class='d-none' >
-        <span class=" mt-4 badge rounded-pill border border-warning text-warning"><i class="fas fa-exclamation-triangle "></i> unsaved changes</span>
-      </div>
 		</div>
     <footer class="footer mt-auto py-3">
       <div class="px-2 pb-0">
         <button type="button" class="btn btn-sm btn-outline-danger me-2" id="writePreferences" ><i class="fas fa-save"></i> Save preferences</button><!--
    //--><button type="button" class="btn btn-sm btn-outline-warning" id="reloadPreferences" ><i class="fas fa-undo-alt"></i> Restore</button>
+         <div id='alertmessage' class='d-inline-block d-none' >
+           <span class=" mt-4 badge rounded-pill border border-warning text-warning"><i class="fas fa-exclamation-triangle "></i> unsaved changes</span>
+         </div>
       </div>
     </footer>
 		<script src="./rendprefs.js"></script>

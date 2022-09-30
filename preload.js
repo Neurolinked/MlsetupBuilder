@@ -19,9 +19,7 @@ contextBridge.exposeInMainWorld(
 				var file = ipcRenderer.send('main:3dialog');
         return file
 			},
-      ConfiguraUnbundle:() => {
-        ipcRenderer.send('main:setupUnbundle',{});
-      },
+/*TODO remove this function      ConfiguraUnbundle:() => { ipcRenderer.send('main:setupUnbundle',{});  },*/
 			ConfiguraWkitCli:() => {
         ipcRenderer.send('main:setupCR2Wr',{});
       },
@@ -113,13 +111,17 @@ ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 ipcRenderer.on('preload:logEntry',(event, resultSave, warning = false) => {
 	let Data = new Date(Date.now());
 	var notificationCenter = document.querySelector("#NotificationCenter .offcanvas-body")
+  var fastMessage = document.getElementById("foot-message")
+
 	notificationCenter.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + resultSave + "<br/>" + notificationCenter.innerHTML;
+
+  fastMessage.innerHTML = resultSave.split('<br/>')[0];
 	if (warning){
 		let notiCounter = document.querySelector("#notyCounter span")
 		if (notiCounter.innerText==''){
 			notiCounter.innerText = 0
 		}
-		 let noterrorz = parseInt(notiCounter.innerText)
+		let noterrorz = parseInt(notiCounter.innerText)
 		noterrorz++
 		notiCounter.innerText = noterrorz
 	}
