@@ -166,7 +166,7 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #modelsNavbar{grid-column-start: 1; grid-column-end: 2; grid-row-start: 3; grid-row-end: 3;}
 #micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 2; grid-row-end: 4;}
 #layer_settings{grid-column-start: 3; grid-column-end: 3; grid-row-start: 2; grid-row-end: 3;}
-#colorGrid{display:grid;grid-template-columns:1fr 2fr 1fr .3fr;}
+#colorGrid{display:grid;grid-template-columns:1fr 1.8fr 1fr .6fr;}
 #matdisplay{display:grid;grid-template-columns: 170px 1fr;} /*display the materials and it's datas*/
 
 #legacyMaterial{height:140px;overflow-y: scroll;border:1px solid #4d5154!important;}

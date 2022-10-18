@@ -264,21 +264,6 @@ const template = [
     submenu: [{ label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},{label:'Microblend Lab',accelerator: 'Ctrl+B',click:()=>{ mainWindow.webContents.send('preload:openModal','micromanager')}},{ type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
   },
   { role: 'windowMenu' },
-	/*
-  {
-    label: 'Window',
-    submenu: [
-			/*
-			{label: 'Model Library',accelerator: 'CTRL+L',click:()=>{
-						childWindow("apps/models.html",mainWindow,800,600,'Model Library', {preload: path.join(__dirname, 'apps/preloadmodel.js')} );
-				}},
-			{label: 'Databases Editor',click:()=>{
-						childWindow("apps/editor.html",mainWindow,1200,600,'Databases Editor', {preload: path.join(__dirname, 'apps/preloaDb.js')} );
-				}},
-			{ type: 'separator' },{ role: 'minimize' },{ role: 'zoom' },
-      ...(isMac ? [{ type: 'separator' },{ role: 'front' },{ type: 'separator' },{ role: 'window' } ] : [ { role: 'close' } ])
-    ]
-  },*/
   {
     role: 'help',
     submenu: [
@@ -311,7 +296,7 @@ function createWindow () {
   mainWindow.loadFile('index.html')
   nativeTheme.themeSource = 'dark';
   // Open the DevTools.
-	if (!!dev){
+	if (dev){
 		mainWindow.webContents.openDevTools()
 	}
 }
@@ -442,11 +427,12 @@ ipcMain.on('main:handle_args', (event, payload) => {
 })
 
 //Window for reading 3d models
+/*
 ipcMain.on('main:read3dFile',(event,percorso,flags)=>{
   fs.readFile(percorso,flags,(err,contenutofile) =>{
     if (err) {
       if (err.code=='ENOENT'){
-        dialog.showErrorBox("File opening error","The searched file does not exists "+path.join(preferences.get('unbundle'),percorso))
+        dialog.showErrorBox("File opening error","The searched file does not exists check the path of the file on the log  (botton left of the User Interface)")
 				event.reply('preload:logEntry', 'Missing file:'+path.join(preferences.get('unbundle'),percorso),true)
       }else{
         dialog.showErrorBox("File opening error",err.message)
@@ -455,7 +441,7 @@ ipcMain.on('main:read3dFile',(event,percorso,flags)=>{
     }
     event.returnValue = contenutofile
   })
-})
+})*/
 //setup the version of the software where needed
 ipcMain.on('main:getversion',(event, arg) =>{
 	event.reply('preload:setversion',app.getVersion())
@@ -785,7 +771,11 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 		}
 	})
 })
-
+/*
+ipcMain.handle('main:uncookMicroblends',(event)=>{
+	
+})
+*/
 ipcMain.on('main:uncookMicroblends',(event)=>{
 	fs.access(path.normalize(preferences.get('unbundle')),fs.constants.W_OK,(err)=>{
 		if (err){

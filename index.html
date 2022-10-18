@@ -15,6 +15,7 @@
 	<link rel="preload" as="image" href="./images/system/uncook.jpg">-->
 	<!-- end of help preload -->
 	<!-- Intro.js -->
+  <script type="text/javascript"  src="./public/pouchDB/pouchdb-7.3.0.min.js"></script>
 	<link rel="stylesheet" href="./node_modules/intro.js/minified/introjs.min.css" />
 	<link href="./node_modules/intro.js/themes/introjs-dark.css" rel="stylesheet">
 	<!-- End Intro -->
@@ -344,7 +345,6 @@
 		</div>
     <div class="btn-group" role="group" aria-label="model loading">
   		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
-      <!--<button type="button" id="FolderScan" data-toggle="tooltip" title="Search and import assets" class="btn btn-outline-danger"><i class="fas fa-magnifying-glass"></i></button>-->
     </div>
    <div class="btn-group " role="group" aria-label="information and data">
      <button class="btn btn-outline-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#InfoModel" ><i class="fa-solid fa-hammer"></i> <i class="fas fa-info"></i></button>
@@ -544,10 +544,12 @@
           <!--<button type="button" id=""  data-toggle="tooltip" title="resort colors by" class="btn  btn-sm btn-outline-warning"><i class="fa-solid fa-sort"></i></button>-->
           <input type="checkbox" class="btn-check" id="colororder" checked autocomplete="off">
           <label class="btn btn-outline-warning btn-sm" for="colororder"><i class="fa-solid fa-sort"></i></label>
+					<input type="checkbox" class="btn-check" id="BWAdd" autocomplete="off">
+					<label class="btn btn-outline-warning btn-sm" for="BWAdd"><i class="fa-solid fa-swatchbook"></i></label>
         </div>
       </div>
       <div id="colordisplay" class="layer-1">
-        <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" title='null_null' >&nbsp;</span></div>
+        <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" data-lum='0.5' title='null_null' >&nbsp;</span></div>
       </div>
   </div>
   <div id="micropanel" class="layer-1 rounded">

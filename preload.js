@@ -11,18 +11,10 @@ contextBridge.exposeInMainWorld(
         var filecontent = ipcRenderer.sendSync('main:readFile', path, streamcode, no_repo);
         return filecontent
       },
-			EDStream: (path,streamcode) =>{
-        var filecontent = ipcRenderer.sendSync('main:read3dFile', path, streamcode);
-        return filecontent
-      },
 			ThreeDAsset: () =>{
 				var file = ipcRenderer.send('main:3dialog');
         return file
 			},
-/*TODO remove this function      ConfiguraUnbundle:() => { ipcRenderer.send('main:setupUnbundle',{});  },*/
-			ConfiguraWkitCli:() => {
-        ipcRenderer.send('main:setupCR2Wr',{});
-      },
 			Export:(data) => {
 				ipcRenderer.send('main:writefile',data);
 			},
@@ -33,6 +25,7 @@ contextBridge.exposeInMainWorld(
 				ipcRenderer.send('main:uncookForRepo',conf);
 			},
 			microMe: async ()=>{
+        //return await ipcRenderer.invoke('main:uncookMicroblends');
 				ipcRenderer.send('main:uncookMicroblends');
 			},
 			getModels: ()=>{
@@ -42,7 +35,6 @@ contextBridge.exposeInMainWorld(
       getMuBlends: async ()=>{
         return await ipcRenderer.invoke('main:loadMuBlend');
       },
-      setMuBlends: ()=>{},
 			savePref: (conf)=>{
 				ipcRenderer.send('main:saveStore',conf);
 			},
@@ -50,9 +42,11 @@ contextBridge.exposeInMainWorld(
         ipcRenderer.send('main:scanFolder');
       },
       Foldering : (path) =>{
+        //It will display the path folder chosen
         ipcRenderer.send('main:openFolder',path);
       },
       ExtOpen :(content)=>{
+        //It will display external resources as videos an link in the default browser
         ipcRenderer.send('main:WindopenExt',content);
       },
       importMBlend : (package)=>{
@@ -238,8 +232,4 @@ ipcRenderer.on('preload:packageDone',(event,result)=>{
 
 ipcRenderer.on('preload:MuReload',(event,result)=>{
   document.dispatchEvent(updblends);
-})
-
-window.addEventListener('DOMContentLoaded', () => {
-
 })

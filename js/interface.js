@@ -1,4 +1,26 @@
 window.$ = window.jQuery;
+
+var Mlmasks = new PouchDB('mlmasks');
+var Models = new PouchDB('threedmodels');
+var Normals = new PouchDB('normalmaps');
+var Mltemplates = new PouchDB('mltemplate');
+
+Mlmasks.info().then(function (info) {
+  if (info.doc_count==0){
+    console.log("caricare le maschere da file");
+  }
+});
+Models.info().then(function (info) {
+  if (info.doc_count==0){
+    console.log("caricare i modelli da file");
+  }
+});
+Normals.info().then(function (info) {
+  if (info.doc_count==0){
+    console.log("caricare le normal map da file");
+  }
+});
+
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 const mLsetup = new Mlsetup();
@@ -1285,6 +1307,12 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
 
+			if ($("#BWAdd").is(":checked")){
+					$("#cagecolors").append("<span style='background-color:black;' data-lum='0' data-order='0' title='000000_null'>&nbsp;</span>")
+					$("#cagecolors").append("<span style='background-color:white;' data-lum='1' data-order='-1' title='ffffff_null'>&nbsp;</span>")
+          $("#materialcolors").append('<option style="color:rgb(50%,50%,50%);" value="rgb(0%,0%,0%);" >000000_null</option><option style="color:rgb(50%,50%,50%);" value="rgb(100%,100%,100%);" >ffffff_null</option>');
+			}
+
 			//build up the lists of data loaded from the material chosen
 
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
@@ -1423,8 +1451,13 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
 
+			if ($("#BWAdd").is(":checked")){
+					$("#cagecolors").append("<span style='background-color:black;' data-lum='0' data-order='0' title='000000_null'>&nbsp;</span>")
+					$("#cagecolors").append("<span style='background-color:white;' data-lum='1' data-order='-1' title='ffffff_null'>&nbsp;</span>")
+					$("#materialcolors").append('<option style="color:rgb(50%,50%,50%);" value="rgb(0%,0%,0%);" >000000_null</option><option style="color:rgb(50%,50%,50%);" value="rgb(100%,100%,100%);" >ffffff_null</option>');
+			}
 			//build up the lists of data loaded from the material chosen
-
+      
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
 				$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
 			});
@@ -1451,7 +1484,22 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
 		}).appendTo($("#cagecolors"));
 	});
-
+  
+  $("#BWAdd").on("input",function(){
+    if ($(this).is(":checked")){
+      if (($('#cagecolors span[data-lum="0"]').length==0) && ($('#cagecolors span[data-lum="-1"]').length==0)){
+        $("#cagecolors").append("<span style='background-color:black;' data-lum='0' data-order='0' title='000000_null'>&nbsp;</span>");
+        $("#cagecolors").append("<span style='background-color:white;' data-lum='1' data-order='-1' title='ffffff_null'>&nbsp;</span>");
+        
+        $("#cagecolors").find('span').sort(function(a, b) {
+          return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
+        }).appendTo($("#cagecolors"));
+      }
+    }else{
+      $("#cagecolors span[data-lum='0']").remove();
+      $("#cagecolors span[data-lum='1']").remove();
+    }
+  });
 
   //Clicking outside the contextual menu
   $("body").on('click',function(event){
