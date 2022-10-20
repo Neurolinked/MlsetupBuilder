@@ -649,7 +649,6 @@ function loadNormOntheFly(path){
 function loadMapOntheFly(path){
   //const encoder = new TextEncoder()
   path = path.replaceAll(/\//g,'\\');
-  console.log(path)
   var bufferimage
   bufferimage = thePIT.ApriStream(path,'binary');
   //bufferimage = JSON.parse(bufferimage);
@@ -800,7 +799,7 @@ function LoadModelOntheFly(path){
 	        //strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
 					if ((child.userData?.materialNames!=null) && (child.userData?.materialNames!=undefined)){
-							if (!(/(vehicle_lights)|(neon_rims)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|(default_tpp)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
+							if (!(/(vehicle_lights)|(logos)|(neon_rims)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|(default_tpp)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
 									if (modelType=='hair'){
 										if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
 											child.material = hair_cap;
@@ -926,6 +925,7 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 */
 	}else{
 		//t3Ddata = str2ab(modello);
+    safeNormal();
 		cleanScene();
     LoadModelOntheFly(file.value)
 		let modelname = file.value.split('\\').reverse()[0].split('.')[0] //split the path by slashes, reverse to get the last part, split the extension to get only the name [0] of the split
@@ -983,11 +983,10 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
  //let Normed = document.querySelector('#withbones svg:nth-child(2) path');
 let Normed = document.querySelector('#withbones i.icon-normals');
 
-if (theNormal.match(/^[/|\w|\.]+.xbm/)){
+if (theNormal.match(/^[/|\w|\.]+.png/)){
  loadNormOntheFly(theNormal);
 }else{
  safeNormal();
- //Normed.setAttribute("fill",'currentColor');
  Normed.style.color = '';
  //var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
  //material.normalMap = texture;
