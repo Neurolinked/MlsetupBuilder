@@ -454,7 +454,7 @@
   <div id="layer_settings" class="layer-1 rounded">
       <span class="badge w-100 rounded-0">Material</span>
 			<div id="matdisplay" class=" no-gutters layer-3" >
-					<img id="materialChoser" src="images/material/unused.jpg" width="170" height="170" data-bs-toggle="modal" data-bs-target="#materialModal" title="Click to choose a new material for the selected layer" />
+					<img id="materialChoser" src="images/material/unused.jpg" data-bs-toggle="modal" data-bs-target="#materialModal" title="Click to choose a new material for the selected layer" />
 				<div>
 					<div>
 						<div>
@@ -467,18 +467,52 @@
 		            <input type="number" class="form-control form rounded-0" id="layerOpacity" value="1.0" step="0.01" min="0">
 		          </div>
 		        </div>
-						<div class="eq-lay2">
+						<div class="">
 		          <div class="input-group input-group-sm">
-		              <div class="badge my-auto">Offset U</div>
+		              <div class="badge my-auto">Offset</div><span class="input-group-text">U</span>
 		            <input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01">
-		          </div>
-		          <div class="input-group input-group-sm">
-		              <div class="badge my-auto">Offset V</div>
-		            <input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01">
+                 <span class="input-group-text">V</span>
+                  <input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01">
 		          </div>
 		        </div>
+            <div>
+              <div class="input-group input-group-sm" >
+                  <div class="badge my-auto">Rough</div><span class="input-group-text">In</span>
+                  <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
+                    <optgroup label="Reset"><option value="null" >null</option></optgroup>
+                    <optgroup id="Rough_In_values" label="Material"></optgroup>
+                  </select>
+                  <span class="input-group-text">Out</span>
+        	          <select class="form-select rounded-0" id="layerRoughOut" aria-label="RoughnessOut">
+        	            <optgroup label="Reset"><option value="null" >null</option></optgroup>
+        	            <optgroup label="Material specific" id="Rough_out_values"></optgroup>
+        	          </select>
+              </div>
+            </div>
+            <div>
+              <div class="input-group input-group-sm">  
+                 <div class="badge my-auto">Normals</div>
+                <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
+                  <optgroup id="defaultNormal" label='Reset'>
+                    <option value="null">null</option>
+                  </optgroup>
+                  <optgroup id="Norm_Pow_values" label='Materials'></optgroup>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div class="input-group input-group-sm"> 
+                <div class="badge my-auto">Metal</div><span class="input-group-text">Out</span>
+                <!--<div class="badge my-auto">Metal Out</div>-->
+                <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
+                  <optgroup id="defaultMetalOut" label='Reset'>
+                    <option value="null">null</option>
+                  </optgroup>
+                  <optgroup id="Metal_Out_values" label='material'></optgroup>
+                </select>
+              </div>
+            </div>
 					</div>
-
 				</div>
 			</div>
 			<details id="legacyMatSector"><summary id="materialSummary" >unused</summary>
@@ -494,7 +528,7 @@
 				</ul>
 			</div>
 			</details>
-      <div class="twoColGrid layer-1">
+      <!--<div class="twoColGrid layer-1">
         <div>
           <span class="badge  w-100 rounded-0 ">Normals</span>
           <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
@@ -513,6 +547,7 @@
 						<optgroup id="Metal_Out_values" label='material'></optgroup>
           </select>
         </div>
+        <!--
         <div>
           <span class="badge w-100 rounded-0 ">Rough In</span>
           <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
@@ -526,11 +561,12 @@
 	            <optgroup label="Reset"><option value="null" >null</option></optgroup>
 	            <optgroup label="Material specific" id="Rough_out_values"></optgroup>
 	          </select>
-        </div>
-      </div>
+        </div>->
+      </div>-->
       <div id="colorGrid">
         <div><span class="badge  w-100 rounded-0">ColorCode</span><input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13"></div>
-        <div><span class="badge  w-100 rounded-0">Color list</span>
+        <!--<div><span class="badge  w-100 rounded-0">Color list</span>
+          
           <select class="form-select rounded-0" id="LayerColorL" aria-label="microblends selection lists">
             <option selected disabled>select a color</option>
             <optgroup id="defaultcolors" label='Default'>
@@ -538,16 +574,26 @@
             </optgroup>
             <optgroup id="materialcolors" label='Materials'></optgroup>
           </select>
-        </div>
+          </div>
+        -->
         <div><span class="badge  w-100 rounded-0" id="colorPntage">rgb();</span><span class="badge border border-secondary w-100 rounded-0 tint" > </span></div>
-        <div class="text-center"><span class="badge  w-100 rounded-0"> </span>
-          <!--<button type="button" id=""  data-toggle="tooltip" title="resort colors by" class="btn  btn-sm btn-outline-warning"><i class="fa-solid fa-sort"></i></button>-->
-          <input type="checkbox" class="btn-check" id="colororder" checked autocomplete="off">
-          <label class="btn btn-outline-warning btn-sm" for="colororder"><i class="fa-solid fa-sort"></i></label>
-					<input type="checkbox" class="btn-check" id="BWAdd" autocomplete="off">
-					<label class="btn btn-outline-warning btn-sm" for="BWAdd"><i class="fa-solid fa-swatchbook"></i></label>
-        </div>
       </div>
+      <div class="input-group input-group-sm">
+        <span class="input-group-text">Color filter</span>
+        <input type="text" class="form-control" aria-label="Sizing example input" id="colorLbFinder" placeholder="write a label to find the color">
+        <button type="button" id="colorCleaner" data-toggle="tooltip" title="" class="btn text-warning" data-bs-original-title="Clear the search field"><i class="fa fa-times"></i></button>
+        <input type="checkbox" class="btn-check" id="colororder" checked autocomplete="off">
+        <label class="btn btn-outline-warning btn-sm" for="colororder" data-toggle="tooltip" data-bs-original-title="Change the visual Order of the swatches" ><i class="fa-solid fa-sort"></i></label>
+        <input type="checkbox" class="btn-check" id="BWAdd" autocomplete="off">
+        <label class="btn btn-outline-warning btn-sm" for="BWAdd" data-toggle="tooltip" data-bs-original-title="Add Black and white, but you need to install a mod with them (Multilayer Material Xtender has them)"><i class="fa-solid fa-swatchbook"></i></label>
+        <button type="button" id="colorReset" data-toggle="tooltip" title="" class="btn btn-outline-info" data-bs-original-title="Choose the basic override null_null"><i class="fa-solid fa-eraser"></i></button>
+      </div>
+      <!--
+      <div class="input-group">
+				<input id="" class="form-control layer-2" type="text" placeholder="Filter the colors" aria-label="color searcher">
+				
+			</div> 
+      //-->
       <div id="colordisplay" class="layer-1">
         <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" data-lum='0.5' title='null_null' >&nbsp;</span></div>
       </div>

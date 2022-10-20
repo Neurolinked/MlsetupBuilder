@@ -1,5 +1,6 @@
 window.$ = window.jQuery;
-
+var notifications = 0;
+/*
 var Mlmasks = new PouchDB('mlmasks');
 var Models = new PouchDB('threedmodels');
 var Normals = new PouchDB('normalmaps');
@@ -20,7 +21,7 @@ Normals.info().then(function (info) {
     console.log("caricare le normal map da file");
   }
 });
-
+*/
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 const mLsetup = new Mlsetup();
@@ -43,7 +44,7 @@ async function abuildMaskSelector(listOfMasks){
 			var maskSel = document.querySelector("#customMaskSelector");
 			let dummytxt = '';
 			for (k=0, j=listOfMasks.length;k<j;k++){
-				dummytxt +="<option value='"+k+"' >"+listOfMasks[k].mask+"</option>";
+				dummytxt +="<option value='"+k+"' >"+listOfMasks[k].mask.replace("{format}","png")+"</option>";
         //$("#customMaskSelector").append("<option value='"+k+"' >"+listOfMasks[k].mask+"</option>");
       }
 			maskSel.innerHTML+=dummytxt;
@@ -89,11 +90,8 @@ async function nubuildMB(microblendObj){
           package.microblends.forEach((microblend)=>{
             let tmpName = microblend.path.split('.')[0].split("\\").reverse()[0];
             let hash = microblend?.hash != undefined ? `data-hash='${microblend.hash}'` : "";
-
             $("#mbSelect optgroup[label='"+pkgName+"']").append("<option data-package='"+pkgName+"' data-thumbnail='./images/mblend/"+pkgName.toLowerCase()+"/"+tmpName+".png' value='"+microblend.path+"'>"+tmpName+"</option>");
-
             $("#cagetheCuMBlends").append("<li style=\"background-image:url('./images/mblend/"+pkgName.toLowerCase()+"/thumbs/"+tmpName+".png'); '\" data-package='"+pkgName+"' data-path='"+microblend.path+"' title='"+tmpName+"' > </li>");
-
             $("#mbHierarchy ul[data-package='"+pkgName+"']").append(`<li ${hash} data-path[${microblend.path}] class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> ${tmpName}</li>`);
           });
         }
@@ -155,7 +153,13 @@ function switchLegacyMat(material){
 }
 
 $(function(){
-
+  var textureformat = ''
+  var Ptextformat = thePIT.RConfig('maskformat');
+  Ptextformat.then((format)=>{
+    textureformat = format
+  }).catch((error)=>{
+    notifyMe(error);
+  })
   const updblends = new Event('updMBlends');
   document.addEventListener('updMBlends',(e)=>{
       var updCustomMicroblends = thePIT.getMuBlends();
@@ -165,7 +169,6 @@ $(function(){
         console.log(error)
       })
   })
-
 
   var shiftSpeedup = false;
   var indexLayerContextual = null; //variable index for the copied Data
@@ -198,8 +201,6 @@ $(function(){
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
 
-
-
     var readCustomMicroblends = thePIT.getMuBlends();
 
     readCustomMicroblends
@@ -214,7 +215,6 @@ $(function(){
 	let buildmyHairs = abuildHairs(hairs);
 	let buildmyMasks = abuildMaskSelector(maskList)
 
-
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
 	function slideMaterials(index,speed = 700){
@@ -227,12 +227,11 @@ $(function(){
 		let Data = new Date(Date.now());
 		$("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br/>");
 		if (warning){
-			let noterrorz = parseInt($("#notyCounter span").text()+0);
-			$("#notyCounter span").text(parseInt(noterrorz+1));
+      notifications++
+      $("#notyCounter span").text(notifications);
 		}
     $("#foot-message").text(message);
 	}
-
 
 	var matChooser = document.getElementById('materialChoser')
 	var tooltipMat = new bootstrap.Tooltip(matChooser,{placement:'left'})
@@ -246,7 +245,6 @@ $(function(){
 		let leftcorner = $("#Filemanager").offset().left;
 		$('#addedCSS').text('.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
 	}
-
 
 	$("#HairTool").on('show.bs.offcanvas',function(){
 		hairToolW();
@@ -333,7 +331,6 @@ $(function(){
     let patapackage = $(this).parent().data("path");
     thePIT.delMBlend({package:package, file:name.trim()+".png", path:patapackage});
   });
-
 
   $("#CheckSaveMblend").click(function(){
     if (/^[a-zA-z0-9_\-]+$/.test($("#mbListPackage").val())) {
@@ -886,13 +883,15 @@ $("#resetShades span.choose").click(function(){
       //setup the chosen colors for the layer
 
 			let  ricercacolore = $(this).data("color");
+      
+      /*
       if ($("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).length>0){
         $("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).prop("selected","selected");
         $("#LayerColorL").change();//fire the events as a user color selection to update colors percentage and preview
       }else{
         $("#LayerColorL").prop('selectedIndex',0); //reset to null to let overrides work
-      }
-
+      }*/
+      $("#cagecolors span").removeClass("active");
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
 			$("#mbInput").focusout(); //fires up the change of material blending preview
       $("#mbSelect").trigger('change');
@@ -1103,10 +1102,10 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#modelTarget").val(node.node.li_attr['model']);
     if (node.node.li_attr.hasOwnProperty('masks')) {
       if (typeof(node.node.li_attr['masks'])=='Array'){
-        $("#masksTemplate").val(maskList[node.node.li_attr['masks'][0]].mask);
+        $("#masksTemplate").val(maskList[node.node.li_attr['masks'][0]].mask.replace("{format}",textureformat));
         maxlayers = maskList[node.node.li_attr['masks'][0]].layers
       }else{
-        $("#masksTemplate").val(maskList[node.node.li_attr['masks']].mask);
+        $("#masksTemplate").val(maskList[node.node.li_attr['masks']].mask.replace("{format}",textureformat));
         maxlayers = maskList[node.node.li_attr['masks']].layers
       }
     }else{
@@ -1115,7 +1114,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     }
 		// ID of the normal map
 		if (node.node.li_attr.hasOwnProperty('normal')) {
-			$("#normTemplate").val(normList[node.node.li_attr['normal']]);
+			$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}","png"));//$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));
 		}else{
 			$("#normTemplate").val('');
 		}
@@ -1276,16 +1275,29 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#floatMat").addClass('d-none');
 	});
 
-	$("body").on("click","#materiaList li", function(){
-		$("#materiaList li").removeClass('active');
+	$("body").on("click","#materiaList li, #cagemLibrary > div", function(event){
+     let target = $( event.target );
+    //console.log(target);
+    
+		$("#materiaList li, #cagemLibrary > div").removeClass('active');
 		$(this).addClass('active');
+    
+    if (target.is( "div" )){
+      if ($(this).index()/4>1){
+  			slideMaterials($(this).index());
+  		}
+    }
+    
 		$("#materialSummary").html($(this).data('ref'));
 		$("#matInput").val($(this).data('path'));
 		$("#matInput").trigger("change");
+    
 		if (ml_libraries.hasOwnProperty($(this).data('ref'))){
-			let materialtoload = $(this).data('ref');
-
-			console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
+			var materialtoload = $(this).data('ref');
+      switchLegacyMat(materialtoload);
+      
+			notifyMe("Material override loaded for "+materialtoload,false);
+      console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
 
 			$("#Rough_out_values").html('');//reset optional roughness
 			$("#Metal_Out_values").html('');
@@ -1295,7 +1307,14 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#cagecolors").html('');
 
 			let toodarkClass;
-
+      
+      if ($("#BWAdd").is(":checked")){
+        if (ml_libraries[materialtoload].overrides.colorScale.filter(el => el.n=='000000_null').length<=0){
+          ml_libraries[materialtoload].overrides.colorScale.push({'n':'000000_null','v':[0,0,0]})
+          ml_libraries[materialtoload].overrides.colorScale.push({'n':'ffffff_null','v':[1,1,1]})
+        }
+      }
+      
 			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
 				toodarkClass='';
 				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
@@ -1306,15 +1325,8 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
 				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
-
-			if ($("#BWAdd").is(":checked")){
-					$("#cagecolors").append("<span style='background-color:black;' data-lum='0' data-order='0' title='000000_null'>&nbsp;</span>")
-					$("#cagecolors").append("<span style='background-color:white;' data-lum='1' data-order='-1' title='ffffff_null'>&nbsp;</span>")
-          $("#materialcolors").append('<option style="color:rgb(50%,50%,50%);" value="rgb(0%,0%,0%);" >000000_null</option><option style="color:rgb(50%,50%,50%);" value="rgb(100%,100%,100%);" >ffffff_null</option>');
-			}
-
+      
 			//build up the lists of data loaded from the material chosen
-
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
 				$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
 			});
@@ -1346,9 +1358,29 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       	return +a.getAttribute('data-order') - +b.getAttribute('data-order');
   		}).appendTo($("#cagecolors"));
     }
-
+    let ricercacolore = $("#layerColor").val();
+    $("#cagecolors span").removeClass("active");
+    
+    if ($("#cagecolors span[title='"+ricercacolore+"']").length>0){
+      $("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
+    }else{
+      notifyMe("The color "+ricercacolore+" isn't present in the material "+materialtoload);
+    }
+    $("#colorLbFinder").keyup();
 	});
 
+  $("#colorLbFinder").keyup(function () {
+		if ($(this).val()==''){
+			$("#cagecolors span").removeClass('d-none');
+      $('#colorLbFinder').removeClass("filterAlert");
+		}else{
+			$("#cagecolors span:not([title*='"+$(this).val()+"'])").addClass('d-none');
+			$("#cagecolors span[title*='"+$(this).val()+"']").removeClass('d-none');
+      $('#colorLbFinder').addClass("filterAlert");
+		}
+  });
+  $("#colorCleaner").click(function(){$("#colorLbFinder").val("").keyup()});
+  
   $("#colororder").change(function(){
     if ($("#colororder").is(":checked")){
       $("#cagecolors").find('span').sort(function(a, b) {
@@ -1412,16 +1444,16 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			slideMaterials(matindexchose,200);
 		}
 	});
-
+/*
 	$("body").on('click','#cagemLibrary > div',function(event){
 
-		$("#cagemLibrary > div").removeClass("active");
-		$(this).addClass('active');
+		//$("#cagemLibrary > div").removeClass("active");
+		//$(this).addClass('active');
 
-		if ($(this).index()/4>1){
-			slideMaterials($(this).index());
+		//if ($(this).index()/4>1){
+			//slideMaterials($(this).index());
 			//$("#cagemLibrary").animate({scrollTop:((Math.floor($(this).index()/3)-1)*67)+"px"},700);
-		}
+		//}
 
 		$("#materialSummary").html($(this).data('ref'));
 		$("#matInput").val($(this).data('path'));
@@ -1439,7 +1471,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#cagecolors").html('');
 
 			let toodarkClass;
-
+      
 			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
 				toodarkClass='';
 				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
@@ -1450,12 +1482,6 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
 				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
-
-			if ($("#BWAdd").is(":checked")){
-					$("#cagecolors").append("<span style='background-color:black;' data-lum='0' data-order='0' title='000000_null'>&nbsp;</span>")
-					$("#cagecolors").append("<span style='background-color:white;' data-lum='1' data-order='-1' title='ffffff_null'>&nbsp;</span>")
-					$("#materialcolors").append('<option style="color:rgb(50%,50%,50%);" value="rgb(0%,0%,0%);" >000000_null</option><option style="color:rgb(50%,50%,50%);" value="rgb(100%,100%,100%);" >ffffff_null</option>');
-			}
 			//build up the lists of data loaded from the material chosen
       
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
@@ -1483,8 +1509,9 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#cagecolors").find('span').sort(function(a, b) {
     	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
 		}).appendTo($("#cagecolors"));
+    
 	});
-  
+  */
   $("#BWAdd").on("input",function(){
     if ($(this).is(":checked")){
       if (($('#cagecolors span[data-lum="0"]').length==0) && ($('#cagecolors span[data-lum="-1"]').length==0)){
@@ -1511,19 +1538,26 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   });
 
 	//On change on the color selection, update the bigger color preview and the line that say the percentage
-	$("body").on('change','#LayerColorL', function(){
+	//$("body").on('change','#LayerColorL', function(){
+    /*
 		$(".tint").prop('style','background-color:'+$(this).val()+"!important;");
 		$("#layerColor").val($('#LayerColorL option:selected').text().slice(0,-2));
 	  let choosed_color = tinycolor($(this).val());
 	  $("#colorPntage").html(choosed_color.toPercentageRgbString()); //convert to text percentage the colors
-	});
-
+    
+	});*/
+  /*simulate the selection of the null_null color */
+  $("#colorReset").click(function(){
+    $("body #cagecolors span[title='null_null']").click();
+  })
+  
 	$("body").on('click','#cagecolors span',function(){
 		/* retarget the colors chosen*/
 		$("#cagecolors span").removeClass('active');
 		$(this).addClass('active');
 
 		let colorchanger = $(this).attr("title");
+    /*
 		$("body #materialcolors").prop('selectedIndex',0);
 		if ($("body #materialcolors option:contains('"+colorchanger+"')").length>0) {
 			$("body #materialcolors option:contains('"+colorchanger+"')").prop("selected",true);
@@ -1531,7 +1565,13 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("body #defaultcolors option:contains('"+colorchanger+"')").prop("selected",false);
 		}
 		$("body #LayerColorL").change();
-		$("#layerColor").change();
+    */
+    let colorSwatchValue = $(this).css("background-color")
+    $(".tint").prop('style','background-color:'+colorSwatchValue+"!important;");
+	  let choosed_color = tinycolor(colorSwatchValue);
+	  $("#colorPntage").html(choosed_color.toPercentageRgbString());
+    $("#layerColor").val(colorchanger).change();
+		//$("#layerColor").change();
 	});
 
   $("#cagethemicroblends li").click(function(){
