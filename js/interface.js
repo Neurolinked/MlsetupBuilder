@@ -160,6 +160,9 @@ $(function(){
   }).catch((error)=>{
     notifyMe(error);
   })
+  var mls_Offcanvas = document.getElementById('off_MLSetups')
+  var off_MLSetup = new bootstrap.Offcanvas(mls_Offcanvas)
+
   const updblends = new Event('updMBlends');
   document.addEventListener('updMBlends',(e)=>{
       var updCustomMicroblends = thePIT.getMuBlends();
@@ -1270,7 +1273,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#floatMat").removeClass('d-none');
 		}
 	);
-
+  
 	$("#materiaList").mouseout(function(e){
 		$("#floatMat").addClass('d-none');
 	});
@@ -1805,10 +1808,35 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
 //----File Auto Loader
 $("#importTech").change(function(){
 	var fr=new FileReader(); //new reading Object
-	fr.onload=function(){$("#passaggio").val(fr.result);} //get the result of the reading to the textarea
-	fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
+	fr.onload=function(){
+    $("#passaggio").val(fr.result);
+    $("#passaggio").change();
+  } //get the result of the reading to the textarea
+  if ($("#importTech")[0].files[0]){
+    fr.readAsText($("#importTech")[0].files[0]); //Read as a text file  
+  }
 });
 
+$("#passaggio").change(function(){
+  if ($(this).val()!=""){
+    //$("#off_MLSetups div.offcanvas-body").html("")
+    $("#off_MLSetups div.offcanvas-body detail").fadeOut();
+    var mls_content =" "
+    try{
+      mls_content = JSON.parse($("#passaggio").val());
+      let toload = new Mlsetup()
+      toload.import(mls_content);
+      
+      let test = $([toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
+      console.log(test)
+      $(".mlpreviewBody").html(test)
+      //$(".mlpreviewBody").html(toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>"));
+    }catch(error){
+      notifyMe("Error interpreting the JSON format")
+    }
+    off_MLSetup.show();
+  }
+});
 //Cleanep all the layers value
 function vacuumCleaner(on = true){
   let c_opacity
@@ -1863,6 +1891,7 @@ function vacuumCleaner(on = true){
 
 //----Button to load
 $("#TheMagicIsHere").click(function(){
+    off_MLSetup.hide()
 		if (String($("#passaggio").val()).trim()!="") {
 			theArcOfNOA = JSON.parse($("#passaggio").val());
 			if (theArcOfNOA.hasOwnProperty('Chunks')){
