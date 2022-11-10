@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline'; img-src * data: 'unsafe-inline'; connect-src * 'unsafe-inline'; worker-src blob: ;" >
+  <meta name="author" content="Neurolinked">
+  <meta name="date" content="October 2022">
+	<link href="../bs511/css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript"  src="../bs511/js/bootstrap.bundle.min.js"></script>
+	<!--FontAwesome --><link rel="stylesheet" href="../public/fontawesome-free/css/all.min.css" />
+	<!--FontAwesome --><script type="text/javascript" src="../public/fontawesome-free/js/all.min.js" ></script>
+	<!-- If the require doesn't work, include first the jQuery file  <script src="jquery-3.0.0.min.js"></script>-->
+	<script type="text/javascript" src='../js/jquery-3.6.0.min.js'></script>
+  <script type="text/javascript" src='../js/modules/materialBuf.js'></script>
+  <link rel="stylesheet" href="../css/materials.css" />
+  </head>
+  <body class="h-100 fs-80">
+		<header>
+      <button type="button" class="btn btn-sm btn-outline-primary" id="materialImport" >Import <i class="fa-solid fa-file-import"></i></button>
+      <input type="file" class="d-none" accept=".Material.json" id="importfield" />
+      <button type="button" class="btn btn-sm btn-outline-primary" id="materialExport" >Export <i class="fa-solid fa-file-export"></i></button>
+    </header>
+		<div class="bodyGrid">
+			<div id="instances">
+				<div class="card rounded-0 border-0 h-100 overflow-hidden">
+					<div class="card-header p-1 bg-primary fs-60 rounded-0">Local Material Buffer</div>
+          <div><!-- TABS for local material Buffer-->
+          <ul class="nav nav-tabs" id="matBufSection" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="btn btn-secondary btn-micro active" id="Material-tab" data-bs-toggle="tab" data-bs-target="#Material" type="button" role="tab" aria-controls="material" aria-selected="true">Materials</button>
+            </li>
+            <li class="nav-item mx-1" role="presentation">
+              <button class="btn btn-secondary btn-micro" id="TexList-tab" data-bs-toggle="tab" data-bs-target="#TexList" type="button" role="tab" aria-controls="TexList" aria-selected="false">TextureList</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="btn btn-secondary btn-micro" id="Mtemplate-tab" data-bs-toggle="tab" data-bs-target="#Mtemplate" type="button" role="tab" aria-controls="Mtemplate" aria-selected="false">MaterialTemplates</button>
+            </li>
+          </ul>
+        </div>
+					<div class="card-body p-0 vertscroll">
+<div class="tab-content" id="TabMaterialBuffers">
+  <div class="tab-pane fade show active" id="Material" role="tabpanel" aria-labelledby="Material-tab"></div>
+  <div class="tab-pane fade " id="TexList" role="tabpanel" aria-labelledby="TexList-tab">
+    <ul class="list-group list-group-flush vertscroll">
+    </ul>
+  </div>
+  <div class="tab-pane fade" id="Mtemplate" role="tabpanel" aria-labelledby="Mtemplate-tab"></div>
+</div>
+<!--End TABS for Local material Buffer -->
+					</div>
+				</div>
+			</div>
+			<div id="Mat_Setup">
+				<div class="card rounded-0 border-0 h-100">
+					<div class="card-header p-1 bg-dark fs-60 rounded-0">CMaterial Instance Setup</div>
+          <div class="input-group input-group-sm">
+            <div class="badge my-auto">Name</div>
+            <input type="text" class="form-control" placeholder="Name of the material" id="Mat_S_name" >
+          </div>
+          <div class="input-group input-group-sm">
+            <div class="badge my-auto">BaseMaterial</div>
+            <input type="text" class="form-control" placeholder="Material base file" id="Mat_Base_S_name">
+          </div>
+          <div class="input-group input-group-sm">
+            <div class="badge my-auto">MaterialTemplate</div>
+            <input type="text" class="form-control" placeholder="Material variant file" id="Mat_Temp_S_name">
+          </div>
+          <div class="d-grid gap-2">
+            <button class="btn btn-secondary btn-tiny" id="packItBack" type="button">Put the edits in the buffer</button>
+          </div>
+					<div class="card-body p-0 vertscroll">
+
+					</div>
+				</div>
+			</div>
+			<div id="tplLibrary" >
+				<div class="card rounded-0 border-0 h-100">
+				  <div class="card-header p-1 bg-primary fs-60 rounded-0">Material templates Library <span><button type="button" class="btn btn-micro btn-warning" id="bReloadLibrary"><i class="fa-solid fa-refresh"></i></button></span></div>
+				  <div class="card-body p-1 vertscroll">
+
+				  </div>
+          <div class="card-footer p-1 d-grid"><button type="button" class="btn btn-micro btn-warning" id="bSaveLibrary"><i class="fa-solid fa-save"></i> Save library</button></div>
+				</div>
+			</div>
+		</div>
+    <footer>
+      <span class="me-2"><i class="fa-solid fa-layer-group text-normals"></i> Multilayers <span>
+      <span class="me-2"><i class="fa-solid fa-microchip text-danger"></i> Metal base </span>
+      <span class="me-2"><i class="fa-solid fa-tag text-secondary"></i> Mesh decal </span>
+      <span class="me-2"><i class="fa-solid fa-fill text-info"></i> Not common </span>
+    </footer>
+    <script type="text/javascript" src='../js/utilities.js'></script>
+		<script src="./rendmat.js"></script>
+  </body>
+</html>

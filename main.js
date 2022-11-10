@@ -92,6 +92,9 @@ if (mljson ==''){
 var wkitto = app.commandLine.getSwitchValue("wkit")
 var dev = app.commandLine.getSwitchValue("dev")
 
+//register the application name
+if (process.platform === 'win32'){ app.setAppUserModelId(app.name); }
+
 function MuReading(){
 	return new Promise((resolve,reject) =>{
 		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],'/mbcustom.json')/* application file  */
@@ -166,14 +169,15 @@ async function dirOpen(event,arg) {
 
 customResource()
 
-const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
+const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences,full=false) => {
   let modal = new BrowserWindow({
     width: width,
     height: height,
     modal: true,
     parent: parentWindow,
 		webPreferences: preferences,
-		title: title
+		title: title,
+		fullscreen: full
   })
 	modal.menuBarVisible=false
 	modal.minimizable=false
@@ -191,7 +195,8 @@ const childWindow = (htmlFile, parentWindow, width, height, title='MlsetupBuilde
     modal: false,
     parent: parentWindow,
 		webPreferences: preferences,
-		title: title
+		title: title,
+		alwaysOnTop : false
   })
 	mywin.menuBarVisible=false
 	mywin.minimizable=true
@@ -261,7 +266,14 @@ const template = [
   // { role: 'viewMenu' }
   {
     label: 'View',
-    submenu: [{ label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},{label:'Microblend Lab',accelerator: 'Ctrl+B',click:()=>{ mainWindow.webContents.send('preload:openModal','micromanager')}},{ type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
+    submenu: [
+			{label: 'Material Composer',accelerator: 'Ctrl+K',click:()=>{
+				childWindow("apps/materials.html",mainWindow,1200,800,'Material Composer', {preload: path.join(__dirname, 'apps/preloadmats.js')} );
+			}},
+			{label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},
+			{label:'Microblend Lab',accelerator: 'Ctrl+B',click:()=>{ mainWindow.webContents.send('preload:openModal','micromanager')}},
+			{label:'Logs',click:()=>{ mainWindow.webContents.send('preload:openModal','log')}},
+			{type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
   },
   { role: 'windowMenu' },
   {
@@ -323,6 +335,9 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
+ipcMain.on('main:aimMicros',(event) =>{
+	createModal("apps/aiming.html",mainWindow,1000,500,'Microblends aiming', {preload: path.join(__dirname, 'apps/preloadaim.js')});
+})
 
 ipcMain.on('main:giveModels',(event) => {
 	//read custom models json file and try to inject it in the main body
@@ -543,7 +558,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 							dialog.showErrorBox('Error during the writing process of the file')
 							return
 						}else{
-							if (!objwkitto.hasOwnProperty('major')){
+							if ((!objwkitto.hasOwnProperty('major')) && (arg.compile) ){
 								let test = preferences.get('wcli')
 								if (test.match(/.+WolvenKit\.CLI\.exe$/)){
 									child( test, ["cr2w", "-p",salvataggio.filePath, "-d"],(err, data)=>{
@@ -563,9 +578,11 @@ ipcMain.on('main:writefile',(event,arg) => {
 									event.reply('preload:noBar','')
 								}
 							}else{
-								 new Notification({title:"Conversion executed", body: "Your file has been saved, remember to convert it back in Wolvenkit. Shutting Down" }).show()
+								 new Notification({title:"Conversion executed", body: "Your file has been saved, remember to convert it back in Wolvenkit." }).show()
 								 event.reply('preload:noBar','')
-								 app.exit(0)
+								 if (objwkitto.hasOwnProperty('major')){
+								 	app.exit(0)
+							 	}
 							}
 						}
 					})
@@ -585,6 +602,46 @@ ipcMain.on('main:writefile',(event,arg) => {
 				new Notification({title:"Save List", body: "Your file has been saved" }).show()
 				event.reply('preload:logEntry', 'models list saved')
 			}
+		})
+	}else if (arg.type=='materialLibrary'){
+		let app_matLib = path.join(app.getAppPath(),userRScheme[_jsons],arg.file)/* application file  */
+		let bk_matLib = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_jsons],arg.file)/* application file  */
+
+		fs.writeFile(app_matLib, arg.content,(err) =>{
+			if (err) {
+				new Notification({title:"Save", body: "Your material template library has encounter an error during the save process" }).show()
+				mainWindow.webContents.send('preload:logEntry', "Your material template library has encounter an error during the save process",true)
+			}else{
+				new Notification({title:"Save", body: "Your material template library has been saved" }).show()
+				fs.copyFile(app_matLib,bk_matLib,fs.constants.COPYFILE_FICLONE,(err) =>{
+					if (err) {
+						mainWindow.webContents.send('preload:logEntry', "it's impossible to create the template material Library backup",true)
+					}
+				})
+			}
+		})
+	}else if (arg.type=='materialBuffer'){
+		const salvataggio = dialog.showSaveDialog({
+			title:'Save the .Material.json file',
+			defaultPath: def_path,
+			filters:[ { name: 'All Files', extensions: ['*'] },	{ name: 'Mesh materials source file', extensions: ['Material.json'] } ],
+			properties: ['createDirectory']
+		}).then(salvataggio => {
+			if (!salvataggio.canceled){
+				fs.writeFile(salvataggio.filePath, arg.content,'utf8',(errw,data) =>{
+					if(errw){
+						dialog.showErrorBox('Error during the writing process of the file')
+						return
+					}else{
+						event.reply('preload:logEntry', 'Operation executed, the file is saved there >'+salvataggio.filePath)
+						new Notification({title:"Remember", body: "Your file has been saved in Material.json format import it back with Wolvenkit" }).show()
+					}
+				})
+			}else{
+				event.reply('preload:logEntry', 'Save procedure cancelled')
+			}
+		}).catch((error)=>{
+			mainWindow.webContents.send('preload:logEntry', "it's impossible to create the template material Library backup",true)
 		})
 	}
 	mljson = ''

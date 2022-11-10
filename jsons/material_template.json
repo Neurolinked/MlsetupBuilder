@@ -1,0 +1,599 @@
+{
+  "MaterialTemplates": [
+    {
+      "Name": "engine\\materials\\multilayered.mt",
+      "Data": {
+        "GlobalNormal": "engine\\textures\\editor\\normal.xbm",
+        "MultilayerMask": "engine\\materials\\defaults\\multilayer_default.mlmask",
+        "MultilayerSetup": "engine\\materials\\defaults\\multilayer_default.mlsetup",
+        "GlobalNormalIntensity": 1,
+        "GlobalNormalUVScale": {
+          "X": 1,
+          "Y": 1,
+          "Z": 0,
+          "W": 0
+        },
+        "GlobalNormalUVBias": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0,
+          "W": 0
+        },
+        "MaskAtlas": "",
+        "MaskTiles": null,
+        "Layers": null,
+        "LayersStartIndex": 0,
+        "SurfaceTexAspectRatio": 0,
+        "MaskToTileScale": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0,
+          "W": 0
+        },
+        "MaskTileSize": 0,
+        "MaskAtlasDims": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0,
+          "W": 0
+        },
+        "MaskBaseResolution": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0,
+          "W": 0
+        },
+        "SetupLayerMask": 0,
+        "NormalsTextureDDXYMultiplier": 1,
+        "MicroblendsTextureDDXYMultiplier": 1
+      }
+    },
+    {
+      "Name": "engine\\materials\\metal_base.remt",
+      "Data": {
+        "BaseColor": "engine\\textures\\editor\\grey.xbm",
+        "BaseColorScale": {
+          "X": 1,
+          "Y": 1,
+          "Z": 1,
+          "W": 0
+        },
+        "Metalness": "engine\\textures\\editor\\black.xbm",
+        "MetalnessScale": 1,
+        "MetalnessBias": 0,
+        "Roughness": "engine\\textures\\editor\\white.xbm",
+        "RoughnessScale": 1,
+        "RoughnessBias": 0,
+        "Normal": "engine\\textures\\editor\\normal.xbm",
+        "NormalStrength": 1,
+        "AlphaThreshold": 0.38,
+        "Emissive": "engine\\textures\\editor\\black.xbm",
+        "EmissiveLift": 0,
+        "EmissiveEV": 0,
+        "EmissiveEVRaytracingBias": 0,
+        "EmissiveDirectionality": 0,
+        "EnableRaytracedEmissive": 1,
+        "EmissiveColor": {
+          "Red": 0,
+          "Green": 0,
+          "Blue": 0,
+          "Alpha": 255
+        },
+        "LayerTile": 1
+      }
+    },
+    {
+      "Name": "base\\materials\\mesh_decal.mt",
+      "Data": {
+        "DiffuseTexture": "engine\\textures\\editor\\grey.xbm",
+        "DiffuseColor": {
+          "Red": 255,
+          "Green": 255,
+          "Blue": 255,
+          "Alpha": 255
+        },
+        "DiffuseAlpha": 0,
+        "UVOffsetX": 0,
+        "UVOffsetY": 0,
+        "UVRotation": 0,
+        "UVScaleX": 1,
+        "UVScaleY": 1,
+        "SecondaryMask": "engine\\textures\\editor\\white.xbm",
+        "SecondaryMaskUVScale": 1,
+        "SecondaryMaskInfluence": 0,
+        "NormalTexture": "engine\\textures\\editor\\normal.xbm",
+        "NormalAlpha": 0,
+        "NormalAlphaTex": "engine\\textures\\editor\\white.xbm",
+        "UseNormalAlphaTex": 0,
+        "NormalsBlendingMode": 0,
+        "NormalsBlendingModeAlpha": "engine\\textures\\editor\\white.xbm",
+        "RoughnessTexture": "engine\\textures\\editor\\white.xbm",
+        "RoughnessScale": 1,
+        "RoughnessBias": 0,
+        "MetalnessTexture": "engine\\textures\\editor\\black.xbm",
+        "MetalnessScale": 1,
+        "MetalnessBias": 0,
+        "AlphaMaskContrast": 0,
+        "RoughnessMetalnessAlpha": 0,
+        "AnimationSpeed": 1,
+        "AnimationFramesWidth": 1,
+        "AnimationFramesHeight": 1,
+        "DepthThreshold": 0.5
+      }
+    },
+    {
+      "Name": "base\\materials\\mesh_decal_emissive.mt",
+      "Data": {
+        "DiffuseTexture": "engine\\textures\\small_white.xbm",
+        "DiffuseColor": {
+          "Red": 255,
+          "Green": 255,
+          "Blue": 255,
+          "Alpha": 255
+        },
+        "DiffuseColor2": {
+          "Red": 0,
+          "Green": 0,
+          "Blue": 0,
+          "Alpha": 0
+        },
+        "DiffuseAlpha": 0,
+        "UVOffsetX": 0,
+        "UVOffsetY": 0,
+        "UVRotation": 0,
+        "UVScaleX": 1,
+        "UVScaleY": 1,
+        "EmissiveEV": 0,
+        "AnimationSpeed": 1,
+        "AnimationFramesWidth": 1,
+        "AnimationFramesHeight": 1,
+        "ScrollSpeed": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0,
+          "W": 0
+        },
+        "HardOrSoftTransition": 0,
+        "FullVisibilityFactor": 1,
+        "EnableAlternateColor": 0,
+        "EnableAlternateUVcoord": 0,
+        "Preview2ndState": 0,
+        "LayerTile": 1
+      }
+    },
+    {
+      "Name": "base\\fx\\shaders\\hologram.mt",
+      "Data": {
+        "AdditiveAlphaBlend": 1,
+        "OpaqueScanlineDensity": 400,
+        "Scanline": "base\\fx\\_textures\\masks\\gradients\\fx_reflected_vertical_gradient_03_alpha_d.xbm",
+        "Normal": "base\\materials\\placeholder\\normal.xbm",
+        "DotsTexture": "base\\fx\\characters\\hologram\\hologram_pointcloud_dot.xbm",
+        "DotsSize": 100,
+        "DotsColor": {
+          "Red": 73,
+          "Green": 168,
+          "Blue": 246,
+          "Alpha": 255
+        },
+        "Projector1Position": {
+          "X": 0,
+          "Y": 0,
+          "Z": 1,
+          "W": 0
+        },
+        "SurfaceColor": {
+          "Red": 73,
+          "Green": 168,
+          "Blue": 246,
+          "Alpha": 255
+        },
+        "SurfaceShadows": {
+          "Red": 0,
+          "Green": 0,
+          "Blue": 0,
+          "Alpha": 255
+        },
+        "FallofColor": {
+          "Red": 0,
+          "Green": 136,
+          "Blue": 163,
+          "Alpha": 255
+        },
+        "Diffuse": "base\\materials\\placeholder\\black.xbm",
+        "GradientOffset": -100,
+        "GradientLength": 1,
+        "FresnelStrength": 3.07393,
+        "DotsFresnelStrength": 0.544747,
+        "GlowStrength": 0.252918,
+        "DesaturationStrength": 0,
+        "FlickerThreshold": 0,
+        "FlickerChance": 0,
+        "ArtifactsChance": 0,
+        "LightBleed": 0.291498,
+        "NormalStrength": 1,
+        "ScreenSpaceFlicker": 0,
+        "UseIsobars": 0,
+        "EntropyThreshold": 0,
+        "UseMovingDots": 0,
+        "IsHair": 0,
+        "ScanlineThickness": -0.578947,
+        "Opacity": 1,
+        "GlobalTint": 0,
+        "SampledOrProceduralDots": 1,
+        "FullColorOrGrayscale": 0
+      }
+    },
+    {
+      "Name": "base\\materials\\frosted_glass_curtain.mt",
+      "Data": {
+        "AdditiveAlphaBlend": 1,
+        "MaskOpacity": 0.05,
+        "RoughnessDirty": 0.5,
+        "Opacity": 0.9,
+        "ColorMultiplier": {
+          "Red": 200,
+          "Green": 200,
+          "Blue": 200,
+          "Alpha": 255
+        },
+        "TintColorAttenuation": 0,
+        "RoughnessAttenuation": 0,
+        "FrontFacesReflectionPower": 0.5,
+        "BackFacesReflectionPower": 0.5,
+        "IOR": 0,
+        "blurRadius": 1,
+        "diffuseStrength": 0,
+        "SpecularPower": 1,
+        "NormalStrength": 1,
+        "Diffuse": "engine\\textures\\editor\\white.xbm",
+        "Roughness": "engine\\textures\\editor\\grey.xbm",
+        "Normal": "engine\\textures\\editor\\normal.xbm"
+      }
+    },
+    {
+      "Name": "base\\fx\\shaders\\metal_base_glitter.mt",
+      "Data": {
+        "BaseColor": "engine\\textures\\editor\\grey.xbm",
+        "BaseColorScale": {
+          "Red": 229,
+          "Green": 36,
+          "Blue": 36,
+          "Alpha": 255
+        },
+        "Metalness": "engine\\textures\\editor\\black.xbm",
+        "MetalnessScale": 0,
+        "MetalnessBias": 0,
+        "Roughness": "engine\\textures\\editor\\white.xbm",
+        "RoughnessScale": 0,
+        "RoughnessBias": 0,
+        "Normal": "engine\\textures\\small_flat_normal.xbm",
+        "AlphaFromEmissive": 1,
+        "EmissiveMask": "base\\fx\\_textures\\masks\\noise\\fx_digital_noise_01_d.xbm",
+        "EmissiveEV": 6.209678,
+        "AlphaThreshold": 0,
+        "EmissiveColor": {
+          "Red": 254,
+          "Green": 116,
+          "Blue": 15,
+          "Alpha": 255
+        },
+        "HistogramRange": 0.491935,
+        "ScrollSpeed": 0.21371,
+        "EmissiveTile": 1,
+        "Looped": 0
+      }
+    },
+    {
+      "Name": "base\\fx\\shaders\\parallaxscreen.mt",
+      "Data": {
+        "ParalaxTexture": "base\\surfaces\\textures\\screens\\generic\\display_block_02.xbm",
+        "ScanlineTexture": "base\\fx\\_textures\\masks\\gradients\\fx_reflected_vertical_gradient_02_d.xbm",
+        "Metalness": 0.9,
+        "Roughness": 0.1,
+        "Emissive": 7,
+        "EmissiveEVRaytracingBias": 0,
+        "EmissiveDirectionality": 0,
+        "EnableRaytracedEmissive": 1,
+        "ImageScale": 1.05,
+        "LayersSeparation": 0.1,
+        "IntensityPerLayer": {
+          "X": 1,
+          "Y": 0.25,
+          "Z": 0.06,
+          "W": 0
+        },
+        "ScanlinesDensity": 125,
+        "ScanlinesIntensity": 0.25,
+        "BlinkingSpeed": 0,
+        "BlinkingMaskTexture": "base\\surfaces\\materials\\default\\black.xbm",
+        "ScrollMaskTexture": "base\\surfaces\\materials\\default\\black.xbm",
+        "ScrollVerticalOrHorizontal": 0,
+        "ScrollMaskStartPoint1": 0.02,
+        "ScrollMaskHeight1": 0.5,
+        "ScrollSpeed1": 0.25,
+        "ScrollStepFactor1": 30,
+        "ScrollMaskStartPoint2": 0.4,
+        "ScrollMaskHeight2": 0.2,
+        "ScrollSpeed2": 1.5,
+        "ScrollStepFactor2": 10,
+        "EmissiveColor": {
+          "Red": 255,
+          "Green": 255,
+          "Blue": 255,
+          "Alpha": 255
+        },
+        "HSV_Mod": {
+          "X": 0,
+          "Y": 1,
+          "Z": 0,
+          "W": -1
+        },
+        "IsBroken": 0,
+        "FixForBlack": 1
+      }
+    },
+    {
+      "Name": "base\\materials\\hair.mt",
+      "Data": {
+        "Strand_ID": "base\\materials\\placeholder\\grey.xbm",
+        "Strand_Gradient": "base\\materials\\placeholder\\grey.xbm",
+        "Strand_Alpha": "base\\materials\\placeholder\\grey.xbm",
+        "RoughnessScale": 1,
+        "RoughnessBias": 0,
+        "AlphaCutoff": 0.33,
+        "Flow": "engine\\textures\\editor\\hairdefault_f.xbm",
+        "FlowStrength": 1,
+        "VertexColorStrength": 0,
+        "Scattering": 0.16,
+        "ShadowStrength": 0,
+        "ShadowMin": -0.5,
+        "ShadowMax": 1,
+        "ShadowRoughness": 1,
+        "DebugHairColor": 0,
+        "HairProfile": "engine\\materials\\defaults\\default.hp"
+      }
+    },
+    {
+      "Name": "base\\materials\\skin.mt",
+      "Data": {
+        "Albedo": "engine\\textures\\editor\\white.xbm",
+        "SecondaryAlbedo": "engine\\textures\\editor\\white.xbm",
+        "SecondaryAlbedoInfluence": 0,
+        "SecondaryAlbedoTintColorInfluence": 0,
+        "Normal": "engine\\textures\\small_flat_normal.xbm",
+        "DetailNormal": "engine\\textures\\small_flat_normal.xbm",
+        "Roughness": "engine\\textures\\editor\\white.xbm",
+        "DetailRoughnessBiasMin": 1,
+        "DetailRoughnessBiasMax": 0.68,
+        "MicroDetailUVScale01": 10,
+        "MicroDetailUVScale02": 10,
+        "MicroDetail": "base\\characters\\common\\skin\\face\\microdetail_n.xbm",
+        "MicroDetailInfluence": 1,
+        "TintColorMask": "base\\characters\\common\\skin\\torso\\i0_000_base__tintcolormask.xbm",
+        "TintColor": {
+          "Red": 0,
+          "Green": 0,
+          "Blue": 0,
+          "Alpha": 0
+        },
+        "TintScale": 0,
+        "SkinProfile": "engine\\materials\\defaults\\default.sp",
+        "Detailmap_Stretch": "engine\\textures\\small_flat_normal.xbm",
+        "EmissiveMask": "engine\\textures\\editor\\black.xbm",
+        "EmissiveEV": 0,
+        "Detailmap_Squash": "engine\\textures\\small_flat_normal.xbm",
+        "CavityIntensity": 0.25,
+        "Bloodflow": "engine\\textures\\editor\\white.xbm",
+        "BloodColor": {
+          "Red": 0,
+          "Green": 0,
+          "Blue": 0,
+          "Alpha": 0
+        },
+        "DetailNormalInfluence": 0
+      }
+    },
+    {
+      "Name": "base\\fx\\shaders\\signages.mt",
+      "Data": {
+        "MainTexture": "base\\fx\\textures\\other\\plazma_mask.xbm",
+        "UseRoughnessTexture": 0,
+        "RoughnessTexture": "engine\\textures\\editor\\black.xbm",
+        "Metalness": 0,
+        "Roughness": 0.151951,
+        "RoughnessTilingAndOffset": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0,
+          "W": 0
+        },
+        "EmissiveEV": 8.103615,
+        "EmissiveEVRaytracingBias": 0,
+        "EmissiveDirectionality": 0,
+        "EnableRaytracedEmissive": 1,
+        "UniformColor": 0,
+        "UseVertexColorOrMap": 1,
+        "ColorOneStart": {
+          "Red": 255,
+          "Green": 0,
+          "Blue": 0,
+          "Alpha": 255
+        },
+        "ColorOneEnd": {
+          "Red": 255,
+          "Green": 135,
+          "Blue": 135,
+          "Alpha": 255
+        },
+        "ColorGradientScale": 1,
+        "HorizontalOrVerticalGradient": 0,
+        "GradientStartPosition": 0,
+        "ColorTwo": {
+          "Red": 8,
+          "Green": 255,
+          "Blue": 237,
+          "Alpha": 255
+        },
+        "ColorThree": {
+          "Red": 57,
+          "Green": 170,
+          "Blue": 86,
+          "Alpha": 255
+        },
+        "ColorFour": {
+          "Red": 0,
+          "Green": 145,
+          "Blue": 226,
+          "Alpha": 255
+        },
+        "ColorFive": {
+          "Red": 0,
+          "Green": 0,
+          "Blue": 0,
+          "Alpha": 255
+        },
+        "ColorSix": {
+          "Red": 92,
+          "Green": 0,
+          "Blue": 122,
+          "Alpha": 255
+        },
+        "NoiseTexture": "base\\fx\\_textures\\masks\\noise\\fx_organic_noise_01_d.xbm",
+        "LightupDensity": 0,
+        "LightupMinimumValue": 0.5,
+        "LightupHorizontalOrVertical": 0,
+        "BlinkingSpeed": 0,
+        "BlinkingMinimumValue": 0,
+        "BlinkingPhase": 0,
+        "BlinkSmoothness": 1,
+        "FresnelAmount": 0
+      }
+    },
+    {
+      "Name": "base\\materials\\glass.mt",
+      "Data": {
+        "TintColor": {
+          "Red": 229,
+          "Green": 229,
+          "Blue": 229,
+          "Alpha": 255
+        },
+        "Opacity": 1,
+        "GlassTint": "base\\materials\\placeholder\\white.xbm",
+        "OpacityBackFace": 0,
+        "TintFromVertexPaint": 0,
+        "FrontFacesReflectionPower": 1,
+        "BackFacesReflectionPower": 1,
+        "IOR": 1,
+        "RefractionDepth": 2.5,
+        "FresnelBias": 1,
+        "GlassSpecularColor": {
+          "Red": 255,
+          "Green": 255,
+          "Blue": 255,
+          "Alpha": 255
+        },
+        "NormalStrength": 1,
+        "NormalMapAffectsSpecular": 1,
+        "SurfaceMetalness": 0,
+        "MaskOpacity": 0,
+        "MaskTexture": "engine\\textures\\editor\\white.xbm",
+        "Roughness": "engine\\textures\\editor\\white.xbm",
+        "Normal": "engine\\textures\\editor\\normal.xbm",
+        "GlassRoughnessBias": -1,
+        "MaskRoughnessBias": 0,
+        "BlurRadius": 0,
+        "BlurByRoughness": 0
+      }
+    },
+    {
+      "Name": "base\\materials\\glass_cracked_edge.mt",
+      "Data": {
+        "BaseColor": "engine\\textures\\editor\\white.xbm",
+        "BaseColorScale": {
+          "X": 0.349306,
+          "Y": 0.924935,
+          "Z": 0.76702,
+          "W": 1
+        },
+        "AlphaScale": 1,
+        "UseAlphaFromSkinning": 0,
+        "MetalnessScale": 1,
+        "Roughness": "engine\\textures\\editor\\white.xbm",
+        "RoughnessScale": 0.05,
+        "RoughnessBias": 0,
+        "Normal": "engine\\textures\\editor\\normal.xbm",
+        "AlphaThreshold": 0.33,
+        "LayerTile": 1
+      }
+    },
+    {
+      "Name": "base\\materials\\metal_base_ui.mt",
+      "Data": {
+        "ScanlineTexture": "base\\fx\\_textures\\masks\\gradients\\fx_reflected_vertical_gradient_02_d.xbm",
+        "Metalness": 0.9,
+        "RoughnessScale": 0.1,
+        "FixToPbr": 0,
+        "EmissiveEV": 6.02741,
+        "EmissiveEVRaytracingBias": 0,
+        "EmissiveDirectionality": 0,
+        "EnableRaytracedEmissive": 0,
+        "LayersSeparation": 0.1,
+        "IntensityPerLayer": {
+          "X": 1,
+          "Y": 0.1,
+          "Z": 0.075,
+          "W": 0.05
+        },
+        "ScanlinesDensity": {
+          "X": 125,
+          "Y": 125,
+          "Z": 0,
+          "W": 2
+        },
+        "ScanlinesIntensity": 0.25,
+        "IsBroken": 0,
+        "ImageScale": 1,
+        "UIRenderTexture": "engine\\ink\\textures\\4x4_transparent.xbm",
+        "RenderTextureScale": {
+          "X": 1,
+          "Y": 1,
+          "Z": 1,
+          "W": 1
+        },
+        "VerticalFlipEnabled": 0,
+        "TexturePartUV": {
+          "X": 0,
+          "Y": 0,
+          "Z": 1,
+          "W": 1
+        },
+        "DirtTexture": "base\\environment\\decoration\\alpha_empty.xbm",
+        "DirtColor": {
+          "Red": 255,
+          "Green": 255,
+          "Blue": 255,
+          "Alpha": 255
+        },
+        "DirtRoughness": 0.564516,
+        "DirtEmissiveAttenuation": 0.5,
+        "DirtContrast": 1,
+        "Tint": {
+          "Red": 255,
+          "Green": 255,
+          "Blue": 255,
+          "Alpha": 255
+        },
+        "FixForBlack": 1,
+        "FixForVerticalSlide": 1,
+        "ForcedTint": {
+          "Red": 255,
+          "Green": 255,
+          "Blue": 255,
+          "Alpha": 0
+        }
+      }
+    }
+  ]
+}

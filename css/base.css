@@ -36,9 +36,6 @@ footer.main>div{border:1px solid var(--layer-1);font-size:0.75rem;}
 
 select optgroup:label{display:none;}
 
-input[type='color']{border:0 none!important;padding:0;height:auto;}
-input[type='file']::-webkit-file-upload-button{display:none;}
-
 .bg-attention{background-color:var(--active-sel)!important;}
 .fa-mars{color:var(--bs-cyan);}
 .fa-venus{color:var(--bs-teal);}
@@ -85,7 +82,7 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #withthacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 5;}
 /*#thacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 3;}*/
 #withbones{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1;grid-row-end: 1;z-index:10;text-align:right;}
-#Filemanager{grid-column-start: 2; grid-column-end: 5; grid-row-start: 1; grid-row-end: 1;display:grid;grid-template-columns:1fr 2fr 1fr;text-align: center;}
+#Filemanager{grid-column-start: 2; grid-column-end: 5; grid-row-start: 1; grid-row-end: 1;display:grid;grid-template-columns:0.6fr 0.9fr 1.4fr;text-align: center;}
 #MlEditor{grid-column-start: 2; grid-column-end: 2;grid-row-start: 2; grid-row-end: 3;}
 #modelsNavbar{grid-column-start: 1; grid-column-end: 2; grid-row-start: 3; grid-row-end: 3;}
 #micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 2; grid-row-end: 4;}
@@ -205,7 +202,6 @@ Contextual Menu for the layering Systems
 #layers-contextual li.void {background-color: var(--layer-0);border:none;height:.6em;}
 
 #masksModal input[type='text'],
-
 input[type='text'],
 #materialModal input[type='text'],
 #interface input[type='text'],
@@ -355,6 +351,7 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
     max-width: 1040px;
 }
 
+.dropSelect option,
 #xport_dm{background-color:var(--layer-0);border:1px solid var(--primary);}
 #xport_dm li a{color: var(--active) !important;}
 #xport_dm li a:hover{background-color:var(--active);color: white !important;}
@@ -487,3 +484,8 @@ span.choose.active{border-color:var(--active-sel);}
 .mlpreviewBody details{margin:0 0 1em;background-color: var(--layer-0);}
 .mlpreviewBody details summary{margin:0.5em 0;background-color: var(--secondary);}
 .mlpreviewBody details ul{margin:0;margin-left:0.5rem;border-left:5px solid var(--secondary); padding:0;list-style: none}
+
+.dropSelect,
+.dropSelect option{background-color:var(--layer-0)!important;border:1px solid var(--primary)!important;color:var(--primary)!important;box-shadow: none;outline: none;}
+.dropSelect option:focus,
+.dropSelect option:hover{background-color:var(--primary)!important;color:var(--layer-0)!important;}
