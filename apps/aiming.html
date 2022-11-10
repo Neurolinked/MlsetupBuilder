@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline'; img-src * data: 'unsafe-inline'; connect-src * 'unsafe-inline'; worker-src blob: ;" >
+  <meta name="author" content="Neurolinked">
+  <meta name="date" content="October 2022">
+	<link href="../bs511/css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript"  src="../bs511/js/bootstrap.bundle.min.js"></script>
+	<!--FontAwesome --><link rel="stylesheet" href="../public/fontawesome-free/css/all.min.css" />
+	<!--FontAwesome --><script type="text/javascript" src="../public/fontawesome-free/js/all.min.js" ></script>
+	<!-- If the require doesn't work, include first the jQuery file  <script src="jquery-3.0.0.min.js"></script>-->
+	<script type="text/javascript" src='../js/jquery-3.6.0.min.js'></script>
+  <!--<script type="text/javascript" src='../js/modules/materialBuf.js'></script>-->
+  <link rel="stylesheet" href="../css/aim.css" />
+  </head>
+  <body class="w-100">
+		<canvas id="" width="1024" height="1024"></canvas>
+  		<div id="AimManager" class="rounded p-1">
+        <div id="aimPanels" class="layer-1">
+          <span class="badge bg-secondary w-100 rounded-0 layer-0">horizontal: <span id="dispAimU"></span></span>
+          <input id="AimU" class="w-100 mb-4" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
+          <span class="badge bg-secondary w-100 rounded-0 layer-0">vertical: <span id="dispAimV"></span></span>
+          <input id="AimV" class="w-100 mb-4" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
+          <span class="badge bg-secondary w-100 rounded-0 layer-0">mbTile: <span id="dispAimTile"></span></span>
+          <input id="AimMTile" class="w-100" type="range" min="0.05" max="80.0" value="0.0" step="0.001">
+          <!--<span class="badge  w-100 rounded-0 layer-1">Chained To the Layer</span>-->
+          <div class="form-check form-switch my-2">
+            <input class="form-check-input ml-3" type="checkbox" id="AimChain" >
+            <label class="form-check-label fs-80" for="AimChain">Chained To the Layer</label>
+          </div>
+          <!--<input id="AimChain" class="w-100"  min="0.01" max="4.0" value="0.0" step="0.01">-->
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button id="confirmAim" class="btn btn-sm btn-block btn-outline-warning" >Done</button>
+            <button id="reloadAim" class="btn btn-sm btn-block btn-outline-danger" >Reset</button>
+          </div>
+      </div>
+    </div>
+		<script type="text/javascript" src='../js/utilities.js'></script>
+		<script src="./rendaim.js"></script>
+  </body>
+</html>
