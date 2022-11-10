@@ -54,6 +54,9 @@ contextBridge.exposeInMainWorld(
       },
       delMBlend : (toBeDeleted)=>{
         ipcRenderer.send('main:delmBlend',toBeDeleted);
+      },
+      openAim : ()=>{
+        ipcRenderer.send('main:aimMicros');
       }
 	},
 )
@@ -92,7 +95,8 @@ ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 		wkitto = JSON.parse(versionchecker);
 		if ((wkitto.hasOwnProperty('major')) && (wkitto.hasOwnProperty('minor'))){
 			if (Number(wkitto.major+'.'+wkitto.minor)>=8.5) {
-				document.querySelector("#exportJason").classList.add("d-none");
+				document.querySelector("#exportVersion").classList.add("d-none");
+        document.querySelector("#checkCompile").classList.add("d-none");
 			}else{
 				console.log('no suitable version of wkit to integrate');
 			}
@@ -153,6 +157,9 @@ ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
 			break;
     case 'micromanager' :
       connection = document.querySelector("#versionDisplay a:nth-child(6)")
+      break;
+    case 'log' :
+      connection = document.querySelector("#versionDisplay a:nth-child(7)")
       break;
 	}
   try{

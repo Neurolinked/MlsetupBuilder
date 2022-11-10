@@ -636,7 +636,23 @@ $("#resetShades span.choose").click(function(){
 	localStorage = window.localStorage;
 	const license = localStorage.getItem('LicenseRead');
 	const licenseWindow = document.getElementById('LicenseModal');
-
+  const lastExportFormat = localStorage.getItem('ExportFormat');
+  var openCloseMBlend = localStorage.getItem('customMicroblend_I');
+      
+  if (openCloseMBlend){
+    $("#cu_mu_display").addClass("d-none");
+    $("#btn_dis_cBlend svg").removeClass("fa-eye-slash").addClass("fa-eye");
+  }else{
+    $("#cu_mu_display").removeClass("d-none");
+    $("#btn_dis_cBlend svg").removeClass("fa-eye").addClass("fa-eye-slash");
+  }
+  
+  if (lastExportFormat!=null){
+    $("select[name='exportVersion']").val(String(lastExportFormat));  
+  }else{
+    $("select[name='exportVersion']").val(2);  
+  }
+  
 	const modelPlace = localStorage.getItem('MLibX');
 	if (Number(modelPlace)>0){
 		swapModelClass();
@@ -648,6 +664,7 @@ $("#resetShades span.choose").click(function(){
 	//modal information windows for loaded models
 	//const wGLBInfo = new bootstrap.Modal(document.getElementById('modalInfo'));
 	//modal window used for aiming the microblends over the actual used layer
+  $("#AimMBlend").click(function(){thePIT.openAim();})
 	const AimMBlend = new bootstrap.Modal(document.getElementById('AimBlend'));
 	const AimWindows = document.getElementById('AimBlend');
 	//On open of the aiming windows
@@ -848,7 +865,28 @@ $("#resetShades span.choose").click(function(){
   			let fireTxLoad = document.getElementById('maskLayer');
   			fireTxLoad.dispatchEvent(TextureLoad);
       }
-
+      
+      $("#layerColor").val($(this).data("color"));
+      $("#matInput").val($(this).data("material"));
+			$("#layerTile").val($(this).data("mattile"));
+			$("#layerOpacity").val($(this).data("opacity")).change();
+			
+			$("#layerNormal").val(String($(this).data("normal")));
+			$("#layerRoughIn").val(String($(this).data("roughin")));
+			$("#layerRoughOut").val(String($(this).data("roughout")));
+			$("#layerMetalIn").val(String($(this).data("metalin")));
+			$("#layerMetalOut").val(String($(this).data("metalout")));
+			$("#layerOffU").val($(this).data("offsetu"));
+			$("#layerOffV").val($(this).data("offsetv"));
+      //Microblend section
+			$("#mbInput").val($(this).data("mblend"));
+			$("#mbTile").val($(this).data("mbtile"));
+			$("#mbCont").val($(this).data("mbcontrast"));
+			$("#mbNorm").val($(this).data("mbnormal"));
+			$("#mbOffU").val($(this).data("mboffu"));
+			$("#mbOffV").val($(this).data("mboffv"));
+      //setup the chosen colors for the layer
+      
       //Load the layers infor into the fields
       let materialByClick = String($(this).data("material")).replace(/^.*[\\\/]/, '').split('.')[0];
 			semaphoreCLKmBlend=true;
@@ -865,26 +903,7 @@ $("#resetShades span.choose").click(function(){
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
 			//$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
       //Setup the inputs
-      $("#matInput").val($(this).data("material"));
-			$("#layerTile").val($(this).data("mattile"));
-			$("#layerOpacity").val($(this).data("opacity")).change();
-			$("#layerColor").val($(this).data("color"));
-			$("#layerNormal").val(String($(this).data("normal")));
-			$("#layerRoughIn").val(String($(this).data("roughin")));
-			$("#layerRoughOut").val(String($(this).data("roughout")));
-			$("#layerMetalIn").val(String($(this).data("metalin")));
-			$("#layerMetalOut").val(String($(this).data("metalout")));
-			$("#layerOffU").val($(this).data("offsetu"));
-			$("#layerOffV").val($(this).data("offsetv"));
-      //Microblend section
-			$("#mbInput").val($(this).data("mblend"));
-			$("#mbTile").val($(this).data("mbtile"));
-			$("#mbCont").val($(this).data("mbcontrast"));
-			$("#mbNorm").val($(this).data("mbnormal"));
-			$("#mbOffU").val($(this).data("mboffu"));
-			$("#mbOffV").val($(this).data("mboffv"));
-      //setup the chosen colors for the layer
-
+      
 			let  ricercacolore = $(this).data("color");
       
       /*
@@ -895,7 +914,7 @@ $("#resetShades span.choose").click(function(){
         $("#LayerColorL").prop('selectedIndex',0); //reset to null to let overrides work
       }*/
       $("#cagecolors span").removeClass("active");
-			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
+			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
 			$("#mbInput").focusout(); //fires up the change of material blending preview
       $("#mbSelect").trigger('change');
 		}
@@ -1247,6 +1266,8 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     }else{
       $("#cu_mu_display").addClass("d-none");
     }
+    openCloseMBlend = !openCloseMBlend;
+    localStorage.setItem("customMicroblend_I",openCloseMBlend);
   });
 	//Material libraries and search
 	var matToSearch=false;
@@ -1828,7 +1849,6 @@ $("#passaggio").change(function(){
       toload.import(mls_content);
       
       let test = $([toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
-      console.log(test)
       $(".mlpreviewBody").html(test)
       //$(".mlpreviewBody").html(toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>"));
     }catch(error){
@@ -2239,12 +2259,17 @@ $("#TheMagicIsHere").click(function(){
 		}
 	});
 
-
+$("select[name='exportVersion']").change(function(){
+  console.log($(this).val())
+  localStorage.setItem("ExportFormat",$(this).val())
+});
 
 //3 export versions for Wkit
 $(".xportJSON").click(function(){
-  ver = $(this).data("version");
-
+  ver = Number($("select[name='exportVersion']").val());
+  //ver = $(this).data("version");
+  console.log(ver);
+  
   let nomefile = 'commonlayer.json';
   //check if there is already a chosed Names
   if (String($("#nametoexport").val()).trim()!==''){
@@ -2484,7 +2509,8 @@ $(".xportJSON").click(function(){
     thePIT.Export({
       file:nomefile,
       content:preamble+jsonbody+closing,
-      type:'mlsetup'
+      type:'mlsetup',
+      compile: $("#checkCompile").is(":checked")
     });
   }
 });

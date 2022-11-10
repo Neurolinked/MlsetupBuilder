@@ -1,3 +1,5 @@
+var flippingdipping = true;
+var flipdipNorm = false;
 var imgWorker
 const normalMapInfo = {
   width : 128,
@@ -14,10 +16,9 @@ if (window.Worker) {
     //material.normalMap = normMe;
     material.normalMap.needsUpdate = true
     //material.map.needsUpdate = true;
-    material.normalMap.flipY = false;
+    material.normalMap.flipY = flipdipNorm;
   }
 }
-
 
 dat.GUI.prototype.removeFolder = function(name) {
    var folder = this.__folders[name];
@@ -177,7 +178,6 @@ canvasPaint.wrapS = THREE.RepeatWrapping
 canvasPaint.wrapT = THREE.RepeatWrapping
 const drawStartPos = new THREE.Vector2();
 
-
 const material = new THREE.MeshStandardMaterial({color: 0x500000,map:canvasPaint});
 
 const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 1, thickness: 0.05});
@@ -224,6 +224,30 @@ const gui = new dat.GUI({autoPlace:false});
 var GuiSubmesh =gui.addFolder("Submesh Toggle");
 GuiSubmesh.close();//closes the submeshes folder
 
+
+/*control onto the flip*/
+
+var flipcheck = document.getElementById("flipMask");
+
+flipcheck.onclick=function(){
+  let layerSelected = document.querySelector("#layeringsystem li.active");
+  flippingdipping = flipcheck.checked;
+  //need to update the canvas
+  material.map.flipY = flippingdipping;
+  layerSelected.click();
+}
+
+var flipNcheck = document.getElementById("flipNorm");
+flipNcheck.onclick=function(){
+  flipdipNorm = flipNcheck.checked;
+  //need to update the canvas
+  var test = document.getElementById("normalMe");
+  var test2 = test.getContext("2d");
+  var image = test2.getImageData(0,0,normalMapInfo.width,normalMapInfo.height)
+  if (window.Worker) {
+    imgWorker.postMessage(image)
+  }
+}
 
 //document.documentElement.style.setProperty('--rendView', '700px'); //used for changing the viewport size
 //Parametric Render width from CSS
@@ -651,34 +675,50 @@ function loadMapOntheFly(path){
   path = path.replaceAll(/\//g,'\\');
   var bufferimage
   bufferimage = thePIT.ApriStream(path,'binary');
-  //bufferimage = JSON.parse(bufferimage);
 
   if ((typeof(bufferimage)!="object") && (bufferimage!="") ){
-    var data = str2ab(bufferimage);
-  	 let offsetHeight = 3;
-  	 let offsetwidth = 4;
-  	 const headerData = new Uint32Array( data, 0, 5 ); //get the two dimensions data bytes
-  	 let height = headerData[3];
-  	 let width = headerData[4];
-  	 let size = height * width;
-		 const dx10Data = new Uint32Array( data, 128, 4 ); //get the type of DDS
-		 var luminancedata
-		 //wolvenkit 8.4.3+ and cli 1.5.0+ format
-		 if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
-			 luminancedata = new Uint8Array( data, 148, size );
-		 }else{
-			 //or legacy
-			 luminancedata = new Uint8Array( data, 128, size );
-		 }
-  	 //var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType,THREE.UVMapping,THREE.RepeatWrapping);
-  	 //dataTex.flipY=true;
-
-  	 material.color.set(0x500000);
-
-  	 //material.map = canvasPaint //material.map = dataTex;
-  	 giveToTheAim(luminancedata,width,height);
-     originalLayer = paintMaskHT.toDataURL('image/png');
-  	 //console.log(height+","+width);
+    
+    if (path.endsWith(".png")){
+      var base64 = window.btoa(bufferimage);
+      let img = new Image();
+      img.src = "data:image/png;base64," + base64;
+      img.onload = function () {
+          paintMaskCTX.drawImage(img, 0, 0, 768, 768);
+      };
+      originalLayer = paintMaskHT.toDataURL('image/png');
+      
+      material.color.set(0x500000);
+      material.map.flipY = flippingdipping
+      material.map.needsUpdate = true;
+       
+    }else if(path.endsWith(".dds")){
+      var data = str2ab(bufferimage);
+      let offsetHeight = 3;
+   	 let offsetwidth = 4;
+   	 const headerData = new Uint32Array( data, 0, 5 ); //get the two dimensions data bytes
+   	 let height = headerData[3];
+   	 let width = headerData[4];
+   	 let size = height * width;
+ 		 const dx10Data = new Uint32Array( data, 128, 4 ); //get the type of DDS
+ 		 var luminancedata
+ 		 //wolvenkit 8.4.3+ and cli 1.5.0+ format
+ 		 if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+ 			 luminancedata = new Uint8Array( data, 148, size );
+ 		 }else{
+ 			 //or legacy
+ 			 luminancedata = new Uint8Array( data, 128, size );
+ 		 }
+   	 //var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType,THREE.UVMapping,THREE.RepeatWrapping);
+   	 //dataTex.flipY=true;
+ 
+   	 material.color.set(0x500000);
+ 
+   	 //material.map = canvasPaint //material.map = dataTex;
+   	  giveToTheAim(luminancedata,width,height);
+      originalLayer = paintMaskHT.toDataURL('image/png');
+    }
+  	 
+     material.map.flipY = flippingdipping
      material.map.needsUpdate = true;
   }else{
     let notific = document.querySelector("#notyCounter span");
@@ -968,12 +1008,10 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 
  theMaskLayer = String(theMaskLayer).replace(/X/g,layer);
 
- if (theMaskLayer.match(/^[/|\w|\.]+.dds/)){
+ if (theMaskLayer.match(/^[/|\w|\.]+.[dds|png]$/)){
 	 //load textures
 	 loadMapOntheFly(theMaskLayer);
 	 //material.needUpdates =true; //setup the mask I'll set the material to update
- }else if(theMaskLayer.match(/^[/|\w|\.]+.png/)){
-   loadMapOntheFly(theMaskLayer);
  }else{
    material.color.set(0x000055);
 	 clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;

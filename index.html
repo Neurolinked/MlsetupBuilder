@@ -15,7 +15,7 @@
 	<link rel="preload" as="image" href="./images/system/uncook.jpg">-->
 	<!-- end of help preload -->
 	<!-- Intro.js -->
-  <script type="text/javascript"  src="./public/pouchDB/pouchdb-7.3.0.min.js"></script>
+  <!--<script type="text/javascript"  src="./public/pouchDB/pouchdb-7.3.0.min.js"></script>-->
 	<link rel="stylesheet" href="./node_modules/intro.js/minified/introjs.min.css" />
 	<link href="./node_modules/intro.js/themes/introjs-dark.css" rel="stylesheet">
 	<!-- End Intro -->
@@ -348,6 +348,9 @@
 
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <input type="checkbox" data-toggle="tooltip" title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off"><label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
+      <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipMask" autocomplete="off" checked="checked"><label class="btn btn-outline-warning" for="flipMask"><i class="fa-solid fa-rotate fa-rotate-90"></i></label>
+      <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipNorm" autocomplete="off"><label class="btn btn-outline-normal" for="flipNorm"><i class="icon-normals"></i></label>
+      
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
 		<div class="btn-group ms-2 me-1" role="group" aria-label="model loading">
@@ -374,15 +377,26 @@
     <div> </div>
     <div>
       <div class="input-group input-group-sm">
+        
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
+        <!--<button class="btn btn-sm btn-Prim rounded-0 p-1" type="button" id="exportversions" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>//-->
+        <select name="exportVersion" class="dropSelect">
+          <option value="2">Json v0.0.2 (Wkit 8.7)</option>
+          <option value="1">Json v0.0.1 (Wkit 8.5)</option>
+          <option value="0">pre-Wkit 8.5</option>
+        </select>
+        <button class="btn btn-sm btn-Prim rounded-0 p-1 xportJSON" type="button" id="exportversions" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
+        <input type="checkbox" class="btn-check" id="checkCompile" autocomplete="off" checked='checked'><label class="btn btn-outline-warning" for="checkCompile" >Compile</label>
+        <!--
 				<div class="dropdown">
-				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0 p-1" type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
+				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0 p-1 " type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
 				  <ul id="xport_dm" class="dropdown-menu" aria-labelledby="exportversions">
             <li><a class="dropdown-item xportJSON" href="#" id="exportJason_v2" data-version="2">Json v0.0.2 (Wkit 8.7)</a></li>
 				    <li><a class="dropdown-item xportJSON" href="#" id="exportJason_v1" data-version="1">Json v0.0.1 (Wkit 8.5)</a></li>
 				    <li><a class="dropdown-item xportJSON" href="#" id="exportJason" data-version="0">pre-Wkit 8.5</a></li>
 				  </ul>
-				</div>
+				</div>-->
+        <!--<input type="checkbox" class="btn-check" id="checkCompile" autocomplete="off" checked='checked'><label class="btn btn-secondary" for="checkCompile" >Compile</label>-->
       </div>
   </div>
   </div>
@@ -673,7 +687,7 @@
           <div class="input-group input-group-sm">
             <span class="input-group-text rounded-0 bg-dark text-warning border-0">V</span> <input type="number" class="form-control rounded-0 text-end" id="mbOffV" value="0" step="0.01">
           </div>
-          <button class="btn btn-Prim rounded-0 btn-sm" data-bs-toggle="modal" data-bs-target="#AimBlend" type="button"><i class="fas fa-crosshairs"></i> &micro; Aim</button>
+          <button class="btn btn-Prim rounded-0 btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
         </div><!--
         <div class="d-grid">
 
@@ -687,6 +701,7 @@
 				<a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#HairTool">Hair Tool</a>
 				<a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#uncookMicro">Microblend Build</a>
         <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#off-MLab">Microblend Lab</a>
+        <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter">Notification Center</a>
       </div>
     </div>
   </div>
@@ -841,24 +856,6 @@
   </div>
 </div>
 </div>
-
-
-<!--
-<div class="modal fade" id="modalInfo" tabindex="-1" aria-labelledby="modelsInfoH" aria-hidden="true" data-focus="true">
-<div class="modal-dialog modal-xl modal-dialog-centered">
-  <div class="modal-content ">
-    <div class="modal-header bg-info text-dark">
-      <h5 class="modal-title" id="modelsInfoH"><i class="fas fa-info-circle"></i> Model information</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-		<div class="row no-gutter">
-	    <div class="col-4"><div class="modal-body text-white" style="background-color:#121212;min-height:100%"></div></div>
-			<div class="col-8 text-center"> </div>
-		</div>
-  </div>
-</div>
-</div>
--->
 <!-- A modal for the setup of the option randomizer -->
 <!-- windows for aiming the microblend over the masks -->
 <div class="modal fade" id="AimBlend" tabindex="-1" aria-labelledby="aimblendLBL" aria-hidden="true">
