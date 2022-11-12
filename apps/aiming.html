@@ -17,15 +17,16 @@
   <link rel="stylesheet" href="../css/aim.css" />
   </head>
   <body class="w-100">
-		<canvas id="" width="1024" height="1024"></canvas>
+    <canvas id="theAimer" width="1024" height="1024" ></canvas><div id="theAimerOverlay" ></div>
   		<div id="AimManager" class="rounded p-1">
         <div id="aimPanels" class="layer-1">
+          <input id="mblendImg" type="hidden" value="">
           <span class="badge bg-secondary w-100 rounded-0 layer-0">horizontal: <span id="dispAimU"></span></span>
           <input id="AimU" class="w-100 mb-4" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
           <span class="badge bg-secondary w-100 rounded-0 layer-0">vertical: <span id="dispAimV"></span></span>
           <input id="AimV" class="w-100 mb-4" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
           <span class="badge bg-secondary w-100 rounded-0 layer-0">mbTile: <span id="dispAimTile"></span></span>
-          <input id="AimMTile" class="w-100" type="range" min="0.05" max="80.0" value="0.0" step="0.001">
+          <input id="AimMTile" class="w-100" type="range" min="0.05" max="80.0" value="0.05" step="0.001">
           <!--<span class="badge  w-100 rounded-0 layer-1">Chained To the Layer</span>-->
           <div class="form-check form-switch my-2">
             <input class="form-check-input ml-3" type="checkbox" id="AimChain" >

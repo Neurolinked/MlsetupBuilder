@@ -82,7 +82,7 @@ const preferences = new store({schema,
 });
 
 preferences.watch = true
-let mainWindow
+let mainWindow,aimWindow
 
 var mljson = app.commandLine.getSwitchValue("open")
 if (mljson ==''){
@@ -169,15 +169,14 @@ async function dirOpen(event,arg) {
 
 customResource()
 
-const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences,full=false) => {
+const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences,frameless=true) => {
   let modal = new BrowserWindow({
     width: width,
     height: height,
     modal: true,
     parent: parentWindow,
 		webPreferences: preferences,
-		title: title,
-		fullscreen: full
+		title: title
   })
 	modal.menuBarVisible=false
 	modal.minimizable=false
@@ -335,8 +334,9 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
-ipcMain.on('main:aimMicros',(event) =>{
-	createModal("apps/aiming.html",mainWindow,1000,500,'Microblends aiming', {preload: path.join(__dirname, 'apps/preloadaim.js')});
+ipcMain.on('main:aimMicros',(event,configurations) =>{
+	aimWindow = createModal("apps/aiming.html",mainWindow,1380,532,'Microblends aiming', {preload: path.join(__dirname, 'apps/preloadaim.js')});
+	setTimeout(()=>{aimWindow.webContents.send('preload:configure',configurations)},400)
 })
 
 ipcMain.on('main:giveModels',(event) => {
@@ -828,9 +828,15 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 		}
 	})
 })
+
+
+ipcMain.on('main:setMicroCoords',(event,datas)=>{
+	aimWindow.close()
+	mainWindow.webContents.send('preload:setMicroCoords',datas)
+})
 /*
 ipcMain.handle('main:uncookMicroblends',(event)=>{
-	
+
 })
 */
 ipcMain.on('main:uncookMicroblends',(event)=>{

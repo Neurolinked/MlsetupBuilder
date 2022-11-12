@@ -25,7 +25,6 @@ Normals.info().then(function (info) {
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 const mLsetup = new Mlsetup();
-mLsetup.Layers[19].tiles = 5.0
 
 var layerSwapstart = null;
 
@@ -638,7 +637,7 @@ $("#resetShades span.choose").click(function(){
 	const licenseWindow = document.getElementById('LicenseModal');
   const lastExportFormat = localStorage.getItem('ExportFormat');
   var openCloseMBlend = localStorage.getItem('customMicroblend_I');
-      
+
   if (openCloseMBlend){
     $("#cu_mu_display").addClass("d-none");
     $("#btn_dis_cBlend svg").removeClass("fa-eye-slash").addClass("fa-eye");
@@ -646,13 +645,13 @@ $("#resetShades span.choose").click(function(){
     $("#cu_mu_display").removeClass("d-none");
     $("#btn_dis_cBlend svg").removeClass("fa-eye").addClass("fa-eye-slash");
   }
-  
+
   if (lastExportFormat!=null){
-    $("select[name='exportVersion']").val(String(lastExportFormat));  
+    $("select[name='exportVersion']").val(String(lastExportFormat));
   }else{
-    $("select[name='exportVersion']").val(2);  
+    $("select[name='exportVersion']").val(2);
   }
-  
+
 	const modelPlace = localStorage.getItem('MLibX');
 	if (Number(modelPlace)>0){
 		swapModelClass();
@@ -664,7 +663,18 @@ $("#resetShades span.choose").click(function(){
 	//modal information windows for loaded models
 	//const wGLBInfo = new bootstrap.Modal(document.getElementById('modalInfo'));
 	//modal window used for aiming the microblends over the actual used layer
-  $("#AimMBlend").click(function(){thePIT.openAim();})
+  $("#AimMBlend").click(function(){
+    thePIT.openAim(
+      {
+        horizontal:parseFloat($("#mbOffU").val()),
+        vertical:parseFloat($("#mbOffV").val()),
+        tiles:parseFloat($("#mbTile").val()),
+        microblend:$("#mb-preview").attr('src'),
+        mask:document.getElementById("maskPainter").toDataURL()
+      }
+    );
+  })
+
 	const AimMBlend = new bootstrap.Modal(document.getElementById('AimBlend'));
 	const AimWindows = document.getElementById('AimBlend');
 	//On open of the aiming windows
@@ -865,12 +875,12 @@ $("#resetShades span.choose").click(function(){
   			let fireTxLoad = document.getElementById('maskLayer');
   			fireTxLoad.dispatchEvent(TextureLoad);
       }
-      
+
       $("#layerColor").val($(this).data("color"));
       $("#matInput").val($(this).data("material"));
 			$("#layerTile").val($(this).data("mattile"));
 			$("#layerOpacity").val($(this).data("opacity")).change();
-			
+
 			$("#layerNormal").val(String($(this).data("normal")));
 			$("#layerRoughIn").val(String($(this).data("roughin")));
 			$("#layerRoughOut").val(String($(this).data("roughout")));
@@ -886,7 +896,7 @@ $("#resetShades span.choose").click(function(){
 			$("#mbOffU").val($(this).data("mboffu"));
 			$("#mbOffV").val($(this).data("mboffv"));
       //setup the chosen colors for the layer
-      
+
       //Load the layers infor into the fields
       let materialByClick = String($(this).data("material")).replace(/^.*[\\\/]/, '').split('.')[0];
 			semaphoreCLKmBlend=true;
@@ -903,9 +913,9 @@ $("#resetShades span.choose").click(function(){
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
 			//$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
       //Setup the inputs
-      
+
 			let  ricercacolore = $(this).data("color");
-      
+
       /*
       if ($("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).length>0){
         $("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).prop("selected","selected");
@@ -1294,7 +1304,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#floatMat").removeClass('d-none');
 		}
 	);
-  
+
 	$("#materiaList").mouseout(function(e){
 		$("#floatMat").addClass('d-none');
 	});
@@ -1302,24 +1312,24 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	$("body").on("click","#materiaList li, #cagemLibrary > div", function(event){
      let target = $( event.target );
     //console.log(target);
-    
+
 		$("#materiaList li, #cagemLibrary > div").removeClass('active');
 		$(this).addClass('active');
-    
+
     if (target.is( "div" )){
       if ($(this).index()/4>1){
   			slideMaterials($(this).index());
   		}
     }
-    
+
 		$("#materialSummary").html($(this).data('ref'));
 		$("#matInput").val($(this).data('path'));
 		$("#matInput").trigger("change");
-    
+
 		if (ml_libraries.hasOwnProperty($(this).data('ref'))){
 			var materialtoload = $(this).data('ref');
       switchLegacyMat(materialtoload);
-      
+
 			notifyMe("Material override loaded for "+materialtoload,false);
       console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
 
@@ -1331,14 +1341,14 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#cagecolors").html('');
 
 			let toodarkClass;
-      
+
       if ($("#BWAdd").is(":checked")){
         if (ml_libraries[materialtoload].overrides.colorScale.filter(el => el.n=='000000_null').length<=0){
           ml_libraries[materialtoload].overrides.colorScale.push({'n':'000000_null','v':[0,0,0]})
           ml_libraries[materialtoload].overrides.colorScale.push({'n':'ffffff_null','v':[1,1,1]})
         }
       }
-      
+
 			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
 				toodarkClass='';
 				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
@@ -1349,7 +1359,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
 				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
-      
+
 			//build up the lists of data loaded from the material chosen
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
 				$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
@@ -1384,7 +1394,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     }
     let ricercacolore = $("#layerColor").val();
     $("#cagecolors span").removeClass("active");
-    
+
     if ($("#cagecolors span[title='"+ricercacolore+"']").length>0){
       $("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
     }else{
@@ -1404,7 +1414,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		}
   });
   $("#colorCleaner").click(function(){$("#colorLbFinder").val("").keyup()});
-  
+
   $("#colororder").change(function(){
     if ($("#colororder").is(":checked")){
       $("#cagecolors").find('span').sort(function(a, b) {
@@ -1495,7 +1505,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			$("#cagecolors").html('');
 
 			let toodarkClass;
-      
+
 			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
 				toodarkClass='';
 				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
@@ -1507,7 +1517,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
 			});
 			//build up the lists of data loaded from the material chosen
-      
+
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
 				$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
 			});
@@ -1533,7 +1543,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#cagecolors").find('span').sort(function(a, b) {
     	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
 		}).appendTo($("#cagecolors"));
-    
+
 	});
   */
   $("#BWAdd").on("input",function(){
@@ -1541,7 +1551,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       if (($('#cagecolors span[data-lum="0"]').length==0) && ($('#cagecolors span[data-lum="-1"]').length==0)){
         $("#cagecolors").append("<span style='background-color:black;' data-lum='0' data-order='0' title='000000_null'>&nbsp;</span>");
         $("#cagecolors").append("<span style='background-color:white;' data-lum='1' data-order='-1' title='ffffff_null'>&nbsp;</span>");
-        
+
         $("#cagecolors").find('span').sort(function(a, b) {
           return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
         }).appendTo($("#cagecolors"));
@@ -1568,13 +1578,13 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$("#layerColor").val($('#LayerColorL option:selected').text().slice(0,-2));
 	  let choosed_color = tinycolor($(this).val());
 	  $("#colorPntage").html(choosed_color.toPercentageRgbString()); //convert to text percentage the colors
-    
+
 	});*/
   /*simulate the selection of the null_null color */
   $("#colorReset").click(function(){
     $("body #cagecolors span[title='null_null']").click();
   })
-  
+
 	$("body").on('click','#cagecolors span',function(){
 		/* retarget the colors chosen*/
 		$("#cagecolors span").removeClass('active');
@@ -1834,7 +1844,7 @@ $("#importTech").change(function(){
     $("#passaggio").change();
   } //get the result of the reading to the textarea
   if ($("#importTech")[0].files[0]){
-    fr.readAsText($("#importTech")[0].files[0]); //Read as a text file  
+    fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
   }
 });
 
@@ -1847,7 +1857,7 @@ $("#passaggio").change(function(){
       mls_content = JSON.parse($("#passaggio").val());
       let toload = new Mlsetup()
       toload.import(mls_content);
-      
+
       let test = $([toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
       $(".mlpreviewBody").html(test)
       //$(".mlpreviewBody").html(toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>"));
@@ -2269,7 +2279,7 @@ $(".xportJSON").click(function(){
   ver = Number($("select[name='exportVersion']").val());
   //ver = $(this).data("version");
   console.log(ver);
-  
+
   let nomefile = 'commonlayer.json';
   //check if there is already a chosed Names
   if (String($("#nametoexport").val()).trim()!==''){

@@ -55,8 +55,8 @@ contextBridge.exposeInMainWorld(
       delMBlend : (toBeDeleted)=>{
         ipcRenderer.send('main:delmBlend',toBeDeleted);
       },
-      openAim : ()=>{
-        ipcRenderer.send('main:aimMicros');
+      openAim : (setups)=>{
+        ipcRenderer.send('main:aimMicros',setups);
       }
 	},
 )
@@ -239,4 +239,15 @@ ipcRenderer.on('preload:packageDone',(event,result)=>{
 
 ipcRenderer.on('preload:MuReload',(event,result)=>{
   document.dispatchEvent(updblends);
+})
+
+ipcRenderer.on('preload:setMicroCoords',(event,data)=>{
+  if (data.Link){
+    document.getElementById('layerTile').value = data.S //size
+    document.getElementById('layerOffU').value = data.H //Horizontal
+    document.getElementById('layerOffV').value = data.V //Vertical
+  }
+  document.getElementById('mbTile').value = data.S //size
+  document.getElementById('mbOffU').value = data.H //Horizontal
+  document.getElementById('mbOffV').value = data.V //Vertical
 })
