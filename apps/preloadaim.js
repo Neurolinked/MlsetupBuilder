@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld(
   {
 		Done : (microcoords) =>{
 			ipcRenderer.send('main:setMicroCoords',microcoords);
+		},
+		Reload : () =>{
+			ipcRenderer.send('main:reloadAim')
 		}
 	}
 )

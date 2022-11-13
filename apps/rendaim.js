@@ -1,5 +1,6 @@
 $(function(){
-
+	thePIT.Reload()
+	
 	var microblendRatio = Number($("#AimMTile").val())
 	var microblendRatioVal = (1/microblendRatio) * 1024
 
@@ -14,7 +15,7 @@ $(function(){
 	$("#dispAimTile").html($("#AimMTile").val());
 
 	$("#AimMTile, #AimV, #AimU").on("input",function(event){
-
+		
 		microblendRatio = Number($("#AimMTile").val())
 		microblendRatioVal = (1/microblendRatio) * 1024
 

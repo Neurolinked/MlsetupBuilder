@@ -92,6 +92,8 @@ if (mljson ==''){
 var wkitto = app.commandLine.getSwitchValue("wkit")
 var dev = app.commandLine.getSwitchValue("dev")
 
+var lastMicroConf = {}
+
 //register the application name
 if (process.platform === 'win32'){ app.setAppUserModelId(app.name); }
 
@@ -335,8 +337,13 @@ app.on('window-all-closed', function () {
 })
 
 ipcMain.on('main:aimMicros',(event,configurations) =>{
+	lastMicroConf = configurations
 	aimWindow = createModal("apps/aiming.html",mainWindow,1380,532,'Microblends aiming', {preload: path.join(__dirname, 'apps/preloadaim.js')});
-	setTimeout(()=>{aimWindow.webContents.send('preload:configure',configurations)},400)
+	//setTimeout(()=>{aimWindow.webContents.send('preload:configure',configurations)},400)
+})
+
+ipcMain.on('main:reloadAim',()=>{
+	aimWindow.webContents.send('preload:configure',lastMicroConf)
 })
 
 ipcMain.on('main:giveModels',(event) => {
@@ -828,7 +835,6 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 		}
 	})
 })
-
 
 ipcMain.on('main:setMicroCoords',(event,datas)=>{
 	aimWindow.close()
