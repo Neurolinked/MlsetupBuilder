@@ -5,6 +5,7 @@ var child = require('child_process').execFile;
 var spawner = require('child_process').spawn;
 const path = require('path')
 const fs = require('fs')
+const fse = require('fs-extra')
 const store = require('electron-store');
 const sharp = require('sharp');
 const dree = require('dree');
@@ -77,6 +78,10 @@ const preferences = new store({schema,
 		'1.6.3': store => {
 			store.delete('pathfix')
 			store.set('legacymaterial',false)
+		},
+		'1.6.6': store =>{
+			store.set('game','')
+			store.set('depot','')
 		}
 	}
 });
@@ -160,6 +165,64 @@ function customResource(){
 	}
 }
 
+function SaveCustom(){
+	let toMigration = path.join(app.getPath('userData'),userResourcesPath)
+	let applicationDest = app.getAppPath()
+	try {
+		if (!fs.existsSync(toMigration)){
+			//nothing to Save, the folder to migrate isn't there
+			customResource()
+		}
+		userRScheme.forEach((item, i) => {
+			
+			let dirToSaveTo = path.join(toMigration,item)
+			console.log(item,i,dirToSaveTo)
+			switch (item){
+				case 'decals':
+					fse.copySync(path.join(applicationDest,"/images/","cpsource"),dirToSaveTo)
+					break
+				case 'mblend':
+					fse.copySync(path.join(applicationDest,"/images/",item),dirToSaveTo)
+					break
+				case 'jsons':
+					fse.copySync(path.join(applicationDest,item,"mbcustom.json"),path.join(dirToSaveTo,"mbcustom.json"))
+					break
+			}
+		})
+		new Notification({title:'Save custom datas',body: "The custom datas in MLSB have been restored" }).show()
+	}catch(error){
+		dialog.showErrorBox("Saving Error",error)
+	}
+}
+//port datas from the previous version of MLSB
+function restoreCustom(){
+	let fromMigration = path.join(app.getPath('userData'),userResourcesPath)
+	let applicationDest = app.getAppPath()
+	try {
+		if (!fs.existsSync(fromMigration)){
+			//nothing to restore, the folder three will be created
+		}else{
+			userRScheme.forEach((item, i) => {
+				let dirToVerify = path.join(fromMigration,item)
+				switch (item){
+					case 'decals':
+						fse.copySync(dirToVerify,path.join(applicationDest,"images","cpsource"))
+						break
+					case 'mblend':
+						fse.copySync(dirToVerify,path.join(applicationDest,"images",item))
+						break
+					case 'jsons':
+						fse.copySync(path.join(dirToVerify,"mbcustom.json"),path.join(applicationDest,item,"mbcustom.json"))
+						break
+				}
+			})
+			new Notification({title:'Restore custom datas',body: "The datas you had saved in your resource folder are now restored" }).show()
+		}
+	}catch(error){
+		dialog.showErrorBox("Restore Error ",error)
+	}
+}
+
 async function dirOpen(event,arg) {
 	const {canceled,filePaths } = await dialog.showOpenDialog({title:arg.title, properties: ['openDirectory'], defaultPath:path.normalize(arg.path)})
 	if (canceled){
@@ -169,6 +232,7 @@ async function dirOpen(event,arg) {
 	}
 }
 
+//Verify the folders to restore Materials from
 customResource()
 
 const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences,frameless=true) => {
@@ -242,10 +306,7 @@ const template = [
       ...(isMac ? [
 				{ role: 'pasteAndMatchStyle' },{ role: 'delete' },{ role: 'selectAll' },{ type: 'separator' },{label: 'Speech',submenu: [{ role: 'startSpeaking' },{ role: 'stopSpeaking' }]}
       ] : [
-        { role: 'delete' },{ type: 'separator' },{ role: 'selectAll' },{ type: 'separator' },
-				{id:98,label:'My resources',click:()=>{
-					outside.openPath(path.join(app.getPath('userData'),userResourcesPath));
-				}}
+        { role: 'delete' },{ type: 'separator' },{ role: 'selectAll' }
       ])
     ]
   },
@@ -276,6 +337,16 @@ const template = [
 			{label:'Logs',click:()=>{ mainWindow.webContents.send('preload:openModal','log')}},
 			{type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
   },
+	{ label:'Utils',
+		submenu: [
+			{id:98,label:'My resources',click:()=>{
+				outside.openPath(path.join(app.getPath('userData'),userResourcesPath));
+			}},
+			{type: 'separator' },
+			{label:'Save custom resources',click:()=>{SaveCustom()}},
+			{label:'Restore custom resources',click:()=>{restoreCustom()}}
+		]
+ 	},
   { role: 'windowMenu' },
   {
     role: 'help',
