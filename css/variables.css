@@ -123,3 +123,6 @@ input[type='number'],
 input[type='text'], select{background-color:var(--eq-lay2);color:var(--bs-light);border-color:rgba(255,255,255,0.11);font-size:.75rem!important;}
 input[type='color']{border:0 none!important;padding:0;height:auto;}
 input[type='file']::-webkit-file-upload-button{display:none;}
+
+.experimental::before{content:'! Experimental ';font-size:.7rem;color:var(--primary);display:inline-block;}
+.experimental{border:1px dotted var(--primary);background-color:var(--layer-0);}
