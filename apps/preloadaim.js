@@ -32,7 +32,7 @@ ipcRenderer.on('preload:configure', (event, configurations) => {
 		const img = new Image();   // Create new img element
 		img.addEventListener('load', () => {
 		// execute drawImage statements here
-			ctx.drawImage(img, 0, 0,microblendRatioVal,microblendRatioVal);
+			ctx.drawImage(img, 0, 0,1024,1024);
 		}, false);
 		img.src = configurations.mask // configurations.microblend.replace("./","../");
 

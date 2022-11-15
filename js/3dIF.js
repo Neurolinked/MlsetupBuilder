@@ -387,7 +387,7 @@ function giveToTheAim(textureData,w,h){
  var ctx = aimcanvas.getContext('2d');
  aimcanvas.width=512;
  aimcanvas.height=512;
-
+ 
  var imageData = ctx.createImageData(w,h);
  var k=0;
  for (let i = 0; i < imageData.data.length; i += 4) {
@@ -409,10 +409,10 @@ function giveToTheAim(textureData,w,h){
   oc.height=h;
   var octx = oc.getContext('2d');
   octx.putImageData(imageData,0,0,0,0,w,h);
+  //octx.putImageData(imageData,0,0,0,0,w,h);
   octx.scale(512/w,512/h);
   octx.setTransform(1,0,0,-1,0,0);
-  ctx.drawImage(oc,0,0,512,512);
-
+  //ctx.drawImage(oc,0,0,512,512);
   paintMaskCTX.drawImage(oc,0,0,768,768);
   oc.remove();
 }
