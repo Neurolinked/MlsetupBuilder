@@ -23,13 +23,15 @@ How to use it with Wolvenkit: https://youtu.be/uCOHjMPvpgc
 To display the models present in the model library you need to setup a folder in the software preferences, choose the Wolvenkit-CLI executable, at least version 1.5.2 and from the build menu Build the repository, then the microblends normals and decals for the software
 
 # Screenshot
-Main window with the new custom microblends interface
+New Main window
 
-![Custom microblends interface](https://www.kientzproduction.com/gitcontent/mlsb_165_1.png)
+![New Main window](https://www.kientzproduction.com/gitcontent/mlsb_166_1.png)
 
-New model info panel
-![Info Panel](https://www.kientzproduction.com/gitcontent/mlsb_165_2.png)
+New Microblend aiming window
+![New Microblend aiming window](https://www.kientzproduction.com/gitcontent/mlsb_166_2.png)
 
+Material Composer Editor
+![Material Composer Editor](https://www.kientzproduction.com/gitcontent/mlsb_166_3.png)
 
 # Wanna support ?
 If you really wish you can donate with Ko-fi
