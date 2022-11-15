@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld(
 				ipcRenderer.send('main:getversion', {})
 				ipcRenderer.send('main:handle_args', {}) //load arguments and source json files
 			},
-      ApriStream: (path,streamcode,no_repo = false) =>{
+      ApriStream : (path,streamcode,no_repo = false) =>{
         var filecontent = ipcRenderer.sendSync('main:readFile', path, streamcode, no_repo);
         return filecontent
       },
@@ -250,4 +250,10 @@ ipcRenderer.on('preload:setMicroCoords',(event,data)=>{
   document.getElementById('mbTile').value = data.S //size
   document.getElementById('mbOffU').value = data.H //Horizontal
   document.getElementById('mbOffV').value = data.V //Vertical
+})
+//update the configurations in the main interface
+ipcRenderer.on("preload:upd_config",(event,data)=>{
+  //console.log(data)
+  let maskTemplate = document.getElementById("masksTemplate")
+  maskTemplate.value = maskTemplate.value.replace(new RegExp(/\.(dds|png|xbm)/),"."+data.maskformat)
 })

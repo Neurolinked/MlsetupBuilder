@@ -176,7 +176,6 @@ function SaveCustom(){
 		userRScheme.forEach((item, i) => {
 			
 			let dirToSaveTo = path.join(toMigration,item)
-			console.log(item,i,dirToSaveTo)
 			switch (item){
 				case 'decals':
 					fse.copySync(path.join(applicationDest,"/images/","cpsource"),dirToSaveTo)
@@ -443,22 +442,44 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 	}else{
 		whereLoadFrom = path.join(preferences.get('unbundle'),percorso)
 	}
-
+	var hasDepot = preferences.get('depot')!=preferences.get('unbundle') ? true : false
+	//whereLoadFrom = path.join(preferences.get('depot'),percorso)
   fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
     if (err) {
       if (err.code=='ENOENT'){
-				if (normals.test(whereLoadFrom)){
-					event.reply('preload:logEntry', 'normal map not found in : '+whereLoadFrom,true)
+				if (hasDepot){
+					event.reply('preload:logEntry', 'Missing file - trying in the Depot Folder')
+					fs.readFile(path.join(preferences.get('depot'),percorso),flags,(err,contenutofile) =>{
+						if (err){
+							if (err.code=='ENOENT'){
+								if (path.join(preferences.get('depot'),percorso)){
+									event.reply('preload:logEntry', 'normal map not found in : '+path.join(preferences.get('depot'),percorso),true)
+								}else{
+									dialog.showErrorBox("File opening error","The searched file does not exists also in the Depot\n"+path.join(preferences.get('depot'),percorso))
+									event.reply('preload:logEntry', 'Missing file - '+path.join(preferences.get('depot'),percorso),true)
+								}
+							}
+							contenutofile=""
+						}else{
+							event.reply('preload:logEntry', 'File found in the Depot Folder, Yay')
+						}
+						//event.returnValue = 
+						return contenutofile
+					})
 				}else{
-					dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
-					event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
+					if (normals.test(whereLoadFrom)){
+						event.reply('preload:logEntry', 'normal map not found in : '+whereLoadFrom,true)
+					}else{
+						dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
+						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
+					}
 				}
       }else{
         dialog.showErrorBox("File opening error",err.message)
       }
       contenutofile=""
     }
-    event.returnValue = contenutofile
+		event.returnValue = contenutofile	
   })
 })
 //restored arguments reading
@@ -519,22 +540,6 @@ ipcMain.on('main:handle_args', (event, payload) => {
 	}
 })
 
-//Window for reading 3d models
-/*
-ipcMain.on('main:read3dFile',(event,percorso,flags)=>{
-  fs.readFile(percorso,flags,(err,contenutofile) =>{
-    if (err) {
-      if (err.code=='ENOENT'){
-        dialog.showErrorBox("File opening error","The searched file does not exists check the path of the file on the log  (botton left of the User Interface)")
-				event.reply('preload:logEntry', 'Missing file:'+path.join(preferences.get('unbundle'),percorso),true)
-      }else{
-        dialog.showErrorBox("File opening error",err.message)
-      }
-      contenutofile=""
-    }
-    event.returnValue = contenutofile
-  })
-})*/
 //setup the version of the software where needed
 ipcMain.on('main:getversion',(event, arg) =>{
 	event.reply('preload:setversion',app.getVersion())

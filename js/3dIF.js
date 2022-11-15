@@ -684,13 +684,13 @@ function loadMapOntheFly(path){
       img.src = "data:image/png;base64," + base64;
       img.onload = function () {
           paintMaskCTX.drawImage(img, 0, 0, 768, 768);
+          //Load the layer and update the materials
+          material.color.set(0x500000);
+          material.map.flipY = flippingdipping
+          material.map.needsUpdate = true;
       };
-      originalLayer = paintMaskHT.toDataURL('image/png');
+      originalLayer = img.src;
       
-      material.color.set(0x500000);
-      material.map.flipY = flippingdipping
-      material.map.needsUpdate = true;
-       
     }else if(path.endsWith(".dds")){
       var data = str2ab(bufferimage);
       let offsetHeight = 3;
