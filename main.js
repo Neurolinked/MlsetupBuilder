@@ -453,7 +453,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 						if (err){
 							if (err.code=='ENOENT'){
 								if (path.join(preferences.get('depot'),percorso)){
-									event.reply('preload:logEntry', 'normal map not found in : '+path.join(preferences.get('depot'),percorso),true)
+									event.reply('preload:logEntry', 'File not found in : '+path.join(preferences.get('depot'),percorso),true)
 								}else{
 									dialog.showErrorBox("File opening error","The searched file does not exists also in the Depot\n"+path.join(preferences.get('depot'),percorso))
 									event.reply('preload:logEntry', 'Missing file - '+path.join(preferences.get('depot'),percorso),true)
@@ -468,7 +468,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 					})
 				}else{
 					if (normals.test(whereLoadFrom)){
-						event.reply('preload:logEntry', 'normal map not found in : '+whereLoadFrom,true)
+						event.reply('preload:logEntry', 'File not found in : '+whereLoadFrom,true)
 					}else{
 						dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
