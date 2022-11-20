@@ -112,7 +112,14 @@ $(function(){
 		$("#Mat_Base_S_name, #Mat_Temp_S_name").val(templateLibrary.MaterialTemplates[$(this).attr('data-templatecast-index')].Name)
 		$("#Mat_Setup div.card-body").html(materialTemplated.cast());
 	});
-
+	
+	$("body").on("click","button.toDefault",function(event){
+		console.log($(this))
+		let componente = $(this).prev("input")
+		console.log(componente)
+		componente.val(componente.attr("default")).keyup()
+	});
+	
 	$("body").on("keyup","div[data-built='BuildFromTemplate'] input",function(){
 		if ($(this).attr("default")!=$(this).val()){
 			$(this).addClass("custom");

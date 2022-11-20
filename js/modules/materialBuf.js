@@ -22,12 +22,14 @@ class MaterialTemplate{
 				htmlbuildelement += `<div class="input-group input-group-sm">
 						<div class="badge my-auto">${property}</div>
 						<input type="text" class="form-control" data-field='${property}' default='${value}' value='${value}'>
+						<button class="btn rounded-0 btn-outline-primary layer-1 border-0 btn-micro p-1 toDefault"><i class="fa-solid fa-eraser"></i></button>
 					</div>`
 					break
 				case 'number':
 				htmlbuildelement += `<div class="input-group input-group-sm">
 						<div class="badge my-auto">${property}</div>
 						<input type="number" class="form-control" data-field='${property}' default='${value}' value='${value}'>
+						<button class="btn rounded-0 btn-outline-primary layer-1 border-0 btn-micro p-1 toDefault"><i class="fa-solid fa-eraser"></i></button>
 					</div>`
 					break
 				case 'object':

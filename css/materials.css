@@ -92,3 +92,5 @@ div[data-built='BuildFromTemplate'] input:active{border:none!important;box-shado
   30%, 70% {box-shadow: 0 0 8px var(--primary);}
   40%, 50%, 60% { box-shadow: 0 0 10px var(--primary);}
 }
+
+.toDefault{box-shadow: none!important;}
