@@ -61,6 +61,7 @@ body{width: 100vw;height: 95vh;background-color:var(--layer-0);color:white;}
 .eq-lay2{background-color:var(--eq-lay2);}
 .eq-lay3{background-color:var(--eq-lay3);}
 .eq-lay4{background-color:var(--eq-lay4);}
+.bg-active{background-color:var(--active)!important;}
 .bg-secondary{background-color:var(--secondary)!important;}
 .bg-normal{background-color:var(--normal);}
 .btn-tiny>.btn, .btn-tiny {
@@ -126,3 +127,6 @@ input[type='file']::-webkit-file-upload-button{display:none;}
 
 .experimental::before{content:'! Experimental ';font-size:.7rem;color:var(--primary);display:inline-block;}
 .experimental{border:1px dotted var(--primary);background-color:var(--layer-0);}
+
+*::-webkit-scrollbar {width:10px;height:10px;background-color:black;}
+*::-webkit-scrollbar-thumb{background: var(--eq-lay3);border:1px solid var(--bs-danger);background-color: rgba(220,53,69,0.5);}

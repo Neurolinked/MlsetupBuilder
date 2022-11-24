@@ -54,15 +54,16 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #interface canvas{ background: radial-gradient(#010101, #121212);background-repeat: no-repeat}
 #dat-container {background-color:var(--layer-1); position: absolute; top: 0px; left: 20px; z-index: 10; border:1px solid var(--secondary)!important;z-index:11;}
 #dat-container .dg.main .close-button { border:1px solid var(--secondary)!important; }
-#materialTrees, #layeringsystem, .offcanvas *:not(.fa-2x), .dropdown-menu li,#cagemLibrary div{font-size:0.75rem!important;}
+#materialTrees, #layeringsystem, .offcanvas *:not(.svg-inline--fa), .dropdown-menu li,#cagemLibrary div{font-size:0.75rem!important;}
 
 
-#ModelLibrary.offcanvas{width:512px!important;}
+#ModelLibrary.offcanvas-start{width:600px!important;}
 .offcanvas .offcanvas-command{padding:1rem;background:var(--layer-3);}
 .offcanvas .offcanvas-header{background-color: var(--primary);}
 #off-MLab .offcanvas-header {  background-color: var(--bs-warning);}
+/*
 .offcanvas-body::-webkit-scrollbar {background-color:var(--layer-0);}
-.offcanvas-body::-webkit-scrollbar-thumb{background: var(--eq-lay3);-webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);border:1px solid var(--bs-dark);}
+.offcanvas-body::-webkit-scrollbar-thumb{background: var(--eq-lay3);-webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);border:1px solid var(--bs-dark);}*/
 #InfoModel .offcanvas-header{background-color: transparent!important;}
 #off_MLSetups div.offcanvas-body::-webkit-scrollbar,
 #InfoModel .offcanvas-body::-webkit-scrollbar {width:6px;background-color:black;}
@@ -95,7 +96,7 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #cagemLibrary{height:calc(2 * var(--matsizes));overflow-y: scroll;border:1px solid #4d5154!important;}
 #cagemLibrary::-webkit-scrollbar ,
 #cagethematerials::-webkit-scrollbar {background-color:var(--layer-0);}
-#cagemLibrary::-webkit-scrollbar-thumb,
+
 #cagethematerials::-webkit-scrollbar-thumb{background: var(--eq-lay3);-webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);border:1px solid var(--bs-dark);}
 
 #cagemLibrary > div{height:var(--matsizes);border:1px solid var(--secondary);text-align: center;background-color: var(--secondary);margin-bottom:3px;text-shadow: 0 0 3px #000, 0 0 5px #000;}
@@ -447,6 +448,9 @@ span.choose.active{border-color:var(--active-sel);}
 
 .svg-inline--fa .fa-2x{height:2em!important;}
 .svg-inline--fa .fa-3x{height:3em!important;}
+.svg-inline--fa .fa-4x{height:4em!important;}
+.svg-inline--fa .fa-5x{height:5em!important;}
+.svg-inline--fa .fa-6x{height:6em!important;}
 #foot-message{overflow-wrap: break-word;text-overflow: ellipsis;padding-left:4px;}
 
 .card{background-color: var(--layer-1);}
