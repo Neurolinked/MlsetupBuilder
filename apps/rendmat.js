@@ -20,7 +20,7 @@ $(function(){
 			if (templateLibrary.MaterialTemplates.length > 0){
 				let libraryCodeGenerator = ''
 				for(const [key,template] of Object.entries(templateLibrary.MaterialTemplates)){
-					libraryCodeGenerator +=`<div class="mb-2 layer-0 rounded border outline-secondary" >
+					libraryCodeGenerator +=`<div class="mb-2 layer-0 rounded border border-secondary" >
 						<div class="templateStripes rounded-top p-1">
 							<button type="button" data-templatecast-index='${key}' class="btn btn-micro btn-warning"><i class="fa-solid fa-backward"></i></button> 
 							<span class="badge bg-dark ">${template.Name.split("\\").reverse()[0]}</span>
@@ -301,4 +301,19 @@ $(function(){
 	//save to file and have a backup in your userfolder
 	$("#bSaveLibrary").click(function(){ thePIT.BackupLibrary(JSON.stringify(templateLibrary,null,"  ")) });
 	
+	/* Eyedropper color preview
+	$("body").on("click","div.showColor",function(){
+		if (!window.EyeDropper) {
+	    console.log('Your browser does not support the EyeDropper API');
+	    return;
+	  }
+		const eyeDropper = new EyeDropper();
+
+	  eyeDropper.open().then((result) => {
+	    console.log(result.sRGBHex)
+	  }).catch((e) => {
+	    console.log(e);
+	  });
+	})
+	*/
 });

@@ -4,28 +4,23 @@
   <meta charset="utf-8">
   <title>MlsetupBuilder </title>
   <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src * 'unsafe-inline'; script-src *; img-src * data: 'unsafe-inline' blob:; connect-src 'self'; worker-src * blob:;" ><!--
-  <meta http-equiv="X-Content-Security-Policy" content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; img-src * data: 'unsafe-inline'; connect-src * 'unsafe-inline'">-->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src * 'unsafe-inline'; script-src *; img-src * data: 'unsafe-inline' blob:; connect-src 'self'; worker-src * blob:;" >
   <meta name="author" content="Neurolinked">
   <meta name="date" content="September 2021">
-	<!-- images on the help section
-	<link rel="preload" as="image" href="./images/system/mblends.jpg">
-	<link rel="preload" as="image" href="./images/system/prefs.jpg">
-	<link rel="preload" as="image" href="./images/system/repobuild.jpg">
-	<link rel="preload" as="image" href="./images/system/uncook.jpg">-->
-	<!-- end of help preload -->
-	<!-- Intro.js -->
   <!--<script type="text/javascript"  src="./public/pouchDB/pouchdb-7.3.0.min.js"></script>-->
+	<!-- Intro.js -->
 	<link rel="stylesheet" href="./node_modules/intro.js/minified/introjs.min.css" />
 	<link href="./node_modules/intro.js/themes/introjs-dark.css" rel="stylesheet">
 	<!-- End Intro -->
   <!-- BOOtstrap 5 -->
-  <link href="./bs511/css/bootstrap.min.css" rel="stylesheet">
+  <link href="./css/mlsb.css" rel="stylesheet">
+  <script type="text/javascript"  src="./js/bootstrap/bootstrap.bundle.min.js"></script>
+  <!--<link href="./bs511/css/bootstrap.min.css" rel="stylesheet">
   <script type="text/javascript"  src="./bs511/js/bootstrap.bundle.min.js"></script>
   <!--FontAwesome --><link rel="stylesheet" href="./public/fontawesome-free/css/all.min.css" />
 	<!--FontAwesome --><script type="text/javascript" src="./public/fontawesome-free/js/all.min.js" ></script>
   <!-- If the require doesn't work, include first the jQuery file  <script src="jquery-3.0.0.min.js"></script> -->
-  <script type="text/javascript" src='./js/jquery-3.6.0.min.js'></script>
+  <script type="text/javascript" src='./js/jquery-3.6.1.min.js'></script>
   <!-- mlsetup Class Description -->
   <script type="text/javascript" src='./js/modules/mlsetup.js'></script>
   <!--jstree library DB -->
@@ -39,7 +34,7 @@
   <!--hardcoded default Model-only  DB --><script src="./js/models.js" type="text/javascript"></script><!--hardcoded DB -->
 	<!--hardcoded default Model-only  DB --><script src="./js/hairs.js" type="text/javascript"></script><!--hardcoded DB -->
 <!--Material Tree  --><script src="./js/materialTree.js"></script><!--Material Tree -->
-<!--Tinny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
+<!--Tiny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
   <!--hardcoded microblends default //--><script type="text/javascript" src="./jsons/mbcore.json" ></script><!--hardcoded microblend DB//-->
 	<!--hardcoded material default //--><script type="text/javascript" src="./js/materialcore.js" ></script><!--hardcoded material DB//-->
@@ -48,30 +43,119 @@
   <script type="text/javascript" src='./js/interface.js'></script>
   <link rel="stylesheet" href="./css/base.css" />
   <link rel="stylesheet" href="./css/iconmoon.css" />
-	<style id="addedCSS" type="text/css">.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);}</style>
-	<style id="mlLibCSS" type="text/css"> </style>
-  <style id="minfoCSS" type="text/css"> </style>
+  <style id="panelsSize" type="text/css"> </style>
   </head>
   <body class="px-1">
 		<div id="floatMat" class="d-none position-absolute"> </div>
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
     <div id="dat-container"></div>
 <!--THREE.js libraries -->
-    <script src='./js/threejs/build/three.min.js'></script>
-    <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
-		<script type='module' src='./js/threejs/src/math/MathUtils.js'></script>
-		<script type='module' src='./js/threejs/src/math/Color.js'></script>
-		<script type='module' src='./js/threejs/src/scene/Fog.js'></script>
-		<!--
-		<script src='./js/threejs/examples/js/libs/fflate.min.js'></script>
-		<script src='./js/threejs/examples/js/loaders/FBXLoader.js'></script>
-		-->
-    <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
-    <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
+<!--
+    <script src='./js/threejs/146/build/three.min.js'></script>
+    <script src='./js/threejs/146/examples/js/controls/OrbitControls.js'></script>
+		<script type='module' src='./js/threejs/146/src/math/MathUtils.js'></script>
+		<script type='module' src='./js/threejs/146/src/math/Color.js'></script>
+		<script type='module' src='./js/threejs/146/src/scene/Fog.js'></script>
+    <script src='./js/threejs/146/examples/js/loaders/GLTFLoader.js'></script>
+    <script src='./js/threejs/146/examples/js/libs/dat.gui.min.js'></script>
+  -->
+  <script src='./js/threejs/build/three.min.js'></script>
+  <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
+  <script type='module' src='./js/threejs/src/math/MathUtils.js'></script>
+  <script type='module' src='./js/threejs/src/math/Color.js'></script>
+  <script type='module' src='./js/threejs/src/scene/Fog.js'></script>
+  <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
+  <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
+<!--New Model Library interface -->
+<div class="offcanvas offcanvas-end coverFullEditor bs-layer1 text-bg-dark" tabindex="-1" id="TreeDdLibVas" aria-labelledby="TreedLiblab">
+  <div class="offcanvas-header p-2">
+    <div id="TreedLiblab">Model Warehouse</div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-command">
+    <div class="input-group layer-4">
+      <input id="TreeDSearch" class="form-control " type="text" placeholder="Search in the models library" aria-label="models searcher">
+      <button type="button" id="TreeDClean"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
+    </div>
+    <div class="progress rounded-0 border border-dark ">
+      <div class="progress-bar progress-bar-animated progress-bar-striped bg-info " role="progressbar" aria-label="Warning striped example" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    Categories
+    <div>
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#"><i class="fas fa-mars fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="fas fa-venus fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#"><i class="text-warning fas fa-folder fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="text-danger fas fa-car-side fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="text-danger fas fa-motorcycle fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="text-primary fas fa-skull-crossbones fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="text-warning fas fa-baby fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="text-white fas fa-star-half fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="fas fa-mask-face fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="fas fa-scissors fa-2x px-2" ></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link "><i class="fas fa-tag fa-2x px-2" ></i></a>
+        </li>
+      </ul>      
+      <!--
+      { "icon" : "" },
+      "scan" : {"icon" : "text-danger fas fa-magnifying-glass"},
+      "custom" : { "icon" : "custom fas fa-folder" },
+      "custmesh" : { "icon" : "custom fas fa-dice-d6" },
+      "man" : { "icon" : "fas fa-mars" },
+      "woman" : { "icon" : "fas fa-venus" },
+      "car" : { "icon" : "text-danger fas fa-car-side" },
+      "moto" :{ "icon" : "text-danger fas fa-motorcycle" },
+      "weapons" : { "icon" : "text-primary fas fa-skull-crossbones" },
+      "kiddo" : {"icon": "text-warning fas fa-baby"},
+      "layer0" : {"icon": "text-white fas fa-star-half"},
+      "custmask" : {"icon":"custom fas fa-mask-face"},
+      "hair" : {"icon":"fa-solid fa-scissors"},-->
+    </div>
+  </div>
+  <div class="offcanvas-body ">
+    <div class="d-flex align-items-start bs-layer0">
+      <div class="nav flex-column nav-pills me-3 layer-1" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home" aria-selected="true"><i class="fas fa-folder text-info fa-3x" ></i></button><span class="badge d-block">Custom</span>
+        <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false"><i class="fa-solid fa-shirt text-warning fa-3x"></i></button><span class="badge d-block">Garments</span>
+        <button class="nav-link" id="v-pills-disabled-tab" data-bs-toggle="pill" data-bs-target="#v-pills-disabled" type="button" role="tab" aria-controls="v-pills-disabled" aria-selected="false"><i class="fa-solid fa-robot fa-3x"></i></button><span class="badge d-block">Cyberware</span>
+        <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false"><i class="fa-solid fa-gun text-primary fa-3x"></i></button><span class="badge d-block">Weapons</span>
+        <button class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false"><i class="fa-solid fa-truck-plane text-primary fa-3x"></i></button><span class="badge d-block">Vehicles</span>
+      </div>
+      <div class="tab-content " id="v-pills-tabContent">
+        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab" tabindex="0">...</div>
+        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab" tabindex="0">...</div>
+        <div class="tab-pane fade" id="v-pills-disabled" role="tabpanel" aria-labelledby="v-pills-disabled-tab" tabindex="0">...</div>
+        <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab" tabindex="0">...</div>
+        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab" tabindex="0">...</div>
+      </div>
+    </div>
+  </div>
+</div>
 <!--model Library -->
-<div class="offcanvas offcanvas-start offcanvas-models bg-dark bg-gradient text-light" tabindex="-1" id="ModelLibrary" aria-labelledby="ModelLibraryLabel" data-bs-backdrop="false">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title " id="ModelLibraryLabel">Model Library</h5>
+<div class="offcanvas offcanvas-start offcanvas-models text-bg-dark bg-gradient " tabindex="-1" id="ModelLibrary" aria-labelledby="ModelLibraryLabel" data-bs-backdrop="false">
+  <div class="bg-active d-flex justify-content-between p-2">
+    <div id="ModelLibraryLabel">Model Library</div>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-command">
@@ -84,7 +168,7 @@
 		<nav class="navbar navbar-expand-lg navbar-dark ">
   		<div class="container-fluid">
 		<button type="button" class="btn btn-outline-warning" id="mlPosX" title='Move me'><i class="fas fa-caret-right"></i></button>
-    <div class="btn-group mt-1" role="group" aria-label="models filtering">
+    <div class="btn-group mt-1" role="group" aria-label="3d window operators">
 			<button type="button" id="modelFinderCloser" data-toggle="tooltip" title="Reset the tree to the default state" class="btn bg-transparent text-warning"><i class="fas fa-door-closed"></i> </button>
       <button type="button" id="FolderScan" data-toggle="tooltip" title="Search and import custom folder assets" class="btn bg-transparent btn-outline-danger"><i class="fas fa-magnifying-glass"></i> Import</button>
 			<button type="button" class="btn btn-outline-warning" disabled>...category filtering...</button>
@@ -105,7 +189,7 @@
   <div class="offcanvas-body m-2 p-2"></div>
 </div>
 <!--  -->
-<div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light" data-bs-backdrop="false" tabindex="-1" id="HairTool" aria-labelledby="HTLabel" >
+<div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light coverFullEditor" data-bs-backdrop="false" tabindex="-1" id="HairTool" aria-labelledby="HTLabel" >
   <div class="offcanvas-header bg-dark">
     <h5 class="offcanvas-title text-light" id="HTLabel">Hair tool</h5>
     <button type="button" class="btn text-reset text-light" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
@@ -116,10 +200,10 @@
 			 <div class="col-11">
 				<div id="hairSwatches" class=''></div>
 				<div id="hairprofileBuilder" class="layer-1 rounded-0 "><!-- maximum shades will be 5 at the start-->
-						<span class="badge layer-0 w-100 rounded-0">Shades planner</span>
+						<span class="badge bs-layer0 w-100 rounded-0">Shades planner</span>
 						<div class="p-2">
-							<div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 eq-lay1">RootToTip</span><div class="col-10 grad" id="hRootToTip"> </div></div>
-							<div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 eq-lay1">ID</span><div class="col-10 grad" id="hID" > </div></div>
+							<div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 bs-layer1">RootToTip</span><div class="col-10 grad" id="hRootToTip"> </div></div>
+							<div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 bs-layer1">ID</span><div class="col-10 grad" id="hID" > </div></div>
 						</div>
 				</div>
 			</div>
@@ -156,7 +240,7 @@
     <div id="mbHierarchy" class="m-1 border border-dark list-group rounded-0" > </div>
     <span class="badge d-block pb-2">Drop .pngs here:</span>
     <div id="dropzone" class="bg-black rounded text-center" ><i class="fa-solid fa-circle-plus text-black fa-2x"></i></div>
-    <div id="mblendCageManager" class="border outline-secondary mt-4">
+    <div id="mblendCageManager" class="border border-secondary mt-4">
       <div class="input-group layer-4">
         <span class="badge layer-9 rounded-0 ">Package</span>
         <input type="text" class="form-control form-control-sm rounded-0"  list="mbListPackages" id="mbListPackage" />
@@ -174,7 +258,7 @@
   </div>
 </div>
 <!-- offcanvas for model information -->
-<div class="offcanvas offcanvas-end ocModelInfo bg-dark text-light" data-bs-backdrop="false" tabindex="-1" id="InfoModel" aria-labelledby="HTLabel" >
+<div class="offcanvas offcanvas-end ocModelInfo bg-dark text-light coverFullEditor" data-bs-backdrop="false" tabindex="-1" id="InfoModel" aria-labelledby="HTLabel" >
   <div class="offcanvas-header border border-info p-1">
     <h5 class="offcanvas-title text-info" id="HTLabel">Model Information</h5>
     <button type="button" class="btn text-reset text-dark" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
@@ -203,7 +287,7 @@
         <div class="tab-pane fade show active" id="infotab" role="tabpanel" aria-labelledby="info-tab">
           <div>
             <span class='d-block p-1'>Object Paths</span>
-            <form id='modelUserDataForm' class="p-2 eq-lay1">
+            <form id='modelUserDataForm' class="p-2 bs-layer1">
               <input type="text" class='d-none'  id="lastCustomMDL" readonly />
               <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
               <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
@@ -296,7 +380,7 @@
                   <span id="maskoolor" class="choose mx-auto d-block" data-color="800000" style="background-color:#800000"> </span>
                   <input id="slidemask" type="range" min="0" max="255" value="128" step="1">
                 </div>
-                <div class="my-2 border outline-secondary rounded" style="min-height:2rem;">
+                <div class="my-2 border border-secondary rounded" style="min-height:2rem;">
                   <span class="d-block badge rounded-0 txt-secondary"><i class="fa-solid fa-camera-retro"></i> States</span>
                   <div id="Snapshots" class="py-1"> </div>
                 </div>
@@ -345,12 +429,10 @@
     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
 			<input type="checkbox" class="d-none" id="prefloaded" disabled />
 			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
-
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
       <input type="checkbox" data-toggle="tooltip" title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off"><label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
       <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipMask" autocomplete="off" checked="checked"><label class="btn btn-outline-warning" for="flipMask"><i class="fa-solid fa-rotate fa-rotate-90"></i></label>
       <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipNorm" autocomplete="off"><label class="btn btn-outline-normal" for="flipNorm"><i class="icon-normals"></i></label>
-      
 			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
     </div>
 		<div class="btn-group ms-2 me-1" role="group" aria-label="model loading">
@@ -358,6 +440,9 @@
         <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Library</button>
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
+    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#TreeDdLibVas" class="btn btn-out-Prim">
+      <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Lib.
+    </button>
     <div class="btn-group" role="group" aria-label="model loading">
   		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
     </div>
@@ -434,7 +519,7 @@
         <!--class="dropdown d-inline-block " -->
         <div class="btn-group dropend" role="group">
           <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
-            <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu eq-lay1 border border-warning p-2" style="width:22rem;">
+            <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu bs-layer1 border border-warning p-2" style="width:22rem;">
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="rndOnOff">
                 <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
@@ -453,13 +538,13 @@
     </div>
     <div class="my-2 text-center">
       <div class="btn-group">
-        <button class="btn btn-sm btn-outline-secondary " type="button" id="clean-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Reset to blank the selected layer"><i class="fas fa-eraser fa-2x"></i></button>
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-sm btn-outline-plain " type="button" id="clean-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Reset to blank the selected layer"><i class="fas fa-eraser fa-2x"></i></button>
+        <button type="button" class="btn btn-outline-plain dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
           <span class="visually-hidden">Toggle Dropdown</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end text-right">
-          <li><a class="dropdown-item" href="#" id="wipe-layer"><i class="fas fa-eraser"></i> wipe all layers</a></li>
-          <li><a class="dropdown-item" href="#" id="wash-layers"><i class="fas fa-soap"></i> clean all layers</a></li>
+        <ul class="dropdown-menu dropdown-menu-end text-right bg-layer2">
+          <li><a class="dropdown-item text-bg-layer2" href="#" id="wipe-layer"><i class="fas fa-eraser"></i> wipe all layers</a></li>
+          <li><a class="dropdown-item text-bg-layer2" href="#" id="wash-layers"><i class="fas fa-soap"></i> clean all layers</a></li>
         </ul>
       </div>
       <button class="btn btn-sm btn-outline-warning" type="button" id="actlast-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Activate the last unactive layer"><i class="fas fa-plug fa-2x"></i></button>
@@ -721,7 +806,7 @@
 					<div class="input-group">
 					  <input type="text" id="matModFinder" class="form-control rounded-0" placeholder="filter by material name" aria-label="Material name">
 						<!--<button class="btn btn-Prim rounded-0" type="button" id="matModSearch">search</button>-->
-						<button type="button" id="matModFinderCleared" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-times"></i> </button>
+						<button type="button" id="matModFinderCleared" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-soap fa-flip-horizontal"></i> </button>
 					</div>
 				</div>
 				<div ><div id="cagemLibrary" class="matColGrid_spaced" > </div></div>
@@ -769,7 +854,7 @@
 						  <input class="form-check-input" type="checkbox" role="switch" id="arc_NC3" checked>
 							<span class="badge bg-warning text-dark">basegame_3_nightcity.archive</span>
 						</div>
-						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+						<div class="progress border border-dark  my-1 bs-layer0" style="height: 1.5rem;" >
 						  <div id="uncook_step1" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_step2" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
@@ -777,7 +862,7 @@
 							<input class="form-check-input" type="checkbox" role="switch" id="arc_AP4" checked>
 							<span class="badge bg-warning text-dark">basegame_4_appearance.archive</span>
 						</div>
-						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+						<div class="progress border border-dark  my-1 bs-layer0" style="height: 1.5rem;" >
 							<div id="uncook_step3" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_step4" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
@@ -785,7 +870,7 @@
 							<input class="form-check-input" type="checkbox" role="switch" id="arc_GA4" checked>
 							<span class="badge bg-warning text-dark">basegame_4_gamedata.archive</span>
 						</div>
-						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+						<div class="progress border border-dark  my-1 bs-layer0" style="height: 1.5rem;" >
 							<div id="uncook_step5" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_step6" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
@@ -794,7 +879,7 @@
 							<input class="form-check-input" type="checkbox" role="switch" id="arc_DEC4" checked>
 							<span class="badge bg-warning text-dark">Decal materials</span>
 						</div>
-						<div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+						<div class="progress border border-dark  my-1 bs-layer0" style="height: 1.5rem;" >
 							<div id="uncook_step7" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_step8" class="border-start border-dark progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
@@ -802,13 +887,13 @@
               <input class="form-check-input" type="checkbox" role="switch" id="arc_FNT4" checked>
               <span class="badge bg-warning text-dark">Fonts</span>
             </div>
-            <div class="progress border border-dark  my-1 layer-0" style="height: 1.5rem;" >
+            <div class="progress border border-dark  my-1 bs-layer0" style="height: 1.5rem;" >
               <div id="uncook_step9" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
             </div>
 						<!-- TODO to this code-->
 						<div class="text-center mt-3"><i id="uncookCog" class="fas fa-cog fa-pulse fa-4x text-danger d-none"></i></div>
 					</div>
-					<div id="uncookLogger" class="col-5 p-1 layer-0" >
+					<div id="uncookLogger" class="col-5 p-1 bs-layer0" >
 						<div class="text-muted"> </div>
 					</div>
       </div>
@@ -827,24 +912,24 @@
       <div class="modal-body p-0 ">
 				<div class="row no-gutters">
 					<div id='microprep' class="col-4 p-3">
-						<span class="experimental ">&micro;blends Creation</span>
+						<span>&micro;blends Creation</span>
 						<span class="badge d-block bg-warning text-dark mt-4">Uncook</span>
-						<div class="progress border border-dark  mb-3 layer-0" style="height: 1.5rem;" >
+						<div class="progress border border-dark  mb-3 bs-layer0" style="height: 1.5rem;" >
 							<div id="uncook_micro_opt01" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_micro_opt02" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 							<div id="uncook_micro_opt03" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
 						<span class="badge d-block bg-warning text-dark">Resize</span>
-						<div class="progress border border-dark  mb-3 layer-0" style="height: 1.5rem;" >
+						<div class="progress border border-dark  mb-3 bs-layer0" style="height: 1.5rem;" >
 							<div id="uncook_mresize" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
 						<span class="badge d-block bg-warning text-dark">Thumb</span>
-						<div class="progress border border-dark  mb-3 layer-0" style="height: 1.5rem;" >
+						<div class="progress border border-dark  mb-3 bs-layer0" style="height: 1.5rem;" >
 							<div id="uncook_mthumbs" class="progress-bar bg-info progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
 						</div>
 						<div class="text-center mt-3"><i id="mycroCog" class="fas fa-cog fa-pulse fa-4x text-warning d-none"></i></div>
 					</div>
-					<div id="microLogger" class="col-8 p-1 layer-0" >
+					<div id="microLogger" class="col-8 p-1 bs-layer0" >
 						<div class="text-muted"> </div>
 					</div>
       </div>

@@ -23,19 +23,19 @@ footer div{border:1px solid var(--layer-1);font-size:0.75rem;}
 
 .vertscroll{overflow-y: scroll;}
 .vertscroll::-webkit-scrollbar{background-color:var(--layer-0);width:5px;}
-.vertscroll::-webkit-scrollbar-thumb{background: var(--eq-lay3);border:1px solid var(--bs-danger);background-color: rgba(220,53,69,0.5);}
+.vertscroll::-webkit-scrollbar-thumb{background: var(--bs-layer3);border:1px solid var(--bs-danger);background-color: rgba(220,53,69,0.5);}
 
-.nav-tabs{border-bottom-color: var(--secondary);}
+.nav-tabs{border-bottom-color: var( --bs-secondary);}
 
-.list-group-item{background-color: var(--layer-1);color:var(--primary);padding:.5rem .1rem!important;}
+.list-group-item{background-color: var(--layer-1);color:var( --bs-primary);padding:.5rem .1rem!important;}
 
 .showColor{min-width:1rem;min-height:1rem;}
 
 details summary[data-type]::marker {content: '';display: none; overflow-wrap: anywhere!important;}
-details.active > summary[data-type]{background-color: var(--secondary);}
+details.active > summary[data-type]{background-color: var( --bs-secondary);}
 summary[data-type]:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-info);font-weight:900;}
-summary[data-type='engine\\materials\\multilayered.mt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--normal);font-weight:900;}
-summary[data-type='engine\\materials\\metal_base.remt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--error);font-weight:900;}
+summary[data-type='engine\\materials\\multilayered.mt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-normal);font-weight:900;}
+summary[data-type='engine\\materials\\metal_base.remt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-error);font-weight:900;}
 summary[data-type='base\\materials\\mesh_decal.mt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-secondary);font-weight:900;}
 
 #Mat_Setup > div.card > div.input-group .badge{min-width:100px;}
@@ -47,7 +47,7 @@ summary[data-type='base\\materials\\mesh_decal.mt']:before{content: " ";font-
 
 div[data-built='BuildFromTemplate']{background-color: var(--layer-0);}
 div[data-built='BuildFromTemplate'] > div.input-group{margin:1px 0;}
-div[data-built='BuildFromTemplate'] > div > div.badge{min-width:30%;text-align: right;color:var(--primary);}
+div[data-built='BuildFromTemplate'] > div > div.badge{min-width:30%;text-align: right;color:var( --bs-primary);}
 div[data-built='BuildFromTemplate'] input{background-color:black;color:var(--eq-lay2); border:0;}
 div[data-built='BuildFromTemplate'] input.custom{background-color:black;color:var(--bs-light);}
 div[data-built='BuildFromTemplate'] input:focus,
@@ -87,10 +87,10 @@ div[data-built='BuildFromTemplate'] input:active{border:none!important;box-shado
 }
 
 @keyframes flash {
-  10%, 90% {box-shadow: 0 0 2px var(--primary);}
-  20%, 80% {box-shadow: 0 0 4px var(--primary);}
-  30%, 70% {box-shadow: 0 0 8px var(--primary);}
-  40%, 50%, 60% { box-shadow: 0 0 10px var(--primary);}
+  10%, 90% {box-shadow: 0 0 2px var( --bs-primary);}
+  20%, 80% {box-shadow: 0 0 4px var( --bs-primary);}
+  30%, 70% {box-shadow: 0 0 8px var( --bs-primary);}
+  40%, 50%, 60% { box-shadow: 0 0 10px var( --bs-primary);}
 }
 
 .toDefault{box-shadow: none!important;}
