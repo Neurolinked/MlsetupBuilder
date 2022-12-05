@@ -86,6 +86,13 @@ const preferences = new store({schema,
 	}
 });
 
+archives = {
+	engine : "basegame_1_engine.archive",
+	nightcity : "basegame_3_nightcity.archive",
+	appearances : "basegame_4_appearance.archive",
+	gamedata : "basegame_4_gamedata.archive"
+}
+
 preferences.watch = true
 let mainWindow,aimWindow
 
@@ -631,7 +638,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 		const salvataggio = dialog.showSaveDialog({
 			title:'Save the mlsetup jsonized',
 			defaultPath: def_path,
-			filters:[ { name: 'All Files', extensions: ['*'] },	{ name: 'Jsons', extensions: ['json'] } ],
+			filters:[ { name: 'All Files', extensions: ['*'] },	{ name: 'Mlsetup jsons', extensions: ['mlsetup.json'] } ],
 			properties: ['createDirectory']
 		}).then(salvataggio => {
 		    if (!salvataggio.canceled){
@@ -826,16 +833,16 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 						if (typeof(conf)=='object'){
 							mainWindow.webContents.send('preload:uncookLogClean')
 
-							uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1')
-								.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
+							uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1')
+								.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
 								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
-								.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_appearance.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step3'))
-								.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_appearance.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
+								.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],archives.appearances), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step3'))
+								.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],archives.appearances), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
 								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_AP4")})
-								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step5'))
-								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
+								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step5'))
+								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
 								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
-								.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_appearance.archive'), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
+								.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(selection.filePaths[0],archives.appearances), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
 								.then(()=> {
 									return new Promise((resolve,reject) =>{
 										if (conf[3]){
@@ -900,7 +907,7 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 									}
 								})
 								.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_DEC4") })
-								.then(()=>uncookRun(conf[4],["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
+								.then(()=>uncookRun(conf[4],["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
 								.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
 								.catch(err => { console.log(err) })
 								.finally(() => { 	mainWindow.webContents.send('preload:enable',"#triggerUncook") })
@@ -937,9 +944,9 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 						mainWindow.webContents.send('preload:uncookLogClean','#microLogger')
 
-						uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_1_engine.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
-							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_3_nightcity.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
-							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],'basegame_4_gamedata.archive'), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
+						uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.engine), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
+							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
+							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
 							.then(()=> {
 								return new Promise((resolve,reject) =>{
 									fs.readdir(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/'),(err,files)=>{
