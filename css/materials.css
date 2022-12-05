@@ -1,6 +1,6 @@
 @import "./variables.css";
 
-.bodyGrid{display:grid;grid-template-columns: 1.3fr 2.4fr 1.1fr;gap:4px;margin:0 2px;}
+.bodyGrid{display:grid;grid-template-columns: 1.1fr 2.4fr 1.1fr;gap:4px;margin:0 2px;}
 .bodyGrid > div {border:1px solid var(--layer-2);height:90vh;background-color:var(--layer-1);}
 .mat_instance{display:grid;grid-template-columns: 1fr 24px;gap:2px;margin:0;}
 .sendtoEdit {cursor: pointer;}
@@ -19,15 +19,15 @@ footer div{border:1px solid var(--layer-1);font-size:0.75rem;}
 
 .card{background-color:transparent;}
 .card .card-header{display:flex;justify-content: space-between;}
-.card .card-header.bg-primary{border:1px solid var(--layer-0);background-color:var(--active)!important;}
+.card .card-header.bg-primary{border:1px solid var(--bs-layer0);background-color:var(--active)!important;}
 
 .vertscroll{overflow-y: scroll;}
-.vertscroll::-webkit-scrollbar{background-color:var(--layer-0);width:5px;}
+.vertscroll::-webkit-scrollbar{background-color:var(--bs-layer0);width:5px;}
 .vertscroll::-webkit-scrollbar-thumb{background: var(--bs-layer3);border:1px solid var(--bs-danger);background-color: rgba(220,53,69,0.5);}
 
 .nav-tabs{border-bottom-color: var( --bs-secondary);}
 
-.list-group-item{background-color: var(--layer-1);color:var( --bs-primary);padding:.5rem .1rem!important;}
+.list-group-item{background-color: var(--bs-layer1);color:var( --bs-primary);padding:.5rem .1rem!important;}
 
 .showColor{min-width:1rem;min-height:1rem;}
 
@@ -45,10 +45,10 @@ summary[data-type='base\\materials\\mesh_decal.mt']:before{content: " ";font-
     background-size: 3rem 3rem;
 }
 
-div[data-built='BuildFromTemplate']{background-color: var(--layer-0);}
+div[data-built='BuildFromTemplate']{background-color: var(--bs-layer0);}
 div[data-built='BuildFromTemplate'] > div.input-group{margin:1px 0;}
 div[data-built='BuildFromTemplate'] > div > div.badge{min-width:30%;text-align: right;color:var( --bs-primary);}
-div[data-built='BuildFromTemplate'] input{background-color:black;color:var(--eq-lay2); border:0;}
+div[data-built='BuildFromTemplate'] input{background-color:black;color:var(--bs-layer2); border:0;}
 div[data-built='BuildFromTemplate'] input.custom{background-color:black;color:var(--bs-light);}
 div[data-built='BuildFromTemplate'] input:focus,
 div[data-built='BuildFromTemplate'] input:active{border:none!important;box-shadow: none!important;}

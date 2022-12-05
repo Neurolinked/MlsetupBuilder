@@ -177,14 +177,14 @@ class MaterialBuffer {
 		if (Number.isNaN(index)){
 			for (const [key, material] of Object.entries(this.Materials)) {
 				codeMaterial += `<div class="mat_instance mb-1" ><details class="border outline-l1" >
-						<summary data-type="${material.BaseMaterial}">${material.Name}</summary>
+						<summary data-type="${material.BaseMaterial}">${material.Name.replaceAll("_"," ")}</summary>
 						${material.MaterialTemplate}
 						<button type="button" class="mt-2 d-block btn btn-sm btn-danger btn-tiny sendtoTrash" data-materialIndex='${key}'><i class="fa-solid fa-trash"></i></button>
 					</details><span class="d-block-inline bg-dark" ><span class="text-warning ps-1 pe-2 sendtoEdit " data-materialIndex='${key}'><i class="fa-solid fa-square-arrow-up-right"></i></span></span></div>`;
 			}
 		}else{
 			codeMaterial = `<div class="mat_instance mb-1" ><details class="border outline-l1" >
-					<summary data-type="${this.Materials[index].BaseMaterial}">${this.Materials[index].Name}</summary>
+					<summary data-type="${this.Materials[index].BaseMaterial}">${this.Materials[index].Name.replaceAll("_"," ")}</summary>
 					${this.Materials[index].MaterialTemplate}
 					<button type="button" class="mt-2 d-block btn btn-sm btn-danger btn-tiny sendtoTrash" data-materialIndex='${index}'><i class="fa-solid fa-trash"></i></button>
 				</details><span class="d-block-inline bg-dark" ><span class="text-warning ps-1 pe-2 sendtoEdit " data-materialIndex='${index}'><i class="fa-solid fa-square-arrow-up-right"></i></span></span></div>`;
