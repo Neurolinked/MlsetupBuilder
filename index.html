@@ -67,7 +67,7 @@
   <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
   <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
 <!--New Model Library interface -->
-<div class="offcanvas offcanvas-end coverFullEditor bs-layer1 text-bg-dark" tabindex="-1" id="TreeDdLibVas" aria-labelledby="TreedLiblab">
+<div class="offcanvas offcanvas-end coverFullEditor bg-layer1 text-bg-dark" tabindex="-1" id="TreeDdLibVas" aria-labelledby="TreedLiblab">
   <div class="offcanvas-header p-2">
     <div id="TreedLiblab">Model Warehouse</div>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -202,8 +202,8 @@
 				<div id="hairprofileBuilder" class="layer-1 rounded-0 "><!-- maximum shades will be 5 at the start-->
 						<span class="badge bs-layer0 w-100 rounded-0">Shades planner</span>
 						<div class="p-2">
-							<div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 bs-layer1">RootToTip</span><div class="col-10 grad" id="hRootToTip"> </div></div>
-							<div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 bs-layer1">ID</span><div class="col-10 grad" id="hID" > </div></div>
+							<div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">RootToTip</span><div class="col-10 grad" id="hRootToTip"> </div></div>
+							<div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">ID</span><div class="col-10 grad" id="hID" > </div></div>
 						</div>
 				</div>
 			</div>
@@ -287,7 +287,7 @@
         <div class="tab-pane fade show active" id="infotab" role="tabpanel" aria-labelledby="info-tab">
           <div>
             <span class='d-block p-1'>Object Paths</span>
-            <form id='modelUserDataForm' class="p-2 bs-layer1">
+            <form id='modelUserDataForm' class="p-2 bg-layer1">
               <input type="text" class='d-none'  id="lastCustomMDL" readonly />
               <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
               <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
@@ -519,7 +519,7 @@
         <!--class="dropdown d-inline-block " -->
         <div class="btn-group dropend" role="group">
           <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
-            <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu bs-layer1 border border-warning p-2" style="width:22rem;">
+            <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu bg-layer1 border border-warning p-2" style="width:22rem;">
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="rndOnOff">
                 <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>

@@ -1,7 +1,6 @@
 var modelsJson=[
     {"id": "folderScan","parent": "#","text": "Folder Scan","type": "scan","state": {"opened": true}},
     {"id": "custom","parent": "#","text": "custom","type": "custom","state": {"opened": true}},
-    /*{"id": "DLC","parent": "#","text": "dlc","type": "custom","state": {"opened": true}},*/
     {"id": "characters","parent": "#","text": "characters","state": {"opened": true}},
     {"id": "body","parent": "characters","text": "body"},
     {"id": "commonbb","parent": "body","text": "common > base_bodies"},

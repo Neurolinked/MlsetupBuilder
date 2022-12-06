@@ -219,6 +219,7 @@ var canvUVWrapped = document.getElementById('UVMapMe');
 
 //const maploader = new THREE.FileLoader().setResponseType('arraybuffer');
 const loader = new THREE.GLTFLoader(); //loader for Gltf and glb models
+//const loader = new GLTFLoader();
 //const fbxloader = new THREE.FBXLoader(); //loader for FBX Format
 const gui = new dat.GUI({autoPlace:false});
 var GuiSubmesh =gui.addFolder("Submesh Toggle");
@@ -833,10 +834,7 @@ function LoadModelOntheFly(path){
 	      if ((child.type=="SkinnedMesh") && (!Boned)){Boned=true;}
 
 	      if ( child.isMesh ) {
-	        //strGLBInfo = strGLBInfo + "<p><span class='badge bg-md-dark w-100 rounded-0'>"+child.name+"</span> <br><p><span class='badge bg-warning text-dark p-1'>Material names:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";//" <span class='badge bg-warning text-dark p-1'>AppNames:</span> "+child.userData.materialNames.toString().replaceAll(",",", ")+"</p>";
           mobjInfo.push({"name":child.name,"appearanceCode":child.userData.materialNames,"materials":[...new Set(child.userData.materialNames)].toString().replaceAll(",",", "),"vertexes":child.geometry.attributes.uv.count});
-					//strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><span class='px-2'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</span> <span class='px-2'>")+"</span></details></p>";
-	        //strGLBInfo = strGLBInfo + "<p class='eq-lay3 rounded'><span class='badge layer-1 w-100 rounded-0'>"+child.name+"</span><details class='eq-lay3 text-white'><summary class='bg-info p-1 text-dark'>Material names</summary><div><div class='p-1 text-center'>"+[...new Set(child.userData.materialNames)].toString().replaceAll(",","</div><div class=' text-center p-1'>")+"</div></details></p>";
 					child.frustumCulled = false;
 					if ((child.userData?.materialNames!=null) && (child.userData?.materialNames!=undefined)){
 							if (!(/(vehicle_lights)|(logos)|(neon_rims)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|(default_tpp)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
@@ -1252,16 +1250,5 @@ function resize() {
  		paintMask3D=false;
 		controls.enabled = true;
  	}
-
-  //Test per trasportare i canvas in fabricJS
-  /*
-  const pageImageBase64 = 'data:image/png;base64,' + buffer.toString('base64')
-
-   fabric.Image.fromURL(pageImageBase64, function(img) {
-     img.set({ top: 0, left: 0 })
-     canvas.add(img)
-   })
-   */
-   // do other things
 
  });
