@@ -1,27 +1,6 @@
 window.$ = window.jQuery;
 var notifications = 0;
-/*
-var Mlmasks = new PouchDB('mlmasks');
-var Models = new PouchDB('threedmodels');
-var Normals = new PouchDB('normalmaps');
-var Mltemplates = new PouchDB('mltemplate');
 
-Mlmasks.info().then(function (info) {
-  if (info.doc_count==0){
-    console.log("caricare le maschere da file");
-  }
-});
-Models.info().then(function (info) {
-  if (info.doc_count==0){
-    console.log("caricare i modelli da file");
-  }
-});
-Normals.info().then(function (info) {
-  if (info.doc_count==0){
-    console.log("caricare le normal map da file");
-  }
-});
-*/
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 const mLsetup = new Mlsetup();
@@ -55,9 +34,11 @@ async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
     if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("package")) ){
       for (k=0, j=microblendObj.microblends.length;k<j;k++){
-        $("#mbSelect optgroup[label='core']").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
         //select
-				$("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png'); '\" data-package='"+microblendObj.package+"'  data-toggle='tooltip' title='"+microblendObj.microblends[k].name+"'> </li>");
+        $("#mbSelect optgroup[label='core']").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
+        //microblend gallery
+        //$("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png'); '\" data-package='"+microblendObj.package+"' title='"+microblendObj.microblends[k].name+"' data-path=''> </li>");
+				$("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblendObj.microblends[k].name}.png');"  data-package='${microblendObj.package}' title='${microblendObj.microblends[k].name}' data-path='base\\surfaces\\microblends\\${microblendObj.microblends[k].name}.xbm' > </li>`);
       }
     }
   }
@@ -89,9 +70,11 @@ async function nubuildMB(microblendObj){
           package.microblends.forEach((microblend)=>{
             let tmpName = microblend.path.split('.')[0].split("\\").reverse()[0];
             let hash = microblend?.hash != undefined ? `data-hash='${microblend.hash}'` : "";
-            $("#mbSelect optgroup[label='"+pkgName+"']").append("<option data-package='"+pkgName+"' data-thumbnail='./images/mblend/"+pkgName.toLowerCase()+"/"+tmpName+".png' value='"+microblend.path+"'>"+tmpName+"</option>");
-            $("#cagetheCuMBlends").append("<li style=\"background-image:url('./images/mblend/"+pkgName.toLowerCase()+"/thumbs/"+tmpName+".png'); '\" data-package='"+pkgName+"' data-path='"+microblend.path+"' title='"+tmpName+"' > </li>");
-            $("#mbHierarchy ul[data-package='"+pkgName+"']").append(`<li ${hash} data-path[${microblend.path}] class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> ${tmpName}</li>`);
+            //$("#mbSelect optgroup[label='"+pkgName+"']").append("<option data-package='"+pkgName+"' data-thumbnail='./images/mblend/"+pkgName.toLowerCase()+"/"+tmpName+".png' value='"+microblend.path+"'>"+tmpName+"</option>");
+            $("#mbSelect optgroup[label='"+pkgName+"']").append(`<option data-package='${pkgName}' data-thumbnail='./images/mblend/${pkgName.toLowerCase()}/${tmpName}.png' value='${microblend.path}'>${tmpName}</option>`);
+            //$("#cagetheCuMBlends").append("<li style=\"background-image:url('./images/mblend/"+pkgName.toLowerCase()+"/thumbs/"+tmpName+".png'); '\" data-package='"+pkgName+"' data-path='"+microblend.path+"' title='"+tmpName+"' > </li>");
+            $("#cagetheCuMBlends").append(`<li style="background-image:url('./images/mblend/${pkgName.toLowerCase()}/thumbs/${tmpName}.png');" data-package='${pkgName}' data-path='${microblend.path}' title='${tmpName}' > </li>`);
+            $("#mbHierarchy ul[data-package='"+pkgName+"']").append(`<li ${hash} data-path='${microblend.path}' class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> ${tmpName}</li>`);
           });
         }
       })
@@ -144,6 +127,16 @@ async function abuildHairs(aHairs){
 			});
 		}
 	}
+}
+
+async function ModelListing(){
+  $.getJSON("./jsons/models.json", function(json) {
+    let dummyCode =""
+    for (const [key, value] of Object.entries(json)) {
+      dummyCode += `<li class="list-group-item layer-1 text-white" data-identifier="${value.id}">${value.name}</li>`
+    }
+    $("#TreeDModelList").html(`<ul class="list-group list-group-flush bg-dark">${dummyCode}</ul>`)
+  })
 }
 
 function switchLegacyMat(material){
@@ -216,6 +209,7 @@ $(function(){
 	let buildmyNuMaterial = abuildMaterial(materialCore);
 	let buildmyHairs = abuildHairs(hairs);
 	let buildmyMasks = abuildMaskSelector(maskList)
+  //let test = ModelListing()
 
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
@@ -227,11 +221,14 @@ $(function(){
 
 	function notifyMe(message, warning = true){
 		let Data = new Date(Date.now());
-		$("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br/>");
+		
 		if (warning){
+      $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");  
       notifications++
       $("#notyCounter span").text(notifications);
-		}
+		}else{
+      $("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br>");
+    }
     $("#foot-message").text(message);
 	}
 
@@ -242,52 +239,36 @@ $(function(){
     if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
 	}else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}
   });
-
-	function hairToolW(){
-		let leftcorner = $("#Filemanager").offset().left;
-		$('#addedCSS').text('.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
-	}
-
-	$("#HairTool").on('show.bs.offcanvas',function(){
-		hairToolW();
-	});
-
-	$(window).resize(function(){
-		hairToolW();
-		if ($('#ModelLibrary').hasClass('offcanvas-end')){
-			modelLibW();
-		}
-    modelInfW();
-	});
-
-	function modelLibW(){
-		if ($("#ModelLibrary").hasClass('offcanvas-start')){
-			$('#mlLibCSS').text('');
-			localStorage.removeItem('MLibX');
-		}else{
-			localStorage.setItem('MLibX',1);
-			let corner = $("#layer_settings").offset().left;
-			//$('#addedCSS').text('.offcanvas-hair {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
-			$('#mlLibCSS').text('#ModelLibrary.offcanvas-models {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);width:'+parseInt($( window ).width()-corner+2)+'px !important;}');
-		}
-	}
-
-  function modelInfW(){
-    let leftcorner = $("#Filemanager").offset().left;
-		$('#minfoCSS').text('.ocModelInfo {top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:'+parseInt($( window ).width()-leftcorner+2)+'px;}');
+  
+  function updPanelCovers(){
+    let fmanager = $("#Filemanager").offset().left;
+    let layersetting = $("#layer_settings").offset().left;
+    $('#panelsSize').text(`
+      .coverFullEditor{top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:${parseInt($( window ).width()-fmanager+(0.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)))}px !important;}
+      .coverParamEditor{top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);width:${parseInt($( window ).width()-layersetting+2)}px !important;}
+    `);
+    
   }
 
-	$("#ModelLibrary").on('show.bs.offcanvas',function(){	modelLibW(); }); //model library offcanvas end panel  size calculator
-  $("#InfoModel").on('show.bs.offcanvas',function(){	modelInfW(); }); //model info offcanvas panel size calculator
+	$(window).resize(function(){
+    updPanelCovers(); //on resize will update the position of the interface to cover
+	});
 
 	$("#mlPosX").click(function(){
 		swapModelClass();
-		modelLibW();
+    updPanelCovers();
 	})
 
 	function swapModelClass(){
 		$("#mlPosX svg").toggleClass('fa-caret-right fa-caret-left');
 		$("#ModelLibrary").toggleClass('offcanvas-start offcanvas-end')
+    if ($('#ModelLibrary').hasClass('offcanvas-end')){
+      localStorage.setItem('MLibX',1);
+      $('#ModelLibrary').addClass("coverParamEditor")
+    }else{
+      localStorage.removeItem('MLibX');
+      $('#ModelLibrary').removeClass("coverParamEditor")
+    }
 	}
 
   const mbDropZone = document.getElementById('dropzone');
@@ -656,6 +637,7 @@ $("#resetShades span.choose").click(function(){
 	if (Number(modelPlace)>0){
 		swapModelClass();
 	}
+  updPanelCovers();
 	//modal uncooking progress
 	const unCookModal = new bootstrap.Modal(document.getElementById('unCookModal'));
 	//license modal
@@ -876,25 +858,7 @@ $("#resetShades span.choose").click(function(){
   			fireTxLoad.dispatchEvent(TextureLoad);
       }
 
-      $("#layerColor").val($(this).data("color"));
-      $("#matInput").val($(this).data("material"));
-			$("#layerTile").val($(this).data("mattile"));
-			$("#layerOpacity").val($(this).data("opacity")).change();
 
-			$("#layerNormal").val(String($(this).data("normal")));
-			$("#layerRoughIn").val(String($(this).data("roughin")));
-			$("#layerRoughOut").val(String($(this).data("roughout")));
-			$("#layerMetalIn").val(String($(this).data("metalin")));
-			$("#layerMetalOut").val(String($(this).data("metalout")));
-			$("#layerOffU").val($(this).data("offsetu"));
-			$("#layerOffV").val($(this).data("offsetv"));
-      //Microblend section
-			$("#mbInput").val($(this).data("mblend"));
-			$("#mbTile").val($(this).data("mbtile"));
-			$("#mbCont").val($(this).data("mbcontrast"));
-			$("#mbNorm").val($(this).data("mbnormal"));
-			$("#mbOffU").val($(this).data("mboffu"));
-			$("#mbOffV").val($(this).data("mboffv"));
       //setup the chosen colors for the layer
 
       //Load the layers infor into the fields
@@ -913,7 +877,30 @@ $("#resetShades span.choose").click(function(){
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
 			//$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
       //Setup the inputs
-
+      
+      if ( (($(this).data("color")=="000000_null") || ($(this).data("color")=="ffffff_null")) && (!$("#BWAdd").is(":checked")) ){
+        $( "#BWAdd" ).click();
+      }
+      
+      $("#layerColor").val($(this).data("color"));
+      $("#matInput").val($(this).data("material"));
+      $("#layerTile").val($(this).data("mattile"));
+      $("#layerOpacity").val($(this).data("opacity")).change();
+      $("#layerNormal").val(String($(this).data("normal")));
+      $("#layerRoughIn").val(String($(this).data("roughin")));
+      $("#layerRoughOut").val(String($(this).data("roughout")));
+      $("#layerMetalIn").val(String($(this).data("metalin")));
+      $("#layerMetalOut").val(String($(this).data("metalout")));
+      $("#layerOffU").val($(this).data("offsetu"));
+      $("#layerOffV").val($(this).data("offsetv"));
+      //Microblend section
+      $("#mbInput").val($(this).data("mblend"));
+      $("#mbTile").val($(this).data("mbtile"));
+      $("#mbCont").val($(this).data("mbcontrast"));
+      $("#mbNorm").val($(this).data("mbnormal"));
+      $("#mbOffU").val($(this).data("mboffu"));
+      $("#mbOffV").val($(this).data("mboffv"));
+      
 			let  ricercacolore = $(this).data("color");
 
       /*
@@ -939,7 +926,7 @@ $("#resetShades span.choose").click(function(){
 	var ModelsLibrary = $('#modelsTree').jstree({
 		'core' : {"dblclick_toggle":false,"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : modelsJson},
 		'types' : {
-							"default" : { "icon" : "text-warning fas fa-folder" },
+							"default" : { "icon" : "text-warning fas fa-folder"},
               "scan" : {"icon" : "text-danger fas fa-magnifying-glass"},
               "custom" : { "icon" : "custom fas fa-folder" },
 							"custmesh" : { "icon" : "custom fas fa-dice-d6" },
@@ -949,6 +936,7 @@ $("#resetShades span.choose").click(function(){
               "moto" :{ "icon" : "text-danger fas fa-motorcycle" },
               "weapons" : { "icon" : "text-primary fas fa-skull-crossbones" },
 							"kiddo" : {"icon": "text-warning fas fa-baby"},
+              "decal" : {"icon": "text-white fas fa-tag"},
               "layer0" : {"icon": "text-white fas fa-star-half"},
               "custmask" : {"icon":"custom fas fa-mask-face"},
 							"hair" : {"icon":"fa-solid fa-scissors"},
@@ -974,7 +962,7 @@ $("#resetShades span.choose").click(function(){
   }).on('loaded.jstree',function(event){
 		joinModels() //down below the oexplanation of what it does
 	});
-
+  
 /*
 * it take the content of the file customModels.json in the userdata folder
 * and it append every child to the branch with custom D in the models tree
@@ -1223,6 +1211,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 
 	//load a new texture to display as microblends and fille the name in the microblend file name
 	$("#mbSelect").change(function(event){
+      var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
   		$("#mbInput").val($(this).val());
 			$("#mbInput").change();
 
@@ -1233,9 +1222,10 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 
         $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass("MBactive");
 
-        if ($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']")){
-          $("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").addClass("MBactive");
-          $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").width()+2))
+        if ($("#cagethemicroblends li[title='"+MBName+"']")){
+          $("#cagethemicroblends li[title='"+MBName+"']").addClass("MBactive");
+          //$("#microdisplay").scrollLeft($("#cagethemicroblends li[title='"+MBName+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").width()+2))
+          document.getElementById("microdisplay").scrollLeft = ($(`#cagethemicroblends li[title='${MBName}']`).index() * (mblendPrevSize+2))
         }
 
         let customSelected = $("#cagetheCuMBlends li").filter(function(el) {
@@ -1243,7 +1233,8 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
         })
         if (customSelected.length>0){
           customSelected.addClass("MBactive");
-          $("#cu_mu_display").scrollLeft($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").index()*($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").width()+2))
+          document.getElementById("cu_mu_display").scrollLeft = ($(`cagetheCuMBlends li[data-path='${$(this).val().replace("\\","\\\\")}']`).index() * (mblendPrevSize+2))
+          //$("#cu_mu_display").scrollLeft($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").index()*($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").width()+2))
         }
   		}
 	});
@@ -1591,15 +1582,6 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		$(this).addClass('active');
 
 		let colorchanger = $(this).attr("title");
-    /*
-		$("body #materialcolors").prop('selectedIndex',0);
-		if ($("body #materialcolors option:contains('"+colorchanger+"')").length>0) {
-			$("body #materialcolors option:contains('"+colorchanger+"')").prop("selected",true);
-		}else{
-			$("body #defaultcolors option:contains('"+colorchanger+"')").prop("selected",false);
-		}
-		$("body #LayerColorL").change();
-    */
     let colorSwatchValue = $(this).css("background-color")
     $(".tint").prop('style','background-color:'+colorSwatchValue+"!important;");
 	  let choosed_color = tinycolor(colorSwatchValue);
@@ -1609,28 +1591,35 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 	});
 
   $("#cagethemicroblends li").click(function(){
+    var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
+    
     $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
     $(this).addClass("MBactive");
-    let theoneselected = $(this).data('bs-original-title');
-    $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+theoneselected+"']").width()+2))
-    //console.log(theoneselected+" :contains('"+theoneselected+"')");
+    let theoneselected = $(this).attr('title');
+    document.getElementById("microdisplay").scrollLeft = ($(`#cagethemicroblends li[title='${theoneselected}']`).index() * (mblendPrevSize+2))
     $("#mbSelect option").removeAttr("selected")
     let mbZelected = $("#mbSelect option").filter(function() { return $(this).text() === theoneselected;})
-    mbZelected.attr('selected', true).change();
+    mbZelected.attr('selected', true);
+    
+    $("#mbInput").val($(`#cagethemicroblends li[title='${theoneselected}']`).data("path"));
+    $("#mbInput").focusout();
   });
 
   $("body").on("click","#cagetheCuMBlends li",function(){
+    var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
+    
     $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
     $(this).addClass("MBactive");
     let theoneselected = $(this).data('path');
-
-    $("#cu_mu_display").scrollLeft($("#cagetheCuMBlends li[data-path='"+theoneselected+"']").index()*($("#cagetheCuMBlends li[data-path='"+theoneselected+"']").width()+2))
+    $("#mbSelect option").removeAttr("selected")
+    document.getElementById("cu_mu_display").scrollLeft = ($(`#cagetheCuMBlends li[data-path='${theoneselected}']`).index() * (mblendPrevSize+2))
     //console.log(theoneselected+" :contains('"+theoneselected+"')");
     $("#mbSelect option").removeAttr("selected");
     let mbZelected = $("#mbSelect option").filter(function() {
        return $(this).val() === theoneselected;
      })
-    mbZelected.attr('selected', true).change();
+    mbZelected.attr('selected', true);
+    $("#mbInput").val($(`#cagetheCuMBlends li[data-path='${theoneselected}']`).data("path"));
   })
 
 const scrollMBContainer = document.getElementById("microdisplay");
@@ -2270,7 +2259,6 @@ $("#TheMagicIsHere").click(function(){
 	});
 
 $("select[name='exportVersion']").change(function(){
-  console.log($(this).val())
   localStorage.setItem("ExportFormat",$(this).val())
 });
 
@@ -2280,7 +2268,7 @@ $(".xportJSON").click(function(){
   //ver = $(this).data("version");
   console.log(ver);
 
-  let nomefile = 'commonlayer.json';
+  let nomefile = 'commonlayer.mlsetup.json';
   //check if there is already a chosed Names
   if (String($("#nametoexport").val()).trim()!==''){
     nomefile = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
@@ -2716,4 +2704,5 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
   $("#KofiSupportPage").click(function(){
     thePIT.ExtOpen({type:'url',param:'ko-fi'})
   })
+  
 });
