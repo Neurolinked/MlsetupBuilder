@@ -79,7 +79,7 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #NotificationCenter .offcanvas-body{background-color:var(--bs-layer0);}
 #HelpTree *:not(svg,path){color:white!important;}
 
-#interface{display:grid;grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;grid-template-rows:40px auto;gap: 4px;}
+#interface{display:grid;grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;grid-template-rows:40px auto 1rem;gap: 4px;}
 #withthacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 5;}
 /*#thacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 3;}*/
 #withbones{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1;grid-row-end: 1;z-index:10;text-align:right;}
