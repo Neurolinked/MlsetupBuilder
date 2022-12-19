@@ -377,7 +377,7 @@ $(function(){
         indexLayerContextual = Number($(this).text());
         //event.target.classList.add("active");
         const { clientX: mouseX, clientY: mouseY } = event;
-        $("#layers-contextual").css("top",`${mouseY}px`).css("left",`${mouseX}px`);
+        $("#layers-contextual").css("top",`${mouseY-60}px`).css("left",`${mouseX}px`);
         $("#layers-contextual").addClass("visible");
     }
   });

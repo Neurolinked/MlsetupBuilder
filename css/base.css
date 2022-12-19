@@ -79,15 +79,15 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #NotificationCenter .offcanvas-body{background-color:var(--bs-layer0);}
 #HelpTree *:not(svg,path){color:white!important;}
 
-#interface{display:grid;grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;grid-template-rows:40px auto 1rem;gap: 4px;}
+#interface{display:grid;grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;grid-template-rows:40px auto 1rem;gap: 4px;height: 100vh;}
 #withthacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 5;}
 /*#thacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 3;}*/
 #withbones{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1;grid-row-end: 1;z-index:10;text-align:right;}
 #Filemanager{grid-column-start: 2; grid-column-end: 5; grid-row-start: 1; grid-row-end: 1;display:grid;grid-template-columns:0.6fr 0.9fr 1.4fr;text-align: center;}
-#MlEditor{grid-column-start: 2; grid-column-end: 2;grid-row-start: 2; grid-row-end: 3;}
+#MlEditor{grid-column-start: 2; grid-column-end: 2;grid-row-start: 2; grid-row-end: 4;}
 #modelsNavbar{grid-column-start: 1; grid-column-end: 2; grid-row-start: 3; grid-row-end: 3;}
-#micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 2; grid-row-end: 4;}
-#layer_settings{grid-column-start: 3; grid-column-end: 3; grid-row-start: 2; grid-row-end: 3;}
+#micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 2; grid-row-end: 4;overflow-y:auto;padding:0 3px;}
+#layer_settings{grid-column-start: 3; grid-column-end: 3; grid-row-start: 2; grid-row-end: 4;}
 #colorGrid{display:grid;grid-template-columns:1.5fr 2.3fr;}
 #matdisplay{display:grid;grid-template-columns: var(--matrender) 1fr;} /*display the materials and it's datas*/
 
@@ -114,7 +114,7 @@ input[type="range" i] {
   cursor: default;
   background-color: transparent!important;
 }
-
+#layer_settings .input-group-text{min-width:3em;}
 #layer_settings div.input-group div.badge{min-width:70px;}
 #micropanel div.input-group div.badge{min-width:120px;}
 /*#withbones{color:var(--bs-layer2);}*/
@@ -158,7 +158,7 @@ input[type="range" i] {
 #layeringsystem li[data-opacity='0'],
 #layeringsystem li[data-opacity='0.0']{opacity:40%;}
 #layeringsystem{margin:0;padding:0;list-style-type: none;background-color:transparent;/*display:grid;grid-template-columns: repeat(5,1fr);grid-gap:5px;*/}
-#layeringsystem li{border:1px solid var(--layer-2);background-color:var(--layer-3);padding:2px;margin:2px 0;}
+#layeringsystem li{border: 1px solid var(--layer-2); background-color:var(--layer-3);padding:2px;margin:2px 0;}
 #layeringsystem li:hover{border-color:var(--layer-7);background-color:var(--layer-5);}
 #layeringsystem li.active{border-color:var(--bs-primary);background-color:var(--bs-secondary);}
 #layeringsystem li[disabled],
@@ -218,7 +218,7 @@ input[type='text'],
 #modelUserDataForm span i{min-width:21px;}
 /* image preview flipping behaviour styles */
 #mb-preview{width:100%;-webkit-transform: scaleY(-1);transform: scaleY(-1);} /*microblend preview flip */
-#bg-changer{display:block;width:100%;border:0 none;height:4em; border: 0 none!important; padding:0;}
+#bg-changer{display:block;width:100%;border:0 none;height:100%; border: 0 none!important; padding:0;}
 .flip{-webkit-transform: scaleY(1)!important;transform: scaleY(1)!important;}
 /*microblend preview text displaing the direction*/
 .bg-secondary, .badge-secondary{background-color:var(--bs-secondary) !important;}
