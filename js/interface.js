@@ -8,6 +8,7 @@ const mLsetup = new Mlsetup();
 var layerSwapstart = null;
 
 var modelType = 'default';
+var mlSetupContent = '';
 /**
   * This function will extend the Numbercasting type
   * adding the feature of returning the lenght of numbers after the dot
@@ -359,7 +360,7 @@ $(function(){
   $(document).on('keyup', function(e) { if (e.shiftKey == false) { shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');} });
 
 	$("#legacyMatSector").click(function(ev){
-		console.log($("#legacyMatSector").prop('open'))
+		//console.log($("#legacyMatSector").prop('open'))
 		if ($("#legacyMatSector").prop('open')==false){
 			thePIT.savePref({legacymaterial:true});
 		}else{
@@ -902,14 +903,6 @@ $("#resetShades span.choose").click(function(){
       $("#mbOffV").val($(this).data("mboffv"));
       
 			let  ricercacolore = $(this).data("color");
-
-      /*
-      if ($("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).length>0){
-        $("#LayerColorL option").filter(function(){ return this.textContent.startsWith(ricercacolore)}).prop("selected","selected");
-        $("#LayerColorL").change();//fire the events as a user color selection to update colors percentage and preview
-      }else{
-        $("#LayerColorL").prop('selectedIndex',0); //reset to null to let overrides work
-      }*/
       $("#cagecolors span").removeClass("active");
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
 			$("#mbInput").focusout(); //fires up the change of material blending preview
@@ -1361,7 +1354,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			});
 
 			Object.entries(ml_libraries[materialtoload].overrides.normalStrength).forEach(([key,value])=>{
-				$("#Norm_Pow_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
+				$("#Norm_Pow_values").append(`<option value="${value.n}" data-force='${value.v}' >${value.n} (${String(value.v)})</option>`);
 			});
 
 			Object.entries(ml_libraries[materialtoload].overrides.metalLevelsOut).forEach(([key,value])=>{
@@ -1825,21 +1818,42 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
  /*------------------------------------------------------------------------------------
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
+$("#importLink").click(function(){
+  $("#importTech").click();
+})
 //----File Auto Loader
 $("#importTech").change(function(){
 	var fr=new FileReader(); //new reading Object
 	fr.onload=function(){
-    $("#passaggio").val(fr.result);
-    $("#passaggio").change();
+    mlSetupContent = fr.result;
+    passTheMlsetup(fr.result);
+    /*$("#passaggio").val(fr.result);
+    $("#passaggio").change();*/
   } //get the result of the reading to the textarea
   if ($("#importTech")[0].files[0]){
     fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
   }
 });
 
+function passTheMlsetup(textContent=""){
+  if (textContent!=""){
+    $("#off_MLSetups div.offcanvas-body detail").fadeOut();
+    var mls_content =" "
+    try{
+      mls_content = JSON.parse(textContent);
+      let toload = new Mlsetup();
+      toload.import(mls_content);
+      let test = $([toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
+      $(".mlpreviewBody").html(test)
+    }catch(error){
+      notifyMe("Error interpreting the JSON format")
+    }
+    off_MLSetup.show();
+  }
+}
+
 $("#passaggio").change(function(){
   if ($(this).val()!=""){
-    //$("#off_MLSetups div.offcanvas-body").html("")
     $("#off_MLSetups div.offcanvas-body detail").fadeOut();
     var mls_content =" "
     try{
@@ -1910,9 +1924,10 @@ function vacuumCleaner(on = true){
 
 //----Button to load
 $("#TheMagicIsHere").click(function(){
-    off_MLSetup.hide()
-		if (String($("#passaggio").val()).trim()!="") {
-			theArcOfNOA = JSON.parse($("#passaggio").val());
+    off_MLSetup.hide();
+    if (mlSetupContent.trim()!="") {
+		//if (String($("#passaggio").val()).trim()!="") {
+			theArcOfNOA = JSON.parse(mlSetupContent);
 			if (theArcOfNOA.hasOwnProperty('Chunks')){
 			/*if (theArcOfNOA.Extension==".mlsetup"){ */
 				if (theArcOfNOA.Chunks[0].Properties.layers.length>0){

@@ -48,6 +48,18 @@
   <body class="px-1">
 		<div id="floatMat" class="d-none position-absolute"> </div>
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
+    <div id="MainMenu" class="btn-group">
+      <button class="btn btn-sm btn-secondary rounded" type="button" data-bs-toggle="dropdown" data-bs-auto-close="inside" aria-expanded="false"><i class="fa-solid fa-caret-down"></i></button>
+      <ul class="dropdown-menu dropdown-menu-dark rounded-0 pt-0">
+        <li><h6 class="dropdown-header bg-warning text-black">Import/Export</h6></li>
+        <li><a class="dropdown-item" href="#" id="importLink" ><i class="fa-solid fa-file-import"></i> Import</a></li>
+        <li><a class="dropdown-item" href="#"  data-bs-toggle="offcanvas" data-bs-target="#off_MLSetups" ><i class="fa-solid fa-vest"></i> MLsetup Preview</a></li>
+        <li><h6 class="dropdown-header bg-active text-black">Models</h6></li>
+        <li><a class="dropdown-item" href="#" data-bs-toggle="offcanvas" data-bs-target="#InfoModel"><i class="fa-solid fa-hammer"></i> <i class="fas fa-info"></i> Model Information</a></li>
+        <li><h6 class="dropdown-header bg-info text-black">Utility</h6></li>
+        <li><a class="dropdown-item" href="#" id="takeashot"><i class="fas fa-camera-retro"></i> 3D Viewport screenshot</a></li>
+      </ul>
+    </div>
     <div id="dat-container"></div>
 <!--THREE.js libraries -->
 <!--
@@ -225,6 +237,9 @@
     <h5 class="offcanvas-title text-dark" id="lblmlsetupseP"><i class="fa-solid fa-vest"></i> MLsetup Preview</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
+  <div class="d-grid py-1">
+    <button class="btn btn-Prim rounded-0" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="bottom" title="Import a json file">Import the MuLtilayer Setup <i class="fa-solid fa-angles-right"></i></button>
+  </div>
   <div class="offcanvas-body">
     <div class="mlpreviewBody" ></div>
   </div>
@@ -233,7 +248,7 @@
 
 <div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" id="off-MLab" aria-labelledby="offcanvasLabel">
   <div class="offcanvas-header border border-dark p-1">
-    <h5 class="offcanvas-title text-dark" id="offcanvasLabel"><i class="fa-solid fa-puzzle-piece"></i> Microblends Lab</h5>
+    <h5 class="offcanvas-title text-dark" id="offcanvasLabel"><i class="fa-solid fa-puzzle-piece"></i> &micro;blends Lab</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
@@ -426,14 +441,14 @@
   <div id="withthacanvas">
   <canvas id="thacanvas"></canvas>
   <div id="modelsNavbar" class="p-1 rounded layer-1">
-    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-			<input type="checkbox" class="d-none" id="prefloaded" disabled />
-			<input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
+    <div class="btn-group btn-group-sm" role="group" aria-label="3D viewport navigation bar">
       <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off"><label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
+      <input type="checkbox" class="d-none" id="prefloaded" disabled />
+      <input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
       <input type="checkbox" data-toggle="tooltip" title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off"><label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
       <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipMask" autocomplete="off" checked="checked"><label class="btn btn-outline-warning" for="flipMask"><i class="fa-solid fa-rotate fa-rotate-90"></i></label>
       <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipNorm" autocomplete="off"><label class="btn btn-outline-normal" for="flipNorm"><i class="icon-normals"></i></label>
-			<a class="btn btn-outline-info" href="#" id="takeashot" ><i class="fas fa-camera-retro"></i></a>
+			<!--<a class="btn btn-outline-info"  ><i class="fas fa-camera-retro"></i></a>-->
     </div>
 		<div class="btn-group ms-2 me-1" role="group" aria-label="model loading">
 	    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#ModelLibrary" class="btn btn-out-Prim">
@@ -453,9 +468,10 @@
 </div>
   <div id="Filemanager" class="p-2 text-white bs-dark layer-1 rounded" style="display:grid;">
     <div>
-      <div class="input-group input-group-sm">
+      <div class="invisible">
+      <!--<div class="input-group input-group-sm"> 1.6.6-->
         <input type="file" class="form-control" accept=".json" placeholder="Load JSON mlsetup"  id="importTech" />
-        <button class="btn btn-Prim" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>
+        <!--<button class="btn btn-Prim" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>-->
       </div>
       <textarea id="passaggio" class="d-none"></textarea>
     </div>
@@ -545,7 +561,7 @@
               </div> //-->
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="rndMbWild">
-                <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize microblends</summary>On a basis, the microblend are setup to use the flat default microblend, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
+                <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize &micro;blends</summary>On a basis, the microblend are setup to use the flat default one, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
               </div>
             </div>
         </div>
@@ -605,7 +621,7 @@
               <div class="input-group input-group-sm my-1">  
                  <div class="badge my-auto">Normals</div>
                 <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
-                  <optgroup id="defaultNormal" label='Reset'><option value="null">null</option></optgroup>
+                  <optgroup id="defaultNormal" label='Reset'><option value="null" data-force="1" >null</option></optgroup>
                   <optgroup id="Norm_Pow_values" label='Materials'></optgroup>
                 </select>
               </div>
@@ -721,7 +737,7 @@
         </optgroup>
       </select>
       <div id="MicroblendsLibrary">
-        <span class="badge w-100 rounded-0" >core microblends</span>
+        <span class="badge w-100 rounded-0" >core &micro;blends</span>
         <div id="microdisplay" class="layer-1">
           <div id="cagethemicroblends" >
             <li style="background-image:url('./images/thumbs/default.gif');" data-package='source' data-toggle="tooltip" title="default"> </li>
@@ -743,7 +759,7 @@
 			</div>
 			
       <div id="CustMicroblendsGallery">
-        <span class="badge w-100 rounded-0" >custom microblends <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
+        <span class="badge w-100 rounded-0" >custom &micro;blends <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
           <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye-slash"></i></button>
           <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
         </div></span>
@@ -782,8 +798,8 @@
         <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#HowDoI">?</a>
 				<a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#unCookModal">unCook</a>
 				<a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#HairTool">Hair Tool</a>
-				<a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#uncookMicro">Microblend Build</a>
-        <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#off-MLab">Microblend Lab</a>
+				<a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#uncookMicro">&micro;blend Build</a>
+        <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#off-MLab">&micro;blend Lab</a>
         <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter">Notification Center</a>
       </div>
     </div>
@@ -994,15 +1010,15 @@
       <li>It can import .mlsetup files exported to json format</li>
       <li>There is a material database that include every basic material the game use and automatically load value for normals, colors,metalness and roughness</li>
       <li>There is a color picker with swatches compiled from the loaded materials</li>
-      <li>There is a microblend preview display</li>
-      <li>Developed a visual system for microblend positioning over the current layer mlmasks, with that you can:
+      <li>There is a &micro;blend preview display</li>
+      <li>Developed a visual system for &micro;blend positioning over the current layer mlmasks, with that you can:
         <ul>
-          <li>Resize the microblend to fit the masks space</li>
-          <li>Position vertically and horizontally the microblend</li>
-          <li>Sync the microblend values with the layers one. Useful to get the perfect corrispondence when you are placing graphic_logos microblend and materials </li>
+          <li>Resize the &micro;blend to fit the masks space</li>
+          <li>Position vertically and horizontally the &micro;blend</li>
+          <li>Sync the &micro;blend values with the layers one. Useful to get the perfect corrispondence when you are placing graphic_logos &micro;blend and materials </li>
         </ul>
       </li>
-      <li>You can explicit custom path for materials and microblends</li>
+      <li>You can explicit custom path for materials and &micro;blends</li>
       <li>Property randomizer for layers with simple configuration window</li>
       </ul>
     </div>
@@ -1154,7 +1170,7 @@ THE SOFTWARE.</p>
   <ul id="layers-contextual">
     <li data-action="cpall"><i class="fa-solid fa-copy"></i> Copy all attributes</li>
     <li data-action="pstall" disabled><i class="fa-solid fa-square"></i> Paste attributes</li>
-    <li data-action="cpmb"><i class="fa-solid fa-shapes"></i> Copy microblends data</li>
+    <li data-action="cpmb"><i class="fa-solid fa-shapes"></i> Copy &micro;blends data</li>
     <li data-action="pstmb" disabled><i class="fa-solid fa-paste"></i> Paste microblends data</li>
 		<li data-action="cpcol"><i class="fa-solid fa-eye-dropper"></i> Copy color</li>
 		<li data-action="pstcol" disabled><i class="fa-solid fa-paintbrush"></i> Paste color</li>

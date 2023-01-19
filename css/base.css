@@ -1,5 +1,4 @@
 @import "variables.css";
-
 footer{
   padding-top:2px;
   position:fixed;
@@ -27,6 +26,13 @@ footer.main>div{border:1px solid var(--layer-1);font-size:0.75rem;}
 	}
 }
 
+
+#MainMenu{
+  position: absolute;
+  top:0;
+  left:0;
+  z-index:15;
+}
 .fs-120{font-size:1.2rem;}
 .fs-110{font-size:1.1rem;}
 .fs-90{font-size:0.9rem;}
@@ -52,9 +58,10 @@ select optgroup:label{display:none;}
 ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg{min-width:24px;}
 /* Options for three.js */
 #interface canvas{ background: radial-gradient(#010101, #121212);background-repeat: no-repeat}
-#dat-container {background-color:var(--layer-1); position: absolute; top: 0px; left: 20px; z-index: 10; border:1px solid var(--bs-secondary)!important;z-index:11;}
+#dat-container {background-color:var(--layer-1); position: absolute; top: 0px; left: 40px; border:1px solid var(--bs-secondary)!important;z-index:11;}
 #dat-container .dg.main .close-button { border:1px solid var(--bs-secondary)!important; }
 #materialTrees, #layeringsystem, .offcanvas *:not(.svg-inline--fa), .dropdown-menu li,#cagemLibrary div{font-size:0.75rem!important;}
+#MainMenu .dropdown-menu li{font-size: 1rem!important;}
 
 
 #ModelLibrary.offcanvas-start{width:600px!important;}
