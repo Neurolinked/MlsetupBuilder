@@ -222,9 +222,9 @@ $(function(){
 
 	function notifyMe(message, warning = true){
 		let Data = new Date(Date.now());
-		
+
 		if (warning){
-      $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");  
+      $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
       notifications++
       $("#notyCounter span").text(notifications);
 		}else{
@@ -240,7 +240,7 @@ $(function(){
     if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
 	}else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}
   });
-  
+
   function updPanelCovers(){
     let fmanager = $("#Filemanager").offset().left;
     let layersetting = $("#layer_settings").offset().left;
@@ -248,7 +248,7 @@ $(function(){
       .coverFullEditor{top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:${parseInt($( window ).width()-fmanager+(0.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)))}px !important;}
       .coverParamEditor{top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);width:${parseInt($( window ).width()-layersetting+2)}px !important;}
     `);
-    
+
   }
 
 	$(window).resize(function(){
@@ -878,11 +878,11 @@ $("#resetShades span.choose").click(function(){
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
 			//$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
       //Setup the inputs
-      
+
       if ( (($(this).data("color")=="000000_null") || ($(this).data("color")=="ffffff_null")) && (!$("#BWAdd").is(":checked")) ){
         $( "#BWAdd" ).click();
       }
-      
+
       $("#layerColor").val($(this).data("color"));
       $("#matInput").val($(this).data("material"));
       $("#layerTile").val($(this).data("mattile"));
@@ -901,7 +901,7 @@ $("#resetShades span.choose").click(function(){
       $("#mbNorm").val($(this).data("mbnormal"));
       $("#mbOffU").val($(this).data("mboffu"));
       $("#mbOffV").val($(this).data("mboffv"));
-      
+
 			let  ricercacolore = $(this).data("color");
       $("#cagecolors span").removeClass("active");
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
@@ -955,7 +955,7 @@ $("#resetShades span.choose").click(function(){
   }).on('loaded.jstree',function(event){
 		joinModels() //down below the oexplanation of what it does
 	});
-  
+
 /*
 * it take the content of the file customModels.json in the userdata folder
 * and it append every child to the branch with custom D in the models tree
@@ -1585,7 +1585,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 
   $("#cagethemicroblends li").click(function(){
     var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
-    
+
     $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
     $(this).addClass("MBactive");
     let theoneselected = $(this).attr('title');
@@ -1593,14 +1593,14 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     $("#mbSelect option").removeAttr("selected")
     let mbZelected = $("#mbSelect option").filter(function() { return $(this).text() === theoneselected;})
     mbZelected.attr('selected', true);
-    
+
     $("#mbInput").val($(`#cagethemicroblends li[title='${theoneselected}']`).data("path"));
     $("#mbInput").focusout();
   });
 
   $("body").on("click","#cagetheCuMBlends li",function(){
     var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
-    
+
     $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
     $(this).addClass("MBactive");
     let theoneselected = $(this).data('path');
@@ -2719,5 +2719,5 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
   $("#KofiSupportPage").click(function(){
     thePIT.ExtOpen({type:'url',param:'ko-fi'})
   })
-  
+
 });

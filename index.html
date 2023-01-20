@@ -54,6 +54,23 @@
         <li><h6 class="dropdown-header bg-warning text-black">Import/Export</h6></li>
         <li><a class="dropdown-item" href="#" id="importLink" ><i class="fa-solid fa-file-import"></i> Import</a></li>
         <li><a class="dropdown-item" href="#"  data-bs-toggle="offcanvas" data-bs-target="#off_MLSetups" ><i class="fa-solid fa-vest"></i> MLsetup Preview</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item xportJSON" href="#" id="exportversions" ><i class="fa-solid fa-file-export"></i> Export</a></li>
+        <form class="m-1 plus_1_layer p-1">
+          <div class="mb-1 ">
+            <input type="text" value="" class="form-control form-control-sm rounded-0" aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
+          </div>
+          <div class="mb-1">
+            <select name="exportVersion" class="form-select form-select-sm rounded-0 dropSelect">
+              <option value="2">Json v0.0.2 (Wkit 8.7)</option>
+              <option value="1">Json v0.0.1 (Wkit 8.5)</option>
+              <option value="0">pre-Wkit 8.5</option>
+            </select>
+          </div>
+          <div class="mb-1">
+            <input type="checkbox" class="form-check-input me-2 ms-1" id="checkCompile" autocomplete="off" ><label class="form-check-label fs-80" for="checkCompile" >Compile</label>
+          </div>
+        </form>
         <li><h6 class="dropdown-header bg-active text-black">Models</h6></li>
         <li><a class="dropdown-item" href="#" data-bs-toggle="offcanvas" data-bs-target="#InfoModel"><i class="fa-solid fa-hammer"></i> <i class="fas fa-info"></i> Model Information</a></li>
         <li><h6 class="dropdown-header bg-info text-black">Utility</h6></li>
@@ -128,7 +145,7 @@
         <li class="nav-item">
           <a class="nav-link "><i class="fas fa-tag fa-2x px-2" ></i></a>
         </li>
-      </ul>      
+      </ul>
       <!--
       { "icon" : "" },
       "scan" : {"icon" : "text-danger fas fa-magnifying-glass"},
@@ -477,10 +494,10 @@
     </div>
     <div> </div>
     <div>
-      <div class="input-group input-group-sm">
-        
+      <div class="input-group input-group-sm"><!--
+
         <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
-        <!--<button class="btn btn-sm btn-Prim rounded-0 p-1" type="button" id="exportversions" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>//-->
+        <!--<button class="btn btn-sm btn-Prim rounded-0 p-1" type="button" id="exportversions" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>//--><!--
         <select name="exportVersion" class="dropSelect">
           <option value="2">Json v0.0.2 (Wkit 8.7)</option>
           <option value="1">Json v0.0.1 (Wkit 8.5)</option>
@@ -618,7 +635,7 @@
               </div>
             </div>
             <div>
-              <div class="input-group input-group-sm my-1">  
+              <div class="input-group input-group-sm my-1">
                  <div class="badge my-auto">Normals</div>
                 <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
                   <optgroup id="defaultNormal" label='Reset'><option value="null" data-force="1" >null</option></optgroup>
@@ -627,7 +644,7 @@
               </div>
             </div>
             <div>
-              <div class="input-group input-group-sm mt-1"> 
+              <div class="input-group input-group-sm mt-1">
                 <div class="badge my-auto">Metal</div><span class="input-group-text border-0">Out</span>
                 <!--<div class="badge my-auto">Metal Out</div>-->
                 <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
@@ -692,7 +709,7 @@
       <div id="colorGrid">
         <div><span class="badge  w-100 rounded-0">ColorCode</span><input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13"></div>
         <!--<div><span class="badge  w-100 rounded-0">Color list</span>
-          
+
           <select class="form-select rounded-0" id="LayerColorL" aria-label="microblends selection lists">
             <option selected disabled>select a color</option>
             <optgroup id="defaultcolors" label='Default'>
@@ -717,8 +734,8 @@
       <!--
       <div class="input-group">
 				<input id="" class="form-control layer-2" type="text" placeholder="Filter the colors" aria-label="color searcher">
-				
-			</div> 
+
+			</div>
       //-->
       <div id="colordisplay" class="layer-1">
         <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" data-lum='0.5' title='null_null' >&nbsp;</span></div>
@@ -757,7 +774,7 @@
 
 				</div>
 			</div>
-			
+
       <div id="CustMicroblendsGallery">
         <span class="badge w-100 rounded-0" >custom &micro;blends <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
           <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye-slash"></i></button>
