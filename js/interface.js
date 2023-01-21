@@ -242,7 +242,7 @@ $(function(){
   });
 
   function updPanelCovers(){
-    let fmanager = $("#Filemanager").offset().left;
+    let fmanager = $("#MlEditor").offset().left;
     let layersetting = $("#layer_settings").offset().left;
     $('#panelsSize').text(`
       .coverFullEditor{top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:${parseInt($( window ).width()-fmanager+(0.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)))}px !important;}

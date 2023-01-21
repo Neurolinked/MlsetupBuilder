@@ -76,6 +76,12 @@
         <li><h6 class="dropdown-header bg-info text-black">Utility</h6></li>
         <li><a class="dropdown-item" href="#" id="takeashot"><i class="fas fa-camera-retro"></i> 3D Viewport screenshot</a></li>
       </ul>
+      <div class="d-none">
+      <!--<div class="input-group input-group-sm"> 1.6.6-->
+        <input type="file" accept=".json" placeholder="Load JSON mlsetup"  id="importTech" />
+        <!--<button class="btn btn-Prim" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>-->
+        <textarea id="passaggio" class="d-none"></textarea>
+      </div>
     </div>
     <div id="dat-container"></div>
 <!--THREE.js libraries -->
@@ -483,41 +489,7 @@
    </div>
   </div>
 </div>
-  <div id="Filemanager" class="p-2 text-white bs-dark layer-1 rounded" style="display:grid;">
-    <div>
-      <div class="invisible">
-      <!--<div class="input-group input-group-sm"> 1.6.6-->
-        <input type="file" class="form-control" accept=".json" placeholder="Load JSON mlsetup"  id="importTech" />
-        <!--<button class="btn btn-Prim" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>-->
-      </div>
-      <textarea id="passaggio" class="d-none"></textarea>
-    </div>
-    <div> </div>
-    <div>
-      <div class="input-group input-group-sm"><!--
-
-        <input type="text" value="" class="form-control " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" accept=".json"  />
-        <!--<button class="btn btn-sm btn-Prim rounded-0 p-1" type="button" id="exportversions" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>//--><!--
-        <select name="exportVersion" class="dropSelect">
-          <option value="2">Json v0.0.2 (Wkit 8.7)</option>
-          <option value="1">Json v0.0.1 (Wkit 8.5)</option>
-          <option value="0">pre-Wkit 8.5</option>
-        </select>
-        <button class="btn btn-sm btn-Prim rounded-0 p-1 xportJSON" type="button" id="exportversions" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
-        <input type="checkbox" class="btn-check" id="checkCompile" autocomplete="off" checked='checked'><label class="btn btn-outline-warning" for="checkCompile" >Compile</label>
-        <!--
-				<div class="dropdown">
-				  <button class="btn btn-sm dropdown-toggle btn-Prim rounded-0 p-1 " type="button" id="exportversions" data-bs-toggle="dropdown" aria-expanded="false" title="Export the actual layer structure to json format to be transformed by the Wkit family tools in .mlsetup" ><i class="fas fa-save"></i> Export</button>
-				  <ul id="xport_dm" class="dropdown-menu" aria-labelledby="exportversions">
-            <li><a class="dropdown-item xportJSON" href="#" id="exportJason_v2" data-version="2">Json v0.0.2 (Wkit 8.7)</a></li>
-				    <li><a class="dropdown-item xportJSON" href="#" id="exportJason_v1" data-version="1">Json v0.0.1 (Wkit 8.5)</a></li>
-				    <li><a class="dropdown-item xportJSON" href="#" id="exportJason" data-version="0">pre-Wkit 8.5</a></li>
-				  </ul>
-				</div>-->
-        <!--<input type="checkbox" class="btn-check" id="checkCompile" autocomplete="off" checked='checked'><label class="btn btn-secondary" for="checkCompile" >Compile</label>-->
-      </div>
-  </div>
-  </div>
+  <!--<div id="Filemanager" class="p-2 text-white bs-dark layer-1 rounded" style="display:grid;"> </div>-->
   <div id="MlEditor" class="text-white layer-1 rounded">
     <span class="badge w-100 rounded-0 ">Layers</span>
 		<div class="d-grid"><button class="btn btn-out-Prim btn-sm" id="applytoMyLayer" type="button" data-toggle="tooltip" data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
