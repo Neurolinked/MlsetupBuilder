@@ -3,7 +3,7 @@ var notifications = 0;
 
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
-const mLsetup = new Mlsetup();
+var mLsetup = new Mlsetup();
 
 var layerSwapstart = null;
 
@@ -1841,35 +1841,17 @@ function passTheMlsetup(textContent=""){
     var mls_content =" "
     try{
       mls_content = JSON.parse(textContent);
-      let toload = new Mlsetup();
-      toload.import(mls_content);
-      let test = $([toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
+      mLsetup = new Mlsetup();
+      mLsetup.import(mls_content);
+      let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
       $(".mlpreviewBody").html(test)
     }catch(error){
-      notifyMe("Error interpreting the JSON format")
+      notifyMe(`Error: ${error}`)
     }
     off_MLSetup.show();
   }
 }
 
-$("#passaggio").change(function(){
-  if ($(this).val()!=""){
-    $("#off_MLSetups div.offcanvas-body detail").fadeOut();
-    var mls_content =" "
-    try{
-      mls_content = JSON.parse($("#passaggio").val());
-      let toload = new Mlsetup()
-      toload.import(mls_content);
-
-      let test = $([toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
-      $(".mlpreviewBody").html(test)
-      //$(".mlpreviewBody").html(toload.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>"));
-    }catch(error){
-      notifyMe("Error interpreting the JSON format")
-    }
-    off_MLSetup.show();
-  }
-});
 //Cleanep all the layers value
 function vacuumCleaner(on = true){
   let c_opacity
@@ -1925,6 +1907,70 @@ function vacuumCleaner(on = true){
 //----Button to load
 $("#TheMagicIsHere").click(function(){
     off_MLSetup.hide();
+    console.log(mLsetup);
+    //Layer Cleanup for disabled layers
+    disabledLayers = 20 - mLsetup.Layers.length;
+    
+    $(`#layeringsystem li`).removeAttr('disabled');
+    
+    if (disabledLayers>0){
+      $(`#layeringsystem li:nth-last-child(-n+${disabledLayers})`).attr('disabled','disabled');
+      for(h=19;h>=20-disabledLayers;h--){
+        mLsetup.reset(h);
+      }
+    }
+    //Layer data build
+    for(k=0;k<20;k++){
+      $('#layeringsystem li').eq(k).data({
+        mattile:mLsetup.Layers[k].tiles,
+        labels:'('+mLsetup.Layers[k].color+') '+ String(mLsetup.Layers[k].material).replace(/^.*[\\\/]/, '').split('.')[0],
+        material:mLsetup.Layers[k].material,
+        opacity:mLsetup.Layers[k].opacity,
+        color:mLsetup.Layers[k].color,
+        normal:mLsetup.Layers[k].normal,
+        roughin:mLsetup.Layers[k].roughnessIn,
+        roughout:mLsetup.Layers[k].roughnessOut,
+        metalin:mLsetup.Layers[k].metalIn,
+        metalout:mLsetup.Layers[k].metalOut,
+        offsetU:mLsetup.Layers[k].offsetU,
+        offsetV:mLsetup.Layers[k].offsetV,
+        mblend:mLsetup.Layers[k].microblend.file,
+        mbtile:mLsetup.Layers[k].microblend.tiles,
+        mbcontrast:mLsetup.Layers[k].microblend.contrast,
+        mbnormal:mLsetup.Layers[k].microblend.normal,
+        mboffu:mLsetup.Layers[k].microblend.offset.h,
+        mboffv:mLsetup.Layers[k].microblend.offset.v
+      });
+      $('#layeringsystem li').eq(k).attr({
+        "data-mattile":mLsetup.Layers[k].tiles,
+        "data-labels":'('+mLsetup.Layers[k].color+') '+ String(mLsetup.Layers[k].material).replace(/^.*[\\\/]/, '').split('.')[0],
+        "data-material":mLsetup.Layers[k].material,
+        "data-opacity":mLsetup.Layers[k].opacity,
+        "data-color":mLsetup.Layers[k].color,
+        "data-normal":mLsetup.Layers[k].normal,
+        "data-roughin":mLsetup.Layers[k].roughnessIn,
+        "data-roughout":mLsetup.Layers[k].roughnessOut,
+        "data-metalin":mLsetup.Layers[k].metalIn,
+        "data-metalout":mLsetup.Layers[k].metalOut,
+        "data-offsetU":mLsetup.Layers[k].offsetU,
+        "data-offsetV":mLsetup.Layers[k].offsetV,
+        "data-mblend":mLsetup.Layers[k].microblend.file,
+        "data-mbtile":mLsetup.Layers[k].microblend.tiles,
+        "data-mbcontrast":mLsetup.Layers[k].microblend.contrast,
+        "data-mbnormal":mLsetup.Layers[k].microblend.normal,
+        "data-mboffu":mLsetup.Layers[k].microblend.offset.h,
+        "data-mboffv":mLsetup.Layers[k].microblend.offset.v
+      });
+    }
+    console.log(`%c- Imported ${$("#importTech").val()} -`,"background-color:green;color:yellow;")
+    //$("#load-info").html('<span class="badge bg-info text-dark">Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1)+' </span>');
+    notifyMe('Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1),false);
+    $('#nametoexport').val($("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1));
+    $("#importTech").val("");
+    $("#layeringsystem li.active").click();
+    
+    return
+    
     if (mlSetupContent.trim()!="") {
 		//if (String($("#passaggio").val()).trim()!="") {
 			theArcOfNOA = JSON.parse(mlSetupContent);

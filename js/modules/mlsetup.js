@@ -18,7 +18,6 @@ class Layer {
 			normal : 1.0,
 			offset : { h:0.0, v:0.0}
 	}
-
 }
 
 class Mlsetup {
@@ -92,7 +91,7 @@ class Mlsetup {
 				for (const [key, prop] of Object.entries(layeriteration)) {
 					this.Layers[i].color=prop.colorScale;
 					this.Layers[i].material=prop.material.DepotPath;
-					this.Layers[i].tiles=prop.matTile;
+					this.Layers[i].tiles=prop?.matTile ? prop.matTile: 1;
 					this.Layers[i].microblend.tiles = prop.mbTile
           this.Layers[i].metalIn=prop.metalLevelsIn
           this.Layers[i].metalOut = prop.metalLevelsOut
@@ -104,21 +103,21 @@ class Mlsetup {
           this.Layers[i].normal = prop.normalStrength
           this.Layers[i].offsetU = prop.offsetU
           this.Layers[i].offsetV = prop.offsetV
-          this.Layers[i].opacity = prop.opacity
+          this.Layers[i].opacity = prop?.opacity!=undefined ? prop.opacity : 1
           this.Layers[i].overrides = prop.overrides
           this.Layers[i].roughnessIn = prop.roughLevelsIn
           this.Layers[i].roughnessOut = prop.roughLevelsOut
 					i++
 				}
 				this.normals = !!mlsetupObject.Data.RootChunk.usenormal
-				this.ratio = mlsetupObject.Data.RootChunk.ratio
+				this.ratio = (mlsetupObject.Data.RootChunk?.ratio!=undefined) ? mlsetupObject.Data.RootChunk.ratio : 1.0;
 				break;
 			case 1:
 				//Iteration on mlsetupObject.Chunks.0.Properties.layers
 				this.#limit = mlsetupObject.Data.RootChunk.Properties.layers.length
 				layeriteration = mlsetupObject.Data.RootChunk.Properties.layers;
 				for (const [key, prop] of Object.entries(layeriteration)) {
-					let thisLayer =prop.Properties
+					let thisLayer = prop.Properties
 					this.Layers[i].color=thisLayer.colorScale;
 					this.Layers[i].material=thisLayer.material.DepotPath;
 					this.Layers[i].tiles=thisLayer?.matTile ? thisLayer.matTile : 1;
@@ -140,7 +139,7 @@ class Mlsetup {
 					i++
 				}
 				this.normals = true
-				this.ratio = mlsetupObject.Data.RootChunk.Properties.ratio
+				this.ratio = (mlsetupObject.Data.RootChunk.Properties.ratio!=undefined) ? mlsetupObject.Data.RootChunk.Properties.ratio : 1.0;
 				break;
 			default:
 				this.#limit = mlsetupObject.Chunks[0].Properties.layers.length
@@ -167,7 +166,7 @@ class Mlsetup {
 					i++
 				}
 				this.normals = true
-				this.ratio = mlsetupObject.Chunks[0].Properties.ratio
+				this.ratio = (mlsetupObject.Chunks[0].Properties?.ratio!=undefined) ? mlsetupObject.Chunks[0].Properties?.ratio : 1.0;
 				break;
 		}
 		if (this.#limit < 20){
