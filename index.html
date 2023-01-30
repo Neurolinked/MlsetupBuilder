@@ -7,7 +7,6 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src * 'unsafe-inline'; script-src *; img-src * data: 'unsafe-inline' blob:; connect-src 'self'; worker-src * blob:;" >
   <meta name="author" content="Neurolinked">
   <meta name="date" content="September 2021">
-  <!--<script type="text/javascript"  src="./public/pouchDB/pouchdb-7.3.0.min.js"></script>-->
 	<!-- Intro.js -->
 	<link rel="stylesheet" href="./node_modules/intro.js/minified/introjs.min.css" />
 	<link href="./node_modules/intro.js/themes/introjs-dark.css" rel="stylesheet">
@@ -15,8 +14,6 @@
   <!-- BOOtstrap 5 -->
   <link href="./css/mlsb.css" rel="stylesheet">
   <script type="text/javascript"  src="./js/bootstrap/bootstrap.bundle.min.js"></script>
-  <!--<link href="./bs511/css/bootstrap.min.css" rel="stylesheet">
-  <script type="text/javascript"  src="./bs511/js/bootstrap.bundle.min.js"></script>
   <!--FontAwesome --><link rel="stylesheet" href="./public/fontawesome-free/css/all.min.css" />
 	<!--FontAwesome --><script type="text/javascript" src="./public/fontawesome-free/js/all.min.js" ></script>
   <!-- If the require doesn't work, include first the jQuery file  <script src="jquery-3.0.0.min.js"></script> -->
@@ -152,20 +149,6 @@
           <a class="nav-link "><i class="fas fa-tag fa-2x px-2" ></i></a>
         </li>
       </ul>
-      <!--
-      { "icon" : "" },
-      "scan" : {"icon" : "text-danger fas fa-magnifying-glass"},
-      "custom" : { "icon" : "custom fas fa-folder" },
-      "custmesh" : { "icon" : "custom fas fa-dice-d6" },
-      "man" : { "icon" : "fas fa-mars" },
-      "woman" : { "icon" : "fas fa-venus" },
-      "car" : { "icon" : "text-danger fas fa-car-side" },
-      "moto" :{ "icon" : "text-danger fas fa-motorcycle" },
-      "weapons" : { "icon" : "text-primary fas fa-skull-crossbones" },
-      "kiddo" : {"icon": "text-warning fas fa-baby"},
-      "layer0" : {"icon": "text-white fas fa-star-half"},
-      "custmask" : {"icon":"custom fas fa-mask-face"},
-      "hair" : {"icon":"fa-solid fa-scissors"},-->
     </div>
   </div>
   <div class="offcanvas-body ">
@@ -268,7 +251,6 @@
   </div>
 </div>
 <!--Offcanvas Import close -->
-
 <div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" id="off-MLab" aria-labelledby="offcanvasLabel">
   <div class="offcanvas-header border border-dark p-1">
     <h5 class="offcanvas-title text-dark" id="offcanvasLabel"><i class="fa-solid fa-puzzle-piece"></i> &micro;blends Lab</h5>
@@ -534,20 +516,13 @@
       <div class="btn-group btn-group-sm m-1 " role="group" aria-label="Layers randomizer">
 				<button type="button" class="btn btn-outline-warning" id="layerRandomizer" data-toggle="tooltip" title="Randomize layers"><i class="fas fa-random"></i></button>
 				<input id="layerRandomCfg" class="form-control rounded-0 border border-warning" type="text" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
-				<!--<button type="button" class="btn btn-outline-warning" id="randomTrScribe" data-toggle="tooltip" title="Transcribe actual enabled layer setup"><i class="fab fa-buffer"></i></button>
-        <button type="button" class="btn btn-outline-warning" id="randomicOpt" data-bs-toggle="modal" data-toggle="tooltip" data-bs-target="#RandOptmodal" title="Option setting for the randomizer"><i class="fas fa-cogs"></i></button>
-        <!--class="dropdown d-inline-block " -->
         <div class="btn-group dropend" role="group">
           <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
             <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu bg-layer1 border border-warning p-2" style="width:22rem;">
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="rndOnOff">
                 <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
-              </div><!--
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="rndAll" disabled>
-                <label class="form-check-label" for="rndAll" ><details><summary>Randomize all layers</summary>Without this option ONLY the already active layers can obtain randomized values.</details></label>
-              </div> //-->
+              </div>
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="rndMbWild">
                 <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize &micro;blends</summary>On a basis, the microblend are setup to use the flat default one, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
@@ -563,7 +538,6 @@
 			<div class="layer-1 m-2"><span class="badge w-100 rounded-0 "> Normal </span>
 				<div class="form-check form-switch d-flex justify-content-center">
 					<input class="form-check-input " type="checkbox" role="switch" id="useNormals" checked>
-					<!--<label class="form-check-label ml-2" for="flexSwitchCheckDefault">ON</label>-->
 				</div>
 			</div>
 		</div>
@@ -618,11 +592,8 @@
             <div>
               <div class="input-group input-group-sm mt-1">
                 <div class="badge my-auto">Metal</div><span class="input-group-text border-0">Out</span>
-                <!--<div class="badge my-auto">Metal Out</div>-->
                 <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
-                  <optgroup id="defaultMetalOut" label='Reset'>
-                    <option value="null">null</option>
-                  </optgroup>
+                  <optgroup id="defaultMetalOut" label='Reset'><option value="null">null</option></optgroup>
                   <optgroup id="Metal_Out_values" label='material'></optgroup>
                 </select>
               </div>
@@ -643,54 +614,8 @@
 				</ul>
 			</div>
 			</details>
-      <!--<div class="twoColGrid layer-1">
-        <div>
-          <span class="badge  w-100 rounded-0 ">Normals</span>
-          <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
-            <optgroup id="defaultNormal" label='Reset'>
-              <option value="null">null</option>
-            </optgroup>
-            <optgroup id="Norm_Pow_values" label='Materials'></optgroup>
-          </select>
-        </div>
-        <div>
-          <span class="badge  w-100 rounded-0 ">Metal Out</span>
-          <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
-						<optgroup id="defaultMetalOut" label='Reset'>
-              <option value="null">null</option>
-            </optgroup>
-						<optgroup id="Metal_Out_values" label='material'></optgroup>
-          </select>
-        </div>
-        <!--
-        <div>
-          <span class="badge w-100 rounded-0 ">Rough In</span>
-          <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
-            <optgroup label="Reset"><option value="null" >null</option></optgroup>
-            <optgroup id="Rough_In_values" label="Material"></optgroup>
-          </select>
-        </div>
-        <div>
-          <span class="badge  w-100 rounded-0 ">Rough Out</span>
-	          <select class="form-select rounded-0" id="layerRoughOut" aria-label="RoughnessOut">
-	            <optgroup label="Reset"><option value="null" >null</option></optgroup>
-	            <optgroup label="Material specific" id="Rough_out_values"></optgroup>
-	          </select>
-        </div>->
-      </div>-->
       <div id="colorGrid">
         <div><span class="badge  w-100 rounded-0">ColorCode</span><input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13"></div>
-        <!--<div><span class="badge  w-100 rounded-0">Color list</span>
-
-          <select class="form-select rounded-0" id="LayerColorL" aria-label="microblends selection lists">
-            <option selected disabled>select a color</option>
-            <optgroup id="defaultcolors" label='Default'>
-              <option style="color:rgb(50%,50%,50%);" value="rgb(50%,50%,50%);" >null_null</option>
-            </optgroup>
-            <optgroup id="materialcolors" label='Materials'></optgroup>
-          </select>
-          </div>
-        -->
         <div><span class="badge  w-100 rounded-0" id="colorPntage">rgb();</span><span class="badge border border-secondary w-100 rounded-0 tint" > </span></div>
       </div>
       <div class="input-group input-group-sm">
@@ -703,12 +628,6 @@
         <label class="btn btn-outline-warning btn-sm" for="BWAdd" data-toggle="tooltip" data-bs-original-title="Add Black and white, but you need to install a mod with them (Multilayer Material Xtender has them)"><i class="fa-solid fa-swatchbook"></i></label>
         <button type="button" id="colorReset" data-toggle="tooltip" title="" class="btn btn-outline-info" data-bs-original-title="Choose the basic override null_null"><i class="fa-solid fa-eraser"></i></button>
       </div>
-      <!--
-      <div class="input-group">
-				<input id="" class="form-control layer-2" type="text" placeholder="Filter the colors" aria-label="color searcher">
-
-			</div>
-      //-->
       <div id="colordisplay" class="layer-1">
         <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" data-lum='0.5' title='null_null' >&nbsp;</span></div>
       </div>
@@ -776,11 +695,8 @@
             <span class="input-group-text rounded-0 bg-dark text-warning border-0">V</span> <input type="number" class="form-control rounded-0 text-end" id="mbOffV" value="0" step="0.01">
           </div>
           <button class="btn btn-Prim rounded-0 btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
-        </div><!--
-        <div class="d-grid">
-
         </div>
-      --></div>
+      </div>
     </div>
       <div id="versionDisplay">
         <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
@@ -949,10 +865,6 @@
 <div class="modal fade" id="AimBlend" tabindex="-1" aria-labelledby="aimblendLBL" aria-hidden="true">
 <div class="modal-dialog modal-lg">
   <div class="modal-content">
-    <!--<div class="modal-header bg-secondary text-white">
-      <h5 class="modal-title" id="aimblendLBL">&micro;blend aiming</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>-->
     <div class="modal-body text-white">
       <div id="aimGRID">
         <!--both canvas -->

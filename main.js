@@ -455,22 +455,24 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
     if (err) {
       if (err.code=='ENOENT'){
 				if (hasDepot){
-					event.reply('preload:logEntry', 'Missing file - trying in the Depot Folder')
-					fs.readFile(path.join(preferences.get('depot'),percorso),flags,(err,contenutofile) =>{
+					
+					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom} - trying in the Depot Folder`)
+					whereLoadFrom = path.join(preferences.get('depot'),percorso)
+					
+					fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
 						if (err){
 							if (err.code=='ENOENT'){
-								if (path.join(preferences.get('depot'),percorso)){
-									event.reply('preload:logEntry', 'File not found in : '+path.join(preferences.get('depot'),percorso),true)
+								if (whereLoadFrom){
+									event.reply('preload:logEntry', `File not found in : ${whereLoadFrom}`,true)
 								}else{
-									dialog.showErrorBox("File opening error","The searched file does not exists also in the Depot\n"+path.join(preferences.get('depot'),percorso))
-									event.reply('preload:logEntry', 'Missing file - '+path.join(preferences.get('depot'),percorso),true)
+									dialog.showErrorBox("File opening error",`The searched file does not exists also in the Depot ${whereLoadFrom}`)
+									event.reply('preload:logEntry', `Missing file - ${whereLoadFrom}`,true)
 								}
 							}
 							contenutofile=""
 						}else{
 							event.reply('preload:logEntry', 'File found in the Depot Folder, Yay')
 						}
-						//event.returnValue = 
 						return contenutofile
 					})
 				}else{
@@ -486,6 +488,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
       }
       contenutofile=""
     }
+		event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
 		event.returnValue = contenutofile	
   })
 })

@@ -841,14 +841,13 @@ $("#resetShades span.choose").click(function(){
 
   //actions connected to the click onto the layers list
 	$('#layeringsystem li').click(function(e){
+    
 		if (!$(this).attr("disabled")){
       //activate the new one only if isn't disabled
 			$('#layeringsystem li').removeClass('active notsync');
-
       //sync with the mask paint editor
       $("#masksPanel li.active").removeClass("active");
       $("#masksPanel li").eq($(this).index()).addClass("active");
-
 			$(this).addClass('active');
 			$("#maskLayer").attr("value",$(this).text());
       //if the model is already loaded it fires the event to load the masks
@@ -858,7 +857,6 @@ $("#resetShades span.choose").click(function(){
   			let fireTxLoad = document.getElementById('maskLayer');
   			fireTxLoad.dispatchEvent(TextureLoad);
       }
-
 
       //setup the chosen colors for the layer
 
@@ -872,7 +870,10 @@ $("#resetShades span.choose").click(function(){
 			$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
 			slideMaterials($("#cagemLibrary > div.active").index());
 			$("#materialSummary").html(materialByClick);
-			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
+      /* ColorChange before the switch */
+      $("#layerColor").val($(this).data("color"));
+			/*trigger the material change */
+      $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
 			//
       //$("#materialTrees").jstree().deselect_all(true);//reset the material library
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
@@ -883,7 +884,7 @@ $("#resetShades span.choose").click(function(){
         $( "#BWAdd" ).click();
       }
 
-      $("#layerColor").val($(this).data("color"));
+      //$("#layerColor").val($(this).data("color"));
       $("#matInput").val($(this).data("material"));
       $("#layerTile").val($(this).data("mattile"));
       $("#layerOpacity").val($(this).data("opacity")).change();
@@ -986,20 +987,6 @@ $("#resetShades span.choose").click(function(){
       case 'default':
         return false;
         break;
-        /*
-      case 'scan':
-      return {
-        "scan":{
-          "separator_before": false,
-          "separator_after": false,
-          "label": "Start a new folder scan",
-          "icon": "fas fa-folder-tree",
-          "action": function (obj) {
-              thePIT.Scan();
-            }
-          }
-        };
-        break;*/
       case 'custmask':
         return {
 					"remove":{
@@ -1087,23 +1074,6 @@ $("#resetShades span.choose").click(function(){
 			}
       default:
 				return false;
-				/*
-        return {
-            "Customize": {
-                "separator_before": false,
-                "separator_after": false,
-                "label": "customize",
-                "icon": "fas fa-edit",
-                "action": function (obj) {
-                  let radix = $('#modelsTree').jstree(true);
-                  radix.copy_node(node,'custom','last',function(child,father,pos){
-                    oldtype = String(child.icon).replace('text-white','');
-                    radix.set_type(child,'custmask');
-                    radix.set_icon(child,"custom "+oldtype);
-                  });
-                }
-            },
-          }*/
     }
   }
 //When selecting a model from the library it load data in the inputs
@@ -1462,74 +1432,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			slideMaterials(matindexchose,200);
 		}
 	});
-/*
-	$("body").on('click','#cagemLibrary > div',function(event){
-
-		//$("#cagemLibrary > div").removeClass("active");
-		//$(this).addClass('active');
-
-		//if ($(this).index()/4>1){
-			//slideMaterials($(this).index());
-			//$("#cagemLibrary").animate({scrollTop:((Math.floor($(this).index()/3)-1)*67)+"px"},700);
-		//}
-
-		$("#materialSummary").html($(this).data('ref'));
-		$("#matInput").val($(this).data('path'));
-		$("#matInput").trigger("change");
-		if (ml_libraries.hasOwnProperty($(this).data('ref'))){
-			let materialtoload = $(this).data('ref');
-			switchLegacyMat(materialtoload);
-			console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
-
-			$("#Rough_out_values").html('');//reset optional roughness
-			$("#Metal_Out_values").html('');
-			$("#Rough_In_values").html('');
-			$("#Norm_Pow_values").html('');
-			$("#materialcolors").html('');
-			$("#cagecolors").html('');
-
-			let toodarkClass;
-
-			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
-				toodarkClass='';
-				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
-				//if (!(colorchecking.getBrightness()>90) && (colorchecking.getBrightness()<110)){
-				if (!tinycolor.isReadable(colorchecking,"#3c454d")){
-					toodarkClass='bg-light';
-				}
-				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
-			});
-			//build up the lists of data loaded from the material chosen
-
-			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
-				$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
-			});
-
-			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsOut).forEach(([key,value])=>{
-				$("#Rough_out_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
-			});
-
-			Object.entries(ml_libraries[materialtoload].overrides.normalStrength).forEach(([key,value])=>{
-				$("#Norm_Pow_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
-			});
-
-			Object.entries(ml_libraries[materialtoload].overrides.metalLevelsOut).forEach(([key,value])=>{
-				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
-			});
-
-			$("#materialChoser").attr('src','./images/material/'+materialtoload+'.jpg');
-		}else{
-			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
-			$("#materialcolors").html("");
-		}
-
-		$("#cagecolors").find('span').sort(function(a, b) {
-    	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
-		}).appendTo($("#cagecolors"));
-
-	});
-  */
+  
   $("#BWAdd").on("input",function(){
     if ($(this).is(":checked")){
       if (($('#cagecolors span[data-lum="0"]').length==0) && ($('#cagecolors span[data-lum="-1"]').length==0)){
@@ -1555,15 +1458,6 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     }
   });
 
-	//On change on the color selection, update the bigger color preview and the line that say the percentage
-	//$("body").on('change','#LayerColorL', function(){
-    /*
-		$(".tint").prop('style','background-color:'+$(this).val()+"!important;");
-		$("#layerColor").val($('#LayerColorL option:selected').text().slice(0,-2));
-	  let choosed_color = tinycolor($(this).val());
-	  $("#colorPntage").html(choosed_color.toPercentageRgbString()); //convert to text percentage the colors
-
-	});*/
   /*simulate the selection of the null_null color */
   $("#colorReset").click(function(){
     $("body #cagecolors span[title='null_null']").click();
@@ -2326,8 +2220,6 @@ $("select[name='exportVersion']").change(function(){
 //3 export versions for Wkit
 $(".xportJSON").click(function(){
   ver = Number($("select[name='exportVersion']").val());
-  //ver = $(this).data("version");
-  console.log(ver);
 
   let nomefile = 'commonlayer.mlsetup.json';
   //check if there is already a chosed Names
@@ -2725,9 +2617,7 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
     }
   }
 
-  $("#FolderScan").click(function(){
-    thePIT.Scan();
-  });
+  $("#FolderScan").click(function(){ thePIT.Scan() });
 
   $("#txtFolderScanner").change(function(){
     if ($(this).val()!=''){
