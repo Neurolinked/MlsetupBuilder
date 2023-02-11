@@ -13,7 +13,7 @@ class Layer {
 	overrides = 0
 	microblend = {
 			file : 'base\\surfaces\\microblends\\default.xbm',
-			tiles : 1,
+			tiles : 1.0,
 			contrast : 0.0,
 			normal : 1.0,
 			offset : { h:0.0, v:0.0}
