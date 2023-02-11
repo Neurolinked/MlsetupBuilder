@@ -86,7 +86,7 @@ const preferences = new store({schema,
 	}
 });
 
-archives = {
+var archives={
 	engine : "basegame_1_engine.archive",
 	nightcity : "basegame_3_nightcity.archive",
 	appearances : "basegame_4_appearance.archive",
@@ -833,7 +833,7 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
-			var archives = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
+			var archivefold = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
 			.then(selection => {
 				if (!selection.canceled){
 					let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
@@ -943,7 +943,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
-			var archives = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
+			let archive = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
 			.then(selection => {
 				if (!selection.canceled){
 					let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
@@ -952,7 +952,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 
 					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 						mainWindow.webContents.send('preload:uncookLogClean','#microLogger')
-
+						
 						uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.engine), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
 							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
 							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
@@ -1009,6 +1009,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 					}
 				}
 			})
+			.catch((err)=> mainWindow.webContents.send('preload:logEntry',`${err} `,true))
 		}
 	})
 })
@@ -1144,7 +1145,7 @@ ipcMain.on('main:delmBlend', (event,micro)=>{
 
 
 ipcMain.on('main:scanFolder',()=>{
-	var archives = dialog.showOpenDialog({title:'Select a folder you want to scan',properties: ['openDirectory'],defaultPath:app.getPath('recent')})
+	var archive = dialog.showOpenDialog({title:'Select a folder you want to scan',properties: ['openDirectory'],defaultPath:app.getPath('recent')})
 		.then(selection => {
 			if (!selection.canceled){
 				if (selection.filePaths[0] == preferences.get('unbundle')){
