@@ -18,6 +18,8 @@ Number.prototype.countDecimals = function () {
     return this.toString().split(".")[1].length || 0;
 }
 
+const range = (start, stop, step = 1) =>  Array(Math.ceil((stop - start) / step)+1).fill(start).map((x, y) => x + y * step)
+  
 async function abuildMaskSelector(listOfMasks){
 	if (typeof(listOfMasks)=="object"){
 			var maskSel = document.querySelector("#customMaskSelector");
@@ -211,7 +213,11 @@ $(function(){
 	let buildmyHairs = abuildHairs(hairs);
 	let buildmyMasks = abuildMaskSelector(maskList)
   //let test = ModelListing()
-
+  
+  const ml_randomized = Object.keys(ml_libraries)
+    .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g))
+    .reduce((cur,key) => { return Object.assign(cur,{[key]:ml_libraries[key]}) },{} );
+  
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
 	function slideMaterials(index,speed = 700){
@@ -1523,6 +1529,7 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
 });
 
 	$("#layerRandomizer").click(function(){
+    
     let max_blends = 5;
     let layblend;
 		//get options
@@ -1530,72 +1537,37 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
 		var rndMBlend = $("#rndMbWild").prop('checked');
 		//get active layers to be randomized
 		var layerSactive = $("#layeringsystem li:not([disabled])").length;
-    var subjectlayer, subjectlayerRText
+    var subjectlayer
 		var layerfilter = $("#layerRandomCfg").val();
-
+    var affectedByRand = [...Array(20).keys()];
+    
 		//check on random layer selections
-		if ($("#layerRandomCfg").val()!=""){
+		if (layerfilter!=""){
 			//last cleanup, remove single and multiple , or - alone at the start or end of the string
 			layerfilter = layerfilter.replace(/[2-9][0-9]{1}|\d{3,}/g,'19').replace(/[,\-]+$/,'');
-			var arraychilds = new Set(layerfilter.split(',').sort());//create a unique set from a sorted array
-			$("#layerRandomCfg").val(Array.from(arraychilds).join(',')); //translate the obtained values in the field
-			//if it contain the value 0-19 or 19-0 all the layers are selected to be used... so clean the filter even more
-			if (arraychilds.has('0-19') || arraychilds.has('19-0')){
-				$("#layerRandomCfg").val('0-19');
-			}else{
-				//here we explode the ranges
-				arraychilds.forEach((item, i, set) => {
-					if (String(item).match(/^\d+\-\d+$/)!==null){
-						let values = String(item).split('-').map(Number);
-						if (values[0]==values[1]){
-							set.delete(item);
-							set.add(values[0]);
-						}else{
-							let minimum = Math.min.apply(Math, values)
-							let maximum = Math.max.apply(Math, values);
-							set.delete(item);
-							for (k=minimum;k<=maximum;k++){
-								set.add(k);
-							}
-						}
-					}
-				});
-			}
-			subjectlayerRText=Array.from(arraychilds).map(String); //Display The list
+      //retrieve the affected layers
+      affectedByRand = syntheticRanges(layerfilter)
 		}
-
-
-
+    
+    //filter disabled layers
+    $("#layeringsystem li[disabled]").each(function( index, el ) {
+      affectedByRand = affectedByRand.filter(idx => idx!=$(el).index());
+    });
+    
     if (!turnOnOff){
-	    subjectlayer = $("#layeringsystem li:not([disabled])").filter(
-	      function(){
-					if ($("#layerRandomCfg").val()!=""){
-						if ((subjectlayerRText.includes($(this)[0].innerText)) && (Number($(this).data("opacity"))>0)){
-							return true;
-						}
-					}else{
-	        	return Number($(this).data("opacity"))>0;
-					}
-	    });
+      subjectlayer = $("#layeringsystem li:not([disabled])").filter((el,ob) => {
+        if (affectedByRand.includes(el) && (Number($(ob).data("opacity"))>0)){
+          return true;
+        }else{
+          affectedByRand = affectedByRand.filter(idx => idx!=el);
+        }
+      });
     }else{
-			if ($("#layerRandomCfg").val()!=""){
-				subjectlayer = $("#layeringsystem li:not([disabled])").filter(
-					function(){
-						return subjectlayerRText.includes($(this)[0].innerText);
-					});
-			}else{
-				subjectlayer = $("#layeringsystem li:not([disabled])");
-			}
-
+      subjectlayer = $("#layeringsystem li:not([disabled])").filter((el) => affectedByRand.includes(el));
     }
-
+    
     if (!rndMBlend){max_blends=1;}
-
-    let materialist = Object.keys(ml_libraries)
-      .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g))
-      .reduce((cur,key) => { return Object.assign(cur,{[key]:ml_libraries[key]}) },{} );
-
-    let materialA = Object.keys(materialist);
+    let materialA = Object.keys(ml_randomized);
     let numaterial = materialA.length;
     let material_colors = 0;
     let materialselect = "unused";
@@ -1604,55 +1576,59 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
     let numerocicle = subjectlayer.length;
     let microblenda = $("#mbSelect option:not([disabled])");
 
-    //Scelta layer
+    //choosing how to apply the microblends on the layers with restrictons layer
     if ((numerocicle > 3)){
       layblend = 1 + Math.floor(Math.random() * (numerocicle-4))
     }
 
-    //let mblist = Object.entries($("#mbSelect option").filter())
-    for (k=0;k<numerocicle;k++){
-
-        if ((turnOnOff) && (k>0) && $("#layeringsystem li").eq(subjectlayer[k].innerText).data("opacity")>0){
-          if (Math.random() > 0.45){
-            $("#layeringsystem li").eq(subjectlayer[k].innerText).data("opacity",0);
-          }
-        }else{
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).data("opacity",(parseFloat(Math.random()*0.99) + parseFloat(0.01)).toFixed(2));
-        }
-
-        $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-opacity",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("opacity"));
-
-        if (Number($("#layeringsystem li").eq(subjectlayer[k].innerText).data("opacity")) > 0){
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).data("mattile",(Math.random() * 15).toFixed(2));
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).data("mbtile",(Math.random() * 15).toFixed(2));
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).data("mbcontrast",Math.random().toFixed(2));
-          if ((((rndMBlend) && (Math.random() > 0.6)) || (k==layblend)) && (k>0)  && (max_blends>0)){
-            $("#layeringsystem li").eq(subjectlayer[k].innerText).data("mblend",microblenda[Math.floor(Math.random() * microblenda.length)].value);
-            max_blends=max_blends-1;
-          }else{
-            $("#layeringsystem li").eq(subjectlayer[k].innerText).data("mblend","base\\surfaces\\microblends\\default.xbm");
-          }
-          materialselect = materialA[(Math.floor(Math.random() * (numaterial-1)))];
-          //console.log(materialselect);
-          materialrnd = materialJson.filter(mat => mat.text == materialselect)[0].a_attr['data-val'];
-          //console.log(materialrnd);
-          material_colors = materialist[materialselect].overrides.colorScale[Math.floor(Math.random() * (materialist[materialselect].overrides.colorScale.length - 1))].n;
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).data("material",materialrnd);
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).data("color",material_colors);
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).data("labels","("+material_colors+") "+materialselect);
-          //material Choice
-          //setup to html to interact with CSS
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-labels",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("labels"));
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-mattile",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("mattile"));
-
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-mbtile",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("mbtile"));
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-mblend",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("mblend"));
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-mbcontrast",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("mbcontrast"));
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-color",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("color"));
-          $("#layeringsystem li").eq(subjectlayer[k].innerText).attr("data-material",$("#layeringsystem li").eq(subjectlayer[k].innerText).data("material"));
-        }
-      $("#layeringsystem li.active").click();
-    }
+    subjectlayer.each((idx,el)=>{
+      let tLayer = new Layer();
+      
+      if((turnOnOff) && ($(el).index()>0)){
+        if (Math.random() > 0.45){ tLayer.opacity = 0 }
+      }else{
+        tLayer.opacity = (parseFloat(Math.random()*0.99) + parseFloat(0.01)).toFixed(2);
+      }
+      
+      
+      tLayer.tiles = (Math.random() * 15).toFixed(2);
+      tLayer.microblend.tiles = (Math.random() * 15).toFixed(2);
+      tLayer.microblend.contrast = Math.random().toFixed(2)
+      
+      materialselect = materialA[(Math.floor(Math.random() * (numaterial-1)))];
+      
+      if ((((rndMBlend) && (Math.random() > 0.6)) || ($(el).index()==layblend)) && ($(el).index()>0)  && (max_blends>0)){
+        tLayer.microblend.file = microblenda[Math.floor(Math.random() * microblenda.length)].value
+      }
+      
+      tLayer.material = materialJson.filter(mat => mat.text == materialselect)[0].a_attr['data-val'];
+      tLayer.color = ml_randomized[materialselect].overrides.colorScale[Math.floor(Math.random() * (ml_randomized[materialselect].overrides.colorScale.length - 1))].n;
+      
+      $(el).data({
+        "opacity":tLayer.opacity,
+        "labels":"("+tLayer.color+") "+materialselect,
+        "material":tLayer.material,
+        "mattile":tLayer.tiles,
+        "color":tLayer.color,
+        "mbtile":tLayer.microblend.tiles,
+        "mbcontrast":tLayer.microblend.contrast,
+        "mbtile":tLayer.microblend.tiles,
+        "mblend":tLayer.microblend.file,
+      })
+      
+      $(el).attr({
+        "data-opacity":tLayer.opacity,
+        "data-labels":"("+tLayer.color+") "+materialselect,
+        "data-material":tLayer.material,
+        "data-mattile":tLayer.tiles,
+        "data-color":tLayer.color,
+        "data-mbtile":tLayer.microblend.tiles,
+        "data-mbcontrast":tLayer.microblend.contrast,
+        "data-mblend":tLayer.microblend.file,
+      });
+    })
+    
+    $("#layeringsystem li.active").click();
 	});
 
   //Clean the actual selected layer
@@ -1667,7 +1643,11 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
   	}
   });
 	//Erase layers and put opacity at 0.0 4 all of them unless the 0 one
-  $("#wash-layers").click(function(){ vacuumCleaner(); $("#layeringsystem li.active").click(); });
+  $("#wash-layers").click(function(){
+    $("#layerRandomCfg").keyup(); //fixes a possible layer selection
+    vacuumCleaner(true,true);
+    $("#layeringsystem li.active").click();
+  });
 
   //Activate the first layer disabled
   $("#actlast-Layer").click(function(){
@@ -1677,7 +1657,11 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
   });
 
   //Erase layers but let opacity at 1.0
-  $("#wipe-layer").click(function(){ vacuumCleaner(false); $("#layeringsystem li.active").click();});
+  $("#wipe-layer").click(function(){
+    $("#layerRandomCfg").keyup(); //fixes a possible layer selection
+    vacuumCleaner(false,true);
+    $("#layeringsystem li.active").click();
+  });
 
   //applying data to the structure of li
   $("#applytoMyLayer").click(function(){
@@ -1746,56 +1730,93 @@ function passTheMlsetup(textContent=""){
   }
 }
 
-//Cleanep all the layers value
-function vacuumCleaner(on = true){
-  let c_opacity
-  //Cleanup all layers value
-  if (on){ c_opacity=1.0; }else{ c_opacity=0.0; }
-  for (k=0;k<=19;k++){
-    $('#layeringsystem li').eq(k).data({
-      mattile:'1.0',
-      labels:'(null_null) unused',
-      material:'base\\surfaces\\materials\\special\\unused.mltemplate',
-      opacity:c_opacity,
-      color:'null_null',
-      normal:'null',
-      roughin:'null',
-      roughout:'null',
-      metalin:'null',
-      metalout:'null',
-      offsetU:0.0,
-      offsetV:0.0,
-      mblend:'base\\surfaces\\microblends\\default.xbm',
-      mbtile:1.0,
-      mbcontrast:0.0,
-      mbnormal:1.0,
-      mboffu:0.0,
-      mboffv:0.0
-    });
-    $('#layeringsystem li').eq(k).attr({
-      "data-mattile":'1.0',
-      "data-labels":'(null_null) unused',
-      "data-material":'base\\surfaces\\materials\\special\\unused.mltemplate',
-      "data-opacity":String(c_opacity),
-      "data-color":'null_null',
-      "data-normal":'null',
-      "data-roughin":'null',
-      "data-roughout":'null',
-      "data-metalin":'null',
-      "data-metalout":'null',
-      "data-offsetU":'0.0',
-      "data-offsetV":'0.0',
-      "data-mblend":'base\\surfaces\\microblends\\default.xbm',
-      "data-mbtile":'1.0',
-      "data-mbcontrast":'0.0',
-      "data-mbnormal":'1.0',
-      "data-mboffu":'0.0',
-      "data-mboffv":'0.0'
-    });
-
-    $('#layeringsystem li').eq(0).data({opacity:1.0});
-    $('#layeringsystem li').eq(0).attr({"data-opacity":"1.0"});
+//Used to calculate the ranges as Documents printing notations
+function syntheticRanges(text='', maxIndex = 20){
+  var ranges = [];
+  text = text.replaceAll(" ","");
+  
+  if (text==""){
+    ranges = [...Array(maxIndex).keys()];
+  }else{
+    let taRanges = []; //temporary Array ranges
+    taRanges = text.split(",")
+    
+    taRanges.forEach( el =>{
+      let dummy = []
+      if (el.includes("-") > 0){
+        dummy = el.split("-").map(x=>parseInt(x))
+        if (dummy[0] > dummy[1]){
+          ranges.push([...range(Number(dummy[1]), Number(dummy[0])) ])
+        }else{
+          ranges.push([...range(Number(dummy[0]),Number(dummy[1]))])  
+        }
+      }else{
+        ranges.push(Number(el))
+      }
+    })
+    ranges = [...new Set(ranges.flatMap(num => num))]
   }
+  return ranges;
+}
+//Cleanep all the layers value
+function vacuumCleaner(on = true, ranges = false){
+  var c_opacity=1.0;
+  
+  var aRanges = [...Array(20).keys()];
+  
+  if (ranges) {  
+    $("#layerRandomCfg").val().replaceAll(" ","");
+    aRanges = syntheticRanges($("#layerRandomCfg").val());
+  }
+  //Cleanup all layers value
+  if(!on){ c_opacity = 0.0; }
+  aRanges.forEach(id =>{
+    if ($('#layeringsystem li').eq(id).attr("disabled")!="disabled"){
+      $('#layeringsystem li').eq(id).data({
+        mattile:'1.0',
+        labels:'(null_null) unused',
+        material:'base\\surfaces\\materials\\special\\unused.mltemplate',
+        opacity:c_opacity,
+        color:'null_null',
+        normal:'null',
+        roughin:'null',
+        roughout:'null',
+        metalin:'null',
+        metalout:'null',
+        offsetU:0.0,
+        offsetV:0.0,
+        mblend:'base\\surfaces\\microblends\\default.xbm',
+        mbtile:1.0,
+        mbcontrast:0.0,
+        mbnormal:1.0,
+        mboffu:0.0,
+        mboffv:0.0
+      });
+      $('#layeringsystem li').eq(id).attr({
+        "data-mattile":'1.0',
+        "data-labels":'(null_null) unused',
+        "data-material":'base\\surfaces\\materials\\special\\unused.mltemplate',
+        "data-opacity":String(c_opacity),
+        "data-color":'null_null',
+        "data-normal":'null',
+        "data-roughin":'null',
+        "data-roughout":'null',
+        "data-metalin":'null',
+        "data-metalout":'null',
+        "data-offsetU":'0.0',
+        "data-offsetV":'0.0',
+        "data-mblend":'base\\surfaces\\microblends\\default.xbm',
+        "data-mbtile":'1.0',
+        "data-mbcontrast":'0.0',
+        "data-mbnormal":'1.0',
+        "data-mboffu":'0.0',
+        "data-mboffv":'0.0'
+      });
+    }
+  })
+  
+  $('#layeringsystem li').eq(0).data({opacity:1.0});
+  $('#layeringsystem li').eq(0).attr({"data-opacity":"1.0"});
 }
 
 //----Button to load
