@@ -1,6 +1,6 @@
 // main.js
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Notification, ipcMain, nativeTheme, dialog, Menu } = require('electron')
+const { app, BrowserWindow, screen, Notification, ipcMain, nativeTheme, dialog, Menu } = require('electron')
 var child = require('child_process').execFile;
 var spawner = require('child_process').spawn;
 const path = require('path')
@@ -371,11 +371,13 @@ const template = [
 const menu = Menu.buildFromTemplate(template)
 Menu.setApplicationMenu(menu)
 
-function createWindow () {
+function createWindow (width,height) {
+	width = parseInt((width/100)*95)
+	
   // Create the browser window.
    mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 960,
+    width: width,
+    height: height,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       webgl:true,
@@ -398,11 +400,15 @@ const prefupdate = preferences.onDidAnyChange(()=>{
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  createWindow()
+ // Create a window that fills the screen's available work area.
+ const primaryDisplay = screen.getPrimaryDisplay()
+ const { width, height } = primaryDisplay.workAreaSize
+ 
+  createWindow(width,height)
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(width,height)
   })
 })
 
