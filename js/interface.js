@@ -553,9 +553,9 @@ $("#resetShades span.choose").click(function(){
         case 'clean':
           mLsetup.reset(indexLayerContextual)
           //--- to Be resetted ---
-          if ($("#layeringsystem li.active").length>0){
+          if ($("#layeringsystem li").eq(indexLayerContextual).click()){
         		$("#matInput").val("base\\surfaces\\materials\\special\\unused.mltemplate");//clean the material
-        		$("#layerOpacity").val("0.0").change();//zeroing the opacity
+        		//$("#layerOpacity").val("1.0").change();//zeroing the opacity
         		$("#layerColor").val("null_null");//color replace
         		$("#applytoMyLayer").click(); //trigger the application to layer
       			$("#layeringsystem li.active").click() //reselect the layer to updates the material
