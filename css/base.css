@@ -22,7 +22,7 @@ footer.main{
   gap: 4px;
 }
 
-footer.main>div{border:1px solid var(--layer-1);font-size:0.75rem;}
+footer.main>div{border:1px solid var(--layer-1);border-bottom: none;font-size:0.75rem;}
 .no-gutters {
 	margin-left: 0;
 	margin-right: 0;
@@ -33,6 +33,9 @@ footer.main>div{border:1px solid var(--layer-1);font-size:0.75rem;}
 	}
 }
 
+#pBar{
+  min-height:23px!important;
+}
 
 #MainMenu{
   position: absolute;

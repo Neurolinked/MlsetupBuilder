@@ -19,7 +19,7 @@ Number.prototype.countDecimals = function () {
 }
 
 const range = (start, stop, step = 1) =>  Array(Math.ceil((stop - start) / step)+1).fill(start).map((x, y) => x + y * step)
-  
+
 async function abuildMaskSelector(listOfMasks){
 	if (typeof(listOfMasks)=="object"){
 			var maskSel = document.querySelector("#customMaskSelector");
@@ -148,6 +148,7 @@ function switchLegacyMat(material){
 }
 
 $(function(){
+
   var textureformat = ''
   var Ptextformat = thePIT.RConfig('maskformat');
   Ptextformat.then((format)=>{
@@ -213,11 +214,11 @@ $(function(){
 	let buildmyHairs = abuildHairs(hairs);
 	let buildmyMasks = abuildMaskSelector(maskList)
   //let test = ModelListing()
-  
+
   const ml_randomized = Object.keys(ml_libraries)
     .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g))
     .reduce((cur,key) => { return Object.assign(cur,{[key]:ml_libraries[key]}) },{} );
-  
+
   $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
 	function slideMaterials(index,speed = 700){
@@ -243,8 +244,22 @@ $(function(){
 	var tooltipMat = new bootstrap.Tooltip(matChooser,{placement:'left'})
 
   $(document).on('keydown', function(e) {
+    var ev = e || window.event; // Event object 'ev'
+    var key = ev.which || ev.keyCode; // Detecting keyCode
+
+    var ctrl =  ev.ctrlKey ? ev.ctrlKey : ((key === 17) ? true : false);
+    if (key == 73 && ctrl) {
+      // CTRL+I Import action
+      $("#importLink").click();
+    }
+    if (key == 69 && ctrl) {
+      // CTRL+E export action
+      $("#exportversions").click();
+    }
+
     if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
-	}else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}
+	  }else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}
+
   });
 
   function updPanelCovers(){
@@ -847,7 +862,7 @@ $("#resetShades span.choose").click(function(){
 
   //actions connected to the click onto the layers list
 	$('#layeringsystem li').click(function(e){
-    
+
 		if (!$(this).attr("disabled")){
       //activate the new one only if isn't disabled
 			$('#layeringsystem li').removeClass('active notsync');
@@ -1438,7 +1453,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 			slideMaterials(matindexchose,200);
 		}
 	});
-  
+
   $("#BWAdd").on("input",function(){
     if ($(this).is(":checked")){
       if (($('#cagecolors span[data-lum="0"]').length==0) && ($('#cagecolors span[data-lum="-1"]').length==0)){
@@ -1529,7 +1544,7 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
 });
 
 	$("#layerRandomizer").click(function(){
-    
+
     let max_blends = 5;
     let layblend;
 		//get options
@@ -1540,7 +1555,7 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
     var subjectlayer
 		var layerfilter = $("#layerRandomCfg").val();
     var affectedByRand = [...Array(20).keys()];
-    
+
 		//check on random layer selections
 		if (layerfilter!=""){
 			//last cleanup, remove single and multiple , or - alone at the start or end of the string
@@ -1548,12 +1563,12 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
       //retrieve the affected layers
       affectedByRand = syntheticRanges(layerfilter)
 		}
-    
+
     //filter disabled layers
     $("#layeringsystem li[disabled]").each(function( index, el ) {
       affectedByRand = affectedByRand.filter(idx => idx!=$(el).index());
     });
-    
+
     if (!turnOnOff){
       subjectlayer = $("#layeringsystem li:not([disabled])").filter((el,ob) => {
         if (affectedByRand.includes(el) && (Number($(ob).data("opacity"))>0)){
@@ -1565,7 +1580,7 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
     }else{
       subjectlayer = $("#layeringsystem li:not([disabled])").filter((el) => affectedByRand.includes(el));
     }
-    
+
     if (!rndMBlend){max_blends=1;}
     let materialA = Object.keys(ml_randomized);
     let numaterial = materialA.length;
@@ -1583,27 +1598,27 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
 
     subjectlayer.each((idx,el)=>{
       let tLayer = new Layer();
-      
+
       if((turnOnOff) && ($(el).index()>0)){
         if (Math.random() > 0.45){ tLayer.opacity = 0 }
       }else{
         tLayer.opacity = (parseFloat(Math.random()*0.99) + parseFloat(0.01)).toFixed(2);
       }
-      
-      
+
+
       tLayer.tiles = (Math.random() * 15).toFixed(2);
       tLayer.microblend.tiles = (Math.random() * 15).toFixed(2);
       tLayer.microblend.contrast = Math.random().toFixed(2)
-      
+
       materialselect = materialA[(Math.floor(Math.random() * (numaterial-1)))];
-      
+
       if ((((rndMBlend) && (Math.random() > 0.6)) || ($(el).index()==layblend)) && ($(el).index()>0)  && (max_blends>0)){
         tLayer.microblend.file = microblenda[Math.floor(Math.random() * microblenda.length)].value
       }
-      
+
       tLayer.material = materialJson.filter(mat => mat.text == materialselect)[0].a_attr['data-val'];
       tLayer.color = ml_randomized[materialselect].overrides.colorScale[Math.floor(Math.random() * (ml_randomized[materialselect].overrides.colorScale.length - 1))].n;
-      
+
       $(el).data({
         "opacity":tLayer.opacity,
         "labels":"("+tLayer.color+") "+materialselect,
@@ -1615,7 +1630,7 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
         "mbtile":tLayer.microblend.tiles,
         "mblend":tLayer.microblend.file,
       })
-      
+
       $(el).attr({
         "data-opacity":tLayer.opacity,
         "data-labels":"("+tLayer.color+") "+materialselect,
@@ -1627,7 +1642,7 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
         "data-mblend":tLayer.microblend.file,
       });
     })
-    
+
     $("#layeringsystem li.active").click();
 	});
 
@@ -1734,13 +1749,13 @@ function passTheMlsetup(textContent=""){
 function syntheticRanges(text='', maxIndex = 20){
   var ranges = [];
   text = text.replaceAll(" ","");
-  
+
   if (text==""){
     ranges = [...Array(maxIndex).keys()];
   }else{
     let taRanges = []; //temporary Array ranges
     taRanges = text.split(",")
-    
+
     taRanges.forEach( el =>{
       let dummy = []
       if (el.includes("-") > 0){
@@ -1748,7 +1763,7 @@ function syntheticRanges(text='', maxIndex = 20){
         if (dummy[0] > dummy[1]){
           ranges.push([...range(Number(dummy[1]), Number(dummy[0])) ])
         }else{
-          ranges.push([...range(Number(dummy[0]),Number(dummy[1]))])  
+          ranges.push([...range(Number(dummy[0]),Number(dummy[1]))])
         }
       }else{
         ranges.push(Number(el))
@@ -1761,10 +1776,10 @@ function syntheticRanges(text='', maxIndex = 20){
 //Cleanep all the layers value
 function vacuumCleaner(on = true, ranges = false){
   var c_opacity=1.0;
-  
+
   var aRanges = [...Array(20).keys()];
-  
-  if (ranges) {  
+
+  if (ranges) {
     $("#layerRandomCfg").val().replaceAll(" ","");
     aRanges = syntheticRanges($("#layerRandomCfg").val());
   }
@@ -1814,7 +1829,7 @@ function vacuumCleaner(on = true, ranges = false){
       });
     }
   })
-  
+
   $('#layeringsystem li').eq(0).data({opacity:1.0});
   $('#layeringsystem li').eq(0).attr({"data-opacity":"1.0"});
 }
@@ -1825,9 +1840,9 @@ $("#TheMagicIsHere").click(function(){
     console.log(mLsetup);
     //Layer Cleanup for disabled layers
     disabledLayers = 20 - mLsetup.Layers.length;
-    
+
     $(`#layeringsystem li`).removeAttr('disabled');
-    
+
     if (disabledLayers>0){
       $(`#layeringsystem li:nth-last-child(-n+${disabledLayers})`).attr('disabled','disabled');
       for(h=19;h>=20-disabledLayers;h--){
@@ -1883,9 +1898,9 @@ $("#TheMagicIsHere").click(function(){
     $('#nametoexport').val($("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1));
     $("#importTech").val("");
     $("#layeringsystem li.active").click();
-    
+
     return
-    
+
     if (mlSetupContent.trim()!="") {
 		//if (String($("#passaggio").val()).trim()!="") {
 			theArcOfNOA = JSON.parse(mlSetupContent);
@@ -2476,8 +2491,10 @@ $(".xportJSON").click(function(){
     }
 
     jsonbody = jsonbody.slice(0,-3); //removes latest commas
+    $("#pBar").addClass('progress p-0 border-0 rounded-0');
+    //$("#pBar").addClass('progress-bar progress-bar-striped bg-danger progress-bar-animated');
+    $("#pBar").html(`<div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-label="Danger striped example" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>`);
 
-    $("#pBar").addClass('progress-bar progress-bar-striped bg-danger progress-bar-animated');
     thePIT.Export({
       file:nomefile,
       content:preamble+jsonbody+closing,

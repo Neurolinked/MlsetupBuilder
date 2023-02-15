@@ -686,9 +686,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 							}else{
 								 new Notification({title:"Conversion executed", body: "Your file has been saved, remember to convert it back in Wolvenkit." }).show()
 								 event.reply('preload:noBar','')
-								 if (objwkitto.hasOwnProperty('major')){
-								 	app.exit(0)
-							 	}
+								 //do not exit automatically if (objwkitto.hasOwnProperty('major')){	app.exit(0) 	}
 							}
 						}
 					})
