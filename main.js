@@ -82,6 +82,13 @@ const preferences = new store({schema,
 		'1.6.6': store =>{
 			store.set('game','')
 			store.set('depot','')
+		},
+		'1.6.7': store =>{
+			if (store.get('depot')==''){
+				//preparing for the switch from the unbundle folder, to the depot one
+				let fixVal = store.get('unbundle')
+				store.set('depot', fixVal)
+			}
 		}
 	}
 });
@@ -181,7 +188,7 @@ function SaveCustom(){
 			customResource()
 		}
 		userRScheme.forEach((item, i) => {
-			
+
 			let dirToSaveTo = path.join(toMigration,item)
 			switch (item){
 				case 'decals':
@@ -373,7 +380,7 @@ Menu.setApplicationMenu(menu)
 
 function createWindow (width,height) {
 	width = parseInt((width/100)*95)
-	
+
   // Create the browser window.
    mainWindow = new BrowserWindow({
     width: width,
@@ -403,7 +410,7 @@ app.whenReady().then(() => {
  // Create a window that fills the screen's available work area.
  const primaryDisplay = screen.getPrimaryDisplay()
  const { width, height } = primaryDisplay.workAreaSize
- 
+
   createWindow(width,height)
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -461,10 +468,10 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
     if (err) {
       if (err.code=='ENOENT'){
 				if (hasDepot){
-					
+
 					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom} - trying in the Depot Folder`)
 					whereLoadFrom = path.join(preferences.get('depot'),percorso)
-					
+
 					fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
 						if (err){
 							if (err.code=='ENOENT'){
@@ -495,7 +502,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
       contenutofile=""
     }
 		event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
-		event.returnValue = contenutofile	
+		event.returnValue = contenutofile
   })
 })
 //restored arguments reading
@@ -952,7 +959,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 
 					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 						mainWindow.webContents.send('preload:uncookLogClean','#microLogger')
-						
+
 						uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.engine), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
 							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
 							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
