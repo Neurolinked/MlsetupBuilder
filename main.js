@@ -26,6 +26,7 @@ const _microblends = 0
 const _decals = 1
 const _jsons = 2
 
+var contentpath
 var customModels
 var userResourcesPath = '/_Migrate/'
 var userRScheme = [
@@ -838,186 +839,217 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
-			var archivefold = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
-			.then(selection => {
-				if (!selection.canceled){
-					let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
-					let uncooker = preferences.get('wcli')
-					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
-						if (typeof(conf)=='object'){
-							mainWindow.webContents.send('preload:uncookLogClean')
 
-							uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1')
-								.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
-								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
-								.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],archives.appearances), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step3'))
-								.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(selection.filePaths[0],archives.appearances), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
-								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_AP4")})
-								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step5'))
-								.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
-								.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
-								.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(selection.filePaths[0],archives.appearances), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
-								.then(()=> {
-									return new Promise((resolve,reject) =>{
-										if (conf[3]){
-											fs.readdir(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/'),(err,files)=>{
-												if (err){
-														mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
-														reject()
-											  }else {
-													var decalfiles = []
-													files.forEach((el)=>{
-														if (el.match(/garment_decals_[d|n]\d{2}\.png$/))
-														decalfiles.push(el)
-													})
-													mainWindow.webContents.send('preload:uncookErr','Found '+decalfiles.length+' decals to process','#uncookLogger')
-													resolve(decalfiles)
-												}
-											})
-										}else{
-											resolve([])
-										}
-									})
-								})
-								.then((files)=>{
-									try{
-										var perc = Number(100/files.length).toFixed(2)
-										var k = 0
-										files.forEach((png)=>{
-											if (/.+n\d{2}\.png$/.test(png)){
-												k++
-												sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
-												.raw()
-												.toBuffer({ resolveWithObject: true })
-											  .then(({ data, info }) => {
-													const { width, height, channels } = info;
-													for (let i = 0, l=data.length; i < l; i += 4) {
-													 data[i + 2] = 255;  // B value
-												 	}
-													sharp(data, { raw: { width, height, channels } })
-													.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
-														 if(err){
-															 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
-														 }
-													 })
-												})
-											  .catch(err => { console.log(err) })
-											}else{
-												sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
-													.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
-														 if(err){
-															 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
-														 }else{
-															 k++
-															 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'step8')
-														 }
-													  })
-											}
-
-										})
-										if (conf[3]) mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals copied and edited</span>')
-									}catch(err){
-										if (conf[3]) mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
-									}
-								})
-								.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_DEC4") })
-								.then(()=>uncookRun(conf[4],["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
-								.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
-								.catch(err => { console.log(err) })
-								.finally(() => { 	mainWindow.webContents.send('preload:enable',"#triggerUncook") })
-							}
+			var gameContentPath = preferences.get('game')
+			if (gameContentPath!=''){
+				//try to use the path for the content you setup in the preferences
+				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
+				in ${gameContentPath}`)
+				mainWindow.webContents.send('preload:logEntry',`The export will be done into ${preferences.get('unbundle')}`)
+				var archiveFilter = repoBuilder(gameContentPath,conf)
+			}else{
+				var archivefold = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
+				.then(selection => {
+					if (!selection.canceled){
+						repoBuilder(selection.filePaths[0],conf)
 					}
-				}
-			})
+				}).catch(err => mainWindow.webContents.send('preload:logEntry',`${err} `, true))
+			}
 		}
 	})
 })
+
+//function to execute the series of uncook
+function repoBuilder(contentdir, conf){
+	contentpath = contentdir
+	return new Promise((resolve,reject) =>{
+		let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
+		let uncooker = preferences.get('wcli')
+		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
+			if (typeof(conf)=='object'){
+				mainWindow.webContents.send('preload:uncookLogClean')
+
+				uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1')
+					.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
+					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
+					.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step3'))
+					.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
+					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_AP4")})
+					.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step5'))
+					.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
+					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
+					.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
+					.then(()=> {
+						return new Promise((resolve,reject) =>{
+							if (conf[3]){
+								fs.readdir(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/'),(err,files)=>{
+									if (err){
+											mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+											reject()
+									}else {
+										var decalfiles = []
+										files.forEach((el)=>{
+											if (el.match(/garment_decals_[d|n]\d{2}\.png$/))
+											decalfiles.push(el)
+										})
+										mainWindow.webContents.send('preload:uncookErr','Found '+decalfiles.length+' decals to process','#uncookLogger')
+										resolve(decalfiles)
+									}
+								})
+							}else{
+								resolve([])
+							}
+						})
+					})
+					.then((files)=>{
+						try{
+							var perc = Number(100/files.length).toFixed(2)
+							var k = 0
+							files.forEach((png)=>{
+								if (/.+n\d{2}\.png$/.test(png)){
+									k++
+									sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
+									.raw()
+									.toBuffer({ resolveWithObject: true })
+									.then(({ data, info }) => {
+										const { width, height, channels } = info;
+										for (let i = 0, l=data.length; i < l; i += 4) {
+										 data[i + 2] = 255;  // B value
+										}
+										sharp(data, { raw: { width, height, channels } })
+										.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
+											 if(err){
+												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+											 }
+										 })
+									})
+									.catch(err => { console.log(err) })
+								}else{
+									sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
+										.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
+											 if(err){
+												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+											 }else{
+												 k++
+												 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'step8')
+											 }
+											})
+								}
+
+							})
+							if (conf[3]) mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals copied and edited</span>')
+						}catch(err){
+							if (conf[3]) mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+						}
+					})
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_DEC4") })
+					.then(()=>uncookRun(conf[4],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
+					.catch(err => { console.log(err) })
+					.finally(() => { 	mainWindow.webContents.send('preload:enable',"#triggerUncook") })
+				}
+		}
+	})
+}
 
 ipcMain.on('main:setMicroCoords',(event,datas)=>{
 	aimWindow.close()
 	mainWindow.webContents.send('preload:setMicroCoords',datas)
 })
-/*
-ipcMain.handle('main:uncookMicroblends',(event)=>{
 
-})
-*/
 ipcMain.on('main:uncookMicroblends',(event)=>{
 	fs.access(path.normalize(preferences.get('unbundle')),fs.constants.W_OK,(err)=>{
 		if (err){
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
-			let archive = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
-			.then(selection => {
-				if (!selection.canceled){
-					let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
-					let uncooker = preferences.get('wcli')
-					var countingOnYou = 0
 
-					if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
-						mainWindow.webContents.send('preload:uncookLogClean','#microLogger')
-
-						uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.engine), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
-							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.nightcity), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
-							.then(()=> 	uncookRun(true,["uncook", "-p", path.join(selection.filePaths[0],archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
-							.then(()=> {
-								return new Promise((resolve,reject) =>{
-									fs.readdir(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/'),(err,files)=>{
-										if (err){
-												mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
-												reject()
-									  }else {
-											var slavefiles = []
-											files.forEach((el)=>{
-												if (el.match(/.+\.png$/))
-												slavefiles.push(el)
-											})
-											mainWindow.webContents.send('preload:uncookErr','Found '+slavefiles.length+' microblends to process','#microLogger')
-											resolve(slavefiles)
-										}
-									})
-								})
-							})
-							.then((files)=>{
-								//console.log(files)
-								try{
-									var perc = Number(100/files.length).toFixed(2)
-									var k = 1
-									files.forEach((png)=>{
-
-										sharp(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/',png))
-											.resize(256)
-											.toFile(path.join(app.getAppPath(),'images/',png), (err, info) => {
-												 if(err){
-													 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
-												 }else{
-													 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mresize')
-												 }
-											  })
-												.resize(64)
-												.toFile(path.join(app.getAppPath(),'images/thumbs/',png), (err, info) => {
-													 if(err){
-														 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
-													 }else{
-														 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mthumbs')
-													 }
-												  })
-										k++
-									})
-								}catch(err){
-									mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
-								}
-							})
-							.catch((err)=>{mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')})
-							.finally(() => { 	mainWindow.webContents.send('preload:enable',"#MycroMe") })
+			var gameContentPath = preferences.get('game')
+			if (gameContentPath!=''){
+				//try to use the path for the content you setup in the preferences
+				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
+				in ${gameContentPath}`)
+				var archiveFilter = microBuilder(gameContentPath)
+			}else{
+				let archive = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
+				.then(selection => {
+					if (!selection.canceled){
+						var archiveFilter = microBuilder(selection.filePaths[0])
 					}
-				}
-			})
-			.catch((err)=> mainWindow.webContents.send('preload:logEntry',`${err} `,true))
+				})
+				.catch((err)=> mainWindow.webContents.send('preload:logEntry',`${err} `,true))
+			}
 		}
 	})
 })
+
+function microBuilder(contentdir){
+	contentpath = contentdir
+	return new Promise((resolve,reject) =>{
+
+			let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
+			let uncooker = preferences.get('wcli')
+			var countingOnYou = 0
+
+			if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
+				mainWindow.webContents.send('preload:uncookLogClean','#microLogger')
+
+				uncookRun(true,["uncook", "-p", path.join(contentpath,archives.engine), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
+					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
+					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
+					.then(()=> {
+						return new Promise((resolve,reject) =>{
+							fs.readdir(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/'),(err,files)=>{
+								if (err){
+										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+										reject()
+								}else {
+									var slavefiles = []
+									files.forEach((el)=>{
+										if (el.match(/.+\.png$/))
+										slavefiles.push(el)
+									})
+									mainWindow.webContents.send('preload:uncookErr','Found '+slavefiles.length+' microblends to process','#microLogger')
+									resolve(slavefiles)
+								}
+							})
+						})
+					})
+					.then((files)=>{
+						//console.log(files)
+						try{
+							var perc = Number(100/files.length).toFixed(2)
+							var k = 1
+							files.forEach((png)=>{
+
+								sharp(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/',png))
+									.resize(256)
+									.toFile(path.join(app.getAppPath(),'images/',png), (err, info) => {
+										 if(err){
+											 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+										 }else{
+											 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mresize')
+										 }
+										})
+										.resize(64)
+										.toFile(path.join(app.getAppPath(),'images/thumbs/',png), (err, info) => {
+											 if(err){
+												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+											 }else{
+												 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mthumbs')
+											 }
+											})
+								k++
+							})
+						}catch(err){
+							mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+						}
+					})
+					.catch((err)=>{mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')})
+					.finally(() => { 	mainWindow.webContents.send('preload:enable',"#MycroMe") })
+			}
+	})
+}
 
 ipcMain.on('main:mBlender',(event,package)=>{
 	var pathPackage = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_microblends],package.packageName.toLowerCase())
