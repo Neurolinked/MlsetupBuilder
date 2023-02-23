@@ -92,6 +92,7 @@ function getIntersects( point, objects ) {
 var nMeKanv = document.getElementById('normalMe');
 const paintMaskHT = document.getElementById('maskPainter');
 const paintMaskCTX = paintMaskHT.getContext('2d');
+paintMaskCTX.willReadFrequently = true;
 paintMaskCTX.lineCap = "round";
 var pressure = 0.2;
 var snapsManager = document.getElementById('Snapshots');
@@ -388,7 +389,7 @@ function giveToTheAim(textureData,w,h){
  var ctx = aimcanvas.getContext('2d');
  aimcanvas.width=512;
  aimcanvas.height=512;
- 
+
  var imageData = ctx.createImageData(w,h);
  var k=0;
  for (let i = 0; i < imageData.data.length; i += 4) {
@@ -625,7 +626,7 @@ function loadNormOntheFly(path){
 					/* Size is setted up */
           nMeKanv.width = normalMapInfo.width = pngWidth;
           nMeKanv.height = normalMapInfo.height = pngHeight;
-          
+
 					var encodedData = btoa(bufferimage);
 					var dataURI = "data:image/png;base64," + encodedData;
 					var nMap = new Image();
@@ -678,7 +679,7 @@ function loadMapOntheFly(path){
   bufferimage = thePIT.ApriStream(path,'binary');
 
   if ((typeof(bufferimage)!="object") && (bufferimage!="") ){
-    
+
     if (path.endsWith(".png")){
       var base64 = window.btoa(bufferimage);
       let img = new Image();
@@ -691,7 +692,7 @@ function loadMapOntheFly(path){
           material.map.needsUpdate = true;
       };
       originalLayer = img.src;
-      
+
     }else if(path.endsWith(".dds")){
       var data = str2ab(bufferimage);
       let offsetHeight = 3;
@@ -711,14 +712,14 @@ function loadMapOntheFly(path){
  		 }
    	 //var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType,THREE.UVMapping,THREE.RepeatWrapping);
    	 //dataTex.flipY=true;
- 
+
    	 material.color.set(0x500000);
- 
+
    	 //material.map = canvasPaint //material.map = dataTex;
    	  giveToTheAim(luminancedata,width,height);
       originalLayer = paintMaskHT.toDataURL('image/png');
     }
-  	 
+
      material.map.flipY = flippingdipping
      material.map.needsUpdate = true;
   }else{
