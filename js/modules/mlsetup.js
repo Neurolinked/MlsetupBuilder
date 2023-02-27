@@ -1,3 +1,28 @@
+/**
+ * Layer Class
+ * the default values are into square brackets
+ * @class
+ * @property {number} tiles					- number of tiles of the layer [1.0]
+ * @property {number} material			- path of a material [full path of unused.mltemplate]
+ * @property {number} opacity				- [1.0]
+ * @property {string} color					- [null_null]
+ * @property {string} normals				- [null]
+ * @property {string} roughnessIn		- [null]
+ * @property {string} roughnessOut	- [null]
+ * @property {string} metalIn				- [null]
+ * @property {string} metalOut			- [null]
+ * @property {number} offsetU				- [0.0]
+ * @property {number} offsetV				- [0.0]
+ * @property {number} overrides			- [0]
+ * @property {object} microblend
+ * @property {string} microblend.file - path of a microblend [full path of default.xbm]
+ * @property {number} microblend.tiles - [1.0]
+ * @property {number} microblend.contrast - [0.0]
+ * @property {number} microblend.normal 	- [1.0]
+ * @property {object} microblend.offset
+ * @property {number} microblend.offset.h 	- [0.0] orizzontal offset of the microblend
+ * @property {number} microblend.offset.v 	- [0.0] vertical offset of the microblend
+ */
 class Layer {
 	tiles = 1.0
 	material = 'base\\surfaces\\materials\\special\\unused.mltemplate'
@@ -20,12 +45,25 @@ class Layer {
 	}
 }
 
+/**
+ * Creates a new Mlsetup.
+ * @property {Array.<number>} version - version in 3 number notation
+ * @property {number} ratio						- [1.0]
+ * @property {boolean} normal					- [true]
+ * @property {Array.<Layer>} Layers		- arrays of 20 Layer classes
+ * @class
+ */
 class Mlsetup {
 	version = [0,0,3]
 	ratio = 1.0
 	normal = true
+	/**
+	 * maximum number of layer to import
+	 * @private
+	 */
 	#limit = 20
 
+	/** @constructs */
 	constructor(){
 		this.Layers = []
 		for (let i=0;i<20;i++){
@@ -33,10 +71,19 @@ class Mlsetup {
 		}
 	}
 
+	/**
+	 * Reset the chosen Layer to a default state
+	 * @param {number} layer
+	 */
 	reset(layer=0){
 		this.Layers[layer] = new Layer()
 	}
 
+	/**
+	 * Swap two layers in the Mlsetup array stack
+	 * @param {number} idSource
+	 * @param {number} idDest
+	 */
 	swap(idSource , idDest){
 		if (Number(idSource) && Number(idDest)){
 			if (idSource!=idDest){
@@ -51,21 +98,29 @@ class Mlsetup {
 			return false
 		}
 	}
-	
-	//Add a new Layer
+
+	/**
+	 * Push an empty Layer in the Mlsetup array stack
+	 */
 	plug(){
 		if (this.Layers.length<20){
 			this.Layers.push(new Layer())
 		}
 	}
 
-	//remove the last Layer
+	/**
+	 * Remove the last Layer in the array stack
+	 */
 	unplug(){
 		if (this.Layers.length>0){
 				this.Layers.splice(-1,1)
 		}
 	}
 
+	/**
+	 * Configure the version parameter of the MLsetup json object imported
+	 * @param {object} jsonObject
+	 */
 	getVersion(jsonObject){
 		if (typeof(jsonObject)=='object'){
 			if (jsonObject.Header !== undefined){
@@ -77,8 +132,13 @@ class Mlsetup {
 		}
 	}
 
+	/**
+	 * Translate the json object into a full mlsetup
+	 * @param {object} mlsetupObject
+	 */
 	import(mlsetupObject){
-		this.getVersion(mlsetupObject) //research for wolvenkit Json version
+		this.getVersion(mlsetupObject)
+
 		this.#limit = 20
 		var layeriteration = null
 		var i = 0;
@@ -174,6 +234,35 @@ class Mlsetup {
 		}
 	}
 
+	/**
+	 * Translate the source string into a compiled version of the whole MLsetup.
+	 * It replace from the source template, string to the parameters value from every Layer
+	 * The source string need to have every text target property enclosed in braces
+	 * example `{color}` will be replaced in the string by the color value for every layer
+	 * The list of parameters are
+	 * color - color for the layer
+	 * material - material path
+	 * material|short - just the material name
+	 * tiles
+	 * microTile - microblend tile
+	 * opacity
+	 * metalIn - metalLevelsIn
+	 * metalOut - metalLevelsOut
+	 * microblend - microblend path
+	 * microblend|short - just the name of the microblend
+	 * microContrast
+	 * microOffH - microblend offset horizontal
+	 * microOffV - microblend offset vertical
+	 * normal
+	 * offsetU - Layer offset horizontal
+	 * offsetV - Layer offset vertical
+	 * overrides
+	 * roughnessIn - Roughness In
+	 * roughnessOut - Roughness Out
+	 * open - replaced with open if the layer opacity is different from 0
+	 * @param {string} codetemplate
+	 * @return {string}
+	 */
 	template(codetemplate){
 		var generated =''
 		var appoggio
