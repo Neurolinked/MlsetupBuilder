@@ -18,17 +18,17 @@
     "url": "https://github.com/Neurolinked/MlsetupBuilder.git"
   },
   "dependencies": {
-    "dree": "^3.3.7",
-    "electron-store": "^8.0.1",
+    "dree": "^3.4.4",
+    "electron-store": "^8.1.0",
     "fs": "^0.0.1-security",
-    "fs-extra": "^10.1.0",
-    "intro.js": "^5.0.0",
-    "sharp": "^0.30.4"
+    "fs-extra": "^11.1.0",
+    "intro.js": "^5.1.0",
+    "sharp": "^0.31.3"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^6.1.1",
-    "electron": "^22.0.0",
-    "electron-packager": "^13.1.1",
-    "electron-winstaller": "^5.0.0"
+    "electron": "^22.2.1",
+    "electron-packager": "^17.1.1",
+    "electron-winstaller": "^5.1.0"
   }
 }
