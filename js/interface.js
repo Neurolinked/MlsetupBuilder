@@ -9,6 +9,7 @@ var layerSwapstart = null;
 
 var modelType = 'default';
 var mlSetupContent = '';
+
 /**
   * This function will extend the Numbercasting type
   * adding the feature of returning the lenght of numbers after the dot
@@ -148,6 +149,21 @@ function switchLegacyMat(material){
 }
 
 $(function(){
+  //canvas for contestual material
+  const canvasMaterial = document.getElementById('materialDis');
+  const material2D = canvasMaterial.getContext("2d");
+  var lastsize = canvasMaterial.offsetWidth;
+  //function to draw the image material
+  function drawMaterial(materialChoose){
+    var squaresize = canvasMaterial.offsetWidth
+    lastsize = squaresize;
+    const img = new Image();
+    img.onload = ()=>{
+      material2D.drawImage(img,0,0,squaresize,squaresize)
+    };
+    img.src = `./images/material/${materialChoose}.jpg`
+  }
+  drawMaterial("unused");
 
   var textureformat = ''
   var Ptextformat = thePIT.RConfig('maskformat');
@@ -239,9 +255,10 @@ $(function(){
     }
     $("#foot-message").text(message);
 	}
-
+  /*
 	var matChooser = document.getElementById('materialChoser')
 	var tooltipMat = new bootstrap.Tooltip(matChooser,{placement:'left'})
+  */
 
   $(document).on('keydown', function(e) {
     var ev = e || window.event; // Event object 'ev'
@@ -258,8 +275,9 @@ $(function(){
       $("#exportversions").click();
     }
 
+    /* Remove, no more internal modal window
     if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
-	  }else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}
+  }else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}*/
 
   });
 
@@ -270,11 +288,19 @@ $(function(){
       .coverFullEditor{top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);transform: translateX(100%);width:${parseInt($( window ).width()-fmanager+(0.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)))}px !important;}
       .coverParamEditor{top: 0;right: 0;border-left: 1px solid rgba(0,0,0,.2);width:${parseInt($( window ).width()-layersetting+2)}px !important;}
     `);
-
   }
 
 	$(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover
+
+    //resize of the canvas
+    /*
+    let matSize = parseInt($("#materialDis").parent().css("width"));
+
+    $("#materialDis").attr({
+      'width':matSize,
+      'height':matSize
+    });*/
 	});
 
 	$("#mlPosX").click(function(){
@@ -379,7 +405,7 @@ $(function(){
 		$('#sp-gradients div').css('background-color',$('#bkgshades').val());
 	});
 
-  $(document).on('keyup', function(e) { if (e.shiftKey == false) { shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');} });
+  //$(document).on('keyup', function(e) { if (e.shiftKey == false) { shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');} });
 
 	$("#legacyMatSector").click(function(ev){
 		//console.log($("#legacyMatSector").prop('open'))
@@ -618,7 +644,8 @@ $("#resetShades span.choose").click(function(){
 
 
   const uvmSize = $("#maskPainter").attr('width');
-	const microBlend = new fabric.Canvas('maskFabric');//initialize the fabric Element
+  /*
+  const microBlend = new fabric.Canvas('maskFabric');//initialize the fabric Element
 
 	microBlend.selection=false;
 	microBlend.uniformScaling = true; //only scaling 1:1
@@ -635,7 +662,7 @@ $("#resetShades span.choose").click(function(){
 	 });
 
 	var semaphoreCLKmBlend =false;
-
+*/
 	localStorage = window.localStorage;
 	const license = localStorage.getItem('LicenseRead');
 	const licenseWindow = document.getElementById('LicenseModal');
@@ -678,8 +705,9 @@ $("#resetShades span.choose").click(function(){
         mask:document.getElementById("maskPainter").toDataURL()
       }
     );
-  })
+  });
 
+  /* to remove
 	const AimMBlend = new bootstrap.Modal(document.getElementById('AimBlend'));
 	const AimWindows = document.getElementById('AimBlend');
 	//On open of the aiming windows
@@ -816,7 +844,7 @@ $("#resetShades span.choose").click(function(){
     $('#dispAimTile').text($("#AimMTile").val());
     $('#AimMTile, #AimU, #AimV').trigger('input');
 
-  });
+  });*/
 
   $("#slidemask").on("input",function(){
 		let hexacol
@@ -889,7 +917,9 @@ $("#resetShades span.choose").click(function(){
 			$("#cagemLibrary > div").removeClass("active");
 			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
 			switchLegacyMat(materialByClick);
-			$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
+			//$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
+      drawMaterial(materialByClick); //draw the material in the canvas
+
 			slideMaterials($("#cagemLibrary > div.active").index());
 			$("#materialSummary").html(materialByClick);
       /* ColorChange before the switch */
@@ -1305,7 +1335,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		if (ml_libraries.hasOwnProperty($(this).data('ref'))){
 			var materialtoload = $(this).data('ref');
       switchLegacyMat(materialtoload);
-
+      drawMaterial(materialtoload); //draw the material in the canvas
 			notifyMe("Material override loaded for "+materialtoload,false);
       console.log("%cMaterial override loaded for "+materialtoload, "color:green"); //"%cThis is a green text", "color:green"
 
@@ -1353,7 +1383,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
 			});
 
-			$("#materialChoser").attr('src','./images/material/'+materialtoload+'.jpg');
+			//$("#materialChoser").attr('src','./images/material/'+materialtoload+'.jpg');
 		}else{
 			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
 			$("#materialcolors").html("");

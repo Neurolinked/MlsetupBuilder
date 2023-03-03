@@ -505,7 +505,7 @@
            <button type="button" class="btn btn-outline-primary" id="wipe-layer"><i class="fas fa-eraser"></i> wipe</button>
            <button type="button" class="btn btn-outline-primary" id="wash-layers"><i class="fas fa-soap"></i> clean</a></button>
          </div>
-         <div class="btn-group btn-group-sm btn-tiny me-2" role="group" aria-label="Randomizer tools">
+         <div class="btn-group btn-group-sm btn-tiny" role="group" aria-label="Randomizer tools">
            <button type="button" class="btn btn-outline-warning" id="layerRandomizer" data-toggle="tooltip" title="Randomize layers"><i class="fas fa-random"></i> random</button>
            <div class="btn-group dropend" role="group">
              <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
@@ -539,8 +539,11 @@
   </div>
   <div id="layer_settings" class="layer-1 rounded">
       <span class="badge w-100 rounded-0">Material</span>
-			<div id="matdisplay" class=" no-gutters layer-3" >
-					<img id="materialChoser" src="images/material/unused.jpg" data-bs-toggle="modal" data-bs-target="#materialModal" title="Click to choose a new material for the selected layer" />
+			<div id="matdisplay" class="no-gutters layer-3" >
+        <div>
+					<!--<img id="materialChoser" src="images/material/unused.jpg"  title="Click to choose a new material for the selected layer" />-->
+          <canvas id="materialDis" width="128" height="128" data-bs-toggle="modal" data-bs-target="#materialModal" ></canvas>
+        </div>
 				<div>
 					<div>
 						<div>
@@ -857,38 +860,40 @@
 </div>
 <!-- A modal for the setup of the option randomizer -->
 <!-- windows for aiming the microblend over the masks -->
+<!--
 <div class="modal fade" id="AimBlend" tabindex="-1" aria-labelledby="aimblendLBL" aria-hidden="true">
-<div class="modal-dialog modal-lg">
-  <div class="modal-content">
-    <div class="modal-body text-white">
-      <div id="aimGRID">
-        <!--both canvas -->
-        <canvas id="MaskTargettoAim" class="border border-dark" height="512" width="512"></canvas>
-        <canvas contenteditable="true" id="maskFabric" style="display: block;position: absolute;float: left;left: calc(1rem + 21px);"class="border border-info" height="512" width="512" > </canvas>
-        <!--microblend application -->
-        <div id="aimPanels" class="layer-1">
-          <span class="badge  w-100 rounded-0 layer-1">horizontal: <span id="dispAimU"></span></span>
-          <input id="AimU" class="w-100" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
-          <span class="badge  w-100 rounded-0 layer-1">vertical: <span id="dispAimV"></span></span>
-          <input id="AimV" class="w-100" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
-          <span class="badge  w-100 rounded-0 layer-1">mbTile: <span id="dispAimTile"></span></span>
-          <input id="AimMTile" class="w-100" type="range" min="0.05" max="80.0" value="0.0" step="0.001">
-          <!--<span class="badge  w-100 rounded-0 layer-1">Chained To the Layer</span>-->
-          <div class="form-check form-switch my-2 ">
-            <input class="form-check-input ml-3" type="checkbox" id="AimChain" >
-            <label class="form-check-label" for="AimChain">Chained To the Layer</label>
-          </div>
-          <!--<input id="AimChain" class="w-100"  min="0.01" max="4.0" value="0.0" step="0.01">-->
-          <div class="d-grid gap-2 col-6 mx-auto">
-            <button id="confirmAim" class="btn btn-sm btn-block btn-outline-warning" >Done</button>
-            <button id="reloadAim" class="btn btn-sm btn-block btn-outline-danger" >Reset</button>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body text-white">
+        <div id="aimGRID">
+          <!--both canvas
+          <canvas id="MaskTargettoAim" class="border border-dark" height="512" width="512"></canvas>
+          <canvas contenteditable="true" id="maskFabric" style="display: block;position: absolute;float: left;left: calc(1rem + 21px);"class="border border-info" height="512" width="512" > </canvas>
+          <!--microblend application
+          <div id="aimPanels" class="layer-1">
+            <span class="badge  w-100 rounded-0 layer-1">horizontal: <span id="dispAimU"></span></span>
+            <input id="AimU" class="w-100" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
+            <span class="badge  w-100 rounded-0 layer-1">vertical: <span id="dispAimV"></span></span>
+            <input id="AimV" class="w-100" type="range" min="-10.0" max="10.0" value="0.0" step="0.001">
+            <span class="badge  w-100 rounded-0 layer-1">mbTile: <span id="dispAimTile"></span></span>
+            <input id="AimMTile" class="w-100" type="range" min="0.05" max="80.0" value="0.0" step="0.001">
+            <!--<span class="badge  w-100 rounded-0 layer-1">Chained To the Layer</span>
+            <div class="form-check form-switch my-2 ">
+              <input class="form-check-input ml-3" type="checkbox" id="AimChain" >
+              <label class="form-check-label" for="AimChain">Chained To the Layer</label>
+            </div>
+            <!--<input id="AimChain" class="w-100"  min="0.01" max="4.0" value="0.0" step="0.01">
+            <div class="d-grid gap-2 col-6 mx-auto">
+              <button id="confirmAim" class="btn btn-sm btn-block btn-outline-warning" >Done</button>
+              <button id="reloadAim" class="btn btn-sm btn-block btn-outline-danger" >Reset</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-</div>
+-->
 
 <div class="modal fade" id="modalHelp" tabindex="-1" aria-labelledby="modelsHelpH" aria-hidden="true" data-focus="true">
 <div class="modal-dialog modal-xl modal-dialog-centered">
