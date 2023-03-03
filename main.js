@@ -10,6 +10,8 @@ const store = require('electron-store');
 const sharp = require('sharp');
 const dree = require('dree');
 const outside = require('electron').shell;
+//app.commandLine.appendSwitch('enable-unsafe-webgpu') //enable access to the WebGPU interface adapter
+app.commandLine.appendSwitch('enable-gpu') //enable acceleration
 
 const dreeOptions = {
 	stat:false,
