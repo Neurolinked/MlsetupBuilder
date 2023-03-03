@@ -383,6 +383,30 @@ var MDLloadingButton = document.getElementById('btnMdlLoader');
 var CustomLoadButton = document.getElementById('cstMdlLoader');
 var UVSbmeshENA = document.getElementById('unChecksMesh');
 //-------------Material and Object Constant--------------------
+function paintDatas(textureData,w,h){
+  var oc = document.createElement('canvas');
+  oc.width=w;
+  oc.height=h;
+  var octx = oc.getContext('2d');
+  var imageData = octx.createImageData(w,h);
+  var k=0;
+  for (let i = 0; i < imageData.data.length; i += 4) {
+ 	 // Modify pixel data
+ 	 imageData.data[i] = textureData[k];  // R value
+ 	 if (grayscaleCheck.checked){
+ 		 imageData.data[i + 1] =  textureData[k]    // G value
+ 		 imageData.data[i + 2] =  textureData[k]  // B value
+ 	 }else{
+ 		 imageData.data[i + 1] = 0    // G value
+ 		 imageData.data[i + 2] = 0  // B value
+ 	 }
+ 	 imageData.data[i + 3] = 255;  // A value
+ 	 k++;
+  }
+  octx.putImageData(imageData,0,0,0,0,w,h);
+  paintMaskCTX.drawImage(oc,0,0,768,768);
+  oc.remove();
+}
 
 function giveToTheAim(textureData,w,h){
  var aimcanvas = document.getElementById('MaskTargettoAim');
@@ -716,7 +740,8 @@ function loadMapOntheFly(path){
    	 material.color.set(0x500000);
 
    	 //material.map = canvasPaint //material.map = dataTex;
-   	  giveToTheAim(luminancedata,width,height);
+   	  //giveToTheAim(luminancedata,width,height);
+      paintDatas(luminancedata,width,height);
       originalLayer = paintMaskHT.toDataURL('image/png');
     }
 
