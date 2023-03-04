@@ -98,78 +98,6 @@
   <script type='module' src='./js/threejs/src/scene/Fog.js'></script>
   <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
   <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
-<!--New Model Library interface -->
-<div class="offcanvas offcanvas-end coverFullEditor bg-layer1 text-bg-dark" tabindex="-1" id="TreeDdLibVas" aria-labelledby="TreedLiblab">
-  <div class="offcanvas-header p-2">
-    <div id="TreedLiblab">Model Warehouse</div>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-command">
-    <div class="input-group layer-4">
-      <input id="TreeDSearch" class="form-control " type="text" placeholder="Search in the models library" aria-label="models searcher">
-      <button type="button" id="TreeDClean"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
-    </div>
-    <div class="progress rounded-0 border border-dark ">
-      <div class="progress-bar progress-bar-animated progress-bar-striped bg-info " role="progressbar" aria-label="Warning striped example" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-    Categories
-    <div>
-      <ul class="nav nav-pills">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#"><i class="fas fa-mars fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#"><i class="fas fa-venus fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#"><i class="text-warning fas fa-folder fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="text-danger fas fa-car-side fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="text-danger fas fa-motorcycle fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="text-primary fas fa-skull-crossbones fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="text-warning fas fa-baby fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="text-white fas fa-star-half fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="fas fa-mask-face fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="fas fa-scissors fa-2x px-2" ></i></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link "><i class="fas fa-tag fa-2x px-2" ></i></a>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <div class="offcanvas-body ">
-    <div class="d-flex align-items-start bg-layer0">
-      <div class="nav flex-column nav-pills me-3 layer-1" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-        <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home" aria-selected="true"><i class="fas fa-folder text-info fa-3x" ></i></button><span class="badge d-block">Custom</span>
-        <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false"><i class="fa-solid fa-shirt text-warning fa-3x"></i></button><span class="badge d-block">Garments</span>
-        <button class="nav-link" id="v-pills-disabled-tab" data-bs-toggle="pill" data-bs-target="#v-pills-disabled" type="button" role="tab" aria-controls="v-pills-disabled" aria-selected="false"><i class="fa-solid fa-robot fa-3x"></i></button><span class="badge d-block">Cyberware</span>
-        <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false"><i class="fa-solid fa-gun text-primary fa-3x"></i></button><span class="badge d-block">Weapons</span>
-        <button class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false"><i class="fa-solid fa-truck-plane text-primary fa-3x"></i></button><span class="badge d-block">Vehicles</span>
-      </div>
-      <div class="tab-content " id="v-pills-tabContent">
-        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab" tabindex="0">...</div>
-        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab" tabindex="0">...</div>
-        <div class="tab-pane fade" id="v-pills-disabled" role="tabpanel" aria-labelledby="v-pills-disabled-tab" tabindex="0">...</div>
-        <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab" tabindex="0">...</div>
-        <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab" tabindex="0">...</div>
-      </div>
-    </div>
-  </div>
-</div>
 <!--model Library -->
 <div class="offcanvas offcanvas-start offcanvas-models text-bg-dark bg-gradient " tabindex="-1" id="ModelLibrary" aria-labelledby="ModelLibraryLabel" data-bs-backdrop="false">
   <div class="bg-active d-flex justify-content-between p-2">
@@ -460,9 +388,6 @@
         <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Library</button>
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
-    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#TreeDdLibVas" class="btn btn-out-Prim">
-      <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Lib.
-    </button>
     <div class="btn-group" role="group" aria-label="model loading">
   		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
     </div>
