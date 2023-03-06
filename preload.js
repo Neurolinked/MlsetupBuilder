@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld(
 			RConfig: async (conf) => {
         return await ipcRenderer.invoke('main:getStoreValue', conf);
     	},
+      stopUncook: async()=>{
+        ipcRenderer.send('main:stopTheuncook');
+      },
 			UnCookMe: async (conf)=>{
 				ipcRenderer.send('main:uncookForRepo',conf);
 			},
@@ -213,9 +216,13 @@ ipcRenderer.on('preload:noBar',(event,result)=>{
   progBar.innerHTML = " "
 })
 
-ipcRenderer.on('preload:uncookErr',(event,msg,logger='#uncookLogger')=>{
+ipcRenderer.on('preload:uncookErr',(event, msg, logger='#uncookLogger')=>{
 	var logtext = document.querySelector(logger+' div')
-	logtext.innerHTML = msg + logtext.innerHTML
+  if (logtext!=null){
+    logtext.innerHTML = msg + logtext.innerHTML  
+  }else{
+    document.querySelector('#uncookLogger div').innerHTML = "Process Killed" + document.querySelector('#uncookLogger div').innerHTML 
+  }
 })
 ipcRenderer.on('preload:uncookLogClean',(event,logger='#uncookLogger')=>{
 	var logtext = document.querySelector(logger+' div')

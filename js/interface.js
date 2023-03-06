@@ -2553,6 +2553,7 @@ $("#arc_GA4, #arc_AP4, #arc_NC3, #arc_DEC4, #arc_FNT4").change(function(){
 });
 
 $("#triggerUncook").click(function(){
+  $("#stopUncook").prop("disabled",false);
 	$("#triggerUncook").prop("disabled",true);
 	$("#uncookCog").removeClass('d-none');
 	let files = new Array()
@@ -2560,6 +2561,10 @@ $("#triggerUncook").click(function(){
 		files.push($(this).is(':checked'))
 	})
 	thePIT.UnCookMe(files);
+});
+
+$("#stopUncook").click(function(){
+  thePIT.stopUncook();
 });
 
 $("#MycroMe").click(function(){

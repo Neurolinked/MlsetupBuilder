@@ -13,13 +13,15 @@ const outside = require('electron').shell;
 //app.commandLine.appendSwitch('enable-unsafe-webgpu') //enable access to the WebGPU interface adapter
 app.commandLine.appendSwitch('enable-gpu') //enable acceleration
 
+var subproc
+
 const dreeOptions = {
 	stat:false,
 	followLinks:false,
 	hash:true,
 	sizeInBytes: false,
 	size: false,
-	extensions: ["glb","png","dds","mlmask"],
+	extensions: ["glb"],
 	normalize:true,
 	excludeEmptyDirectories:true
 }
@@ -763,9 +765,12 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 	}
 });
 
+function uncookStop(){
+	
+}
+
 function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
-		var subproc
 		if (toggle){
 			let uncooker = preferences.get('wcli')
 			subproc = spawner(uncooker,params).on('error',function(err){
@@ -796,7 +801,7 @@ function uncookRun(toggle,params,stepbar,logger){
 				mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
 			});
 
-			subproc.on('close', (code) => {
+			subproc.on('close', (code,signal) => {
 				if (code == 0){
 					switch (stepbar) {
 						case 'step1':
@@ -834,6 +839,12 @@ function uncookRun(toggle,params,stepbar,logger){
 		}
 	})
 }
+
+ipcMain.on('main:stopTheuncook',(event)=>{
+	subproc.kill('SIGTERM');
+	mainWindow.webContents.send('preload:enable',"#triggerUncook")
+	mainWindow.webContents.send('preload:disable',"#stopUncook")
+})
 
 ipcMain.on('main:uncookForRepo',(event,conf)=> {
 	fs.access(path.normalize(preferences.get('unbundle')),fs.constants.W_OK,(err)=>{
@@ -948,7 +959,11 @@ function repoBuilder(contentdir, conf){
 					.then(()=>uncookRun(conf[4],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
 					.catch(err => { console.log(err) })
-					.finally(() => { 	mainWindow.webContents.send('preload:enable',"#triggerUncook") })
+					.finally(() => {
+						mainWindow.webContents.send('preload:enable',"#triggerUncook")
+						mainWindow.webContents.send('preload:disable',"#stopUncook")
+						
+					})
 				}
 		}
 	})
