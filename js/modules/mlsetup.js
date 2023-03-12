@@ -142,9 +142,10 @@ class Mlsetup {
 		this.#limit = 20
 		var layeriteration = null
 		var i = 0;
-		switch (Number(this.version[2])){
-			case 3:
-			case 2:
+    var testMinVersion = Number(this.version[2]);
+    
+		switch (true){
+			case (testMinVersion>=2):
 				//Iteration on mlsetupObject.Data.RootChunk.layers
 				layeriteration = mlsetupObject.Data.RootChunk.layers;
 				this.#limit = mlsetupObject.Data.RootChunk.layers.length
@@ -172,7 +173,7 @@ class Mlsetup {
 				this.normals = !!mlsetupObject.Data.RootChunk.usenormal
 				this.ratio = (mlsetupObject.Data.RootChunk?.ratio!=undefined) ? mlsetupObject.Data.RootChunk.ratio : 1.0;
 				break;
-			case 1:
+			case (testMinVersion==1):
 				//Iteration on mlsetupObject.Chunks.0.Properties.layers
 				this.#limit = mlsetupObject.Data.RootChunk.Properties.layers.length
 				layeriteration = mlsetupObject.Data.RootChunk.Properties.layers;
