@@ -881,15 +881,16 @@ function repoBuilder(contentdir, conf){
 		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 			if (typeof(conf)=='object'){
 				mainWindow.webContents.send('preload:uncookLogClean')
-
-				uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1')
-					.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
+				var exportFormatGE = preferences.get('maskformat')
+				//previous configuration ["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1'
+				uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],'step1')
+					//.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
-					.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step3'))
-					.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
+					.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step3'))
+					//.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_AP4")})
-					.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step5'))
-					.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
+					.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step5'))
+					//.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
 					.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
 					.then(()=> {
