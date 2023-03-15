@@ -1,4 +1,4 @@
-var flippingdipping = true;
+var flippingdipping = false;
 var flipdipNorm = false;
 var imgWorker
 const normalMapInfo = {
@@ -222,8 +222,9 @@ var canvUVWrapped = document.getElementById('UVMapMe');
 const loader = new THREE.GLTFLoader(); //loader for Gltf and glb models
 //const loader = new GLTFLoader();
 //const fbxloader = new THREE.FBXLoader(); //loader for FBX Format
-const gui = new dat.GUI({autoPlace:false});
+const gui = new dat.GUI({autoPlace:false,width:350});
 var GuiSubmesh =gui.addFolder("Submesh Toggle");
+var GuiInfo = gui.addFolder("Submesh Info");
 GuiSubmesh.close();//closes the submeshes folder
 
 
@@ -234,14 +235,18 @@ var flipcheck = document.getElementById("flipMask");
 flipcheck.onclick=function(){
   let layerSelected = document.querySelector("#layeringsystem li.active");
   flippingdipping = flipcheck.checked;
+  thePIT.savePref({flipmasks:flippingdipping});
   //need to update the canvas
   material.map.flipY = flippingdipping;
-  layerSelected.click();
+  if (layerSelected){
+    layerSelected.click();
+  }  
 }
 
 var flipNcheck = document.getElementById("flipNorm");
 flipNcheck.onclick=function(){
   flipdipNorm = flipNcheck.checked;
+  thePIT.savePref({flipnorm:flipdipNorm});
   //need to update the canvas
   var test = document.getElementById("normalMe");
   var test2 = test.getContext("2d");
@@ -770,6 +775,7 @@ function cleanScene(){
 }
 
 function mBuildAppearances(model){
+  
   var oAppeinfo = document.getElementById("appeInfo");
   oAppeinfo.innerHTML="";
   var overtInfo = document.getElementById("vertInfo");
@@ -784,42 +790,26 @@ function mBuildAppearances(model){
     //oAppeinfo.innerHTML+=`<span class="badge d-block txt-secondary rounded-0 mt-2"></span>`;
     let names = model.map(x=> x.name.replace('_LOD_1',''));
     model.forEach((el,index)=>{
-      overtInfo.innerHTML+=`<span class="badge eq-lay${(index % 2)*2+1} m-1">${el.name} ${el.vertexes} vertex</span> `
+      overtInfo.innerHTML+=`<span class="badge bg-layer${(index % 2)*2+1} m-1">${el.name} ${el.vertexes} vertex</span> `
+      let infoGui = new Object();
+      infoGui[`Vert-${el.name}`] = `${el.vertexes}`;
+      GuiInfo.add(infoGui, `Vert-${el.name}`)
     });
+    
+    GuiInfo.__controllers.forEach((item, i) => {
+      item.domElement.children[0].readOnly=true;
+    });
+    
+    /*
     let template
+    
     for (i=0,j=model[0].appearanceCode.length;i<j;i++){
       template = `<div class="col"><div class="card"><div class="card-body"><span class="badge d-block text-info rounded-0 mt-2">BufferArray ${i}</span>`
       for (x=0,y=names.length;x<y;x++){
         template += `<span class="badge d-block txt-secondary rounded-0 mt-2">${names[x]}</span>${model[x].appearanceCode[i]}`
       }
       oAppeinfo.innerHTML+=`${template}</ul></div></div></div>`
-    }
-  }
-}
-
-function mBuildInfo(model){
-  var oMdlPills = document.getElementById("v-pills-sMesh");
-  //oMdlPills.innerHTML="";
-  var oMdlTabs = document.getElementById("v-pills-tabContent");
-  //oMdlTabs.innerHTML="";
-
-  if ((model.length>0) && (typeof(model)=='object')){
-    model.forEach((submesh)=>{
-      if (submesh.hasOwnProperty("name")){
-        //There is a Submesh
-        oMdlPills.innerHTML+='<button class="nav-link rounded-0 " id="pill-'+submesh.name+'" data-bs-toggle="pill" data-bs-target="#tab-'+submesh.name+'" type="button" role="tab" aria-controls="#tab-'+submesh.name+'" aria-selected="false">'+submesh.name+'</button>';
-        //Tab Creation
-        oMdlTabs.innerHTML+='<div class="tab-pane fade show" id="tab-'+submesh.name+'" role="tabpanel" aria-labelledby="pill-'+submesh.name+'"></div>';
-
-        let tab = document.getElementById("tab-"+submesh.name); //point the newly created tab
-
-        if (submesh.hasOwnProperty("vertexes")){ tab.innerHTML +='<div class="mb-1"><span class="badge bg-info text-dark rounded-0">Vertex count</span> '+submesh.vertexes+'</div>'; } //vertexes
-        if (submesh.hasOwnProperty("materials")){ tab.innerHTML +='<span class="badge bg-info text-dark rounded-0">Material list: </span> '+submesh.materials; //material list
-        }
-      }
-    })
-    var enMdlPills = document.querySelector("#pill-"+model[0].name);
-    enMdlPills.click();
+    }*/
   }
 }
 
@@ -849,11 +839,13 @@ function LoadModelOntheFly(path){
 	if (data.byteLength>0){
 	    loader.parse( data ,'', ( glbscene ) => {
 	    gui.removeFolder("Submesh Toggle");
-
+      gui.removeFolder("Submesh Info");
+      
       UVSbmeshENA.innerHTML=""; //remove all the buttons in the uv calculator
       clearCanvas(canvUVWrapped,'',768)
 
 	    GuiSubmesh = gui.addFolder("Submesh Toggle");
+      GuiInfo = gui.addFolder("Submesh Info");
 	     glbscene.scene.traverse( function ( child ) {
 				 Decal = false;
          iStitches = false;
@@ -913,7 +905,6 @@ function LoadModelOntheFly(path){
 
 	      }
 	    });
-      //mBuildInfo(mobjInfo);
       mBuildAppearances(mobjInfo);
 	    //if (Boned){MasksOn.classList.add('on');}else{MasksOn.classList.remove('on');}
 			if (Boned){MasksOn.setAttribute("fill","red");}else{MasksOn.setAttribute("fill","currentColor");}

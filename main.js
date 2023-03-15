@@ -68,6 +68,14 @@ const schema = {
 	depot:{
 		type:'string',
 		default: ''
+	},
+	flipmasks:{
+		type:'boolean',
+		default: false
+	},
+	flipnorm:{
+		type:'boolean',
+		default: false
 	}
 };
 
@@ -94,6 +102,8 @@ const preferences = new store({schema,
 				let fixVal = store.get('unbundle')
 				store.set('depot', fixVal)
 			}
+			store.set('flipmasks',false)
+			store.set('flipnorm',false)
 		}
 	}
 });
@@ -459,6 +469,22 @@ ipcMain.on('main:giveModels',(event) => {
 		}
 	})
 })
+
+function readMaterials(materialfile = ''){
+	if (materialfile!=``){
+		materialfile = materialfile.replace(/\.glb$/,".material.json")
+		fs.readFile(materialfile,(err,contenutofile) =>{
+	    if (err) {
+	      if (err.code=='ENOENT'){
+					mainWindow.webContents.send('preload:logEntry',`Material file not found in: ${materialfile}`);
+				}
+				return;
+			}
+			mainWindow.webContents.send('preload:logEntry',`Material file found at ${materialfile}`);
+		})
+	}
+	return;
+}
 //read file on disk
 ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 	var whereLoadFrom
@@ -467,8 +493,8 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 	}else{
 		whereLoadFrom = path.join(preferences.get('unbundle'),percorso)
 	}
+	var a3dMatModel = whereLoadFrom.search(/^.+\.glb$/g)>-1 ? whereLoadFrom: ``; //path of the hypotethical material file
 	var hasDepot = preferences.get('depot')!=preferences.get('unbundle') ? true : false
-	//whereLoadFrom = path.join(preferences.get('depot'),percorso)
   fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
     if (err) {
       if (err.code=='ENOENT'){
@@ -488,6 +514,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 								}
 							}
 							contenutofile=""
+							a3dMatModel="";
 						}else{
 							event.reply('preload:logEntry', 'File found in the Depot Folder, Yay')
 						}
@@ -497,15 +524,18 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 					if (normals.test(whereLoadFrom)){
 						event.reply('preload:logEntry', 'File not found in : '+whereLoadFrom,true)
 					}else{
+						a3dMatModel="";
 						dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 				}
       }else{
         dialog.showErrorBox("File opening error",err.message)
+				a3dMatModel="";
       }
       contenutofile=""
     }
+		readMaterials(a3dMatModel); //launch a search for the material
 		event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
 		event.returnValue = contenutofile
   })
@@ -639,6 +669,12 @@ ipcMain.on('main:saveStore',(event, arg) => {
 	}
 	if (arg.hasOwnProperty('depot')){
 		preferences.set('depot',arg.depot);
+	}
+	if (arg.hasOwnProperty('flipnorm')){
+		preferences.set('flipnorm',arg.flipnorm);
+	}
+	if (arg.hasOwnProperty('flipmasks')){
+		preferences.set('flipmasks',arg.flipmasks);
 	}
 })
 

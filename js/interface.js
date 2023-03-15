@@ -296,15 +296,6 @@ $(function(){
 
 	$(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover
-
-    //resize of the canvas
-    /*
-    let matSize = parseInt($("#materialDis").parent().css("width"));
-
-    $("#materialDis").attr({
-      'width':matSize,
-      'height':matSize
-    });*/
 	});
 
 	$("#mlPosX").click(function(){
@@ -2387,5 +2378,26 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
   $("#KofiSupportPage").click(function(){
     thePIT.ExtOpen({type:'url',param:'ko-fi'})
   })
-
+  
+  var flipMask = thePIT.RConfig('flipmasks')
+                  .then((valore)=>{
+                    if (valore){
+                      $("#flipMask").prop("checked","checked");
+                    }else{
+                      $("#flipMask").prop("checked","");
+                    }
+                  }).catch((error)=>{
+                    notifyMe(error);
+                  });
+                  
+  var flipNorm = thePIT.RConfig('flipnorm')
+                  .then((valore)=>{
+                    if (valore){
+                      $("#flipNorm").prop("checked","checked");
+                    }else{
+                      $("#flipNorm").prop("checked","");
+                    }
+                  }).catch((error)=>{
+                    notifyMe(error);
+                  });
 });
