@@ -249,7 +249,7 @@ $(function(){
 
 	function notifyMe(message, warning = true){
 		let Data = new Date(Date.now());
-    
+
 		if (warning){
       $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
       notifications++
@@ -701,145 +701,6 @@ $("#resetShades span.choose").click(function(){
       }
     );
   });
-
-  /* to remove
-	const AimMBlend = new bootstrap.Modal(document.getElementById('AimBlend'));
-	const AimWindows = document.getElementById('AimBlend');
-	//On open of the aiming windows
-	AimWindows.addEventListener('shown.bs.modal', function (event) {
-   let tiling =$("#mbTile").val();
-   tiling = Number(tiling);
- 	 let horizontal_mb = $("#mbOffU").val();
-   horizontal_mb = Number(horizontal_mb);
-   let vertical_mb = $("#mbOffV").val();
-   vertical_mb = Number(vertical_mb);
-   //connect value
-   $("#AimMTile").val(tiling);
-   $("#AimV").val(vertical_mb);
-   $("#AimU").val(horizontal_mb);
-	 //load visually the values
-	 document.getElementById('dispAimTile').innerHTML = tiling;
-	 document.getElementById('dispAimU').innerHTML = horizontal_mb;
-	 document.getElementById('dispAimV').innerHTML = vertical_mb;
-
-	 var sel_Microblend = $("#mb-preview").attr('src');
-   let microblendRatio =  Number($("#mbTile").val());
-   microblendRatioVal = (1/microblendRatio) * 512;
-
-	 fabric.Image.fromURL(sel_Microblend, function(oImg) {
-		 	oImg.scaleToHeight(microblendRatioVal);
-			oImg.scaleToWidth(microblendRatioVal);
-      //oImg.originY="bottom";
-			//oImg.hasControls = false;
-      oImg.flipY=true;
-      //console.log(oImg.height+" "+oImg.width);
-			oImg.opacity=0.7;
-
-      var patternSourceCanvas = new fabric.StaticCanvas();
-      //patternSourceCanvas.setDimensions({width:oImg.width,height:oImg.height});
-      patternSourceCanvas.setDimensions({width:oImg.getScaledWidth(),height:oImg.getScaledHeight()});
-      patternSourceCanvas.add(oImg);
-      patternSourceCanvas.renderAll();
-
-      var pattern = new fabric.Pattern({
-       source: patternSourceCanvas.getElement(),
-       repeat: 'repeat',
-     });
-
-     pattern.originX="center";
-     pattern.originY="bottom";
-		 var verticalsource = 512-microblendRatioVal;
-     pattern.offsetX=-horizontal_mb*microblendRatioVal;
-		 pattern.offsetY=verticalsource+(vertical_mb*microblendRatioVal);
-
-     //console.log("X:"+pattern.offsetX+" Y:"+pattern.offsetY+" offset: "+ (scalesizinoffset*512) +" ratio: "+microblendRatioVal);
-
-      microBlend.add(
-        new fabric.Rect(
-          {
-            width:512,
-            height:512,
-            left: 0,
-            top: 0,
-            fill: pattern,
-            objectCaching: false,
-            hasControls:false,
-            lockScalingX : true,
-            lockScalingY : true,
-            lockMovementX : true,
-            lockMovementY : true
-          },
-        ),
-      );
-
-      document.getElementById('AimU').oninput = function () {
-				document.getElementById('dispAimU').innerHTML = this.value;
-				let resizable = ((1/Number(document.getElementById('AimMTile').value)) * 512);
-        pattern.offsetX =-1*(Number(this.value)*resizable);
-        microBlend.requestRenderAll();
-      };
-
-			document.getElementById('AimV').oninput = function () {
-				document.getElementById('dispAimV').innerHTML  = this.value;
-				let resizable = ((1/Number(document.getElementById('AimMTile').value)) * 512);
-				verticalsource = 512-resizable
-				pattern.offsetY=verticalsource+(Number(this.value)*resizable);
-        microBlend.requestRenderAll();
-      };
-
-			document.getElementById('AimMTile').oninput = function () {
-				document.getElementById('dispAimTile').innerHTML  = this.value;
-				let resizable = ((1/Number(this.value)) * 512);
-				 oImg.scaleToWidth(resizable);
-				 oImg.scaleToHeight(resizable);
-
-				 let actualX = document.getElementById('AimU').value
-				 let actualY = document.getElementById('AimV').value
-
-				 pattern.offsetY=512-resizable+(actualY*resizable);
-				 pattern.offsetX =-1*(actualX*resizable);
-
-				 patternSourceCanvas.setDimensions({
-					 width: oImg.getScaledWidth(),
-					 height: oImg.getScaledHeight(),
-				 });
-				 microBlend.requestRenderAll();
-		 };
-
-		});
- 	});
-
-	AimWindows.addEventListener('hide.bs.modal', function (event) {	microBlend.clear();	});
-
-  //Speed Changing for Aiming Windows
-  $("#AimV, #AimU, #AimMTile").on("change",function(){
-    if (shiftSpeedup){ $(this).attr("step","0.1");  }else{  $(this).attr("step","0.001"); }
-  });
-
-	$("#confirmAim").click(function(){
-		$("#mbOffU").val($("#AimU").val());
-		$("#mbOffV").val($("#AimV").val());
-		$("#mbTile").val($("#AimMTile").val());
-		if ($("#AimChain").prop('checked')){
-			$("#layerOffU").val($("#AimU").val());
-			$("#layerOffV").val($("#AimV").val());
-			$("#layerTile").val($("#AimMTile").val());
-		}
-		AimMBlend.hide();
-	});
-
-  $("#reloadAim").click(function(){
-		//reload the value from the main window
-    $("#AimU").val($("#mbOffU").val());
-		$("#AimV").val($("#mbOffV").val());
-		$("#AimMTile").val($("#mbTile").val());
-
-    $('#dispAimU').text($("#AimU").val());
-    $('#dispAimV').text($("#AimV").val());
-    $('#dispAimTile').text($("#AimMTile").val());
-    $('#AimMTile, #AimU, #AimV').trigger('input');
-
-  });*/
 
   $("#slidemask").on("input",function(){
 		let hexacol
@@ -2378,7 +2239,7 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
   $("#KofiSupportPage").click(function(){
     thePIT.ExtOpen({type:'url',param:'ko-fi'})
   })
-  
+
   var flipMask = thePIT.RConfig('flipmasks')
                   .then((valore)=>{
                     if (valore){
@@ -2389,7 +2250,7 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
                   }).catch((error)=>{
                     notifyMe(error);
                   });
-                  
+
   var flipNorm = thePIT.RConfig('flipnorm')
                   .then((valore)=>{
                     if (valore){

@@ -219,9 +219,9 @@ ipcRenderer.on('preload:noBar',(event,result)=>{
 ipcRenderer.on('preload:uncookErr',(event, msg, logger='#uncookLogger')=>{
 	var logtext = document.querySelector(logger+' div')
   if (logtext!=null){
-    logtext.innerHTML = msg + logtext.innerHTML  
+    logtext.innerHTML = msg + logtext.innerHTML
   }else{
-    document.querySelector('#uncookLogger div').innerHTML = "Process Killed" + document.querySelector('#uncookLogger div').innerHTML 
+    document.querySelector('#uncookLogger div').innerHTML = "Process Killed" + document.querySelector('#uncookLogger div').innerHTML
   }
 })
 ipcRenderer.on('preload:uncookLogClean',(event,logger='#uncookLogger')=>{
@@ -266,3 +266,8 @@ ipcRenderer.on("preload:upd_config",(event,data)=>{
   let maskTemplate = document.getElementById("masksTemplate")
   maskTemplate.value = maskTemplate.value.replace(new RegExp(/\.(dds|png|xbm)/),"."+data.maskformat)
 })
+
+ipcRenderer.on("preload:activate",(event,target)=>{
+  let objtarget = document.querySelector(target)
+	objtarget.click()
+});

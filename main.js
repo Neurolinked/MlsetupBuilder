@@ -315,6 +315,18 @@ const template = [
   {
     label: 'File',
     submenu: [
+			{
+          label: 'Mlsetup',
+          submenu: [
+						{label: 'Import', click: () =>{
+							mainWindow.webContents.send('preload:activate','#importTech')
+						}},
+						{label: 'Export', click: () =>{
+							mainWindow.webContents.send('preload:activate','#exportversions')
+						}},
+          ]
+      },
+			{ type: 'separator' },
 			{label: '&Preferences', click: () =>{
 				createModal("apps/prefs.html",mainWindow,800,350,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
 			}},
@@ -802,7 +814,7 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 });
 
 function uncookStop(){
-	
+
 }
 
 function uncookRun(toggle,params,stepbar,logger){
@@ -999,7 +1011,7 @@ function repoBuilder(contentdir, conf){
 					.finally(() => {
 						mainWindow.webContents.send('preload:enable',"#triggerUncook")
 						mainWindow.webContents.send('preload:disable',"#stopUncook")
-						
+
 					})
 				}
 		}
