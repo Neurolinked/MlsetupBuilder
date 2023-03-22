@@ -1,5 +1,6 @@
-var flippingdipping = false;
-var flipdipNorm = false;
+var flippingdipping = thePIT.RConfig('flipmasks');
+var flipdipNorm = thePIT.RConfig('flipnorm');
+
 var imgWorker
 const normalMapInfo = {
   width : 128,
@@ -413,6 +414,29 @@ function paintDatas(textureData,w,h){
   oc.remove();
 }
 
+function DDSNormal(textureData,w,h){
+  var oc = document.createElement('canvas');
+  oc.width=w;
+  oc.height=h;
+  var octx = oc.getContext('2d');
+  var imageData = octx.createImageData(w,h);//var imageData = octx.createImageData(w,h);
+  var k=0;
+  for (let i = 0; i < imageData.data.length; i += 4) {
+ 	 // Modify pixel data
+ 	 imageData.data[i] = textureData[k];  // R value
+   imageData.data[i + 1] = textureData[k+1];  // G value
+   imageData.data[i + 2] = 255;
+ 	 imageData.data[i + 3] = 255;  // A value
+ 	 k+=4;
+  }
+  octx.putImageData(imageData,0,0,0,0,w,h);
+  nMeKanv.width=768;
+  nMeKanv.height=768;
+  nctx = nMeKanv.getContext('2d');
+  nctx.drawImage(oc,0,0,768,768);
+  oc.remove();
+}
+
 function giveToTheAim(textureData,w,h){
  var aimcanvas = document.getElementById('MaskTargettoAim');
  var ctx = aimcanvas.getContext('2d');
@@ -607,98 +631,122 @@ function loadNormOntheFly(path){
 	//let Normed = document.querySelector('#withbones svg:nth-child(2) path');
   let Normed = document.querySelector('#withbones i.icon-normals');
   //const encoder = new TextEncoder()
-	path = path.replaceAll(/\//g,'\\').replace(/\.xbm$/,".png"); //pngWay
+	path = path.replaceAll(/\//g,'\\')//.replace(/\.xbm$/,".png"); //pngWay
 	//path = path.replaceAll(/\//g,'\\');
   var bufferimage = thePIT.ApriStream(path,'binary');
 	var ab = str2ab(bufferimage);
+  
+  if (path.endsWith(".png")){
+  	if (ab.byteLength>0){
+  			var filePointer = 0;
+  			const headerData = new Uint8Array(ab,0,8);
+  			filePointer +=8;
+  			//Check on PNG file signature http://www.libpng.org/pub/png/spec/1.2/PNG-Rationale.html#R.PNG-file-signature
+  			if (
+  				(headerData[0]==0x89)
+  				&& (headerData[1]==0x50)
+  				&& (headerData[2]==0x4e)
+  				&& (headerData[3]==0x47)
+  				&& (headerData[4]==0x0d)
+  				&& (headerData[5]==0x0a)
+  				&& (headerData[6]==0x1a)
+  				&& (headerData[7]==0x0a)
+  			){
+  				//Getting the image dimesions to work with the canvas import
+  				//chuckiteration
+  				var chunkslenght, chunkstype
+  				var pngWidth = pngHeight = 0;
+  				var imgByteLenght = ab.byteLength
 
-	if (ab.byteLength>0){
-			var filePointer = 0;
-			const headerData = new Uint8Array(ab,0,8);
-			filePointer +=8;
-			//Check on PNG file signature http://www.libpng.org/pub/png/spec/1.2/PNG-Rationale.html#R.PNG-file-signature
-			if (
-				(headerData[0]==0x89)
-				&& (headerData[1]==0x50)
-				&& (headerData[2]==0x4e)
-				&& (headerData[3]==0x47)
-				&& (headerData[4]==0x0d)
-				&& (headerData[5]==0x0a)
-				&& (headerData[6]==0x1a)
-				&& (headerData[7]==0x0a)
-			){
-				//Getting the image dimesions to work with the canvas import
-				//chuckiteration
-				var chunkslenght, chunkstype
-				var pngWidth = pngHeight = 0;
-				var imgByteLenght = ab.byteLength
+  				while ((pngWidth==0) && (pngWidth==0) && (filePointer<imgByteLenght)) {
+  					chunkslenght = parseInt(new DataView(ab,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
+  					chunkstype = new Uint8Array(ab,filePointer+4,4);
+  					filePointer+=8;
+  					//console.log(chunkslenght+" : "+chunkstype);
+  					if ( (chunkstype[0]==0x49)
+  						&&(chunkstype[1]==0x48)
+  						&&(chunkstype[2]==0x44)
+  						&&(chunkstype[3]==0x52) ){
+  						//go for the read of the length
+  						pngWidth=parseInt(new DataView(ab,filePointer,4).getUint32());
+  						pngHeight=parseInt(new DataView(ab,filePointer+4,4).getUint32());
+  					}
+  					filePointer+=chunkslenght+4; //last 4 byte are for the checksum
+  				}
 
-				while ((pngWidth==0) && (pngWidth==0) && (filePointer<imgByteLenght)) {
-					chunkslenght = parseInt(new DataView(ab,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
-					chunkstype = new Uint8Array(ab,filePointer+4,4);
-					filePointer+=8;
-					//console.log(chunkslenght+" : "+chunkstype);
-					if ( (chunkstype[0]==0x49)
-						&&(chunkstype[1]==0x48)
-						&&(chunkstype[2]==0x44)
-						&&(chunkstype[3]==0x52) ){
-						//go for the read of the length
-						pngWidth=parseInt(new DataView(ab,filePointer,4).getUint32());
-						pngHeight=parseInt(new DataView(ab,filePointer+4,4).getUint32());
-					}
-					filePointer+=chunkslenght+4; //last 4 byte are for the checksum
-				}
+  				if (pngWidth>0){
+  					context = nMeKanv.getContext('2d');
+  					//console.log(pngWidth,pngHeight);
+  					/* Size is setted up */
+            nMeKanv.width = normalMapInfo.width = pngWidth;
+            nMeKanv.height = normalMapInfo.height = pngHeight;
 
-				if (pngWidth>0){
-					context = nMeKanv.getContext('2d');
-					//console.log(pngWidth,pngHeight);
-					/* Size is setted up */
-          nMeKanv.width = normalMapInfo.width = pngWidth;
-          nMeKanv.height = normalMapInfo.height = pngHeight;
-
-					var encodedData = btoa(bufferimage);
-					var dataURI = "data:image/png;base64," + encodedData;
-					var nMap = new Image();
-					nMap.onload = function(){
-						context.drawImage(nMap, 0, 0, normalMapInfo.width,normalMapInfo.height);
-						var imageData = context.getImageData(0,0,normalMapInfo.width,normalMapInfo.height);
-            if (window.Worker) { imgWorker.postMessage(imageData) }
-            /*
-						for (let i = 0, l=imageData.data.length; i < l; i += 4) {
-						 // Modify pixel data
-						 imageData.data[i + 2] = 255;  // B value
-           }*/
-						//context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
-						//normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
-						//material.normalMap = normMe;
+  					var encodedData = btoa(bufferimage);
+  					var dataURI = "data:image/png;base64," + encodedData;
+  					var nMap = new Image();
+  					nMap.onload = function(){
+  						context.drawImage(nMap, 0, 0, normalMapInfo.width,normalMapInfo.height);
+  						var imageData = context.getImageData(0,0,normalMapInfo.width,normalMapInfo.height);
+              if (window.Worker) { imgWorker.postMessage(imageData) }
+              /*
+  						for (let i = 0, l=imageData.data.length; i < l; i += 4) {
+  						 // Modify pixel data
+  						 imageData.data[i + 2] = 255;  // B value
+             }*/
+  						//context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
+  						//normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
+  						//material.normalMap = normMe;
+              //material.normalMap.needsUpdate = true
+  						//material.map.needsUpdate = true;
+  						//material.normalMap.flipY = false;
+              Normed.style.color = 'var(--normal)';
+  						//Normed.setAttribute("fill",'rgb(120,119,255)'); //display the normal flag
+  					}
+  					nMap.src = dataURI;
+  				}else{
+  					//console.log('no sizes found');
+  					notify3D('no sizes found');
+  					safeNormal();
+  					//Normed.setAttribute("fill",'currentColor');
+            Normed.style.color = '';
+  					//var texture = new THREE.CanvasTexture(nMeKanv)
+  					//material.normalMap = texture;
             //material.normalMap.needsUpdate = true
-						//material.map.needsUpdate = true;
-						//material.normalMap.flipY = false;
-            Normed.style.color = 'var(--normal)';
-						//Normed.setAttribute("fill",'rgb(120,119,255)'); //display the normal flag
-					}
-					nMap.src = dataURI;
+  				}
 
-				}else{
-					//console.log('no sizes found');
-					notify3D('no sizes found');
-					safeNormal();
-					//Normed.setAttribute("fill",'currentColor');
-          Normed.style.color = '';
-					//var texture = new THREE.CanvasTexture(nMeKanv)
-					//material.normalMap = texture;
-          //material.normalMap.needsUpdate = true
-				}
-
-			}else{
-				//Normed.setAttribute("fill",'rgb(255,0,0)');
-        Normed.style.color = 'rgb(255,0,0)';
-				notify3D('another format');
-			}
-	}else{
-		//Normed.setAttribute("fill",'rgb(255,128,0)');
-    Normed.style.color = 'rgb(255,128,0)';
-	}
+  			}else{
+  				//Normed.setAttribute("fill",'rgb(255,0,0)');
+          Normed.style.color = 'rgb(255,0,0)';
+  				notify3D('another format');
+  			}
+  	}else{
+  		//Normed.setAttribute("fill",'rgb(255,128,0)');
+      Normed.style.color = 'rgb(255,128,0)';
+  	}
+  }else if(path.endsWith(".dds")){
+    var data = str2ab(bufferimage);
+    let offsetHeight = 3;
+    let offsetwidth = 4;
+    const headerData = new Uint32Array( data, 0, 5 ); //get the two dimensions data bytes
+    let height = headerData[3];
+    let width = headerData[4];
+    let size = height * width * 4;
+    const dx10Data = new Uint32Array( data, 128, 4 ); //get the type of DDS
+    var normalData
+   //wolvenkit 8.4.3+ and cli 1.5.0+ format
+    if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+      normalData = new Uint32Array( data, 148, size );
+    }else{
+      //or legacy RGBA Unorm
+      normalData = new Uint8Array( data, 148, size );
+    }
+    DDSNormal(normalData,width,height);
+    Normed.style.color = 'var(--normal)';
+    material.normalMap.flipY = flipdipNorm
+    material.normalMap.needsUpdate = true;
+  }
+  material.map.flipY = flippingdipping
+  material.map.needsUpdate = true;
 }
 
 function loadMapOntheFly(path){
@@ -1036,7 +1084,7 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
  //let Normed = document.querySelector('#withbones svg:nth-child(2) path');
 let Normed = document.querySelector('#withbones i.icon-normals');
 
-if (theNormal.match(/^[/|\w|\.]+.png/)){
+if (theNormal.match(/^[/|\w|\.]+.[dds|png]/)){
  loadNormOntheFly(theNormal);
 }else{
  safeNormal();

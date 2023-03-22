@@ -855,7 +855,7 @@ function uncookRun(toggle,params,stepbar,logger){
 						case 'step1':
 						case 'step3':
 						case 'step5':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Mesh and mlmasks Done</span>')
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Mesh with materials done</span>')
 							break;
 						case 'step2':
 						case 'step4':

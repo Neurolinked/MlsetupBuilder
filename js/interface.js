@@ -1005,7 +1005,7 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     }
 		// ID of the normal map
 		if (node.node.li_attr.hasOwnProperty('normal')) {
-			$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}","png"));//$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));
+			$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));//$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));
 		}else{
 			$("#normTemplate").val('');
 		}
