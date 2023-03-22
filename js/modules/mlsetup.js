@@ -111,9 +111,9 @@ class Mlsetup {
 	/**
 	 * Remove the last Layer in the array stack
 	 */
-	unplug(){
+	unplug(counted=1){
 		if (this.Layers.length>0){
-				this.Layers.splice(-1,1)
+				this.Layers.splice(-1*counted,counted)
 		}
 	}
 
@@ -138,7 +138,6 @@ class Mlsetup {
 	 */
 	import(mlsetupObject){
 		this.getVersion(mlsetupObject)
-
 		this.#limit = 20
 		var layeriteration = null
 		var i = 0;
@@ -231,7 +230,7 @@ class Mlsetup {
 				break;
 		}
 		if (this.#limit < 20){
-			this.Layers.splice(this.#limit-1,20-this.#limit)
+      this.unplug(20-this.#limit)	//this.Layers.splice(this.#limit-1,20-this.#limit)
 		}
 	}
 
