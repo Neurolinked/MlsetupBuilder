@@ -115,8 +115,8 @@ ipcRenderer.on('preload:logEntry',(event, resultSave, warning = false) => {
   var fastMessage = document.getElementById("foot-message")
 
 	notificationCenter.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + resultSave + "<br/>" + notificationCenter.innerHTML;
-
-  fastMessage.innerHTML = resultSave.split('<br/>')[0];
+  
+  fastMessage.innerHTML = (resultSave.length > 100) ? resultSave.substring(0,100)+'<i class="fa-solid fa-ellipsis"></i>' : resultSave.split('<br/>')[0];
 	if (warning){
 		let notiCounter = document.querySelector("#notyCounter span")
 		if (notiCounter.innerText==''){
