@@ -269,7 +269,7 @@ $(function(){
     var key = ev.which || ev.keyCode; // Detecting keyCode
 
     var ctrl =  ev.ctrlKey ? ev.ctrlKey : ((key === 17) ? true : false);
-
+    /*
     if (key == 73 && ctrl && (!e.shiftKey) ) {
       // CTRL+I Import action
       $("#importLink").click();

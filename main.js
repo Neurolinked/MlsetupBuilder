@@ -318,10 +318,10 @@ const template = [
 			{
           label: 'Mlsetup',
           submenu: [
-						{label: 'Import', click: () =>{
+						{label: 'Import',accelerator: 'Ctrl+i', click: () =>{
 							mainWindow.webContents.send('preload:activate','#importTech')
 						}},
-						{label: 'Export', click: () =>{
+						{label: 'Export',accelerator: 'Ctrl+e', click: () =>{
 							mainWindow.webContents.send('preload:activate','#exportversions')
 						}},
           ]
