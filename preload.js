@@ -91,6 +91,12 @@ ipcRenderer.on('preload:load_source', (event, jsoncontent) => {
   document.querySelector("#TheMagicIsHere").click();
 })
 
+ipcRenderer.on('preload:materiaload',(event,materialcontent)=>{
+  var materialArea = document.getElementById('materialJson');
+  materialArea.value = JSON.stringify(materialcontent)
+  materialArea.dispatchEvent(new Event("update"));
+});
+
 ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 	sessionStorage.setItem("wkitBuild",versionchecker);
   var wkitto

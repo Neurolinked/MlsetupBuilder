@@ -486,12 +486,18 @@ function readMaterials(materialfile = ''){
 	if (materialfile!=``){
 		materialfile = materialfile.replace(/\.glb$/,".material.json")
 		fs.readFile(materialfile,(err,contenutofile) =>{
-	    if (err) {
-	      if (err.code=='ENOENT'){
+	    	if (err) {
+	      		if (err.code=='ENOENT'){
 					mainWindow.webContents.send('preload:logEntry',`Material file not found in: ${materialfile}`);
 				}
 				return;
 			}
+			try {
+				materialcontent = JSON.parse(contenutofile)
+			} catch (error){
+				mainWindow.webContents.send('preload:logEntry', 'Error in the parsing the material file')
+			}
+			mainWindow.webContents.send('preload:materiaload', materialcontent);
 			mainWindow.webContents.send('preload:logEntry',`Material file found at ${materialfile}`);
 		})
 	}

@@ -1,5 +1,6 @@
 window.$ = window.jQuery;
 var notifications = 0;
+var materialJSON = new MaterialBuffer();
 
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
@@ -168,6 +169,17 @@ $(function(){
     img.src = `./images/material/${materialChoose}.jpg`
   }
   drawMaterial("unused");
+
+  /* Material.json load and interface events */
+  $("#materialJson").bind('update',()=>{
+    try {
+      var materialAppearances = JSON.parse($("#materialJson").val());
+      console.log(materialAppearances);
+    } catch (error) {
+      notifyMe(error,false);
+    }
+    materialJSON.import($("#materialJson").val());
+  });
 
   var textureformat = ''
   var Ptextformat = thePIT.RConfig('maskformat');
