@@ -1184,11 +1184,36 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 		}
 	});
 
+  //mousemove and mouseout event over layers
+  $("#layeringsystem li").mousemove(function(e){
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      //$("#floatLayer").css({ "left": `${(mouseX + 30)}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090, "background": `url(images/material/${materialName}.jpg) 0 0 no-repeat`, "background-size": " 128px,128px" });
+      $("#floatLayer").css({ "left": `${(mouseX + 30)}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090 });
+  });
+
+  $("#layeringsystem li").mouseenter(function (e) {
+    if ((parseFloat($(this).data('opacity')) > 0) && ($(this).attr("disabled") == undefined)) {
+      let materialPath = $(this).data('material');
+      let materialName = materialPath.split("\\").reverse()[0].split(".")[0]
+      let mblendPath = $(this).data('mblend');
+      let mblendlName = mblendPath.split("\\").reverse()[0].split(".")[0]
+      $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
+      $("#currentMblend").attr("src", `images/${mblendlName}.png`);
+      $("#floatLayer").removeClass('d-none');
+    }
+  });
+
+
+  $("#layeringsystem li").mouseout(function (e) {
+    $("#floatLayer").addClass('d-none');
+  });
+
 	$("#materiaList li").mousemove(function(e){
-			mouseX = e.clientX;
+			$("#floatMat").css({"left":(mouseX + 30) + "px","top":(mouseY + 10)+"px","z-index":1090,"background":"url(images/material/"+$(this).data('ref')+".jpg) 0 0 no-repeat","background-size":" 128px,128px"});
+			$("#floatMat").removeClass('d-none');useX = e.clientX;
 		  mouseY = e.clientY;
-		  $("#floatMat").css({"left":(mouseX + 30) + "px","top":(mouseY + 10)+"px","z-index":1090,"background":"url(images/material/"+$(this).data('ref')+".jpg) 0 0 no-repeat","background-size":" 128px,128px"});
-			$("#floatMat").removeClass('d-none');
+		  
 		}
 	);
 

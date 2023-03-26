@@ -237,6 +237,8 @@ input[type='text'],
 #mb-preview{width:100%;-webkit-transform: scaleY(-1);transform: scaleY(-1);} /*microblend preview flip */
 #bg-changer{display:block;width:100%;border:0 none;height:100%; border: 0 none!important; padding:0;}
 .flip{-webkit-transform: scaleY(1)!important;transform: scaleY(1)!important;}
+.flipreverse{-webkit-transform: scaleY(-1) !important;
+  transform: scaleY(-1) !important;}
 /*microblend preview text displaing the direction*/
 .bg-secondary, .badge-secondary{background-color:var(--bs-secondary) !important;}
 .bg-md-dark{background-color:var(--med-dark);}
@@ -414,6 +416,7 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #legacyMaterial ul li.active{background-color:var(--bs-secondary);}
 
 #floatMat{background-color: var(--bs-layer0);border: 1px solid var(--bs-secondary);width:128px;height:128px;}
+#floatLayer{background-color: var(--bs-layer0);border: 1px solid var(--bs-secondary);width: 264px;height: 130px;}
 
 #v-pills-sMesh .nav-link{color:var(--bs-info) !important;}
 #v-pills-sMesh .nav-link.active, #v-pills-sMesh .show>.nav-link{color:black !important;background-color: var(--bs-info)!important;}
