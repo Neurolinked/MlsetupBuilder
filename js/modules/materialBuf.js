@@ -1,3 +1,13 @@
+class Appearance{
+	Name = ''
+	Materials=Array()
+
+	costructor(name,materials){
+		this.Name = name;
+		this.Materials = materials;
+	}
+}
+
 class MaterialTemplate{
 	Name = ''
 	Data = Object()
@@ -100,13 +110,14 @@ class Material {
 }
 
 class MaterialBuffer {
+	Appearances = []
 	MaterialRepo = '' //MaterialRepo
 	Materials = [] //Materials
 	TexturesList = [] //TexturesList
 	MaterialTemplates = [] //MaterialTemplates
 	
 	constructor(depotPath = ''){
-		depotPath +=''	//avoid getting a null an use it as a string
+		depotPath +=''	//avoid getting a null and use it as a string
 		this.MaterialRepo = depotPath
 	}
 	
@@ -128,6 +139,9 @@ class MaterialBuffer {
 					if  (mbDummy.MaterialTemplates.length>0){
 						 this.MaterialTemplates = mbDummy.MaterialTemplates
 					}
+				if (mbDummy.hasOwnProperty("Appearances")){
+					this.Appearances = mbDummy.Appearances
+				}
 				return true;
 			}else{
 				return false;
@@ -170,6 +184,25 @@ class MaterialBuffer {
 		this.#UpdateTextures() //relist the Textures
 		this.#fixTemplates() //shut away the Templates unused
 		return true
+	}
+
+	codeAppearances(template='',index=null){
+		let codeMaterial =''
+		if (template==''){
+			template =`<div class="col"><div class="card"><div class="card-header">$APPEARANCE$</div><div class="card-body">$MATERIALS$</div></div></div>`
+		}
+		try {
+			if ((index != null) && (parseInt(index) >= 0) && (parseInt(index) < Object.keys(this.Appearances).length)) {
+				codeMaterial = template.replace("$APPEARANCE$", Object.keys(this.Appearances)[index]).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${Object.values(this.Appearances)[index].join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
+			} else {
+				for (const [key, material] of Object.entries(this.Appearances)) {
+					codeMaterial += template.replace("$APPEARANCE$", key).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${material.join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
+				}
+			}	
+		} catch (error) {
+			console.error(error)
+		}
+		return codeMaterial
 	}
 	
 	codeMaterial(index=NaN){

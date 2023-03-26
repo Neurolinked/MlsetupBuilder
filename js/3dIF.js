@@ -838,7 +838,7 @@ function mBuildAppearances(model){
     //oAppeinfo.innerHTML+=`<span class="badge d-block txt-secondary rounded-0 mt-2"></span>`;
     let names = model.map(x=> x.name.replace('_LOD_1',''));
     model.forEach((el,index)=>{
-      overtInfo.innerHTML+=`<span class="badge bg-layer${(index % 2)*2+1} m-1">${el.name} ${el.vertexes} vertex</span> `
+      //overtInfo.innerHTML+=`<span class="badge bg-layer${(index % 2)*2+1} m-1">${el.name} ${el.vertexes} vertex</span> `
       let infoGui = new Object();
       infoGui[`Vert-${el.name}`] = `${el.vertexes}`;
       GuiInfo.add(infoGui, `Vert-${el.name}`)

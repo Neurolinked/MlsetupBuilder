@@ -172,13 +172,26 @@ $(function(){
 
   /* Material.json load and interface events */
   $("#materialJson").bind('update',()=>{
+    $("#appeInfo").html("");
     try {
       var materialAppearances = JSON.parse($("#materialJson").val());
-      console.log(materialAppearances);
+      //appeInfo
+      //console.log(materialAppearances);
+      /*
+      let codeResult =''
+      template = `<div class="col"><div class="card"><div class="card-header">$TITOLO$</div><div class="card-body">$MATERIALS$</div></div></div>`;
+      for (const [key, entry] of Object.entries(materialAppearances?.Appearances)) {
+        codeResult += template.replace("$TITOLO$", key).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${entry.join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
+      }
+
+      $("#appeInfo").html(codeResult);
+      */
+      materialJSON.import($("#materialJson").val());
+      console.log(materialJSON);
+      $("#appeInfo").html(materialJSON.codeAppearances());
     } catch (error) {
       notifyMe(error,false);
     }
-    materialJSON.import($("#materialJson").val());
   });
 
   var textureformat = ''
