@@ -150,6 +150,7 @@ function switchLegacyMat(material){
 }
 
 $(function(){
+  const Workspace = $("#workspaceCSS");
   //canvas for contestual material
   const canvasMaterial = document.getElementById('materialDis');
   const material2D = canvasMaterial.getContext("2d");
@@ -294,6 +295,14 @@ $(function(){
     var key = ev.which || ev.keyCode; // Detecting keyCode
 
     var ctrl =  ev.ctrlKey ? ev.ctrlKey : ((key === 17) ? true : false);
+    var shift = ev.shiftKey ? ev.shiftKey : ((key === 16) ? true : false);
+    if (ctrl && shift && (key==87)){
+      if (Workspace.attr('href') == './css/workspace_legacy.css'){
+        Workspace.attr('href', './css/workspace_compact.css');
+      }else{
+        Workspace.attr('href', './css/workspace_legacy.css');
+      }
+    }
     /*
     if (key == 73 && ctrl && (!e.shiftKey) ) {
       // CTRL+I Import action

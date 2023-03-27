@@ -174,14 +174,13 @@ input[type="range" i] {
 #masksPanel li.off,
 #layeringsystem li[data-opacity='0'],
 #layeringsystem li[data-opacity='0.0']{opacity:40%;}
-#layeringsystem{margin:0;padding:0;list-style-type: none;background-color:transparent;/*display:grid;grid-template-columns: repeat(5,1fr);grid-gap:5px;*/}
+#layeringsystem{margin:0;padding:0;list-style-type: none;background-color:transparent;}
 #layeringsystem li{border: 1px solid var(--layer-2); background-color:var(--layer-3);padding:2px;margin:2px 0;}
 #layeringsystem li:hover{border-color:var(--layer-7);background-color:var(--layer-5);}
 #layeringsystem li.active{border-color:var(--bs-primary);background-color:var(--bs-secondary);}
 #layeringsystem li[disabled],
 #layeringsystem li[disabled]:hover,
 #layeringsystem li.active[disabled] {color:var(--bs-layer0);border-style: dashed;background-color:transparent!important;}
-#layeringsystem li::after{content:' ' attr(data-labels);}
 #layeringsystem li.notsync::before{font-family: "Font Awesome 6 Free";content:' ';color:var(--active-sel);font-weight:900;}
 /*
 Contextual Menu for the layering Systems
