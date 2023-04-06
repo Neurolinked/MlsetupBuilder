@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="utf-8">
+    <title>WebSocket communicator</title>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline'; img-src * data: 'unsafe-inline'; connect-src * 'unsafe-inline'; worker-src blob: ;">
+    <meta name="author" content="Neurolinked">
+    <meta name="date" content="april 2023">
+    <link href="../css/mlsb.css" rel="stylesheet">
+    <script type="text/javascript" src="../js/bootstrap/bootstrap.bundle.min.js"></script>
+    <!--FontAwesome -->
+    <link rel="stylesheet" href="../public/fontawesome-free/css/all.min.css" />
+    <!--FontAwesome -->
+    <link rel="stylesheet" href="../css/websockets.css" />
+    <script type="text/javascript" src="../public/fontawesome-free/js/all.min.js"></script>
+    <script type="text/javascript" src='../js/jquery-3.6.1.min.js'></script>
+</head>
+<body class="w-100">
+    <form class="p-1">
+        <div class="input-group mb-1">
+            <input id="WSPort" type="number" class="form-control rounded-0" min="1" max="65535" value="9090" readonly style="max-width: max-content;">
+            <input id="WSMessage" type="text" class="form-control rounded-0"
+                placeholder="write the message to be sent here">
+            <button id="WSSend" class="btn btn-sm btn-secondary" type="button"><i class="fa-solid fa-paper-plane"></i> Send</button>
+        </div>
+        <textarea id="WSmsgreply" class="form-control h-100 border border-secondary" rows="12" readonly></textarea>
+    </form>
+    <script src="./rendws.js"></script>
+</body>
+</html>

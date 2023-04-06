@@ -1,0 +1,16 @@
+@import "./variables.css";
+
+body {
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+*::-webkit-scrollbar {
+    width: 4px;
+    background-color: black;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--eq-lay3);
+    border: 1px solid var(--bs-danger);
+    background-color: rgba(220, 53, 69, 0.5);
+}

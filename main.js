@@ -375,7 +375,9 @@ const template = [
 			{label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},
 			{label:'Microblend Lab',accelerator: 'Ctrl+B',click:()=>{ mainWindow.webContents.send('preload:openModal','micromanager')}},
 			{label:'Logs',click:()=>{ mainWindow.webContents.send('preload:openModal','log')}},
-			{type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' }]
+			{label:'Websocket communicator', click: ()=>childWindow("apps/websocket.html",mainWindow,600,400,'Websocket communicator',{preload: path.join(__dirname,'apps/preloadws.js')})},
+			{type: 'separator' },{ role: 'reload' },{ role: 'forceReload' },{ type: 'separator' },{ role: 'resetZoom' },{ role: 'zoomIn' },{ role: 'zoomOut' },{ type: 'separator' },{ role: 'togglefullscreen' },{ role: 'toggleDevTools' },
+		]
   },
 	{ label:'Utils',
 		submenu: [
