@@ -821,10 +821,6 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 	}
 });
 
-function uncookStop(){
-
-}
-
 function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
 		if (toggle){

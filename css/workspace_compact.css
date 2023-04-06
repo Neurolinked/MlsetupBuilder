@@ -23,7 +23,7 @@
     grid-column-start: 4;
     grid-column-end: 4;
     grid-row-start: 1;
-    grid-row-end: 5;
+    grid-row-end: 4;
     overflow-y: auto;
     padding: 0 3px;
 }
