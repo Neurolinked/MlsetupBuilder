@@ -150,7 +150,7 @@ function switchLegacyMat(material){
 }
 
 $(function(){
-  const Workspace = $("#workspaceCSS");
+  const Workspace = $("#workspaceCSS"); //make it as a circular array https://kittygiraudel.com/2022/02/01/circular-array-in-js/
   //canvas for contestual material
   const canvasMaterial = document.getElementById('materialDis');
   const material2D = canvasMaterial.getContext("2d");
@@ -176,20 +176,9 @@ $(function(){
     $("#appeInfo").html("");
     try {
       var materialAppearances = JSON.parse($("#materialJson").val());
-      //appeInfo
-      //console.log(materialAppearances);
-      /*
-      let codeResult =''
-      template = `<div class="col"><div class="card"><div class="card-header">$TITOLO$</div><div class="card-body">$MATERIALS$</div></div></div>`;
-      for (const [key, entry] of Object.entries(materialAppearances?.Appearances)) {
-        codeResult += template.replace("$TITOLO$", key).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${entry.join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
-      }
-
-      $("#appeInfo").html(codeResult);
-      */
       materialJSON.import($("#materialJson").val());
-      console.log(materialJSON);
       $("#appeInfo").html(materialJSON.codeAppearances());
+      console.log(materialJSON);
     } catch (error) {
       notifyMe(error,false);
     }
@@ -878,7 +867,7 @@ $("#resetShades span.choose").click(function(){
 							"hair" : {"icon":"fa-solid fa-scissors"},
 							},
 		"search":{"show_only_matches": true,"show_only_matches_children":true},
-		"plugins" : [ "search","types","state","contextmenu"],//"plugins" : [ "search","types","contextmenu","state" ],
+		"plugins" : [ "search","types","state","contextmenu"],
     "contextmenu":{ "items": customMdlMenu }
 	}).bind("dblclick.jstree", function (event) {
 			let nodo = $('#modelsTree').jstree(true).get_selected(true)[0]
@@ -886,7 +875,6 @@ $("#resetShades span.choose").click(function(){
 			switch (nodo.type){
 				case 'custmesh':
 				case 'custmask':
-        case 'custmask':
 					$('#btnMdlLoader').click();
 					break;
         case 'default':
@@ -896,7 +884,7 @@ $("#resetShades span.choose").click(function(){
 			}
      // Do my action
   }).on('loaded.jstree',function(event){
-		joinModels() //down below the oexplanation of what it does
+		joinModels();
 	});
 
 /*

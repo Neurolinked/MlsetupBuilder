@@ -1,1 +1,22 @@
+#interface{grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;grid-template-rows:40px auto 1rem;gap: 4px;}
+#MlEditor {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 4;
+}
+#layer_settings {
+    grid-column-start: 3;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 4;
+}
+#micropanel {
+    grid-column-start: 4;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 4;
+    overflow-y: auto;
+    padding: 0 3px;
+}
 #layeringsystem li::after {content: ' ' attr(data-labels);}

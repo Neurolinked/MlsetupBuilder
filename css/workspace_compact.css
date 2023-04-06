@@ -1,2 +1,31 @@
+/*:root{
+    --rendView: 50%!important;
+}*/
+#interface {
+    grid-template-columns: var(--rendView) 1.2fr 2fr 1.5fr;
+    grid-template-rows: 40px auto 1rem;
+    gap: 4px;
+}
+#MlEditor {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 4;
+}
+#layer_settings {
+    grid-column-start: 3;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 4;
+}
+
+#micropanel {
+    grid-column-start: 4;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 5;
+    overflow-y: auto;
+    padding: 0 3px;
+}
 #layeringsystem{display: grid;grid-template-columns: 1fr 1fr 1fr 1fr;}
 #layeringsystem li{margin:2px;}

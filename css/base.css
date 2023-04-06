@@ -96,15 +96,13 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #NotificationCenter .offcanvas-body{background-color:var(--bs-layer0);}
 #HelpTree *:not(svg,path){color:white!important;}
 
-#interface{display:grid;grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;grid-template-rows:40px auto 1rem;gap: 4px;height: 100vh;}
+#interface{display:grid;height: 100vh;}
 #withthacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 5;}
 /*#thacanvas{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1; grid-row-end: 3;}*/
 #withbones{grid-column-start: 1; grid-column-end: 1; grid-row-start: 1;grid-row-end: 1;z-index:10;text-align:right;}
 /*#Filemanager{grid-column-start: 2; grid-column-end: 5; grid-row-start: 1; grid-row-end: 1;display:grid;grid-template-columns:0.6fr 0.9fr 1.4fr;text-align: center;}*/
-#MlEditor{grid-column-start: 2; grid-column-end: 2;grid-row-start: 1; grid-row-end: 4;}
+
 #modelsNavbar{grid-column-start: 1; grid-column-end: 2; grid-row-start: 3; grid-row-end: 3;}
-#micropanel{grid-column-start: 4; grid-column-end: 4; grid-row-start: 1; grid-row-end: 4;overflow-y:auto;padding:0 3px;}
-#layer_settings{grid-column-start: 3; grid-column-end: 3; grid-row-start: 1; grid-row-end: 4;}
 #colorGrid{display:grid;grid-template-columns:1.5fr 2.3fr;}
 #matdisplay{display:grid;grid-template-columns: var(--matrender) 1fr;} /*display the materials and it's datas*/
 
