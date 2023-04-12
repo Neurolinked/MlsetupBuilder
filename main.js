@@ -281,11 +281,12 @@ const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilde
   return modal;
 }
 
-const childWindow = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences) => {
+const childWindow = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences, ico='') => {
   let mywin = new BrowserWindow({
     width: width,
     height: height,
     modal: false,
+	icon: ico,
     parent: parentWindow,
 		webPreferences: preferences,
 		title: title,
@@ -369,6 +370,10 @@ const template = [
   {
     label: 'View',
     submenu: [
+			{label: 'Models Browser', accelerator: 'Ctrl+Shift+M', click: () => {
+				childWindow("apps/modelbrowser.html", mainWindow, 1000, 700, 'Models Browser', { preload: path.join(__dirname, 'apps/preloadmb.js') }, path.join(__dirname,'/images/system/mesh.png'));
+				}
+			},
 			{label: 'Material Composer',accelerator: 'Ctrl+K',click:()=>{
 				childWindow("apps/materials.html",mainWindow,1200,800,'Material Composer', {preload: path.join(__dirname, 'apps/preloadmats.js')} );
 			}},
