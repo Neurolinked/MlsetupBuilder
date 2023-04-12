@@ -6,13 +6,13 @@
 .plus_4_layer{background-color:rgba(255,255,255,0.12);}
 .plus_5_layer{background-color:rgba(255,255,255,0.14);}
 
-footer{
+body > footer{
   padding-top:2px;
   position:fixed;
   bottom:0;
   display:block;
 }
-footer.main{
+body > footer.main{
   padding-top:2px;
   position:fixed;
   bottom:0;
@@ -22,7 +22,7 @@ footer.main{
   gap: 4px;
 }
 
-footer.main>div{border:1px solid var(--layer-1);border-bottom: none;font-size:0.75rem;}
+body > footer.main>div{border:1px solid var(--layer-1);border-bottom: none;font-size:0.75rem;}
 .no-gutters {
 	margin-left: 0;
 	margin-right: 0;
@@ -173,7 +173,7 @@ input[type="range" i] {
 #layeringsystem li[data-opacity='0'],
 #layeringsystem li[data-opacity='0.0']{opacity:40%;}
 #layeringsystem{margin:0;padding:0;list-style-type: none;background-color:transparent;}
-#layeringsystem li{border: 1px solid var(--layer-2); background-color:var(--layer-3);padding:2px;margin:2px 0;}
+#layeringsystem li{border: 1px solid var(--bs-layer2); background-color:var(--bs-layer3);padding:2px;margin:2px 0;}
 #layeringsystem li:hover{border-color:var(--layer-7);background-color:var(--layer-5);}
 #layeringsystem li.active{border-color:var(--bs-primary);background-color:var(--bs-secondary);}
 #layeringsystem li[disabled],
@@ -413,7 +413,10 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #legacyMaterial ul li.active{background-color:var(--bs-secondary);}
 
 #floatMat{background-color: var(--bs-layer0);border: 1px solid var(--bs-secondary);width:128px;height:128px;}
-#floatLayer{background-color: var(--bs-layer0);border: 1px solid var(--bs-secondary);width: 264px;height: 130px;}
+#floatLayer{background-color: var(--bs-layer0);border: 1px solid var(--bs-secondary);width: 332px;height: 200px;}
+#floatLayer div.colDisplayer{width:64px;height:128px;vertical-align: top;}
+#floatLayer footer{font-size: .85rem;}
+#floatLayer footer strong{color:var(--active-sel);}
 
 #v-pills-sMesh .nav-link{color:var(--bs-info) !important;}
 #v-pills-sMesh .nav-link.active, #v-pills-sMesh .show>.nav-link{color:black !important;background-color: var(--bs-info)!important;}

@@ -1002,7 +1002,7 @@ document.getElementById('cstMdlLoader').addEventListener('click',(e)=>{
 	cleanScene()
 	let maxLayers = 0;
 	layersActive(maxLayers);
-  safeNormal()
+  	safeNormal()
 	clearCanvas(paintMaskHT,'rgb(256,256,256)',768); //material.map = safeMap;
 	//var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
   material.normalMap.needsUpdate = true // = texture;
@@ -1076,9 +1076,9 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 	 loadMapOntheFly(theMaskLayer);
 	 //material.needUpdates =true; //setup the mask I'll set the material to update
  }else{
-   material.color.set(0x000055);
-	 clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
-	 notify3D('the texture '+theMaskLayer+' does not exists');
+   	material.color.set(0x000055);
+	clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
+	notify3D('the texture '+theMaskLayer+' does not exists');
  }
 
  //let Normed = document.querySelector('#withbones svg:nth-child(2) path');
@@ -1099,21 +1099,21 @@ if (theNormal.match(/^[/|\w|\.]+.[dds|png]/)){
  //material.needUpdates = true;
  //search for the right extension
  if (theModel.match(/.+\.glb$/)){
-	 cleanScene();
-	 if (modelType=='hair'){
-		 if (!(/show/.test(document.getElementById('HairTool')))){
-			 document.querySelector("#versionDisplay a:nth-child(4)").click();
-		 }
-	 }
-	 LoadModelOntheFly(theModel);
-	 //Disattivazione livelli non utilizzabili
-	 layersActive(maxLayer_thisModel);
-   //defUVUnwrap()
-   clearCanvas(canvUVWrapped,',768');
-	 //material.needUpdates =true;
-	 document.getElementById("modelTarget").setAttribute('loaded',true);
-	 MDLloadingButton.disabled=false;
-	 control_reset=true;
+	cleanScene();
+	if (modelType=='hair'){
+		if (!(/show/.test(document.getElementById('HairTool')))){
+			document.querySelector("#versionDisplay a:nth-child(4)").click();
+		}
+	}
+	LoadModelOntheFly(theModel);
+	//Disattivazione livelli non utilizzabili
+	layersActive(maxLayer_thisModel);
+   	//defUVUnwrap()
+   	clearCanvas(canvUVWrapped,',768');
+	//material.needUpdates =true;
+	document.getElementById("modelTarget").setAttribute('loaded',true);
+	MDLloadingButton.disabled=false;
+	control_reset=true;
  }else{
 	 let notific =document.querySelector("#notyCounter span");
 	 err_counter=err_counter+1;

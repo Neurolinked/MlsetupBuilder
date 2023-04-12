@@ -2,6 +2,12 @@ window.$ = window.jQuery;
 var notifications = 0;
 var materialJSON = new MaterialBuffer();
 
+//Broadcasting manager section
+const bc = new BroadcastChannel("streaming"); //communication between opened interafce windows
+bc.onmessage = (event)=>{
+  console.log(event.data);
+};
+
 // lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
 // Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 var mLsetup = new Mlsetup();
@@ -274,6 +280,27 @@ $(function(){
     }
     $("#foot-message").text(`${message}`);
 	}
+
+  function SOnotify(message){
+    if (!("Notification" in window)) {
+      // Check if the browser supports notifications
+      alert("This browser does not support desktop notification");
+    } else if (Notification.permission === "granted") {
+      // Check whether notification permissions have already been granted;
+      // if so, create a notification
+      const notification = new Notification(message);
+      // …
+    } else if (Notification.permission !== "denied") {
+      // We need to ask the user for permission
+      Notification.requestPermission().then((permission) => {
+        // If the user accepts, let's create a notification
+        if (permission === "granted") {
+          const notification = new Notification(message);
+          // …
+        }
+      });
+    }
+  }
   /*
 	var matChooser = document.getElementById('materialChoser')
 	var tooltipMat = new bootstrap.Tooltip(matChooser,{placement:'left'})
@@ -1195,8 +1222,23 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
       let materialName = materialPath.split("\\").reverse()[0].split(".")[0]
       let mblendPath = $(this).data('mblend');
       let mblendlName = mblendPath.split("\\").reverse()[0].split(".")[0]
+      let colormaterial
+      switch ($(this).data('color')) {
+        case '000000_null':
+          colormaterial = {v:[0,0,0]};
+          break;
+        case 'ffffff_null':
+          colormaterial = { v: [1, 1, 1] };
+          break;
+        default:
+          colormaterial = ml_libraries[materialName].overrides.colorScale.filter(e => e.n == $(this).data('color'))[0];
+          break;
+      }
       $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
       $("#currentMblend").attr("src", `images/${mblendlName}.png`);
+      $("#floatLayer div.colDisplayer").attr("title", $(this).data('color'));
+      $("#floatLayer div.colDisplayer").css("background-color", `#${tinycolor.fromRatio({ r: colormaterial.v[0], g: colormaterial.v[1], b: colormaterial.v[2] }).toHex()}`);
+      $("#floatLayer footer").html(`<strong>M:</strong> ${materialName}<br><strong>&micro;b:</strong> ${mblendlName}<br><strong>C:</strong> ${$(this).data('color')}`)
       $("#floatLayer").removeClass('d-none');
     }
   });
@@ -1645,9 +1687,8 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
  /*------------------------------------------------------------------------------------
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
-$("#importLink").click(function(){
-  $("#importTech").click();
-})
+$("#importLink").click(function(){  $("#importTech").click(); })
+
 //----File Auto Loader
 $("#importTech").change(function(){
 	var fr=new FileReader(); //new reading Object
