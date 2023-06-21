@@ -58,6 +58,7 @@
       <button class="btn btn-sm btn-secondary rounded" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false"><i class="fa-solid fa-caret-down"></i></button>
       <ul class="dropdown-menu dropdown-menu-dark rounded-0 pt-0">
         <li><h6 class="dropdown-header bg-warning text-black">Import/Export</h6></li>
+        <li class="d-none"><a class="d-none" href="#" id="importFromWkit" ></li>
         <li><a class="dropdown-item" href="#" id="importLink" ><i class="fa-solid fa-file-import"></i> Import</a></li>
         <li><a class="dropdown-item" href="#"  data-bs-toggle="offcanvas" data-bs-target="#off_MLSetups" ><i class="fa-solid fa-vest"></i> MLsetup Preview</a></li>
         <li><hr class="dropdown-divider"></li>
@@ -1024,5 +1025,16 @@ THE SOFTWARE.</p>
   <script defer src='./js/3dIF.js'></script>
   <script src="./renderer.js"></script>
 	<script type="text/javascript" src="./node_modules/intro.js/minified/intro.min.js" ></script>
+
+  <dialog id="uncookfile" class="border border-primary rounded bg-layer0">
+    <div class="modal-header pb-3">
+      <h5 class="modal-title text-light">Do you want to try uncook the file now ?</h5>
+    </div>
+    <form method="dialog">
+      <button value="cancel" class="btn btn-dark" formmethod="dialog"><i class="fa-solid fa-xmark"></i> No</button>
+      <button id="unCooKonfirm" class="btn btn-primary text-white " value="true"><i class="fa-solid fa-check"></i> Yes</button>
+    </form>
+  </dialog>
+
   </body>
 </html>

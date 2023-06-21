@@ -2,6 +2,8 @@ window.$ = window.jQuery;
 var notifications = 0;
 var materialJSON = new MaterialBuffer();
 
+var uncookMyFile = false;
+
 //Broadcasting manager section
 const bc = new BroadcastChannel("streaming"); //communication between opened interafce windows
 bc.onmessage = (event)=>{
@@ -1703,6 +1705,10 @@ $("#importTech").change(function(){
   }
 });
 
+$("#importFromWkit").click(function(){
+  passTheMlsetup( $("#passaggio").val());
+});
+
 function passTheMlsetup(textContent=""){
   if (textContent!=""){
     $("#off_MLSetups div.offcanvas-body detail").fadeOut();
@@ -2288,6 +2294,23 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
       }
     }
   }
+
+const uncookfile = document.getElementById("uncookfile");
+const unCooKonfirm = document.getElementById("unCooKonfirm");
+
+uncookfile.addEventListener("close", (e) => {
+  if (uncookfile.returnValue == "true") {
+    notifyMe("Trigger the uncook of the file : "+$('#modelsTree').jstree(true).get_selected(true)[0].li_attr.model);
+  }else{
+    notifyMe("File uncook cancelled by the user")
+  }
+});
+
+// Prevent the "confirm" button from the default behavior of submitting the form, and close the dialog with the `close()` method, which triggers the "close" event.
+unCooKonfirm.addEventListener("click", (event) => {
+  event.preventDefault(); // We don't want to submit this fake form
+  uncookfile.close("true"); // Have to send the select box value here.
+});
 
   $("#FolderScan").click(function(){ thePIT.Scan() });
 

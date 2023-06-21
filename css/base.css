@@ -514,3 +514,5 @@ span.choose.active{border-color:var(--active-sel);}
 .dropSelect option{background-color:var(--bs-layer0)!important;border:1px solid var(--bs-primary)!important;color:var(--bs-primary)!important;box-shadow: none;outline: none;}
 .dropSelect option:focus,
 .dropSelect option:hover{background-color:var(--bs-primary)!important;color:var(--bs-layer0)!important;}
+
+dialog::backdrop{background: rgba(0, 0, 0, 0.5);}

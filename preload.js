@@ -88,7 +88,7 @@ ipcRenderer.on('preload:load_source', (event, jsoncontent) => {
   //pass from JSON Object to text
   textareaDummy.value = JSON.stringify(jsoncontent)
   //fire the load events
-  document.querySelector("#TheMagicIsHere").click();
+  document.querySelector("#importFromWkit").click();
 })
 
 ipcRenderer.on('preload:materiaload',(event,materialcontent)=>{
