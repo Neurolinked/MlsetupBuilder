@@ -27,6 +27,9 @@ contextBridge.exposeInMainWorld(
 			UnCookMe: async (conf)=>{
 				ipcRenderer.send('main:uncookForRepo',conf);
 			},
+      UnCookSingle: async (conf)=>{
+        ipcRenderer.send('main:modelExport',conf);
+      },
 			microMe: async ()=>{
         //return await ipcRenderer.invoke('main:uncookMicroblends');
 				ipcRenderer.send('main:uncookMicroblends');
@@ -91,6 +94,11 @@ ipcRenderer.on('preload:load_source', (event, jsoncontent) => {
   document.querySelector("#importFromWkit").click();
 })
 
+ipcRenderer.on('preload:request_uncook',(event)=>{
+  var dialog = document.getElementById("uncookfile");
+  dialog.showModal();
+})
+
 ipcRenderer.on('preload:materiaload',(event,materialcontent)=>{
   var materialArea = document.getElementById('materialJson');
   materialArea.value = JSON.stringify(materialcontent)
@@ -115,19 +123,27 @@ ipcRenderer.on('preload:wkitBuild', (event, versionchecker) => {
 	}
 })
 
-ipcRenderer.on('preload:logEntry',(event, resultSave, warning = false) => {
-	let Data = new Date(Date.now());
+ipcRenderer.on('preload:logEntry',(event, resultSave, warning = false, date = true) => {
+	let Data = date ? new Date(Date.now()) : '';
+
 	var notificationCenter = document.querySelector("#NotificationCenter .offcanvas-body")
   var fastMessage = document.getElementById("foot-message")
 
-	notificationCenter.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + resultSave + "<br/>" + notificationCenter.innerHTML;
-  
+  if (warning) {
+    notificationCenter.innerHTML = `<span class="text-error">[ ${Data.toLocaleString('en-GB', { timeZone: 'UTC' })} ] ${resultSave}<br></span>${notificationCenter.innerHTML}`
+  }else{
+    notificationCenter.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + resultSave + "<br/>" + notificationCenter.innerHTML;
+  }
+	
   fastMessage.innerHTML = (resultSave.length > 150) ? resultSave.substring(0,100)+'<i class="fa-solid fa-ellipsis"></i>' : resultSave.split('<br/>')[0];
 	if (warning){
+    
 		let notiCounter = document.querySelector("#notyCounter span")
 		if (notiCounter.innerText==''){
 			notiCounter.innerText = 0
 		}
+    console.log(`${resultSave} ${notiCounter.innerText}`)
+    
 		let noterrorz = parseInt(notiCounter.innerText)
 		noterrorz++
 		notiCounter.innerText = noterrorz
@@ -217,21 +233,28 @@ ipcRenderer.on('preload:set_3d_asset_name',(event,result) => {
 
 ipcRenderer.on('preload:noBar',(event,result)=>{
 	var progBar = document.querySelector('#pBar')
-	//progBar.classList.remove("progress-bar","progress-bar-striped","bg-danger","progress-bar-animated")
   progBar.classList.remove("progress","p-0","border-0","rounded-0")
   progBar.innerHTML = " "
 })
 
-ipcRenderer.on('preload:uncookErr',(event, msg, logger='#uncookLogger')=>{
-	var logtext = document.querySelector(logger+' div')
-  if (logtext!=null){
-    logtext.innerHTML = msg + logtext.innerHTML
-  }else{
-    document.querySelector('#uncookLogger div').innerHTML = "Process Killed" + document.querySelector('#uncookLogger div').innerHTML
+ipcRenderer.on('preload:uncookErr',(event, msg, logger='#uncookLogger div')=>{
+	var logtext = document.querySelector(logger)
+  var footext = document.getElementById(`foot-message`)
+
+  if (logger == `#NotificationCenter .offcanvas-body`){
+    footext.innerText = msg;
   }
+
+  if (logtext!=null){
+    logtext.innerHTML = `${msg}<br>${logtext.innerHTML}`
+  }else{
+    logtext.innerHTML = `Process Killed ${logtext.innerHTML}`
+  }
+  
 })
-ipcRenderer.on('preload:uncookLogClean',(event,logger='#uncookLogger')=>{
-	var logtext = document.querySelector(logger+' div')
+
+ipcRenderer.on('preload:uncookLogClean',(event,logger='#uncookLogger div')=>{
+	var logtext = document.querySelector(logger)
 	logtext.innerHTML = ''
 })
 

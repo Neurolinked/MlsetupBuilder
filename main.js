@@ -520,9 +520,9 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 	}
 	var a3dMatModel = whereLoadFrom.search(/^.+\.glb$/g)>-1 ? whereLoadFrom: ``; //path of the hypotethical material file
 	var hasDepot = preferences.get('depot')!=preferences.get('unbundle') ? true : false
-  fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
-    if (err) {
-      if (err.code=='ENOENT'){
+  	fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
+    	if (err) {
+      		if (err.code=='ENOENT'){
 				if (hasDepot){
 
 					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom} - trying in the Depot Folder`)
@@ -532,7 +532,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 						if (err){
 							if (err.code=='ENOENT'){
 								if (whereLoadFrom){
-									event.reply('preload:logEntry', `File not found in : ${whereLoadFrom}`,true)
+									event.reply('preload:logEntry', `File not found in: ${whereLoadFrom}`,true)
 								}else{
 									dialog.showErrorBox("File opening error",`The searched file does not exists also in the Depot ${whereLoadFrom}`)
 									event.reply('preload:logEntry', `Missing file - ${whereLoadFrom}`,true)
@@ -540,6 +540,9 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 							}
 							contenutofile=""
 							a3dMatModel="";
+							if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
+								mainWindow.webContents.send('preload:request_uncook')
+							}
 						}else{
 							event.reply('preload:logEntry', 'File found in the Depot Folder, Yay')
 						}
@@ -554,16 +557,16 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 				}
-      }else{
-        dialog.showErrorBox("File opening error",err.message)
+			}else{
+				dialog.showErrorBox("File opening error",err.message)
 				a3dMatModel="";
-      }
-      contenutofile=""
-    }
+			}
+			contenutofile=""
+		}
 		readMaterials(a3dMatModel); //launch a search for the material
 		event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
 		event.returnValue = contenutofile
-  })
+  	})
 })
 //restored arguments reading
 ipcMain.on('main:handle_args', (event, payload) => {
@@ -826,6 +829,36 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 	}
 });
 
+ipcMain.on('main:modelExport',(event,conf)=>{
+	let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
+	let uncooker = preferences.get('wcli')
+	var contentpath = preferences.get('game')
+	var exportFormatGE = preferences.get('maskformat')
+
+	fs.access(path.normalize(unbundlefoWkit),fs.constants.W_OK,(err)=>{
+		if (err){
+			// The folder isn't accessible for writing
+			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
+		}else{
+			if (contentpath==''){
+				event.reply('preload:logEntry',`Path content of the game isn't setup, how can i extract things ? Go into settings and configure it, then reload and retry`,true)
+			}else{
+				event.reply('preload:logEntry',`Searching for the file in the whole archive, be patient`,true);
+				if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
+					uncookRun(true,["uncook", "-p", path.join(contentpath), "-w",path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],false,'#NotificationCenter .offcanvas-body')
+					.then(()=>{
+						event.reply('preload:logEntry',"Export of the model Done, reload");
+						mainWindow.webContents.send('preload:noBar','');
+					}).catch(err => { console.log(err) });
+				}else{
+					event.reply('preload:logEntry',`Wolvenkit.CLI isn't selected in the settings`,true)
+				}
+			}
+
+		}
+	})
+})
+
 function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
 		if (toggle){
@@ -840,15 +873,17 @@ function uncookRun(toggle,params,stepbar,logger){
 				if (!(/%/.test(data.toString()))){
 					mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
 				}else{
-						if (oldtxt != data.toString().split("%")[0]){
-							oldtxt = data.toString().split("%")[0]
+					if (oldtxt != data.toString().split("%")[0]){
+						oldtxt = data.toString().split("%")[0]
 
-							if (oldtxt.length>4){
-								mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
-							}else{
+						if (oldtxt.length>4){
+							mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
+						}else{
+							if (stepbar){
 								mainWindow.webContents.send('preload:uncookBar',oldtxt,stepbar)
 							}
 						}
+					}
 				}
 
 			});
@@ -860,6 +895,7 @@ function uncookRun(toggle,params,stepbar,logger){
 
 			subproc.on('close', (code,signal) => {
 				if (code == 0){
+					//No Error
 					switch (stepbar) {
 						case 'step1':
 						case 'step3':
@@ -883,10 +919,12 @@ function uncookRun(toggle,params,stepbar,logger){
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends step done</span>','#microLogger')
 							break;
 					}
-					mainWindow.webContents.send('preload:uncookBar','100',stepbar)
+					if (stepbar){
+						mainWindow.webContents.send('preload:uncookBar','100',stepbar)
+					}
 					resolve()
 				}else{
-					mainWindow.webContents.send('preload:uncookErr',`child process exited with code ${code}`,true)
+					mainWindow.webContents.send('preload:uncookErr',`child process exited with code ${code}`)
 					reject()
 				}
 			})
@@ -909,7 +947,6 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
-
 			var gameContentPath = preferences.get('game')
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
@@ -955,7 +992,7 @@ function repoBuilder(contentdir, conf){
 							if (conf[3]){
 								fs.readdir(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/'),(err,files)=>{
 									if (err){
-											mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+											mainWindow.webContents.send('preload:uncookErr',`${err}`)
 											reject()
 									}else {
 										var decalfiles = []
@@ -963,7 +1000,7 @@ function repoBuilder(contentdir, conf){
 											if (el.match(/garment_decals_[d|n]\d{2}\.png$/))
 											decalfiles.push(el)
 										})
-										mainWindow.webContents.send('preload:uncookErr','Found '+decalfiles.length+' decals to process','#uncookLogger')
+										mainWindow.webContents.send('preload:uncookErr',`Found ${decalfiles.length} decals to process`)
 										resolve(decalfiles)
 									}
 								})
@@ -990,7 +1027,7 @@ function repoBuilder(contentdir, conf){
 										sharp(data, { raw: { width, height, channels } })
 										.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
 											 if(err){
-												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+												 mainWindow.webContents.send('preload:uncookErr',`${err}`)
 											 }
 										 })
 									})
@@ -999,7 +1036,7 @@ function repoBuilder(contentdir, conf){
 									sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
 										.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
 											 if(err){
-												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+												 mainWindow.webContents.send('preload:uncookErr',`${err}`)
 											 }else{
 												 k++
 												 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'step8')
@@ -1010,7 +1047,7 @@ function repoBuilder(contentdir, conf){
 							})
 							if (conf[3]) mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals copied and edited</span>')
 						}catch(err){
-							if (conf[3]) mainWindow.webContents.send('preload:uncookErr',`${err}`,'#uncookLogger')
+							if (conf[3]) mainWindow.webContents.send('preload:uncookErr',`${err}`)
 						}
 					})
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_DEC4") })
@@ -1076,7 +1113,7 @@ function microBuilder(contentdir){
 						return new Promise((resolve,reject) =>{
 							fs.readdir(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/'),(err,files)=>{
 								if (err){
-										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 										reject()
 								}else {
 									var slavefiles = []
@@ -1084,7 +1121,7 @@ function microBuilder(contentdir){
 										if (el.match(/.+\.png$/))
 										slavefiles.push(el)
 									})
-									mainWindow.webContents.send('preload:uncookErr','Found '+slavefiles.length+' microblends to process','#microLogger')
+									mainWindow.webContents.send('preload:uncookErr','Found '+slavefiles.length+' microblends to process','#microLogger div')
 									resolve(slavefiles)
 								}
 							})
@@ -1101,7 +1138,7 @@ function microBuilder(contentdir){
 									.resize(256)
 									.toFile(path.join(app.getAppPath(),'images/',png), (err, info) => {
 										 if(err){
-											 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+											 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 										 }else{
 											 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mresize')
 										 }
@@ -1109,7 +1146,7 @@ function microBuilder(contentdir){
 										.resize(64)
 										.toFile(path.join(app.getAppPath(),'images/thumbs/',png), (err, info) => {
 											 if(err){
-												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 											 }else{
 												 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mthumbs')
 											 }
@@ -1117,10 +1154,10 @@ function microBuilder(contentdir){
 								k++
 							})
 						}catch(err){
-							mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')
+							mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 						}
 					})
-					.catch((err)=>{mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger')})
+					.catch((err)=>{mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')})
 					.finally(() => { 	mainWindow.webContents.send('preload:enable',"#MycroMe") })
 			}
 	})

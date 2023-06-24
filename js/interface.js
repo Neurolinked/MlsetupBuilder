@@ -272,7 +272,6 @@ $(function(){
 
 	function notifyMe(message, warning = true){
 		let Data = new Date(Date.now());
-
 		if (warning){
       $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
       notifications++
@@ -1514,12 +1513,12 @@ const scrollCustMBContainer = document.getElementById("cu_mu_display");
 scrollMBContainer.addEventListener("wheel", (evt) => {
     evt.preventDefault();
     scrollMBContainer.scrollLeft += evt.deltaY;
-});
+}, {passive: true});
 
 scrollCustMBContainer.addEventListener("wheel", (evt) => {
     evt.preventDefault();
     scrollCustMBContainer.scrollLeft += evt.deltaY;
-});
+}, {passive: true});
 
 	$("#layerRandomizer").click(function(){
 
@@ -2126,9 +2125,7 @@ $(".xportJSON").click(function(){
     }
 
     jsonbody = jsonbody.slice(0,-3); //removes latest commas
-    $("#pBar").addClass('progress p-0 border-0 rounded-0');
-    //$("#pBar").addClass('progress-bar progress-bar-striped bg-danger progress-bar-animated');
-    $("#pBar").html(`<div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-label="Danger striped example" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>`);
+    taskProcessBar();
 
     thePIT.Export({
       file:nomefile,
@@ -2138,6 +2135,17 @@ $(".xportJSON").click(function(){
     });
   }
 });
+
+function taskProcessBar(active = true){
+  onOffSwitch=!!active
+  if (onOffSwitch){
+    $("#pBar").addClass('progress p-0 border-0 rounded-0');
+    $("#pBar").html(`<div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-label="Danger striped example" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>`);
+  }else{
+    $("#pBar").removeClass('progress p-0 border-0 rounded-0');
+    $("#pBar").html(``);
+  }
+}
 
 $("#unCookModal .modal-body .form-check-input").click(function(){
 	if ($(this).is(':checked')){
@@ -2301,6 +2309,8 @@ const unCooKonfirm = document.getElementById("unCooKonfirm");
 uncookfile.addEventListener("close", (e) => {
   if (uncookfile.returnValue == "true") {
     notifyMe("Trigger the uncook of the file : "+$('#modelsTree').jstree(true).get_selected(true)[0].li_attr.model);
+    thePIT.UnCookSingle($('#modelsTree').jstree(true).get_selected(true)[0].li_attr.model.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\"))
+    taskProcessBar();
   }else{
     notifyMe("File uncook cancelled by the user")
   }
