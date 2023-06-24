@@ -832,6 +832,10 @@ function mBuildAppearances(model){
     if (model.length<=0){
       return
     }
+	if (model[0]?.appearanceCode===undefined){
+		console.log(model[0]);
+		return;
+	}
     if (model[0]?.appearanceCode.length <= 0) {
       return
     }
@@ -863,36 +867,29 @@ function mBuildAppearances(model){
 
 function LoadModelOntheFly(path){
 	const repOut = new RegExp('');
-  path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
+	path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
+  	var mobjInfo = [];
+	let Boned = false;
+	let MasksOn = document.querySelector('#withbones svg:nth-child(1) path');
 
-  /*let oMdlInfo = document.getElementById("modalInfo");
-  oMdlInfo.querySelector(".modal-body").innerHTML="";*/
-
-  var mobjInfo = [];
-
-  //let strGLBInfo = "";
-
-  let Boned = false;
-  let MasksOn = document.querySelector('#withbones svg:nth-child(1) path');
-
-  var modelfile, Decal
+  	var modelfile, Decal
 
 	if (/^[\w|\W]:\\.+/.test(path)){
 		modelfile = thePIT.ApriStream(path,'binary',true);
 	}else{
 		modelfile = thePIT.ApriStream(path,'binary');
 	}
-  data = str2ab(modelfile);
+  	data = str2ab(modelfile);
 
 	if (data.byteLength>0){
-	    loader.parse( data ,'', ( glbscene ) => {
-	    gui.removeFolder("Submesh Toggle");
+	  loader.parse( data ,'', ( glbscene ) => {
+	  gui.removeFolder("Submesh Toggle");
       gui.removeFolder("Submesh Info");
       
       UVSbmeshENA.innerHTML=""; //remove all the buttons in the uv calculator
       clearCanvas(canvUVWrapped,'',768)
 
-	    GuiSubmesh = gui.addFolder("Submesh Toggle");
+	  GuiSubmesh = gui.addFolder("Submesh Toggle");
       GuiInfo = gui.addFolder("Submesh Info");
 	     glbscene.scene.traverse( function ( child ) {
 				 Decal = false;
