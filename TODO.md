@@ -4,9 +4,9 @@
 - [x] Cleanup in the import function
 - [x] Support the newest Wolvenkit console 1.8.1
   - [x] Adapt to the new system of loading 3d models from the library
-  - [ ] In-demand mesh/masks export
+  - [x] In-demand mesh/masks export
   - [ ] Right masks loaded from the material.json files instead on a fixed and linked list
-- [ ] A circular Array for different CSS Workspaces
+- [x] A circular Array for different CSS Workspaces
   
   
 ### ManaVortex requests

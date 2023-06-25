@@ -158,7 +158,22 @@ function switchLegacyMat(material){
 }
 
 $(function(){
-  const Workspace = $("#workspaceCSS"); //make it as a circular array https://kittygiraudel.com/2022/02/01/circular-array-in-js/
+  var Workspaces = {
+    index: 0,
+    alternatives: [
+      './css/workspace_legacy.css',
+      './css/workspace_compact.css'
+      ],
+    dom : $("#workspaceCSS"),
+    walk(){
+      let size = this.alternatives.length
+      // add 1 -> mod to the size of the array -> add the size -> re-mod
+      this.index = (++this.index % size + size) % size;
+      return this.alternatives[this.index];
+    }
+  }
+
+  //make it as a circular array https://kittygiraudel.com/2022/02/01/circular-array-in-js/
   //canvas for contestual material
   const canvasMaterial = document.getElementById('materialDis');
   const material2D = canvasMaterial.getContext("2d");
@@ -313,26 +328,11 @@ $(function(){
 
     var ctrl =  ev.ctrlKey ? ev.ctrlKey : ((key === 17) ? true : false);
     var shift = ev.shiftKey ? ev.shiftKey : ((key === 16) ? true : false);
-    if (ctrl && shift && (key==87)){
-      if (Workspace.attr('href') == './css/workspace_legacy.css'){
-        Workspace.attr('href', './css/workspace_compact.css');
-      }else{
-        Workspace.attr('href', './css/workspace_legacy.css');
-      }
-    }
-    /*
-    if (key == 73 && ctrl && (!e.shiftKey) ) {
-      // CTRL+I Import action
-      $("#importLink").click();
-    }
-    if (key == 69 && ctrl ) {
-      // CTRL+E export action
-      $("#exportversions").click();
-    }
 
-    /* Remove, no more internal modal window
-    if (e.shiftKey) {  shiftSpeedup = true; $("#AimV, #AimU, #AimMTile").prop("step",'0.1');
-  }else{  shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');}*/
+    //CTRL + SHIFT + w
+    if (ctrl && shift && (key==87)){
+      Workspaces.dom.attr('href',Workspaces.walk());
+    }
 
   });
 
