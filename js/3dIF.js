@@ -166,7 +166,9 @@ const params = {
  rotationspeed: 6,
  wireframe: false,
  onesided: false,
- lightpower:2
+ lightpower:2,
+ alpha:0,
+ maskColor:[50, 0, 0]
 };
 //-------------Aiming box for the camera ----------------------
 
@@ -180,7 +182,8 @@ canvasPaint.wrapS = THREE.RepeatWrapping
 canvasPaint.wrapT = THREE.RepeatWrapping
 const drawStartPos = new THREE.Vector2();
 
-const material = new THREE.MeshStandardMaterial({color: 0x500000,map:canvasPaint});
+const material = new THREE.MeshStandardMaterial({color: 0x500000,map:canvasPaint,alphaMap:canvasPaint,alphaTest:0});
+const metal_base = new THREE.MeshStandardMaterial({color: 0x808080});
 
 const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 1, thickness: 0.05});
 //material for stitches zip and other things
@@ -338,11 +341,11 @@ canvUVWrapped.addEventListener('dblclick',function(){
 
         var lod
         tocompute.forEach((x)=>{
-          lod = sbmeshs[x]
-          const index = lod.geometry.index;
-    			const uvAttribute = lod.geometry.attributes.uv;
-          ctxxxx.strokeStyle = "#"+tinycolor.fromRatio({r:(Math.random()*.5),g:(Math.random()*.4+.6),b:(Math.random()*.4+.6)}).toHex();
-          ctxxxx.lineWidth = .2;
+          	lod = sbmeshs[x]
+          	const index = lod.geometry.index;
+			const uvAttribute = lod.geometry.attributes.uv;
+          	ctxxxx.strokeStyle = "#"+tinycolor.fromRatio({r:(Math.random()*.5),g:(Math.random()*.4+.6),b:(Math.random()*.4+.6)}).toHex();
+          	ctxxxx.lineWidth = .2;
 
           var il
           if ( index ) {
@@ -1125,24 +1128,21 @@ if (theNormal.match(/^[/|\w|\.]+.[dds|png]/)){
 init();
 
 function init() {
-  scene = new THREE.Scene();
-
-  /*    const axesHelper = new THREE.AxesHelper( 5 );    scene.add( axesHelper ); to understand position of the objects */
-
-  var thacanvas = document.getElementById('thacanvas');
+	scene = new THREE.Scene();
+	/*    const axesHelper = new THREE.AxesHelper( 5 );    scene.add( axesHelper ); to understand position of the objects */
+	var thacanvas = document.getElementById('thacanvas');
 	thacanvas.setAttribute('data-engine',THREE.REVISION);
-  renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true});
-
-  if (window.innerHeight-80<512){
-   renderer.setSize(renderwidth,renderwidth);
-  }else{
-   renderer.setSize(renderwidth,window.innerHeight-80);
-  }
+  	renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true});
+	if (window.innerHeight-80<512){
+	renderer.setSize(renderwidth,renderwidth);
+	}else{
+	renderer.setSize(renderwidth,window.innerHeight-80);
+	}
 
 	renderer.gammaFactor = 2.2;
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.25;
+  	renderer.outputEncoding = THREE.sRGBEncoding;
+  	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  	renderer.toneMappingExposure = 1.25;
 	//----calculating the shadows
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -1150,8 +1150,8 @@ function init() {
 	//Canvas events for painting
 
 	//---calculating the shadows
-  camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.01,200);
-  camera.position.set(0.0,-0.4,-8);
+  	camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.01,200);
+  	camera.position.set(0.0,-0.4,-8);
 	camera.updateProjectionMatrix();
   /*
 
@@ -1205,26 +1205,30 @@ function init() {
 
 	//fog
 	//TODO adding fog to the scene
-	scene.fog = new THREE.Fog( 0x9b9d3f, 10,35);
+	scene.fog = new THREE.Fog( 0x9b9d3f, 10,105);
 
   //Setup the DAT position
-  const GuiBasicsetup = gui.addFolder("Basic Setup");
-  GuiBasicsetup.add( params, 'autorotation' ).name( 'Auto Rotation' );
-  GuiBasicsetup.add( params, 'rotationspeed',2, 10 ).name( 'Rotation speed' );
+  	const GuiBasicsetup = gui.addFolder("Basic Setup");
+	/*
+	GuiBasicsetup.addColor(params, 'maskColor').onChange(()=>{
+		material.color = new THREE.Color(`rgb(${parseInt(params.maskColor[0])},${parseInt(params.maskColor[1])},${params.maskColor[2]})`);
+	});*/
+  	GuiBasicsetup.add( params, 'autorotation' ).name( 'Auto Rotation' );
+  	GuiBasicsetup.add( params, 'rotationspeed',2, 10 ).name( 'Rotation speed' );
 	GuiBasicsetup.add( params, 'wireframe').name( 'View wireframe' ).onChange(() => {
-   if (params.wireframe){
+   	if (params.wireframe){
 		 material.wireframe=true;
 		 hair_cap.wireframe = true;
 		 hair_card.wireframe = true;
 		 hair_short.wireframe = true;
 		 hair_other.wireframe = true;
-	 }else{
+	}else{
 		 material.wireframe=false;
 		 hair_cap.wireframe = false;
 		 hair_card.wireframe = false;
 		 hair_short.wireframe = false;
 		 hair_other.wireframe = false;
-	 }
+	}
    //material.NeedUpdates;
    });;
   GuiBasicsetup.add( params, 'onesided').name( '1-side' ).onChange(() => {
@@ -1234,6 +1238,9 @@ function init() {
 	GuiBasicsetup.add( params, 'lightpower',0.5, 10 ).name( 'Light power' ).onChange(() => {
 		changeLumen = true;
 	});
+	GuiBasicsetup.add(params, 'alpha', 0, 0.08,0.005).name('Maskchannel').onChange(()=>{
+		material.alphaTest = params.alpha
+	})
   GuiBasicsetup.close();
 
   gui.close(); //close the whole dat.gui

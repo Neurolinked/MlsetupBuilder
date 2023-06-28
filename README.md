@@ -6,7 +6,7 @@ A Compiled version is under the Release section on the right side
 
 ## Displaying the models
 
-To display the models present in the model library you need to setup a folder in the software preferences, choose the Wolvenkit-CLI executable, at least version 1.5.2 and from the build menu Build the repository, then the microblends normals and decals for the software
+To display the models present in the model library you need to setup a folder in the software preferences, choose the Wolvenkit-CLI executable, at least version 1.8.2 and from the build menu Build the repository, then the microblends normals and decals for the software
 
 ## If you want to compile it, clone the repository, then
 ```

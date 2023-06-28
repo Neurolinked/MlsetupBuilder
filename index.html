@@ -218,13 +218,14 @@
 </div>
 <!-- offcanvas for model information -->
 <div class="offcanvas offcanvas-end ocModelInfo bg-dark text-light coverFullEditor" data-bs-backdrop="false" tabindex="-1" id="InfoModel" aria-labelledby="HTLabel" >
+  <!--
   <div class="offcanvas-header border border-info p-1">
     <h5 class="offcanvas-title text-info" id="HTLabel">Model Information</h5>
-    <button type="button" class="btn text-reset text-dark" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="offcanvas-body m-1 p-0 experimental">
+    
+  </div>-->
+  <div class="offcanvas-body m-1 p-0">
     <div>
-
+      
     </div><!--end first element -->
 
     <div class="text-center">
@@ -240,6 +241,9 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="uvmap-tab" data-bs-toggle="tab" data-bs-target="#uvmaptab" type="button" role="tab" aria-controls="uvmap map" aria-selected="true">UV map</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button type="button" class="btn bg-danger text-dark" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </li>
       </ul>
       <div class="tab-content" id="OffcanvasInfo">
