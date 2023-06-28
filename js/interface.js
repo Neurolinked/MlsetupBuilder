@@ -158,6 +158,8 @@ function switchLegacyMat(material){
 }
 
 $(function(){
+  let buildmyHairs = abuildHairs(hairs);
+
   var Workspaces = {
     index: 0,
     alternatives: [
@@ -192,6 +194,7 @@ $(function(){
     }
     img.src = `./images/material/${materialChoose}.jpg`
   }
+
   drawMaterial("unused");
 
   /* Material.json load and interface events */
@@ -258,7 +261,7 @@ $(function(){
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
 
-    var readCustomMicroblends = thePIT.getMuBlends();
+  var readCustomMicroblends = thePIT.getMuBlends();
 
     readCustomMicroblends
       .then((listaMU) => {
@@ -269,7 +272,7 @@ $(function(){
       })
 
 	let buildmyNuMaterial = abuildMaterial(materialCore);
-	let buildmyHairs = abuildHairs(hairs);
+	
 	let buildmyMasks = abuildMaskSelector(maskList)
   //let test = ModelListing()
 
@@ -893,13 +896,14 @@ $("#resetShades span.choose").click(function(){
               "layer0" : {"icon": "text-white fas fa-star-half"},
               "custmask" : {"icon":"custom fas fa-mask-face"},
 							"hair" : {"icon":"fa-solid fa-scissors"},
+              "env" : {"icon":"fa-solid fa-building"}
 							},
 		"search":{"show_only_matches": true,"show_only_matches_children":true},
 		"plugins" : [ "search","types","state","contextmenu"],
     "contextmenu":{ "items": customMdlMenu }
 	}).bind("dblclick.jstree", function (event) {
 			let nodo = $('#modelsTree').jstree(true).get_selected(true)[0]
-			//console.log(nodo);
+			console.log(nodo);
 			switch (nodo.type){
 				case 'custmesh':
 				case 'custmask':
@@ -1038,7 +1042,7 @@ $("#resetShades span.choose").click(function(){
 $('#modelsTree').on('select_node.jstree',function(ev,node){
 	modelType = node.node.type;
 	let maxlayers = 19;
-	if ((node.node.type=='man')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='hair')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')||(node.node.type=='custmesh')||(node.node.type=='custmask')){
+	if ((node.node.type=='man')||(node.node.type=='env')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='hair')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')||(node.node.type=='custmesh')||(node.node.type=='custmask')){
     $("#modelTarget").attr('loaded',false);
 		$("#modelTarget").val(node.node.li_attr['model']);
     if (node.node.li_attr.hasOwnProperty('masks')) {
