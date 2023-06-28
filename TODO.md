@@ -8,7 +8,7 @@
   - [ ] metal_base.remt conversion to three.js format
   - [ ] mesh_decal.mt conversion to three.js format
 - [ ] Custom models Material.json search and usage
-  -[ ] Override masks selection from legacy list
+  - [ ] Override masks selection from legacy list
 - [ ] UI redesign for the new materials management
 - [ ] Material Composer extension
   - [ ] Appearances Editor
