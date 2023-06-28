@@ -398,14 +398,23 @@ const template = [
   {
     role: 'help',
     submenu: [
-			{label:'Documentation',
+		{	label:'Documentation',
 			accelerator: 'F1',
 			click:()=>{
 				mainWindow.webContents.send('preload:openModal','help')
-			}},
-			{label:'License',click: () =>{
+			}
+		},
+		{	label:'Download Wolvenkit.CLI',
+			click:()=>{
+				//Download the stable version
+				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit/releases/download/8.9.0/WolvenKit.Console-1.8.2.zip`);
+			}
+		},
+		{	label:'License',click: () =>{
 				mainWindow.webContents.send('preload:openModal','license')
-		}}]
+			}
+		}
+	]
   }
 ]
 
@@ -491,7 +500,7 @@ ipcMain.on('main:giveModels',(event) => {
 
 function readMaterials(materialfile = ''){
 	if (materialfile!=``){
-		materialfile = materialfile.replace(/\.glb$/,".material.json")
+		materialfile = materialfile.replace(/\.glb$/,".Material.json")
 		fs.readFile(materialfile,(err,contenutofile) =>{
 	    	if (err) {
 	      		if (err.code=='ENOENT'){
