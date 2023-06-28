@@ -6,6 +6,12 @@ const normalMapInfo = {
   width : 128,
   height : 128
 }
+const materialTypeCheck = {
+	metal_base : ["engine\\materials\\metal_base.remt"],
+	multilayer : ["engine\\materials\\multilayered.mt"],
+	decals: ["base\\materials\\mesh_decal.mt"],
+	glass: ["base\\materials\\glass.mt"],
+}
 
 if (window.Worker) {
   imgWorker = new Worker('js/workers/imgWork.js');
@@ -1051,6 +1057,7 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 	}
 });
 
+/*MDLloadingButton button click */
 document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
 
  var nthLayer = document.querySelector("#layeringsystem").children;

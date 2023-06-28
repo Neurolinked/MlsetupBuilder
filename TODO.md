@@ -1,11 +1,25 @@
 #MlsetupBuilder
 
+### Todo 1.6.8
+- [ ] New shaders management based on .Material.json file
+  - [ ] Assign shaders as from appearances
+  - [ ] masks loading from material configuration
+  - [ ] multilayer.mt conversion to three.js format
+  - [ ] metal_base.remt conversion to three.js format
+  - [ ] mesh_decal.mt conversion to three.js format
+- [ ] Custom models Material.json search and usage
+  -[ ] Override masks selection from legacy list
+- [ ] UI redesign for the new materials management
+- [ ] Material Composer extension
+  - [ ] Appearances Editor
+  - [ ] Panels column slider
+  - [ ] Content list and editor together
+
 ### Todo 1.6.7
 - [x] Cleanup in the import function
 - [x] Support the newest Wolvenkit console 1.8.1
   - [x] Adapt to the new system of loading 3d models from the library
   - [x] In-demand mesh/masks export
-  - [ ] Right masks loaded from the material.json files instead on a fixed and linked list
 - [x] A circular Array for different CSS Workspaces
   
   

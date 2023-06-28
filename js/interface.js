@@ -903,17 +903,11 @@ $("#resetShades span.choose").click(function(){
     "contextmenu":{ "items": customMdlMenu }
 	}).bind("dblclick.jstree", function (event) {
 			let nodo = $('#modelsTree').jstree(true).get_selected(true)[0]
-			console.log(nodo);
-			switch (nodo.type){
-				case 'custmesh':
-				case 'custmask':
-					$('#btnMdlLoader').click();
-					break;
-        case 'default':
-          break;
-				default:
-					$('#btnMdlLoader').click();
-			}
+      // the default type are the folders
+			if (nodo.type!='default'){
+        $('#btnMdlLoader').click();
+      }
+
      // Do my action
   }).on('loaded.jstree',function(event){
 		joinModels();
