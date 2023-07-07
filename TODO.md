@@ -14,6 +14,7 @@
   - [ ] Appearances Editor
   - [ ] Panels column slider
   - [ ] Content list and editor together
+- [x] Interface Workspace setup saved and reloaded from session to session
 
 ### Todo 1.6.7
 - [x] Cleanup in the import function
@@ -21,9 +22,6 @@
   - [x] Adapt to the new system of loading 3d models from the library
   - [x] In-demand mesh/masks export
 - [x] A circular Array for different CSS Workspaces
-  
-  
-### ManaVortex requests
 - [x] Layer Multiselect for cleaning more then once at the time
 - [x] The tool could remember the name of the last file it opened and pre-set it in the output panel
 - [x] add the assets/environment folder to the models lists

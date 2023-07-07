@@ -12,6 +12,7 @@ const dree = require('dree');
 const outside = require('electron').shell;
 //app.commandLine.appendSwitch('enable-unsafe-webgpu') //enable access to the WebGPU interface adapter
 app.commandLine.appendSwitch('enable-gpu') //enable acceleration
+app.commandLine.appendSwitch('disable-features', 'WidgetLayering'); //minor fixes for console layering not working as intended
 
 var subproc
 
@@ -76,7 +77,11 @@ const schema = {
 	flipnorm:{
 		type:'boolean',
 		default: false
-	}
+	},
+	workspace:{
+		type:'number',
+		default: 0
+	},
 };
 
 const preferences = new store({schema,
@@ -88,7 +93,7 @@ const preferences = new store({schema,
 				store.set('pathfix','1')
 			}
 		},
-		'1.6.3': store => {
+		'1.6.3': store =>{
 			store.delete('pathfix')
 			store.set('legacymaterial',false)
 		},
@@ -104,6 +109,9 @@ const preferences = new store({schema,
 			}
 			store.set('flipmasks',false)
 			store.set('flipnorm',false)
+		},
+		'1.6.8': store =>{
+			store.set('workspace', 0)
 		}
 	}
 });
@@ -370,10 +378,6 @@ const template = [
   {
     label: 'View',
     submenu: [
-			{label: 'Models Browser', accelerator: 'Ctrl+Shift+M', click: () => {
-				childWindow("apps/modelbrowser.html", mainWindow, 1000, 700, 'Models Browser', { preload: path.join(__dirname, 'apps/preloadmb.js') }, path.join(__dirname,'/images/system/mesh.png'));
-				}
-			},
 			{label: 'Material Composer',accelerator: 'Ctrl+K',click:()=>{
 				childWindow("apps/materials.html",mainWindow,1200,800,'Material Composer', {preload: path.join(__dirname, 'apps/preloadmats.js')} );
 			}},
@@ -555,7 +559,6 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 						}else{
 							event.reply('preload:logEntry', 'File found in the Depot Folder, Yay')
 						}
-						return contenutofile
 					})
 				}else{
 					if (normals.test(whereLoadFrom)){
@@ -565,6 +568,10 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 						dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
+					contenutofile = ""
+					if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
+						mainWindow.webContents.send('preload:request_uncook')
+					}
 				}
 			}else{
 				dialog.showErrorBox("File opening error",err.message)
@@ -573,7 +580,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 			contenutofile=""
 		}
 		readMaterials(a3dMatModel); //launch a search for the material
-		event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
+		//event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
 		event.returnValue = contenutofile
   	})
 })
@@ -682,9 +689,13 @@ ipcMain.on('main:3dialog',(event, arg) => {
     if (!threeDAsset.canceled){
 			event.reply('preload:logEntry', 'File choosen : '+threeDAsset.filePaths[0]+'<br/>')
 			event.reply('preload:set_3d_asset_name',threeDAsset.filePaths[0]);
-    }
+    }else{
+		event.reply('preload:logEntry', 'Action cancelled')
+		event.reply('preload:enable','#cstMdlLoader');
+	}
   }).catch(err => {
     dialog.showErrorBox("Error reading the file :",err.message)
+	event.reply('preload:enable','#cstMdlLoader')
   })
 })
 //Save the preferences
@@ -712,6 +723,9 @@ ipcMain.on('main:saveStore',(event, arg) => {
 	}
 	if (arg.hasOwnProperty('flipmasks')){
 		preferences.set('flipmasks',arg.flipmasks);
+	}
+	if (arg.hasOwnProperty('workspace')){
+		preferences.set('workspace',arg.workspace);
 	}
 })
 
