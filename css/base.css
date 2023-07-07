@@ -33,6 +33,8 @@ body > footer.main>div{border:1px solid var(--layer-1);border-bottom: none;font-
 	}
 }
 
+details summary{background-color: var(--bs-secondary); padding:0 0.5rem;}
+
 #pBar{
   min-height:23px!important;
 }
@@ -74,7 +76,6 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #MainMenu .dropdown-menu li{font-size: 0.8rem!important;}
 
 
-#ModelLibrary.offcanvas-start{width:600px!important;}
 .offcanvas .offcanvas-command{padding:1rem;background:var(--layer-3);}
 .offcanvas .offcanvas-header{background-color: var(--bs-primary);}
 #off-MLab .offcanvas-header {  background-color: var(--bs-warning);}

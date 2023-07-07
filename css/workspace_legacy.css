@@ -1,22 +1,54 @@
-#interface{grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;grid-template-rows:40px auto 1rem;gap: 4px;}
-#MlEditor {
+#interface{
+    grid-template-columns:var(--rendView) 1.8fr 3fr 2fr;
+    grid-template-rows: 2rem auto 1rem 27px;
+    gap: 4px;
+}
+#pills-main-IF{
     grid-column-start: 2;
-    grid-column-end: 2;
+    grid-column-end: 5;
     grid-row-start: 1;
+    grid-row-end: 1;
+}
+#nav-tabMLSB{
+    grid-column-start: 2;
+    grid-column-end: 5;
+    grid-row-start: 2;
     grid-row-end: 4;
+    max-height: calc(100vh - (2rem + 27px));
+}
+#modelTabScroll{
+    max-height:calc(100vh - (2.75rem + 77px));
+}
+
+#editor-container{
+    display:grid;
+    grid-template-columns: 1.8fr 3fr 2fr;
+    gap: 4px;
+}
+#MlEditor {
+    grid-column-start: 1;
+    grid-column-end: 1;
 }
 #layer_settings {
-    grid-column-start: 3;
-    grid-column-end: 3;
-    grid-row-start: 1;
-    grid-row-end: 4;
+    grid-column-start: 2;
+    grid-column-end: 2;
 }
 #micropanel {
-    grid-column-start: 4;
-    grid-column-end: 4;
-    grid-row-start: 1;
-    grid-row-end: 4;
+    grid-column-start: 3;
+    grid-column-end: 3;
     overflow-y: auto;
     padding: 0 3px;
 }
 #layeringsystem li::after {content: ' ' attr(data-labels);}
+
+.sonOfModelTabScroll{
+    max-height:calc(100vh - (2.75rem + 75px));
+    overflow-y: auto;
+}
+#modelTabScroll .sonOfModelTabScroll details summary{
+    padding-left:.75rem;
+    list-style-type: circle;
+}
+#modelTabScroll .sonOfModelTabScroll details[open] summary{
+    list-style-type:square;
+}

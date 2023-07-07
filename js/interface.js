@@ -159,21 +159,44 @@ function switchLegacyMat(material){
 
 $(function(){
   let buildmyHairs = abuildHairs(hairs);
-
+  
   var Workspaces = {
     index: 0,
     alternatives: [
       './css/workspace_legacy.css',
-      './css/workspace_compact.css'
+      './css/workspace_compact.css',
+      './css/workspace_substance.css'
       ],
     dom : $("#workspaceCSS"),
+    config( idx = 0 ){
+      this.index = Number(idx) > 0 ? Number(idx) : 0;
+      return this.alternatives[this.index];
+    },
     walk(){
       let size = this.alternatives.length
       // add 1 -> mod to the size of the array -> add the size -> re-mod
       this.index = (++this.index % size + size) % size;
+      thePIT.savePref({workspace:Number(this.index)});
       return this.alternatives[this.index];
     }
   }
+
+  function movecontent(){
+    if (Workspaces.index==2) {
+      $("#layer_settings").appendTo("#SettingsScroller");
+      $("#micropanel").appendTo("#SettingsScroller");
+    }else{
+      $("#layer_settings").insertBefore($("#SettingsScroller"));
+      $("#micropanel").insertBefore($("#SettingsScroller"));
+    }
+  }
+
+  var styleConfig = thePIT.RConfig('workspace');
+  styleConfig.then((style)=>{
+    movecontent();
+    Workspaces.dom.attr('href',Workspaces.config(style));
+  }).catch((error)=>console.error(error));
+  
 
   //make it as a circular array https://kittygiraudel.com/2022/02/01/circular-array-in-js/
   //canvas for contestual material
@@ -204,7 +227,6 @@ $(function(){
       var materialAppearances = JSON.parse($("#materialJson").val());
       materialJSON.import($("#materialJson").val());
       $("#appeInfo").html(materialJSON.codeAppearances());
-      console.log(materialJSON);
     } catch (error) {
       notifyMe(error,false);
     }
@@ -274,7 +296,6 @@ $(function(){
 	let buildmyNuMaterial = abuildMaterial(materialCore);
 	
 	let buildmyMasks = abuildMaskSelector(maskList)
-  //let test = ModelListing()
 
   const ml_randomized = Object.keys(ml_libraries)
     .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g))
@@ -335,6 +356,7 @@ $(function(){
     //CTRL + SHIFT + w
     if (ctrl && shift && (key==87)){
       Workspaces.dom.attr('href',Workspaces.walk());
+      movecontent();
     }
 
   });
@@ -351,23 +373,6 @@ $(function(){
 	$(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover
 	});
-
-	$("#mlPosX").click(function(){
-		swapModelClass();
-    updPanelCovers();
-	})
-
-	function swapModelClass(){
-		$("#mlPosX svg").toggleClass('fa-caret-right fa-caret-left');
-		$("#ModelLibrary").toggleClass('offcanvas-start offcanvas-end')
-    if ($('#ModelLibrary').hasClass('offcanvas-end')){
-      localStorage.setItem('MLibX',1);
-      $('#ModelLibrary').addClass("coverParamEditor")
-    }else{
-      localStorage.removeItem('MLibX');
-      $('#ModelLibrary').removeClass("coverParamEditor")
-    }
-	}
 
   const mbDropZone = document.getElementById('dropzone');
 
@@ -732,10 +737,12 @@ $("#resetShades span.choose").click(function(){
     $("select[name='exportVersion']").val(2);
   }
 
+  /*
 	const modelPlace = localStorage.getItem('MLibX');
 	if (Number(modelPlace)>0){
 		swapModelClass();
 	}
+  */
   updPanelCovers();
 	//modal uncooking progress
 	const unCookModal = new bootstrap.Modal(document.getElementById('unCookModal'));
@@ -837,9 +844,9 @@ $("#resetShades span.choose").click(function(){
 			/*trigger the material change */
       $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
 			//
-      //$("#materialTrees").jstree().deselect_all(true);//reset the material library
+      
       let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
-			//$("#materialTrees").jstree("select_node",materialdummy[0].id); //fire the selection of the material for loading the inputs
+			
       //Setup the inputs
 
       if ( (($(this).data("color")=="000000_null") || ($(this).data("color")=="ffffff_null")) && (!$("#BWAdd").is(":checked")) ){
@@ -880,7 +887,13 @@ $("#resetShades span.choose").click(function(){
   })
 
 	var ModelsLibrary = $('#modelsTree').jstree({
-		'core' : {"dblclick_toggle":false,"themes": {"name": "default-dark","dots": true,"icons": true},'check_callback' : true,'data' : modelsJson},
+		'core' : {
+      "dblclick_toggle":false,
+      "themes": {"name": "default-dark","dots": true,"icons": true},
+      'check_callback' : true,
+      'data' : modelsJson,
+      'worker':false
+    },
 		'types' : {
 							"default" : { "icon" : "text-warning fas fa-folder"},
               "scan" : {"icon" : "text-danger fas fa-magnifying-glass"},
@@ -1022,7 +1035,7 @@ $("#resetShades span.choose").click(function(){
 							});
 							radix.deselect_all();
 							radix.select_node(last);
-							$("#ModelLibrary .offcanvas-body").scrollTop(0);
+							$("#modelsTree").parent().scrollTop(0);
 							masksModal.show();
 						}
           }
@@ -1248,10 +1261,11 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
   });
 
 	$("#materiaList li").mousemove(function(e){
-			$("#floatMat").css({"left":(mouseX + 30) + "px","top":(mouseY + 10)+"px","z-index":1090,"background":"url(images/material/"+$(this).data('ref')+".jpg) 0 0 no-repeat","background-size":" 128px,128px"});
-			$("#floatMat").removeClass('d-none');useX = e.clientX;
-		  mouseY = e.clientY;
-		  
+      var nuPos = $(e.target).offset();
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+			$("#floatMat").css({"left":(nuPos.left - 132) + "px","top":(mouseY - 64)+"px","z-index":1090,"background":"url(images/material/"+$(this).data('ref')+".jpg) 0 0 no-repeat","background-size":" 128px,128px"});
+			$("#floatMat").removeClass('d-none');
 		}
 	);
 
@@ -1261,7 +1275,6 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
 
 	$("body").on("click","#materiaList li, #cagemLibrary > div", function(event){
      let target = $( event.target );
-    //console.log(target);
 
 		$("#materiaList li, #cagemLibrary > div").removeClass('active');
 		$(this).addClass('active');
@@ -1511,12 +1524,12 @@ const scrollCustMBContainer = document.getElementById("cu_mu_display");
 scrollMBContainer.addEventListener("wheel", (evt) => {
     evt.preventDefault();
     scrollMBContainer.scrollLeft += evt.deltaY;
-}, {passive: true});
+});
 
 scrollCustMBContainer.addEventListener("wheel", (evt) => {
     evt.preventDefault();
     scrollCustMBContainer.scrollLeft += evt.deltaY;
-}, {passive: true});
+});
 
 	$("#layerRandomizer").click(function(){
 
@@ -2211,6 +2224,7 @@ $("#choseThisMask").click(function(){
 		if (selectedNode[0].hasOwnProperty('children')){
 			if (selectedNode[0].children.length==0){
 				ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val(),"layers":maskList[$("#customMaskSelector").val()].layers}},"first")
+        ModelsLibrary.jstree(true).open_node('#'+selectedNode[0].li_attr.id);
 			}else{
 				let figli = ModelsLibrary.jstree(true).get_json('#'+selectedNode[0].li_attr.id).children
 				if (figli.filter(el => el.li_attr.masks == $("#customMaskSelector").val()).length <= 0){

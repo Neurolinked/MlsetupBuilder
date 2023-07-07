@@ -12,7 +12,6 @@ var helpJson=[
 ];
 
 $(function(){
-	var ModelOffcanvas = new bootstrap.Offcanvas(document.getElementById('ModelLibrary'));
 	var HelpOffcanvas = new bootstrap.Offcanvas(document.getElementById('HowDoI'));
 
 	var HelpLibrary = $('#HelpTree').jstree({

@@ -76,8 +76,8 @@ function onMouseMove( event ) {
 
 				const uv = intersects[ 0 ].uv;
 				uvPaint.fromArray(intersects[ 0 ].uv)
-				//canvas.setCrossPosition( uv.x, uv.y );
-				//draw( paintMaskCTX, uv.x * 768, 768 - uv.y * 768 );
+				canvas.setCrossPosition( uv.x, uv.y );
+				draw( paintMaskCTX, uv.x * 768, 768 - uv.y * 768 );
 			}
 		}
 	}
@@ -268,6 +268,7 @@ flipNcheck.onclick=function(){
 
 //document.documentElement.style.setProperty('--rendView', '700px'); //used for changing the viewport size
 //Parametric Render width from CSS
+//const renderwidth = Number((parseInt(document.getElementById("interface").offsetWidth/9)*4)-15)
 const renderwidth = Number(getComputedStyle(document.documentElement).getPropertyValue('--rendView').replace(/px/,''));
 let resized = false; //semaphore for resizing behaviour
 window.addEventListener('resize', function() {  resized = true;  });// resize event listener
@@ -860,17 +861,7 @@ function mBuildAppearances(model){
     GuiInfo.__controllers.forEach((item, i) => {
       item.domElement.children[0].readOnly=true;
     });
-    
-    /*
-    let template
-    
-    for (i=0,j=model[0].appearanceCode.length;i<j;i++){
-      template = `<div class="col"><div class="card"><div class="card-body"><span class="badge d-block text-info rounded-0 mt-2">BufferArray ${i}</span>`
-      for (x=0,y=names.length;x<y;x++){
-        template += `<span class="badge d-block txt-secondary rounded-0 mt-2">${names[x]}</span>${model[x].appearanceCode[i]}`
-      }
-      oAppeinfo.innerHTML+=`${template}</ul></div></div></div>`
-    }*/
+
   }
 }
 
@@ -1318,7 +1309,7 @@ function resize() {
 		controls.enabled=true;
 	}
  });
- document.querySelector('body').addEventListener('keyup', (e)=>{
+ document.querySelector('body').addEventListener('keyup', (event)=>{
 	 if (event.shiftKey){
 		 paintMask3D=true;
 		 controls.enabled=false;
