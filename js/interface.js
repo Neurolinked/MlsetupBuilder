@@ -193,8 +193,8 @@ $(function(){
 
   var styleConfig = thePIT.RConfig('workspace');
   styleConfig.then((style)=>{
-    movecontent();
     Workspaces.dom.attr('href',Workspaces.config(style));
+    movecontent();
   }).catch((error)=>console.error(error));
   
 
@@ -1724,7 +1724,7 @@ function passTheMlsetup(textContent=""){
     $("#off_MLSetups div.offcanvas-body detail").fadeOut();
     var mls_content =" "
     try{
-      mls_content = JSON.parse(textContent);
+      mls_content = JSON.parse(textContent,mlsContRevive);
       mLsetup = new Mlsetup();
       mLsetup.import(mls_content);
       let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
@@ -1734,6 +1734,23 @@ function passTheMlsetup(textContent=""){
     }
     off_MLSetup.show();
   }
+}
+
+/*fix for mlsetup version .7*/
+function mlsContRevive(key,value){
+  if (typeof(value)=='object'){
+    if (value.hasOwnProperty('$type')) {  
+      switch (value['$storage']) {
+        case 'string':
+            return String(value['$value']);
+            break;
+        case 'uint64':
+            return Number(value['$value']);
+            break;
+      }
+    }
+  }
+  return value;
 }
 
 //Used to calculate the ranges as Documents printing notations

@@ -1,6 +1,6 @@
 // main.js
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, screen, Notification, ipcMain, nativeTheme, dialog, Menu } = require('electron')
+const { app, BrowserWindow, globalShortcut, screen, Notification, ipcMain, nativeTheme, dialog, Menu } = require('electron')
 var child = require('child_process').execFile;
 var spawner = require('child_process').spawn;
 const path = require('path')
@@ -464,6 +464,10 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow(width,height)
   })
+
+  globalShortcut.register("CommandOrControl+W", () => {
+	//stuff here
+	});
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
