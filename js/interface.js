@@ -198,6 +198,29 @@ $(function(){
   }).catch((error)=>console.error(error));
   
 
+  $(".friendo").on("input",function(e){
+    $($(this).data("control")).val($(this).val());
+    $($(this).data("control")).change();
+  });
+
+  $("input").on({
+      "input":function(e){
+        driveRange(e);
+      },
+      "change":function(e){
+        driveRange(e);
+      }
+    });
+
+  function driveRange(identifier){
+    if ($(identifier.target.getAttribute("id"))!=undefined){
+      var controller = `#${identifier.target.getAttribute("id")}`;
+      if ($(`.friendo[data-control='${controller}']`).length > 0 ){
+        $(`.friendo[data-control='${controller}']`).val( $(controller).val());
+      }
+    }
+  }
+
   //make it as a circular array https://kittygiraudel.com/2022/02/01/circular-array-in-js/
   //canvas for contestual material
   const canvasMaterial = document.getElementById('materialDis');
@@ -855,7 +878,7 @@ $("#resetShades span.choose").click(function(){
 
       //$("#layerColor").val($(this).data("color"));
       $("#matInput").val($(this).data("material"));
-      $("#layerTile").val($(this).data("mattile"));
+      $("#layerTile").val($(this).data("mattile")).change();
       $("#layerOpacity").val($(this).data("opacity")).change();
       $("#layerNormal").val(String($(this).data("normal")));
       $("#layerRoughIn").val(String($(this).data("roughin")));
@@ -866,9 +889,9 @@ $("#resetShades span.choose").click(function(){
       $("#layerOffV").val($(this).data("offsetv"));
       //Microblend section
       $("#mbInput").val($(this).data("mblend"));
-      $("#mbTile").val($(this).data("mbtile"));
-      $("#mbCont").val($(this).data("mbcontrast"));
-      $("#mbNorm").val($(this).data("mbnormal"));
+      $("#mbTile").val($(this).data("mbtile")).change();
+      $("#mbCont").val($(this).data("mbcontrast")).change();
+      $("#mbNorm").val($(this).data("mbnormal")).change();
       $("#mbOffU").val($(this).data("mboffu"));
       $("#mbOffV").val($(this).data("mboffv"));
 
