@@ -3,7 +3,7 @@ var helpJson=[
 {"id": "hdi_0","parent": "#","text": "How do i ...","type": "howdoi","state": {"opened": true}},
 {"id": "hdi_001","parent": "hdi_0","text": " .. start with it","type": "basic"} ,
 /* Link section */
-{"id": "url_0","parent": "#","text": "Videos","type": "urlroot"},
+{"id": "url_0","parent": "#","text": "Documentation","type": "urlroot"},
 {"id": "url_001","parent": "url_0","text": "RedModding wiki","type": "url"},
 /* Video Section */
 {"id": "vid_0","parent": "#","text": "Videos","type": "videoroot"},
