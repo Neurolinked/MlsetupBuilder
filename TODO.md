@@ -15,6 +15,8 @@
   - [ ] Panels column slider
   - [ ] Content list and editor together
 - [x] Interface Workspace setup saved and reloaded from session to session
+- [ ] Keyboard shortcut override
+  - [x] CTRL+A Apply the edits on the current layer
 
 ### Todo 1.6.7
 - [x] Cleanup in the import function

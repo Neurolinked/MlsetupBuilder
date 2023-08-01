@@ -370,7 +370,7 @@ $(function(){
   */
 
   $(document).on('keydown', function(e) {
-    var ev = e || window.event; // Event object 'ev'
+    var ev = e // Event object 'ev'
     var key = ev.which || ev.keyCode; // Detecting keyCode
 
     var ctrl =  ev.ctrlKey ? ev.ctrlKey : ((key === 17) ? true : false);
@@ -380,6 +380,10 @@ $(function(){
     if (ctrl && shift && (key==87)){
       Workspaces.dom.attr('href',Workspaces.walk());
       movecontent();
+    }
+
+    if (ctrl && (key=='KeyA')){
+      $("#applytoMyLayer").click();
     }
 
   });

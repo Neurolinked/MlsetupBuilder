@@ -297,19 +297,19 @@ const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilde
 }
 
 const childWindow = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences, ico='') => {
-  let mywin = new BrowserWindow({
-    width: width,
-    height: height,
-    modal: false,
-	icon: ico,
-    parent: parentWindow,
-		webPreferences: preferences,
-		title: title,
-		alwaysOnTop : false
-  })
+	let mywin = new BrowserWindow({
+		width: width,
+		height: height,
+		modal: false,
+		icon: ico,
+		parent: parentWindow,
+			webPreferences: preferences,
+			title: title,
+			alwaysOnTop : false
+	})
 	mywin.menuBarVisible=false
 	mywin.minimizable=true
-  mywin.loadFile(htmlFile)
+	mywin.loadFile(htmlFile)
 	mywin.once('ready-to-show', () => {
 		mywin.show()
 	})
@@ -360,9 +360,9 @@ const template = [
       { role: 'copy' },
       { role: 'paste' },
       ...(isMac ? [
-				{ role: 'pasteAndMatchStyle' },{ role: 'delete' },{ role: 'selectAll' },{ type: 'separator' },{label: 'Speech',submenu: [{ role: 'startSpeaking' },{ role: 'stopSpeaking' }]}
+				{ role: 'pasteAndMatchStyle' },{ role: 'delete' },{ type: 'separator' },{label: 'Speech',submenu: [{ role: 'startSpeaking' },{ role: 'stopSpeaking' }]}
       ] : [
-        { role: 'delete' },{ type: 'separator' },{ role: 'selectAll' }
+        { role: 'delete' }
       ])
     ]
   },
@@ -472,8 +472,11 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow(width,height)
   })
 
-  globalShortcut.register("CommandOrControl+W", () => {
+  	globalShortcut.register("CommandOrControl+W", () => {
 	//stuff here
+	});
+	globalShortcut.register("CommandOrControl+A", () => {
+		mainWindow.webContents.send('preload:activate', '#applytoMyLayer');
 	});
 })
 
