@@ -44,7 +44,7 @@
 #layeringsystem li{margin:2px;}
 
 .sonOfModelTabScroll{
-    max-height:calc(100vh - (2.75rem + 75px));
+    max-height:calc(100vh - (2.75rem + 75px + 125px));
     overflow-y: auto;
 }
 #modelTabScroll .sonOfModelTabScroll details summary{

@@ -2276,8 +2276,21 @@ $("#choseThisMask").click(function(){
 		}
 		$("#customMaskSelector").prop('selectedIndex',-1);
 	}
-})
+});
 
+/* let the user choose a mlmask file */
+$("#pickCustMask").click(function(){
+  let getinfo = thePIT.RConfig('unbundle')
+  getinfo.then((uncook)=>{
+    thePIT.PickMask(uncook);
+  }).catch((error)=>{
+    notifyMe(error);
+  })
+});
+/* react to a mask change */
+$("#lblmasktoAdd").bind("update",function(){
+  console.log($(this).attr("value"));
+})
 
 $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
   let percorso = $(this).parent().children("input[type='text']").val();
@@ -2285,6 +2298,8 @@ $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
     let getinfo = thePIT.RConfig('unbundle')
     getinfo.then((uncook)=>{
       thePIT.Foldering(uncook+percorso.substring(0,percorso.lastIndexOf('\/')+1));
+    }).catch((error)=>{
+      notifyMe(error);
     })
   }
 });
@@ -2434,4 +2449,21 @@ unCooKonfirm.addEventListener("click", (event) => {
                   }).catch((error)=>{
                     notifyMe(error);
                   });
+  
+  $("#MBAFinder").on("input",function(e){
+    
+    if ($("#MBAFinder").val()!=""){
+
+      var modelAppearances = $("#appeInfo div.card").find(".card-header");
+      modelAppearances.each((index,element)=>{
+        if ($(element).text().match($("#MBAFinder").val())){
+          $(element).closest('div.col').show();
+        }else{
+          $(element).closest('div.col').hide();
+        }
+      });
+    }else{
+      $("#appeInfo div.col").show();
+    }
+  });
 });

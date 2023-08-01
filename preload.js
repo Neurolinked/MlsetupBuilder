@@ -15,6 +15,9 @@ contextBridge.exposeInMainWorld(
 				var file = ipcRenderer.send('main:3dialog');
         return file
 			},
+      PickMask: (folder) =>{
+        ipcRenderer.send('main:pickMlmask',folder)
+      },
 			Export:(data) => {
 				ipcRenderer.send('main:writefile',data);
 			},
@@ -39,7 +42,7 @@ contextBridge.exposeInMainWorld(
 				return additionalModels
 			},
       getMuBlends: async ()=>{
-        return await ipcRenderer.invoke('main:loadMuBlend');
+        return await ipcRenderer.invoke('main:loadUseRSource','microblends');
       },
 			savePref: (conf)=>{
 				ipcRenderer.send('main:saveStore',conf);
@@ -229,6 +232,12 @@ ipcRenderer.on('preload:set_3d_asset_name',(event,result) => {
 	var fileLoaded = document.querySelector("#lastCustomMDL")
 	fileLoaded.value=result
 	fileLoaded.dispatchEvent(new Event('change', { 'bubbles': true }));
+})
+
+ipcRenderer.on('preload:set_new_mask_name',(event,result) => {
+	var fileSelected = document.querySelector("#lblmasktoAdd")
+	fileSelected.setAttribute('value',result)
+  fileSelected.dispatchEvent(new Event('update', { 'bubbles': true }));
 })
 
 ipcRenderer.on('preload:noBar',(event,result)=>{

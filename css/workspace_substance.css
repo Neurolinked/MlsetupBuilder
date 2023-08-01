@@ -24,9 +24,9 @@
     grid-template-columns: 1.5fr 2fr 2.5fr;
     gap: 4px;
 }
+#MlEditor{grid-column-start: 2;}
 #layer_settings {
     grid-column-start: 2;
-    grid-column-end: 2;
 }
 #SettingsScroller{
     grid-column-start: 3;
@@ -34,10 +34,9 @@
     overflow-y: auto;
     max-height: calc(100vh - (2.75rem + 27px));
 }
-#layeringsystem li::after {content: ' ' attr(data-labels);}
 
 .sonOfModelTabScroll{
-    max-height:calc(100vh - (2.75rem + 75px));
+    max-height:calc(100vh - (2.75rem + 75px + 125px));
     overflow-y: auto;
 }
 #modelTabScroll .sonOfModelTabScroll details summary{
@@ -51,6 +50,8 @@
 
 #layeringsystem{
     counter-reset: layer -1;
+    max-height: 40vh;
+    overflow-y: auto;
 }
 #layeringsystem li:before {
     counter-increment: layer;
@@ -69,5 +70,6 @@
   }
   #layeringsystem li{
     margin-left:1.5rem;
-    padding: 0;
+    padding: 2px;
   }
+  #layeringsystem li::after {content: ' ' attr(data-labels);}

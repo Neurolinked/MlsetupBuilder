@@ -39,6 +39,11 @@ var userRScheme = [
 		'decals',
 		'jsons'
 		]
+var userRfiles = {
+	masks : 'masklist',
+	microblends : 'mbcustom',
+	mat_template : 'material_template'
+}
 
 var objwkitto = {}
 const schema = {
@@ -139,29 +144,13 @@ var lastMicroConf = {}
 //register the application name
 if (process.platform === 'win32'){ app.setAppUserModelId(app.name); }
 
-function MuReading(){
-	return new Promise((resolve,reject) =>{
-		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],'/mbcustom.json')/* application file  */
+/*Read the custom Microblends from the resource list*/
 
-		fs.readFile(app_custom_json,(err,contenutofile) =>{
-			if (err) {
-				reject()
-			}else{
-				try{
-					let test = JSON.parse(contenutofile)
-					resolve(test)
-				}catch(err){
-					reject()
-				}
-			}
-		})
-	})
-}
-
+/*Write the custom Microblends to the resource list*/
 function MuWriting(contenuto){
 	return new Promise((resolve,reject) =>{
-		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],'/mbcustom.json')/* application file  */
-		let bk_custom_json = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_jsons],'/mbcustom.json')/* application file  */
+		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],`/${userRfiles.microblends}.json`)/* application file  */
+		let bk_custom_json = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_jsons],`/${userRfiles.microblends}.json`) /* application file  */
 
 		fs.writeFile(app_custom_json,contenuto,(err) =>{
 			if (err) {
@@ -178,11 +167,29 @@ function MuWriting(contenuto){
 	})
 }
 
+function JsonResourceRead(UserResource){
+	return new Promise((resolve,reject) =>{
+		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],`/${UserResource}.json`)/* application file  */
+		fs.readFile(app_custom_json,(err,filecontent) =>{
+			if (err) {
+				reject()
+			}else{
+				try{
+					let strutcontent = JSON.parse(filecontent)
+					resolve(strutcontent)
+				}catch(err){
+					reject()
+				}
+			}
+		})
+	})
+}
+
 function customResource(){
 	let pathMigration = path.join(app.getPath('userData'),userResourcesPath)
 
 	try {
-    if (!fs.existsSync(pathMigration)){
+    	if (!fs.existsSync(pathMigration)){
 			fs.mkdir(pathMigration, { recursive: true }, (err) => {
 				if (err) dialog.showErrorBox("The migration folder isn't accessible, trying to create one : -",err.message)
 			})
@@ -221,7 +228,7 @@ function SaveCustom(){
 					fse.copySync(path.join(applicationDest,"/images/",item),dirToSaveTo)
 					break
 				case 'jsons':
-					fse.copySync(path.join(applicationDest,item,"mbcustom.json"),path.join(dirToSaveTo,"mbcustom.json"))
+					fse.copySync(path.join(applicationDest,item,"mbcustom.json"),path.join(dirToSaveTo,`${userRfiles.microblends}.json`))
 					break
 			}
 		})
@@ -248,7 +255,7 @@ function restoreCustom(){
 						fse.copySync(dirToVerify,path.join(applicationDest,"images",item))
 						break
 					case 'jsons':
-						fse.copySync(path.join(dirToVerify,"mbcustom.json"),path.join(applicationDest,item,"mbcustom.json"))
+						fse.copySync(path.join(dirToVerify,`${userRfiles.microblends}.json`),path.join(applicationDest,item,"mbcustom.json"))
 						break
 				}
 			})
@@ -668,6 +675,21 @@ ipcMain.on('main:setupUnbundle',(event, arg) => {
   })
 })
 
+
+//dialog To choose a mlmask file
+ipcMain.on('main:pickMlmask',(event, arg) => {
+	const result = dialog.showOpenDialog({
+		  title:'Choose a mask file',
+		  filters:[ { name: 'Mulitlayer Mask List', extensions: ['mlmask'] }],
+		  defaultPath:arg
+	  }).then(result => {
+	  if (!result.canceled){
+		event.reply('preload:set_new_mask_name',result.filePaths[0]);
+	  }
+	}).catch(err => {
+	  dialog.showErrorBox("Preferences setup error",err.message)
+	})
+  })
 //dialog for getting the WolvenkitCLI.exe command
 ipcMain.on('main:setupCR2Wr',(event, arg) => {
   const result = dialog.showOpenDialog({
@@ -734,9 +756,16 @@ ipcMain.on('main:saveStore',(event, arg) => {
 })
 
 
-ipcMain.handle('main:loadMuBlend',(event) => {
-	return MuReading()
-})
+ipcMain.handle('main:loadUseRSource',(event,type)=>{
+	switch (type) {
+		case 'microblends':
+			return JsonResourceRead(userRfiles.microblends)
+		case 'masks':
+			return JsonResourceRead(userRfiles.masks)
+		default:
+			return new Promise((resolve,reject) =>{ reject() })
+	}
+});
 
 //json version of mlsetup file write operation
 ipcMain.on('main:writefile',(event,arg) => {
@@ -792,7 +821,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 					event.reply('preload:logEntry', 'Save procedure cancelled')
 				}
 		})
-	}else if(arg.type=='customlist'){
+	}else if (arg.type=='customlist'){
 		fs.writeFile(path.join(app.getPath('userData'),arg.file), arg.content,'utf8',(errw, data) =>{
 			if(errw){
 				event.reply('preload:logEntry', 'Save procedure aborted',true)
@@ -842,6 +871,17 @@ ipcMain.on('main:writefile',(event,arg) => {
 			}
 		}).catch((error)=>{
 			mainWindow.webContents.send('preload:logEntry', "it's impossible to create the template material Library backup",true)
+		})
+	}else if (arg.type=='maskslist'){
+		fs.writeFile(path.join(app.getAppPath(),userRScheme[_jsons],`/${userRfiles.masks}.json`), arg.content,'utf8',(errw, data) =>{
+			if(errw){
+				event.reply('preload:logEntry', 'Save procedure aborted',true)
+				dialog.showErrorBox('Error during the writing process of the file')
+				return
+			}else{
+				new Notification({title:"Save List", body: "Your file has been saved" }).show()
+				event.reply('preload:logEntry', 'custom mask list saved')
+			}
 		})
 	}
 	mljson = ''
@@ -1235,7 +1275,7 @@ ipcMain.on('main:mBlender',(event,package)=>{
 					 })
 				}
 			})
-			MuReading()
+			JsonResourceRead(userRfiles.microblends)
 			.then((contenuto)=>{
 				let listaPath = package.files.map(elm => {return {"path":elm.gamepath,"hash":elm.hash}})
 				let indexPackage = contenuto.packages.findIndex((pkg,index) => { if (pkg.name==package.packageName){ return index	}})
@@ -1287,7 +1327,7 @@ ipcMain.on('main:delmBlend', (event,micro)=>{
 			}
 		})
 		//delete from the Mbcustom.json the entry
-		MuReading()
+		JsonResourceRead(userRfiles.microblends)
 		.then((contenuto)=>{
 			let indexPackage = contenuto.packages.findIndex((pkg,index) => { if (pkg.name==micro.package){ return index	}})
 			let toremove
