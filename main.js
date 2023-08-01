@@ -471,13 +471,6 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow(width,height)
   })
-
-  	globalShortcut.register("CommandOrControl+W", () => {
-	//stuff here
-	});
-	globalShortcut.register("CommandOrControl+A", () => {
-		mainWindow.webContents.send('preload:activate', '#applytoMyLayer');
-	});
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -485,6 +478,20 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
+})
+
+
+app.on('browser-window-focus', () => {
+	globalShortcut.register("CommandOrControl+W", () => {
+	//stuff here
+	})
+	globalShortcut.register("CommandOrControl+A",() => {
+		mainWindow.webContents.send('preload:activate', '#applytoMyLayer')
+	})
+})
+
+app.on('browser-window-blur', () => {
+	globalShortcut.unregisterAll()
 })
 
 ipcMain.on('main:aimMicros',(event,configurations) =>{

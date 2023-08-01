@@ -4,6 +4,14 @@ var materialJSON = new MaterialBuffer();
 
 var uncookMyFile = false;
 
+var textureformat = ''
+var Ptextformat = thePIT.RConfig('maskformat');
+Ptextformat.then((format)=>{
+  textureformat = format
+}).catch((error)=>{
+  notifyMe(error);
+})
+
 //Broadcasting manager section
 const bc = new BroadcastChannel("streaming"); //communication between opened interafce windows
 bc.onmessage = (event)=>{
@@ -35,7 +43,7 @@ async function abuildMaskSelector(listOfMasks){
 			var maskSel = document.querySelector("#customMaskSelector");
 			let dummytxt = '';
 			for (k=0, j=listOfMasks.length;k<j;k++){
-				dummytxt +="<option value='"+k+"' >"+listOfMasks[k].mask.replace("{format}","png")+"</option>";
+				dummytxt +="<option value='"+k+"' >"+listOfMasks[k].mask.replace("{format}",textureformat)+"</option>";
         //$("#customMaskSelector").append("<option value='"+k+"' >"+listOfMasks[k].mask+"</option>");
       }
 			maskSel.innerHTML+=dummytxt;
@@ -255,13 +263,7 @@ $(function(){
     }
   });
 
-  var textureformat = ''
-  var Ptextformat = thePIT.RConfig('maskformat');
-  Ptextformat.then((format)=>{
-    textureformat = format
-  }).catch((error)=>{
-    notifyMe(error);
-  })
+
   var mls_Offcanvas = document.getElementById('off_MLSetups')
   var off_MLSetup = new bootstrap.Offcanvas(mls_Offcanvas)
 
@@ -1093,14 +1095,10 @@ $('#modelsTree').on('select_node.jstree',function(ev,node){
     }
 		// ID of the normal map
 		if (node.node.li_attr.hasOwnProperty('normal')) {
-			$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));//$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));
+			$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));
 		}else{
 			$("#normTemplate").val('');
 		}
-    /*
-		if (node.node.li_attr.hasOwnProperty('layers')){
-			maxlayers = node.node.li_attr.layers;
-		}*/
 		$("#maxLayers").val(maxlayers);
 	}
 });
