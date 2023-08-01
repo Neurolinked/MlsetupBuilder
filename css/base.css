@@ -325,6 +325,8 @@ input[type=range].grayscale:active::-webkit-slider-thumb{background: rgb(102, 10
 input[type=range]:focus {outline: none;}
 
 
+
+
 .form-check-input,.form-check-input:focus{background-color: var(--bs-secondary);border-color:var(--bs-primary);}
 .form-check-input:checked {background-color: var(--active-sel);border-color:var(--bs-primary);}
 
@@ -515,3 +517,9 @@ span.choose.active{border-color:var(--active-sel);}
 .dropSelect option:hover{background-color:var(--bs-primary)!important;color:var(--bs-layer0)!important;}
 
 dialog::backdrop{background: rgba(0, 0, 0, 0.5);}
+.svgBtn svg{
+  background-color: var(--layer-2);
+  border-radius: .5rem;
+  padding:.4rem;
+}
+

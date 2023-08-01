@@ -105,7 +105,7 @@ var pressure = 0.2;
 var snapsManager = document.getElementById('Snapshots');
 paintMaskCTX.save();
 
-grayscaleCheck = document.getElementById('gScalePaint');
+//grayscaleCheck = document.getElementById('gScalePaint');
 
 function HairTexture(hairData=[{c:'#002250',p:0},{c:'#002250',p:1}]) {
 	var size = 256;
@@ -409,13 +409,8 @@ function paintDatas(textureData,w,h){
   for (let i = 0; i < imageData.data.length; i += 4) {
  	 // Modify pixel data
  	 imageData.data[i] = textureData[k];  // R value
- 	 if (grayscaleCheck.checked){
  		 imageData.data[i + 1] =  textureData[k]    // G value
  		 imageData.data[i + 2] =  textureData[k]  // B value
- 	 }else{
- 		 imageData.data[i + 1] = 0    // G value
- 		 imageData.data[i + 2] = 0  // B value
- 	 }
  	 imageData.data[i + 3] = 255;  // A value
  	 k++;
   }
@@ -433,11 +428,11 @@ function DDSNormal(textureData,w,h){
   var k=0;
   for (let i = 0; i < imageData.data.length; i += 4) {
  	 // Modify pixel data
- 	 imageData.data[i] = textureData[k];  // R value
-   imageData.data[i + 1] = textureData[k+1];  // G value
-   imageData.data[i + 2] = 255;
- 	 imageData.data[i + 3] = 255;  // A value
- 	 k+=4;
+ 	imageData.data[i] = textureData[k];  // R value
+   	imageData.data[i + 1] = textureData[k+1];  // G value
+   	imageData.data[i + 2] = 255;
+ 	imageData.data[i + 3] = 255;  // A value
+ 	k+=4;
   }
   octx.putImageData(imageData,0,0,0,0,w,h);
   nMeKanv.width=768;
@@ -494,7 +489,7 @@ function draw( drawContext, x, y ) {
 				// need to flag the map as needing updating.
 				material.map.needsUpdate = true;
 			}
-
+	/*
 	grayscaleCheck.addEventListener('click', ( event )=>{
 		let paintDisplay = document.querySelectorAll("span.choose")
 		let basecode
@@ -541,7 +536,7 @@ function draw( drawContext, x, y ) {
 		}
 		material.map.needsUpdate = true
 	})
-
+	*/
 function layersActive(index){
   let indicators = document.getElementById('layeringsystem');
   let listlayers = indicators.getElementsByTagName("li");
@@ -781,26 +776,24 @@ function loadMapOntheFly(path){
       originalLayer = img.src;
 
     }else if(path.endsWith(".dds")){
-      var data = str2ab(bufferimage);
-      let offsetHeight = 3;
-   	 let offsetwidth = 4;
-   	 const headerData = new Uint32Array( data, 0, 5 ); //get the two dimensions data bytes
-   	 let height = headerData[3];
-   	 let width = headerData[4];
-   	 let size = height * width;
- 		 const dx10Data = new Uint32Array( data, 128, 4 ); //get the type of DDS
- 		 var luminancedata
+    	var data = str2ab(bufferimage);
+    	let offsetHeight = 3;
+		let offsetwidth = 4;
+		const headerData = new Uint32Array( data, 0, 5 ); //get the two dimensions data bytes
+		let height = headerData[3];
+		let width = headerData[4];
+		let size = height * width;
+ 		const dx10Data = new Uint32Array( data, 128, 4 ); //get the type of DDS
+ 		var luminancedata
  		 //wolvenkit 8.4.3+ and cli 1.5.0+ format
- 		 if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+ 		if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
  			 luminancedata = new Uint8Array( data, 148, size );
- 		 }else{
+ 		}else{
  			 //or legacy
  			 luminancedata = new Uint8Array( data, 128, size );
- 		 }
-   	 //var dataTex = new THREE.DataTexture(luminancedata, height, width, THREE.LuminanceFormat, THREE.UnsignedByteType,THREE.UVMapping,THREE.RepeatWrapping);
-   	 //dataTex.flipY=true;
+ 		}
 
-   	 material.color.set(0x500000);
+   	 	material.color.set(0x500000);
 
    	 //material.map = canvasPaint //material.map = dataTex;
    	  //giveToTheAim(luminancedata,width,height);

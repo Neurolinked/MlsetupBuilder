@@ -260,7 +260,7 @@
                   <li class="list-group-item">18</li>
                   <li class="list-group-item rounded-0">19</li>
                 </ul>
-                <div class="text-center my-1 py-1 layer-2 rounded">
+                <div class="text-center my-1 py-1 layer-2 rounded svgBtn">
                   <span class="d-block badge rounded-0 txt-secondary">Tools</span>
                   <span id="wipeMsk" class="btn btn-sm text-secondary" title="Revert to the last loaded"><i class="fas fa-eraser fa-2x"></i></span>
                   <span id="fillMsk" class="btn btn-sm text-secondary" title="Revert to the last loaded"><i class="fa-solid fa-fill-drip fa-2x"></i></span>
@@ -270,21 +270,36 @@
                   <a href="#" id="expMsk" class="btn btn-sm text-secondary" title="Export the current image"><i class="fas fa-file-export fa-2x"></i></a>
                 </div>
                 <div  class="d-flex justify-content-center my-1 py-1 layer-2 rounded">
-                  <input id="strokeMsk" type="range" min="0.2" max="50" value="0.2" step="0.1">
+                  <input id="strokeMsk" name="strokeMsk" type="range" min="0.2" max="50" value="0.2" step="0.1" list="strokeMarkers">
+                  <datalist id="strokeMarkers">
+                    <option value="0.2"></option>
+                    <option value="1"></option>
+                    <option value="5"></option>
+                    <option value="10"></option>
+                    <option value="25"></option>
+                    <option value="50"></option>
+                  </datalist>
                 </div>
+                <!--
 								<div class="d-flex justify-content-center my-1 py-1 layer-2 rounded">
 									<div class="form-check form-switch">
 									  <input class="form-check-input" type="checkbox" role="switch" id="gScalePaint">
 									  <label class="form-check-label" for="gScalePaint">Grayscale</label>
 									</div>
 								</div>
+                -->
                 <div id="resetShades" class="d-flex justify-content-center my-1 py-1 layer-2 rounded">
                   <span class="choose" data-color="000000" style="background-color:#000000"> </span>
-                  <span class="choose" data-color="FF0000" style="background-color:#FF0000"> </span>
+                  <span class="choose" data-color="FF0000" style="background-color:#FFFFFF"> </span>
                 </div>
                 <div class="my-1 py-1 layer-2 rounded">
-                  <span id="maskoolor" class="choose mx-auto d-block" data-color="800000" style="background-color:#800000"> </span>
-                  <input id="slidemask" type="range" min="0" max="255" value="128" step="1">
+                  <span id="maskoolor" class="choose mx-auto d-block" data-color="808080" style="background-color:#808080"> </span>
+                  <input id="slidemask" type="range" min="0" max="255" value="128" step="1"  list="paintMarkers">
+                  <datalist id="paintMarkers">
+                    <option value="0"></option>
+                    <option value="128"></option>
+                    <option value="255"></option>
+                  </datalist>
                 </div>
                 <div class="my-2 border border-secondary rounded" style="min-height:2rem;">
                   <span class="d-block badge rounded-0 txt-secondary"><i class="fa-solid fa-camera-retro"></i> States</span>

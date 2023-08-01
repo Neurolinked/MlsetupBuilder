@@ -794,11 +794,13 @@ $("#resetShades span.choose").click(function(){
 
   $("#slidemask").on("input",function(){
 		let hexacol
+    hexacol = String(Number($(this).val()).toString(16)).padStart(2, '0').repeat(3);
+    /*
 		if ($("#gScalePaint").is(":checked")){
-			hexacol = String(Number($(this).val()).toString(16)).padStart(2, '0').repeat(3);
+			
 		}else{
 			hexacol = Number($(this).val()).toString(16).padStart(2, '0')+"0000";
-		}
+		} */
 		$("#maskoolor").data("color",hexacol);
 		$("#maskoolor").attr("data-color",hexacol);
 		$("#maskoolor").css("background-color","#"+hexacol);
@@ -806,12 +808,7 @@ $("#resetShades span.choose").click(function(){
 
   $("#maskoolor").on("dblclick",function(){
     $("#slidemask").val(128).change();
-    let middleColor
-    if ($("#gScalePaint").is(":checked")){
-      middlecolor="808080";
-    }else{
-      middlecolor="800000";
-    }
+    let middleColor ="808080"
     $("#maskoolor").data("color",middlecolor);
     $("#maskoolor").attr("data-color",middlecolor);
     $("#maskoolor").css("background-color","#"+middlecolor);
