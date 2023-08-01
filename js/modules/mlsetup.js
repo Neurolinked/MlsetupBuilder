@@ -141,7 +141,7 @@ class Mlsetup {
 		this.#limit = 20
 		var layeriteration = null
 		var i = 0;
-    var testMinVersion = Number(this.version[2]);
+    	var testMinVersion = Number(this.version[2]);
     
 		switch (true){
 			case (testMinVersion>=2):
@@ -153,20 +153,20 @@ class Mlsetup {
 					this.Layers[i].material=prop.material.DepotPath;
 					this.Layers[i].tiles=prop?.matTile ? prop.matTile: 1;
 					this.Layers[i].microblend.tiles = prop.mbTile
-          this.Layers[i].metalIn=prop.metalLevelsIn
-          this.Layers[i].metalOut = prop.metalLevelsOut
-          this.Layers[i].microblend.file = prop.microblend.DepotPath
-          this.Layers[i].microblend.contrast = prop.microblendContrast
-          this.Layers[i].microblend.normal = prop.microblendNormalStrength
-          this.Layers[i].microblend.offset.h = prop.microblendOffsetU
-        	this.Layers[i].microblend.offset.v = prop.microblendOffsetV
-          this.Layers[i].normal = prop.normalStrength
-          this.Layers[i].offsetU = prop.offsetU
-          this.Layers[i].offsetV = prop.offsetV
-          this.Layers[i].opacity = prop?.opacity!=undefined ? prop.opacity : 1
-          this.Layers[i].overrides = prop.overrides
-          this.Layers[i].roughnessIn = prop.roughLevelsIn
-          this.Layers[i].roughnessOut = prop.roughLevelsOut
+					this.Layers[i].metalIn=prop.metalLevelsIn
+					this.Layers[i].metalOut = prop.metalLevelsOut
+					this.Layers[i].microblend.file = prop.microblend.DepotPath
+					this.Layers[i].microblend.contrast = prop.microblendContrast
+					this.Layers[i].microblend.normal = prop.microblendNormalStrength
+					this.Layers[i].microblend.offset.h = prop.microblendOffsetU
+					this.Layers[i].microblend.offset.v = prop.microblendOffsetV
+					this.Layers[i].normal = prop.normalStrength
+					this.Layers[i].offsetU = prop.offsetU
+					this.Layers[i].offsetV = prop.offsetV
+					this.Layers[i].opacity = prop?.opacity!=undefined ? prop.opacity : 1
+					this.Layers[i].overrides = prop.overrides
+					this.Layers[i].roughnessIn = prop.roughLevelsIn
+					this.Layers[i].roughnessOut = prop.roughLevelsOut
 					i++
 				}
 				this.normals = !!mlsetupObject.Data.RootChunk.usenormal
@@ -182,20 +182,20 @@ class Mlsetup {
 					this.Layers[i].material=thisLayer.material.DepotPath;
 					this.Layers[i].tiles=thisLayer?.matTile ? thisLayer.matTile : 1;
 					this.Layers[i].microblend.tiles = thisLayer.mbTile
-          this.Layers[i].metalIn=thisLayer.metalLevelsIn
-          this.Layers[i].metalOut = thisLayer.metalLevelsOut
-          this.Layers[i].microblend.file = thisLayer.microblend.DepotPath
-          this.Layers[i].microblend.contrast = thisLayer.microblendContrast
-          this.Layers[i].microblend.normal = thisLayer.microblendNormalStrength
-          this.Layers[i].microblend.offset.h = thisLayer?.microblendOffsetU ? thisLayer.microblendOffsetU : 0
-        	this.Layers[i].microblend.offset.v = thisLayer?.microblendOffsetV ? thisLayer.microblendOffsetV : 0
-          this.Layers[i].normal = thisLayer.normalStrength
-          this.Layers[i].offsetU = thisLayer?.offsetU!=undefined ? thisLayer.offsetU : 0
-          this.Layers[i].offsetV = thisLayer?.offsetV!=undefined ? thisLayer.offsetU : 0
-          this.Layers[i].opacity = thisLayer?.opacity!=undefined ? thisLayer.opacity : 1
-          this.Layers[i].overrides = thisLayer.overrides = 0
-          this.Layers[i].roughnessIn = thisLayer.roughLevelsIn
-          this.Layers[i].roughnessOut = thisLayer.roughLevelsOut
+					this.Layers[i].metalIn=thisLayer.metalLevelsIn
+					this.Layers[i].metalOut = thisLayer.metalLevelsOut
+					this.Layers[i].microblend.file = thisLayer.microblend.DepotPath
+					this.Layers[i].microblend.contrast = thisLayer.microblendContrast
+					this.Layers[i].microblend.normal = thisLayer.microblendNormalStrength
+					this.Layers[i].microblend.offset.h = thisLayer?.microblendOffsetU ? thisLayer.microblendOffsetU : 0
+					this.Layers[i].microblend.offset.v = thisLayer?.microblendOffsetV ? thisLayer.microblendOffsetV : 0
+					this.Layers[i].normal = thisLayer.normalStrength
+					this.Layers[i].offsetU = thisLayer?.offsetU!=undefined ? thisLayer.offsetU : 0
+					this.Layers[i].offsetV = thisLayer?.offsetV!=undefined ? thisLayer.offsetU : 0
+					this.Layers[i].opacity = thisLayer?.opacity!=undefined ? thisLayer.opacity : 1
+					this.Layers[i].overrides = thisLayer.overrides = 0
+					this.Layers[i].roughnessIn = thisLayer.roughLevelsIn
+					this.Layers[i].roughnessOut = thisLayer.roughLevelsOut
 					i++
 				}
 				this.normals = true

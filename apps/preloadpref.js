@@ -3,23 +3,23 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld(
   'thePIT',
   {
-			Args: async() =>{
-        ipcRenderer.send('main:handle_args', {})
-			},
-      /*TODO Remove this function ConfiguraUnbundle:(path) => { ipcRenderer.send('main:setupUnbundle',path); },*/
-			ConfiguraWkitCli:(path) => {
-        ipcRenderer.send('main:setupCR2Wr',path);
-      },
-      chooseAFolder:(folder,msg)=>{
-        return ipcRenderer.invoke('main:folderSetup',{"path":folder,"title":msg});
-      },
-			RConfig: async (conf) => {
-        return await ipcRenderer.invoke('main:getStoreValue', conf);
-    	},
-			SaveAll: async (conf) =>{
-				ipcRenderer.send('main:saveStore',conf);
-			}
+	Args: async() =>{
+		ipcRenderer.send('main:handle_args', {})
 	},
+      /*TODO Remove this function ConfiguraUnbundle:(path) => { ipcRenderer.send('main:setupUnbundle',path); },*/
+	ConfiguraWkitCli:(path) => {
+        ipcRenderer.send('main:setupCR2Wr',path);
+	},
+	chooseAFolder:(folder,msg)=>{
+		return ipcRenderer.invoke('main:folderSetup',{"path":folder,"title":msg});
+	},
+	RConfig: async (conf) => {
+		return await ipcRenderer.invoke('main:getStoreValue', conf);
+	},
+	SaveAll: async (conf) =>{
+		ipcRenderer.send('main:saveStore',conf);
+	}
+  },
 
 )
 
