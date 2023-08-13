@@ -1,6 +1,9 @@
 #MlsetupBuilder
 
 ### Todo 1.6.8
+- [x] New model Library based on DataTables
+  - [x] Row grouping by type : vanilla, custom
+  - [ ] Row ordering based on grouping model name
 - [ ] New shaders management based on .Material.json file
   - [ ] Assign shaders as from appearances
   - [ ] masks loading from material configuration
@@ -15,7 +18,7 @@
   - [ ] Panels column slider
   - [ ] Content list and editor together
 - [x] Interface Workspace setup saved and reloaded from session to session
-- [ ] Keyboard shortcut override
+- [x] Keyboard shortcut override
   - [x] CTRL+A Apply the edits on the current layer
 
 ### Todo 1.6.7
