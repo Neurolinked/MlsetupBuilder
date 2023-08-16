@@ -88,7 +88,8 @@ const schema = {
 		default: 0
 	},
 };
-
+const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit/config.json');
+console.log(wolvenkitPrefFile);
 const preferences = new store({schema,
 	migrations: {
 		'<=1.6.2': store => {
