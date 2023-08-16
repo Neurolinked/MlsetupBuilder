@@ -17,7 +17,7 @@
     max-height: calc(100vh - (2rem + 27px));
 }
 #modelTabScroll{
-    max-height:calc(100vh - (2.75rem + 77px));
+    max-height:calc(100vh - (2.75rem + 85px));
 }
 
 #editor-container{
@@ -40,15 +40,3 @@
     padding: 0 3px;
 }
 #layeringsystem li::after {content: ' ' attr(data-labels);}
-
-.sonOfModelTabScroll{
-    max-height:calc(100vh - (2.75rem + 75px + 125px));
-    overflow-y: auto;
-}
-#modelTabScroll .sonOfModelTabScroll details summary{
-    padding-left:.75rem;
-    list-style-type: circle;
-}
-#modelTabScroll .sonOfModelTabScroll details[open] summary{
-    list-style-type:square;
-}

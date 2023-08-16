@@ -183,16 +183,17 @@ Contextual Menu for the layering Systems
   box-shadow:0px 5px 15px 5px rgba(0,0,0,.3),rgb(0, 0, 0) 0px 0px 5px 0px inset;
   font-size: .75rem;
   padding: 1px;
-}
 
-#layers-contextual li {
-  color: #eee;
-  cursor: pointer;
-  border:1px solid var(--layer-3);
-  background-color:var(--layer-1);
-  padding:2px;
-  margin:2px;
-  list-style: none;
+  & li {
+    color: #eee;
+    cursor: pointer;
+    border:1px solid var(--layer-3);
+    background-color:var(--layer-1);
+    padding:2px;
+    margin:2px;
+    list-style: none;
+  }
+  
 }
 #layers-contextual li[disabled]{
   opacity:.3;
@@ -398,9 +399,6 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #sp-gradients div{border:1px solid var(--layer-9);min-height:calc(100% - 40px);width:1.5rem;margin:0 .5em;}
 #bkgshades{border: 0 none!important;padding: 0;}
 
-/*#modelsTree li[normal] a::after{content:' ';font-family: "Font Awesome 6 Free";font-weight:900;color:var(--normal)!important;}*/
-#modelsTree li[normal] a::after{content:' \e900';font-family: "icomoon";font-weight:900;color:var(--normal)!important;}
-
 .grad{border: 1px solid var(--layer-9);display: inline-block;min-width:300px;min-height:1.8rem;}
 
 #legacyMaterial ul{list-style: none;}
@@ -522,4 +520,42 @@ dialog::backdrop{background: rgba(0, 0, 0, 0.5);}
   border-radius: .5rem;
   padding:.4rem;
 }
+dialog{outline:none;}
 
+div.dataTables_wrapper div.dataTables_info {padding:0;}
+#DataModelsLibrary_filter input[type='search']{min-width:300px;}
+
+.dt-button-collection.dtb-collection-closeable{
+  background: var(--eq-lay2) !important;
+}
+.dt-button-collection.dtb-collection-closeable *{
+  background: var(--eq-lay1) !important;
+}
+.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody>table>tbody>tr>td[colspan]{
+  padding:0;
+  margin-bottom: 0;
+}
+
+/*
+.loadingtext:after {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  -webkit-animation: ellipsis steps(4, end) 700ms infinite;
+  animation: ellipsis steps(4, end) 700ms infinite;
+  content: "\2026";
+  /* ascii code for the ellipsis character *
+  width: 0px;
+}
+
+@keyframes ellipsis {
+  to {
+    width: 40px;
+  }
+}
+
+@-webkit-keyframes ellipsis {
+  to {
+    width: 40px;
+  }
+}*/

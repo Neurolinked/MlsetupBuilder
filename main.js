@@ -129,7 +129,7 @@ var archives={
 }
 
 preferences.watch = true
-let mainWindow,aimWindow
+var mainWindow,aimWindow
 
 var mljson = app.commandLine.getSwitchValue("open")
 if (mljson ==''){
@@ -321,6 +321,10 @@ var wcliExecutable = new RegExp(/.+WolvenKit\.CLI\.exe$/)
 var normals = new RegExp(/.+n\d{2}\.(xbm|png|dds)$/)
 var buildMenu = wcliExecutable.test(preferences.get('wcli'),'i');
 
+function openSettings(){
+	createModal("apps/prefs.html",mainWindow,800,350,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
+}
+
 const template = [
   // { role: 'appMenu' }
   ...(isMac ? [{
@@ -343,9 +347,7 @@ const template = [
           ]
       },
 			{ type: 'separator' },
-			{label: '&Preferences', click: () =>{
-				createModal("apps/prefs.html",mainWindow,800,350,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
-			}},
+			{label: '&Preferences', click: () =>{ openSettings() }},
 			{ type: 'separator' },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
@@ -502,7 +504,13 @@ ipcMain.on('main:aimMicros',(event,configurations) =>{
 
 ipcMain.on('main:reloadAim',()=>{
 	aimWindow.webContents.send('preload:configure',lastMicroConf)
-})
+});
+
+ipcMain.on('main:clickMenu',(event,menuVoice)=>{
+	if (menuVoice=='preferences'){
+		openSettings();
+	}
+});
 
 ipcMain.on('main:giveModels',(event) => {
 	//read custom models json file and try to inject it in the main body
@@ -926,6 +934,7 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 					.then(()=>{
 						event.reply('preload:logEntry',"Export of the model Done, reload");
 						mainWindow.webContents.send('preload:noBar','');
+						mainWindow.webContents.send('preload:activate','#btnMdlLoader');
 					}).catch(err => { console.log(err) });
 				}else{
 					event.reply('preload:logEntry',`Wolvenkit.CLI isn't selected in the settings`,true)
@@ -1369,7 +1378,9 @@ ipcMain.on('main:delmBlend', (event,micro)=>{
 
 })
 
-
+/*
+Scan a folder to search for certain types of files
+*/
 ipcMain.on('main:scanFolder',()=>{
 	var archive = dialog.showOpenDialog({title:'Select a folder you want to scan',properties: ['openDirectory'],defaultPath:app.getPath('recent')})
 		.then(selection => {

@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld(
         var filecontent = ipcRenderer.sendSync('main:readFile', path, streamcode, no_repo);
         return filecontent
       },
+      clickTheMenuVoice:(voice) => {
+        ipcRenderer.send('main:clickMenu',voice);
+      },
 			ThreeDAsset: () =>{
 				var file = ipcRenderer.send('main:3dialog');
         return file
@@ -47,9 +50,12 @@ contextBridge.exposeInMainWorld(
 			savePref: (conf)=>{
 				ipcRenderer.send('main:saveStore',conf);
 			},
+      /*
+Scan a folder searching for GLB files
       Scan: ()=>{
         ipcRenderer.send('main:scanFolder');
       },
+      */
       Foldering : (path) =>{
         //It will display the path folder chosen
         ipcRenderer.send('main:openFolder',path);
@@ -197,6 +203,7 @@ ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
   }
 })
 
+/*
 ipcRenderer.on('preload:scanReply',(event,result)=>{
   if (isValidJSON(result)){
     let passDatas = document.querySelector("#txtFolderScanner");
@@ -204,7 +211,7 @@ ipcRenderer.on('preload:scanReply',(event,result)=>{
     passDatas.dispatchEvent(new Event("change"));
   }
 })
-
+*/
 ipcRenderer.on('preload:enable',(event,target) => {
 		let obj = document.querySelector(target)
 		obj.disabled = false

@@ -126,19 +126,19 @@ class MaterialBuffer {
 		try {
 			mbDummy = JSON.parse(jsonContent)
 			if ((mbDummy.hasOwnProperty("MaterialRepo")) &&
-			 		(mbDummy.hasOwnProperty("Materials")) &&
-					(mbDummy.hasOwnProperty("TexturesList")) &&
-					(mbDummy.hasOwnProperty("MaterialTemplates")) ){	
+				(mbDummy.hasOwnProperty("Materials")) &&
+				(mbDummy.hasOwnProperty("TexturesList")) &&
+				(mbDummy.hasOwnProperty("MaterialTemplates")) ){	
 						
-					if  (mbDummy.Materials.length>0){
-						 this.Materials = mbDummy.Materials
-					}
-					if  (mbDummy.TexturesList.length>0){
-						 this.TexturesList = mbDummy.TexturesList
-					}
-					if  (mbDummy.MaterialTemplates.length>0){
-						 this.MaterialTemplates = mbDummy.MaterialTemplates
-					}
+				if  (mbDummy.Materials.length>0){
+					this.Materials = mbDummy.Materials
+				}
+				if  (mbDummy.TexturesList.length>0){
+					this.TexturesList = mbDummy.TexturesList
+				}
+				if  (mbDummy.MaterialTemplates.length>0){
+					this.MaterialTemplates = mbDummy.MaterialTemplates
+				}
 				if (mbDummy.hasOwnProperty("Appearances")){
 					this.Appearances = mbDummy.Appearances
 				}
@@ -164,6 +164,14 @@ class MaterialBuffer {
 		}
 		this.MaterialTemplates.push(newTemplate)
 		this.#UpdateTextures()
+		return true;
+	}
+
+	pushAppearance(newAppearance){
+		if (!(newAppearance instanceof Appearance)){
+			return false
+		}
+		this.Appearances.push(newAppearance)
 		return true;
 	}
 	

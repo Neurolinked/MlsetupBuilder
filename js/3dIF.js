@@ -44,6 +44,13 @@ function notify3D(message){
 	NTextarea.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+'<br/>'+NTextarea.innerHTML;
 }
 
+
+function fogApply(fogType){
+	console.log(typeof(fogType.color));
+	if ((fogType?.color) && (fogType.far) && fogType.near){
+		return new THREE.Fog( fogType.color, fogType.near,fogType.far)
+	}
+}
 /*thacanvas events*/
 
 thacanvas.addEventListener('mousedown',(event)=>{
@@ -174,7 +181,12 @@ const params = {
  onesided: false,
  lightpower:2,
  alpha:0,
- maskColor:[50, 0, 0]
+ maskColor:[50, 0, 0],
+ fog:{
+	color: 0x9b9d3f,
+	near: 10,
+	far: 105
+	}
 };
 //-------------Aiming box for the camera ----------------------
 
@@ -826,8 +838,9 @@ function cleanScene(){
 }
 
 function mBuildAppearances(model){
-  
-  document.getElementById("appeInfo").innerHTML="";
+	var menuAppearances = document.querySelector("#appearanceSwitcher ul");
+	menuAppearances.innerHTML="";
+  	document.getElementById("appeInfo").innerHTML="";
 
   if ((model.length>0) && (typeof(model)=='object')){
     if (model.length<=0){
@@ -840,6 +853,10 @@ function mBuildAppearances(model){
     if (model[0]?.appearanceCode.length <= 0) {
       return
     }
+
+	model[0].appearanceCode.forEach((app,index)=>{
+		menuAppearances.innerHTML += `<li><a class="dropdown-item ${index==0 ? 'active':''}"  href="#" data-name="${app}"> ${app}</a></li>`;
+	});
     //oAppeinfo.innerHTML+=`<span class="badge d-block txt-secondary rounded-0 mt-2"></span>`;
     let names = model.map(x=> x.name.replace('_LOD_1',''));
     model.forEach((el,index)=>{
@@ -852,6 +869,8 @@ function mBuildAppearances(model){
       item.domElement.children[0].readOnly=true;
     });
 
+  }else{
+	menuAppearances.innerHTML = `<li><a class="dropdown-item" href="#" disabled>No Appearances</a></li>`;
   }
 }
 
@@ -886,7 +905,7 @@ function LoadModelOntheFly(path){
 			var materialExt
 			try {
 				materialExt = JSON.parse(glbscene.parser.extensions.KHR_binary_glTF.content);
-				console.log(materialExt);
+				//console.log(materialExt);
 			} catch (error) {
 				console.error(error);
 			}
@@ -982,8 +1001,7 @@ function LoadModelOntheFly(path){
 
 document.getElementById("takeashot").addEventListener('click', (e) =>{
 	getImageData = true;
-  animate();
-  //console.debug(imgDataShot);
+	animate();
 });
 
 document.getElementById("maskLayer").addEventListener('fire', e => {
@@ -999,28 +1017,30 @@ document.getElementById("maskLayer").addEventListener('fire', e => {
 
 });
 
+function customLoad(e){
 //custom 3d assets file loading
-document.getElementById('cstMdlLoader').addEventListener('click',(e)=>{
+//document.getElementById('cstMdlLoader').addEventListener('click',(e)=>{
 	cleanScene()
 	let maxLayers = 0;
 	layersActive(maxLayers);
   	safeNormal()
 	clearCanvas(paintMaskHT,'rgb(256,256,256)',768); //material.map = safeMap;
 	//var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
-  material.normalMap.needsUpdate = true // = texture;
-  //material.map.needsUpdate = true;
-	CustomLoadButton.setAttribute('disabled','disabled');
+  	material.normalMap.needsUpdate = true // = texture;
+  	//material.map.needsUpdate = true;
+	//CustomLoadButton.setAttribute('disabled','disabled');
 	thePIT.ThreeDAsset();
 	//let Normed = document.querySelector('#withbones svg:nth-child(2) path');
   	let Normed = document.querySelector('#withbones i.icon-normals');
 	//Normed.setAttribute("fill",'currentColor');
   	Normed.style.color='';
-});
+};
 
 document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 	let file = document.getElementById('lastCustomMDL');
+	//let file = MLSB.TreeD.lastModel;
 	//re-enable the button
-	CustomLoadButton.disabled=false;
+	//CustomLoadButton.disabled=false;
 
 	if (file.value.split('.').reverse()[0]=='fbx'){
 		//now i can't do anything
@@ -1030,20 +1050,9 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 */
 	}else{
 		//t3Ddata = str2ab(modello);
-    safeNormal();
+    	safeNormal();
 		cleanScene();
     	LoadModelOntheFly(file.value)
-		let modelname = file.value.split('\\').reverse()[0].split('.')[0] //split the path by slashes, reverse to get the last part, split the extension to get only the name [0] of the split
-		let cstmModels = $('#modelsTree').jstree(true).get_json('custom')
-
-		if (cstmModels.children.length<=0){
-			$('#modelsTree').jstree(true).create_node("custom",{"text":modelname,"type":"custmesh","li_attr":{"model":file.value,layers:0}},"first")
-		}else{
-			let figli = cstmModels.children
-			if (figli.filter(el => el.li_attr.model == file.value).length <= 0){
-					$('#modelsTree').jstree(true).create_node("custom",{"text":modelname,"type":"custmesh","li_attr":{"model":file.value,layers:0}},"first")
-			}
-		}
 
 		layersActive(0);
 		material.map.needsUpdate =true;
@@ -1055,18 +1064,15 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 
 /*MDLloadingButton button click */
 document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
-
  var nthLayer = document.querySelector("#layeringsystem").children;
  var activeLayer = document.querySelector("#layeringsystem li.active");
 
  MDLloadingButton.setAttribute('disabled','disabled');
-
- let theModel = document.getElementById("modelTarget").value; //path of the model to load
+ let theModel = MLSB.TreeD.lastModel//document.getElementById("modelTarget").value; //path of the model to load
  let theMaskLayer = document.getElementById("masksTemplate").value; //template path for the textures
  let theNormal = document.getElementById("normTemplate").value; //normal file to apply to the whole model
  let layer = document.getElementById("maskLayer").value; //actual layer selected in the editors
  let maxLayer_thisModel = document.getElementById("maxLayers").value; //actual numer of layer that the models support
-
  layer = Number(layer);
  maxLayer_thisModel = Number(maxLayer_thisModel);
 
@@ -1081,6 +1087,7 @@ document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
  }else{
    	material.color.set(0x000055);
 	clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
+	material.map.needsUpdate = true;
 	notify3D('the texture '+theMaskLayer+' does not exists');
  }
 
@@ -1153,7 +1160,7 @@ function init() {
 	//Canvas events for painting
 
 	//---calculating the shadows
-  	camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.01,200);
+  	camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.01,10000);
   	camera.position.set(0.0,-0.4,-8);
 	camera.updateProjectionMatrix();
   /*
@@ -1208,7 +1215,7 @@ function init() {
 
 	//fog
 	//TODO adding fog to the scene
-	scene.fog = new THREE.Fog( 0x9b9d3f, 10,105);
+	scene.fog = new THREE.Fog( params.fog.color, params.fog.near,params.fog.far);
 
   //Setup the DAT position
   	const GuiBasicsetup = gui.addFolder("Basic Setup");
@@ -1245,6 +1252,20 @@ function init() {
 		material.alphaTest = params.alpha
 	})
   GuiBasicsetup.close();
+
+  const GuiFogSetup = gui.addFolder("Fog config");
+
+  GuiFogSetup.addColor(params.fog, 'color').onChange((e)=>{
+	scene.fog = fogApply(params.fog);
+  });
+
+  GuiFogSetup.add( params.fog, 'near',0,100 ).name( 'Near Distance' ).onChange((e)=>{
+	scene.fog = fogApply(params.fog);
+  });
+
+  GuiFogSetup.add( params.fog, 'far',params.fog.near,10000 ).name( 'Far Distance' ).onChange((e)=>{
+	scene.fog = fogApply(params.fog);
+  });
 
   gui.close(); //close the whole dat.gui
 

@@ -1,11 +1,23 @@
 window.$ = window.jQuery;
 var notifications = 0;
 var materialJSON = new MaterialBuffer();
-
 var uncookMyFile = false;
-
+var DepotPath = '';
 var textureformat = ''
 var Ptextformat = thePIT.RConfig('maskformat');
+
+function notifyMe(message, warning = true){
+  let Data = new Date(Date.now());
+  if (warning){
+    $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
+    notifications++
+    $("#notyCounter span").text(notifications);
+  }else{
+    $("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br>");
+  }
+  $("#foot-message").text(`${message}`);
+}
+
 Ptextformat.then((format)=>{
   textureformat = format
 }).catch((error)=>{
@@ -26,6 +38,22 @@ var layerSwapstart = null;
 
 var modelType = 'default';
 var mlSetupContent = '';
+
+
+function checkOnSettings(){
+  var checkDepot = thePIT.RConfig('depot');
+  checkDepot.then((result)=>{
+    try {
+      if (result=='') {
+        //Try to setup the Depot folder.
+        var setupSettings = document.getElementById('configure')
+        setupSettings.showModal();
+      } 
+    } catch (error) {
+      notifyMe(error,true);
+    }
+  });
+}
 
 /**
   * This function will extend the Numbercasting type
@@ -150,20 +178,15 @@ async function abuildHairs(aHairs){
 	}
 }
 
-async function ModelListing(){
-  $.getJSON("./jsons/models.json", function(json) {
-    let dummyCode =""
-    for (const [key, value] of Object.entries(json)) {
-      dummyCode += `<li class="list-group-item layer-1 text-white" data-identifier="${value.id}">${value.name}</li>`
-    }
-    $("#TreeDModelList").html(`<ul class="list-group list-group-flush bg-dark">${dummyCode}</ul>`)
-  })
-}
-
 function switchLegacyMat(material){
 	$("#materiaList li").removeClass("active");
 	$("#materiaList li[data-ref='"+material+"']").addClass("active");
 }
+
+$(window).on("load", function (e) {
+  const AppLoading = document.getElementById("Loading");
+  AppLoading.showModal();
+})
 
 $(function(){
   let buildmyHairs = abuildHairs(hairs);
@@ -258,6 +281,7 @@ $(function(){
       var materialAppearances = JSON.parse($("#materialJson").val());
       materialJSON.import($("#materialJson").val());
       $("#appeInfo").html(materialJSON.codeAppearances());
+      //console.log(materialJSON);
     } catch (error) {
       notifyMe(error,false);
     }
@@ -334,18 +358,6 @@ $(function(){
 		}
 	}
 
-	function notifyMe(message, warning = true){
-		let Data = new Date(Date.now());
-		if (warning){
-      $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
-      notifications++
-      $("#notyCounter span").text(notifications);
-		}else{
-      $("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br>");
-    }
-    $("#foot-message").text(`${message}`);
-	}
-
   function SOnotify(message){
     if (!("Notification" in window)) {
       // Check if the browser supports notifications
@@ -401,6 +413,7 @@ $(function(){
 
 	$(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover
+    $("#DataModelsLibrary").DataTable().draw()
 	});
 
   const mbDropZone = document.getElementById('dropzone');
@@ -727,29 +740,15 @@ $("#resetShades span.choose").click(function(){
 
 
   const uvmSize = $("#maskPainter").attr('width');
-  /*
-  const microBlend = new fabric.Canvas('maskFabric');//initialize the fabric Element
 
-	microBlend.selection=false;
-	microBlend.uniformScaling = true; //only scaling 1:1
-	microBlend.uniScaleKey = 'null'; //remove non-uniform scaling
-
-	microBlend.on('object:moving', function(e) {
-     let microblendRatio =  Number($("#mbTile").val());
-		//let sopra = String(e.target.aCoords.tl).split(","); //create an array with x and y of the top left point corner
-		//let sotto = String(e.target.aCoords.br).split(","); //create an array with x and y of the bottom right corner
-    $("#aimPanels span:first-child span").text(-1*Number(e.target.aCoords.tl.x/512).toFixed(2));
-    $("#AimU").val(-1*Number(e.target.aCoords.tl.x/512));
-    $("#aimPanels span:nth-child(3) span").text(-1*Number((512-e.target.aCoords.br.y)/512).toFixed(2));
-    $("#AimV").val(-1*Number((512-e.target.aCoords.br.y)/512));
-	 });
-
-	var semaphoreCLKmBlend =false;
-*/
 	localStorage = window.localStorage;
 	const license = localStorage.getItem('LicenseRead');
 	const licenseWindow = document.getElementById('LicenseModal');
   const lastExportFormat = localStorage.getItem('ExportFormat');
+  const lastModelOpened = localStorage.getItem('lastModelOpened');
+  MLSB.TreeD.lastModel = lastModelOpened;
+  $("#modelTarget").val(MLSB.TreeD.lastModel);
+  
   var openCloseMBlend = localStorage.getItem('customMicroblend_I');
 
   if (openCloseMBlend){
@@ -814,9 +813,13 @@ $("#resetShades span.choose").click(function(){
     $("#maskoolor").css("background-color","#"+middlecolor);
   });
 	//Displays of the license
-	licenseWindow.addEventListener('hidden.bs.modal', function (event) { localStorage.setItem('LicenseRead',Date.now()); });
+	licenseWindow.addEventListener('hidden.bs.modal', function (event) {
+    localStorage.setItem('LicenseRead',Date.now());
+    checkOnSettings()
+  });
 
-	if (license==null){ licenseModal.show();}
+	if (license==null){ licenseModal.show();}else{checkOnSettings()}
+  
 
 	//activate/deactivate wireframe display
   $("#wireFrame").click(function(){
@@ -906,235 +909,152 @@ $("#resetShades span.choose").click(function(){
 		}
 	});
 
-
   $("span.choose").click(function(){
     $("span.choose.active").removeClass("active");
     $(this).addClass("active");
-  })
+  });
 
-	var ModelsLibrary = $('#modelsTree').jstree({
-		'core' : {
-      "dblclick_toggle":false,
-      "themes": {"name": "default-dark","dots": true,"icons": true},
-      'check_callback' : true,
-      'data' : modelsJson,
-      'worker':false
-    },
-		'types' : {
-							"default" : { "icon" : "text-warning fas fa-folder"},
-              "scan" : {"icon" : "text-danger fas fa-magnifying-glass"},
-              "custom" : { "icon" : "custom fas fa-folder" },
-							"custmesh" : { "icon" : "custom fas fa-dice-d6" },
-							"man" : { "icon" : "fas fa-mars" },
-							"woman" : { "icon" : "fas fa-venus" },
-              "car" : { "icon" : "text-danger fas fa-car-side" },
-              "moto" :{ "icon" : "text-danger fas fa-motorcycle" },
-              "weapons" : { "icon" : "text-primary fas fa-skull-crossbones" },
-							"kiddo" : {"icon": "text-warning fas fa-baby"},
-              "decal" : {"icon": "text-white fas fa-tag"},
-              "layer0" : {"icon": "text-white fas fa-star-half"},
-              "custmask" : {"icon":"custom fas fa-mask-face"},
-							"hair" : {"icon":"fa-solid fa-scissors"},
-              "env" : {"icon":"fa-solid fa-building"}
-							},
-		"search":{"show_only_matches": true,"show_only_matches_children":true},
-		"plugins" : [ "search","types","state","contextmenu"],
-    "contextmenu":{ "items": customMdlMenu }
-	}).bind("dblclick.jstree", function (event) {
-			let nodo = $('#modelsTree').jstree(true).get_selected(true)[0]
-      // the default type are the folders
-			if (nodo.type!='default'){
-        $('#btnMdlLoader').click();
-      }
+  $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+    DataTable.tables({ visible: true, api: true }).columns.adjust();
+  });
 
-     // Do my action
-  }).on('loaded.jstree',function(event){
-		joinModels();
-	});
-
-/*
-* it take the content of the file customModels.json in the userdata folder
-* and it append every child to the branch with custom D in the models tree
-*/
-	function joinModels(){
-		var model_load = thePIT.getModels();
-		if ((typeof(model_load)=='object') && (model_load.length>0)){
-			model_load.forEach((item, i) => {
-				if (item.text!="custom"){
-					if (item.li_attr.hasOwnProperty("masks")){
-						//console.log(item.li_attr)
-						$('#modelsTree').jstree(true).create_node('#'+item.parent,{"id":item.id,"text":item.text,"icon":item.icon,"type":item.type,"li_attr":{"model":item.li_attr.model,"masks":Number(item.li_attr.masks)}},'first')
-					}else{
-						$('#modelsTree').jstree(true).create_node('#'+item.parent,{"id":item.id,"text":item.text,"icon":item.icon,"type":item.type,"li_attr":{"model":item.li_attr.model}},"first")
-					}
-				}
-			});
-			$('#modelsTree').jstree(true).redraw();
-		}
-	}
-
-
-
-  function customMdlMenu(node){
-    //console.log(node.type);
-		let radix = $('#modelsTree').jstree(true);
-    switch (node.type){
-      case 'default':
-        return false;
-        break;
-      case 'custmask':
-        return {
-					"remove":{
-						"separator_before": false,
-						"separator_after": false,
-						"label": "Delete",
-						"icon": "fas fa-trash-can",
-						"action": function (obj) {
-							radix.delete_node(radix.get_selected());
-						}
-					}
-        };
-        break;
-			case 'custom':
-				return {
-						"save":{
-							"separator_before": false,
-							"separator_after": false,
-							"label": "Save list",
-							"icon": "fas fa-save",
-							"action": function (obj) {
-								let myCustomTree = ModelsLibrary.jstree(true).get_json("#custom",{"flat":true,"no_data":true,"no_state":true,"no_a_attr":true});
-								//myCustomTree.children
-								let textedJSON = JSON.stringify(myCustomTree)
-								if (textedJSON!==undefined){
-									thePIT.Export({
-										file:'customModels.json',
-										content:textedJSON,
-										type:'customlist'
-									});
-								}
-							}
-						}
-				}
-      case 'custmesh':
-	      return {
-	          "chooseMask": {
-	              "separator_before": false,
-	              "separator_after": false,
-	              "label": "Choose Mask",
-	              "icon": "fas fa-file-export",
-	              "action": function (obj) {
-	                let test = radix.get_json(node,{flat:true});
-									masksModal.show();
-	              }
-	          },
-						"remove":{
-							"separator_before": false,
-							"separator_after": false,
-							"label": "Delete",
-							"icon": "fas fa-trash-can",
-							"action": function (obj) {
-								radix.delete_node(radix.get_selected());
-							}
-						}
-	        }
-        break;
-			case "man" :
-			case "woman":
-			case "car" :
-			case "moto" :
-			case "weapons" :
-			case "kiddo" :
-			case 'layer0':{
-				return {
-          "AddMaskset": {
-            "separator_before": false,
-            "separator_after": false,
-            "label": "Add Maskset",
-            "icon": "fas fa-plus",
-            "action": function (obj) {
-							let radix = $('#modelsTree').jstree(true);
-							let last = radix.copy_node(node,'custom','last',function(child,father,pos){
-								oldtype = String(child.icon).replace('text-white','');
-								radix.set_type(child,'custmesh');
-								radix.set_icon(child,"custom "+oldtype);
-							});
-							radix.deselect_all();
-							radix.select_node(last);
-							$("#modelsTree").parent().scrollTop(0);
-							masksModal.show();
-						}
-          }
-				}
-			}
-      default:
-				return false;
+  function DTformatChild(d) {
+    // `d` is the original data object for the row
+    var maskString ='';
+    var normString = '';
+    if (((d.mask!=null)||(d.mask!==undefined)) && parseInt(d.mask) ){
+      maskString = `<dt class="text-secondary">mask:</dt><dd class="ps-4">${maskList[d.mask].mask.replace('{format}',textureformat)}</dd>`;
     }
+    if (((d.normal!=null)||(d.normal!==undefined)) && parseInt(d.normal)){
+      normString = `<dt class="text-secondary">normal:</dt><dd class="ps-4">${normList[d.normal].replace('{format}',textureformat)}</dd>`;
+    }
+    return (
+        `<dl class="p-2 ps-4 bg-secondary">`+
+        `<dt class="text-primary">File:</dt><dd class="ps-4">${d.file}</dd>` +
+        `<dt class="text-primary">Tags:</dt><dd class="ps-4">${d.tags}</dd>` +
+        `${maskString}${normString}` +
+        '</dl>'
+    );
   }
-//When selecting a model from the library it load data in the inputs
-$('#modelsTree').on('select_node.jstree',function(ev,node){
-	modelType = node.node.type;
-	let maxlayers = 19;
-	if ((node.node.type=='man')||(node.node.type=='env')||(node.node.type=='woman')||(node.node.type=='car')||(node.node.type=='hair')||(node.node.type=='layer0')||(node.node.type=='moto')||(node.node.type=='weapons')||(node.node.type=='kiddo')||(node.node.type=='custmesh')||(node.node.type=='custmask')){
-    $("#modelTarget").attr('loaded',false);
-		$("#modelTarget").val(node.node.li_attr['model']);
-    if (node.node.li_attr.hasOwnProperty('masks')) {
-      if (typeof(node.node.li_attr['masks'])=='Array'){
-        $("#masksTemplate").val(maskList[node.node.li_attr['masks'][0]].mask.replace("{format}",textureformat));
-        maxlayers = maskList[node.node.li_attr['masks'][0]].layers
-      }else{
-        $("#masksTemplate").val(maskList[node.node.li_attr['masks']].mask.replace("{format}",textureformat));
-        maxlayers = maskList[node.node.li_attr['masks']].layers
+
+  var CPModels = $('#DataModelsLibrary').DataTable({
+    ajax: {
+      dataSrc:'models',
+      url:'jsons/tablemodels.json'
+    },
+    buttons: [ ],
+    columns:[
+      {
+        className: 'dt-control',
+        orderable: false,
+        data: null,
+        defaultContent: ''
+      },
+      {data:'name'},
+      {data:'file',searchable:true},
+      {
+        data:'tags'/*
+        render: function( data, type, row, meta ){
+          var howmany = data.split(",");
+          tagString = '';
+          howmany.forEach((el,idx)=>{
+            if (idx % 2){
+              tagString +=`<span class="badge rounded-pill text-bg-info">${el}</span>`;
+            }else{
+              tagString +=`<span class="badge rounded-pill text-bg-primary">${el}</span>`;
+            }
+          })
+          return tagString;
+        }*/
+      },
+      {data:'mask'},
+      {data:'normal'},
+      {
+        data:'origin',
+        defaultContent: 'vanilla',
+        orderable: false,
       }
-    }else{
-      $("#masksTemplate").val('');
-      maxlayers = 0;
+    ],
+    columnDefs:[
+      {target:[0,1,3],visible:true},
+      {target:'_all',visible:false,searchable:false}
+      ],
+    deferRender: true,
+    dom:"<'row g-0'<'col-sm-12 col-md-3'B><'col-sm-12 col-md-3'il><'col-sm-12 col-md-6'f>>" +
+    "<'row g-0'<'col-sm-12'tr>>" +
+    "<'row g-0'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'>>",
+    order: [[ 2, 'asc' ]],
+    processing:true,
+    rowGroup:{
+      dataSrc: function(row){
+        return row['origin']===undefined ? 'vanilla': row['origin'];
+      },
+      startRender: function(rows, group){
+        if (group == 'custom'){
+          $(rows.nodes()).addClass('bg-primary text-dark');
+        }
+      }
+    },
+    scrollCollapse: true,
+    scroller: true,
+    scrollY: (window.innerHeight-290),
+    select: {
+      style:'single',
+      blurable: true
+    },
+    initComplete: function(settings, json){
+      var customRows = thePIT.getModels();
+      if (typeof(customRows)=='object'){
+        var table = $('#DataModelsLibrary').DataTable();
+        for (const [key, value] of Object.entries(customRows)) {
+          if (value?.li_attr?.model!==undefined){
+            table.row.add({
+                name:value.text,
+                tags:value.type,
+                file:value?.li_attr.model,
+                mask:value.li_attr?.masks != undefined ? value.li_attr?.masks : null ,
+                normal:value.li_attr?.normal != undefined ? value.li_attr?.normal : null,
+                origin:"custom"
+            });
+          }
+        }
+        table.draw(true);
+      }
+      var filtered = CPModels.data().flatten().filter((value,index)=>{ return value.file==MLSB.TreeD.lastModel});
+      filtered = filtered.length==1 ? filtered[0] : {};
+      $("#masksTemplate").val(filtered?.mask!=null ? maskList[filtered.mask].mask.replace('{format}',textureformat) : '');
+      $("normTemplate").val(filtered?.normal!=null ? normList[filtered.normal].replace('{format}',textureformat) : '');
+      notifyMe("Mesh linked :"+table.data().length,false);
+      document.getElementById("Loading").close();
     }
-		// ID of the normal map
-		if (node.node.li_attr.hasOwnProperty('normal')) {
-			$("#normTemplate").val(normList[node.node.li_attr['normal']].replace("{format}",textureformat));
-		}else{
-			$("#normTemplate").val('');
-		}
-		$("#maxLayers").val(maxlayers);
-	}
-});
+  })
+  .on('select', function(e, dt, type, indexes ) {
+    //console.log(dt);
+    var data = CPModels.row({selected:true}).data();
 
-	function debounce(cb, interval, immediate) {
-	  var timeout;
+    MLSB.TreeD.lastModel = data.file;
+    localStorage.setItem(`lastModelOpened`,data.file);
 
-	  return function() {
-	    var context = this, args = arguments;
-	    var later = function() {
-	      timeout = null;
-	      if (!immediate) cb.apply(context, args);
-	    };
+    $("#modelTarget").val(MLSB.TreeD.lastModel);
+    $("#masksTemplate").val(data.mask!=null?maskList[data.mask].mask.replace('{format}',textureformat):'');
+    $("normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
+    $('#btnMdlLoader').click();
+  });
 
-	    var callNow = immediate && !timeout;
+  CPModels.select.selector( 'td:not(:first-child)' ); //
 
-	    clearTimeout(timeout);
-	    timeout = setTimeout(later, interval);
-
-	    if (callNow) cb.apply(context, args);
-	  };
-	};
-
-	function searchDaModelTree() {
-		var v = $('#modelFinder').val();
-		$('#modelsTree').jstree(true).search(v);
-		$("#modelFinder").removeClass('searching');
-	}
-
-	$("#modelFinder").on('keypress',debounce(searchDaModelTree, 300));
-
-  $("#modelFinderCleared").click(function(){
-		 $("#modelFinder").val("");
-		 $('#modelsTree').jstree(true).clear_search();
-		 $('#modelsTree').jstree(true).close_all();
-	 });
-  $("#modelFinderCloser").click(function(){$('#modelsTree').jstree(true).close_all();});
-
-
+  $('#DataModelsLibrary tbody').on('click', 'td.dt-control', function () {
+    var tr = $(this).closest('tr');
+    var row = CPModels.row(tr);
+ 
+    if (row.child.isShown()) {
+        // This row is already open - close it
+        row.child.hide();
+    }else {
+        // Open this row
+        row.child(DTformatChild(row.data())).show();
+    }
+  });
   //when the loading of the layer configuration setup a microblend
   //it activate the display onto the preview
 
@@ -2291,6 +2211,11 @@ $("#lblmasktoAdd").bind("update",function(){
   console.log($(this).attr("value"));
 })
 
+
+$("#modelCustomPath").click(function(e){
+  customLoad();
+});
+
 $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
   let percorso = $(this).parent().children("input[type='text']").val();
   if (percorso!=""){
@@ -2312,8 +2237,6 @@ $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
 	$("#modelNorPath").click(function(){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$("#normTemplate").val().replaceAll(/\//g,'\\'));
    });
- //Display the counted meshes
-	notifyMe("Mesh linked :"+modelsJson.filter(attri => attri.li_attr!=undefined).length,false);
 
 	var legacyMatOpen = thePIT.RConfig('legacymaterial')
 	legacyMatOpen.then((isopen)=>{
@@ -2369,13 +2292,16 @@ https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-valu
     }
   }
 
+//Dialog section
+
 const uncookfile = document.getElementById("uncookfile");
 const unCooKonfirm = document.getElementById("unCooKonfirm");
 
+
 uncookfile.addEventListener("close", (e) => {
   if (uncookfile.returnValue == "true") {
-    notifyMe("Trigger the uncook of the file : "+$('#modelsTree').jstree(true).get_selected(true)[0].li_attr.model);
-    thePIT.UnCookSingle($('#modelsTree').jstree(true).get_selected(true)[0].li_attr.model.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\"))
+    notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel}`);
+    thePIT.UnCookSingle(MLSB.TreeD.lastModel.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\"));
     taskProcessBar();
   }else{
     notifyMe("File uncook cancelled by the user")
@@ -2387,41 +2313,6 @@ unCooKonfirm.addEventListener("click", (event) => {
   event.preventDefault(); // We don't want to submit this fake form
   uncookfile.close("true"); // Have to send the select box value here.
 });
-
-  $("#FolderScan").click(function(){ thePIT.Scan() });
-
-  $("#txtFolderScanner").change(function(){
-    if ($(this).val()!=''){
-      try{
-        var albero = JSON.parse($(this).val());
-        FolderImport.reset();
-
-        prepTheList(albero);//prepare the list
-        //console.log(FolderImport);
-        let radix = $('#modelsTree').jstree(true);
-
-        if (FolderImport.groups.models.length>0){
-          if (FolderImport.groups.dirs.length>0){
-            FolderImport.groups.dirs.reverse().forEach((cartella)=>{
-              //se non esiste entra e crea il link
-              if (!radix.get_node('#'+cartella.id)){
-                radix.create_node('#'+cartella.parent,{'id':cartella.id,'text':cartella.text,'type':'default'})
-              }
-            });
-          }
-          FolderImport.groups.models.forEach((modello)=>{
-            //se non esiste entra e crea il link
-            if (!radix.get_node('#'+modello.id)){
-              radix.create_node('#'+modello.parent,{'id':modello.id,'text':modello.text,'type':'custmesh','li_attr':{"model":modello.path}})
-            }
-          });
-        }
-        radix.open_all('#folderScan');
-      }catch(error){
-        notifyMe(error,true);
-      }
-    }
-  });
 
   $("#KofiSupportPage").click(function(){
     thePIT.ExtOpen({type:'url',param:'ko-fi'})
@@ -2465,4 +2356,9 @@ unCooKonfirm.addEventListener("click", (event) => {
       $("#appeInfo div.col").show();
     }
   });
+
+  $("#DialogForSettings").click(function(){
+    thePIT.clickTheMenuVoice('preferences');
+  });
+
 });
