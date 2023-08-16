@@ -13,3 +13,5 @@ document.addEventListener('DOMContentLoaded', () => {
 		)
 
 })
+
+const MLSB = new MLSBEditor;

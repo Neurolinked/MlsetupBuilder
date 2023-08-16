@@ -18,10 +18,18 @@
 	<!--FontAwesome --><script type="text/javascript" src="./public/fontawesome-free/js/all.min.js" ></script>
   <!-- If the require doesn't work, include first the jQuery file  <script src="jquery-3.0.0.min.js"></script> -->
   <script type="text/javascript" src='./js/jquery-3.7.0.min.js'></script>
+  <!--Datatable section-->
+  <script type="text/javascript" src='./public/datatables/datatables.min.js'></script>
+  <link rel="stylesheet" href="./public/datatables/datatables.min.css" />
+  <!--Datatables SearchPanes-->
+  <link rel="stylesheet" href="./public/datatables/SearchPanes-2.2.0/css/searchPanes.bootstrap5.min.css" />
+  <script type="text/javascript" src="./public/datatables/SearchPanes-2.2.0/js/dataTables.searchPanes.min.js" /></script>
+  
   <!-- mlsetup Class Description -->
   <script type="text/javascript" src='./js/modules/mlsetup.js'></script>
   <!-- materialbuffer Class Description -->
   <script type="text/javascript" src='./js/modules/materialBuf.js'></script>
+  <script type="text/javascript" src='./js/modules/MLSB.js'></script>
   <!--jstree library DB -->
 	<link rel="stylesheet" href="./js/jstree/themes/default/style.min.css" />
   <link rel="stylesheet" href="./js/jstree/themes/default-dark/style.min.css" />
@@ -30,7 +38,7 @@
 	<!--hardcoded help tree DB --><script src="./js/help.js" type="text/javascript"></script><!--hardcoded DB -->
 	<!--hardcoded normals DB //--><script src="./js/normList.js" type="text/javascript" ></script><!--hardcoded normal DB//-->
   <!--hardcoded MaskList DB --><script src="./js/maskList.js" type="text/javascript"></script><!--hardcoded DB -->
-  <!--hardcoded default Model-only  DB --><script src="./js/models.js" type="text/javascript"></script><!--hardcoded DB -->
+  <!--hardcoded default Model-only  DB <script src="./js/models.js" type="text/javascript"></script>hardcoded DB -->
 	<!--hardcoded default Model-only  DB --><script src="./js/hairs.js" type="text/javascript"></script><!--hardcoded DB -->
 <!--Material Tree  --><script src="./js/materialTree.js"></script><!--Material Tree -->
 <!--Tiny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
@@ -215,21 +223,6 @@
         </li>
       </ul>
       <div class="tab-content" id="OffcanvasInfo">
-        <!--
-        <div class="tab-pane fade show active" id="infotab" role="tabpanel" aria-labelledby="info-tab">
-          <div>
-            <span class='d-block p-1'>Object Paths</span>
-            
-          </div>
-          <div id="theMinformator "class="d-flex align-items-start m-0 p-0 ">
-            <div class="nav flex-column nav-pills me-3 " id="v-pills-sMesh" role="tablist" aria-orientation="vertical"> </div>
-            <div class="tab-content" id="v-pills-tabContent"> </div>
-          </div><!--end second element ->
-          <div id="vertInfo" class="m-1 p-1" > </div>
-          <div class="mx-1">
-            
-          </div>
-        </div>-->
         <div class="tab-pane fade" id="normtab" role="tabpanel" aria-labelledby="norm-tab">
           <canvas id="normalMe" class="my-1" ></canvas>
         </div>
@@ -358,9 +351,6 @@
 		<div class="btn-group ms-2 me-1" role="group" aria-label="model loading">
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
-    <div class="btn-group" role="group" aria-label="model loading">
-  		<button type="button" id="cstMdlLoader" data-toggle="tooltip" title="Upload in the viewport a 3d asset" class="btn btn-out-Prim"><i class="fas fa-box-open"></i></button>
-    </div>
    <div class="btn-group " role="group" aria-label="textures">
      <button class="btn btn-outline-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#InfoModel" ><i class="fa-solid fa-images"></i></button>
    </div>
@@ -372,7 +362,7 @@
     <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0 active" id="pills-editor-tab" data-bs-toggle="pill" data-bs-target="#nav-editor" type="button" role="tab" aria-controls="pills-editor" aria-selected="true"><i class="fa-solid fa-sliders"></i> Editor</button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0 " type="button" id="nav-modlib-tab" data-bs-toggle="tab" data-bs-target="#nav-modlib"  role="tab" aria-controls="nav-modlib" aria-selected="false"> <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Model Library</button>
+    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0 " type="button" id="nav-modDatlib-tab" data-bs-toggle="tab" data-bs-target="#nav-modDatlib"  role="tab" aria-controls="nav-modDatlib" aria-selected="false"> <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Models library</button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0" id="pills-appearance-tab" data-bs-toggle="pill" data-bs-target="#nav-appearance" type="button" role="tab" aria-controls="pills-appearance" aria-selected="true"><i class="fa-solid fa-palette"></i> Appearances</button>
@@ -383,6 +373,14 @@
 <!--The New Editor-->
     <div id="editor-container">
 <div id="MlEditor" class="text-white layer-1 rounded">
+    <div class="dropdown" id="appearanceSwitcher">
+      <button class="btn btn-sm rounded-0 btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"  data-bs-auto-close="true" aria-expanded="false" style="width:100%;">
+        Appearances switcher
+      </button>
+      <ul class="dropdown-menu dropdown-menu-dark rounded-0">
+        <li><a class="dropdown-item" href="#">Empty, load a model</a></li>
+      </ul>
+    </div>
   <span class="badge w-100 rounded-0 ">Layers</span>
   <div class="d-grid"><button class="btn btn-out-Prim btn-sm rounded-0" id="applytoMyLayer" type="button" data-toggle="tooltip" data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
   <ul id="layeringsystem" class="layer-2">
@@ -625,81 +623,41 @@
   </div>
     <!--End of the New Editor-->
   </div>
-  <div class="tab-pane fade " id="nav-modlib" role="tabpanel" aria-labelledby="pills-modlib-tab" tabindex="1">
-    <div class="tabcommand mb-2">
-      <form id='modelUserDataForm' class="p-2 bg-layer1">
-        <input type="text" class='d-none'  id="lastCustomMDL" readonly />
-        <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
-        <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
-        <div class="input-group input-group-sm mb-2">
-          <span class="input-group-text bg-dark text-info border-info" ><i class="fas fa-cube"></i></span>
-          <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
-          <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
-          <button id="modelOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
-        </div>
-        <div class="input-group input-group-sm border-secondary mb-2">
-          <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-mask"></i></span>
-          <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
-          <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
-          <button id="masksOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
-        </div>
-        <div class="input-group input-group-sm border-secondary">
-          <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-compress-alt"></i></span>
-          <input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
-          <button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
-          <button id="NormOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
-        </div>
-      </form>
-      
-      <textarea id="txtFolderScanner" class="d-none"></textarea>
-      <div class="input-group input-group-sm layer-4">
-        <input id="modelFinder" class="form-control " type="text" placeholder="Search in the models library" aria-label="models searcher">
-        <button type="button" id="modelFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
-        <button type="button" id="modelFinderCloser" data-toggle="tooltip" title="Reset the tree to the default state" class="btn bg-transparent text-warning"><i class="fas fa-door-closed"></i> </button>
-      </div>
-
-    </div>
-    <div id="modelTabScroll" >
-      <div class="row no-gutters" >
-        <div class="col-9 border border-secondary sonOfModelTabScroll"><div id="modelsTree" class="p-1 layer-2 shadow fs-75"></div></div>
-        <div class="col-3 sonOfModelTabScroll px-1">
-          <nav class="navbar bg-black py-0">
-              <button type="button" id="FolderScan" class="btn btn-sm btn-primary rounded-0"><i class="fas fa-magnifying-glass"></i> Import</button>
-          </nav>
-          <span class="badge layer-1 d-block m-2 rounded-0 fs-110"> categories</span>
-          <details class="layer-2" open>
-            <summary class="bg-secondary">garments</summary>
-            <div class="row row-cols-4 text-center g-2 py-2">
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag="">head</button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag="">arms</button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag="">gloves</button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag="">torso</button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag="">legs</button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag="">shoes</button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag=""><i class="fas fa-mars"></i></button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag=""><i class="fas fa-venus"></i></button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag=""><i class="fas fa-baby"></i></button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag=""><i class="fas fa-scissors"></i></button></div>
-            </div>
-          </details>
-          <details  class="layer-2" open ><summary class="bg-secondary" >vehicles</summary>
-            <div class="row row-cols-4 text-center g-2 py-2">
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag=""><i class="fas fa-car-side"></i></button></div>
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag=""><i class="fas fa-motorcycle"></i></button></div>
-            </div>
-          </details>
-          <details  class="layer-2" open ><summary class="bg-secondary">weapons</summary>
-            <div class="row row-cols-4 text-center g-2 py-2">
-              <div><button type="button" class=" btn layer-2 btn-sm w-100" data-tag=""><i class="fas fa-skull-crossbones"></i></button></div>
-            </div>
-          </details>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="tab-pane fade " id="nav-appearance" role="tabpanel" aria-labelledby="pills-appearance-tab" tabindex="2">
     <input id="MBAFinder" class="form-control" type="search" placeholder="Search in the MaterialBufferArray list" aria-label="Search in the MaterialBufferArray list">
     <div id="appeInfo" class="row row-cols-3 row-cols-xs-2 g-4 m-1 p-1" > </div>
+  </div>
+  <div class="tab-pane fade " id="nav-modDatlib" role="tabpanel" aria-labelledby="nav-modDatlib-tab" tabindex="2">
+<!-- Model info for models-->
+<form id='modelUserDataForm' class="p-2 bg-layer1">
+  <input type="text" class='d-none'  id="lastCustomMDL" readonly />
+  <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
+  <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
+  <div class="input-group input-group-sm mb-2">
+    <span class="input-group-text bg-dark text-info border-info" ><i class="fas fa-cube"></i></span>
+    <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
+    <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
+    <button id="modelOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
+    <button id="modelCustomPath" type="button" class="btn btn-outline-primary" data-toggle="tooltip" title="Load a model"><i class="fas fa-box-open"></i> Custom</button>
+  </div>
+  <div class="input-group input-group-sm border-secondary mb-2">
+    <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-mask"></i></span>
+    <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
+    <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
+    <button id="masksOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
+  </div>
+  <div class="input-group input-group-sm border-secondary">
+    <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-compress-alt"></i></span>
+    <input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
+    <button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
+    <button id="NormOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
+  </div>
+</form>
+<!--Model table-->
+    <table id="DataModelsLibrary" class="table bg-layer1 table-striped table-hover table-sm" style="width:100%">
+      <thead><tr><th></th><th>Name</th><th>Path</th><th>Tags</th><th>mask</th><th>normal</th><th></th></tr></thead>
+      <tbody class="bg-layer1"></tbody>
+    </table>
   </div>
 </div>
   </div>
@@ -1068,6 +1026,29 @@ THE SOFTWARE.</p>
       <button value="cancel" class="btn btn-dark" formmethod="dialog"><i class="fa-solid fa-xmark"></i> No</button>
       <button id="unCooKonfirm" class="btn btn-primary text-white " value="true"><i class="fa-solid fa-check"></i> Yes</button>
     </form>
+  </dialog>
+
+  <dialog id="Loading" class="border border-secondary rounded bg-layer0" style="min-width:50vw;outline:none;">
+    <div class="modal-header pb-3">
+      <h5 class="modal-title text-light loadingtext">Loading</h5>
+    </div>
+    <div class="progress" >
+      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+    </div>
+  </dialog>
+
+  <dialog id="configure" class="border border-primary rounded bg-layer0">
+    <div class="modal-header pb-3">
+      <h5 class="modal-title text-primary">Configuration Needed !!!</h5>
+    </div>
+    <div class="text-white-50">
+      <p>Hey, choomba! MLSB can't find your <span class="text-primary">&ltdepot folder/Wolvenkit.CLI/game location&gt</span>. Fix your settings now!</p>
+      <p>In your settings you need to have configured at least:<ul><li>The Cyberpunk 2077 game archive folder path</li><li>A Depot folder path to export content for the game</li><li>the path of the Wolvenkit Console CLI executable</li></ul></p>
+        <form method="dialog">
+          <button value="cancel" class="btn btn-dark" formmethod="dialog"><i class="fa-solid fa-xmark"></i> No (you'll regret it)</button>
+          <button id="DialogForSettings" class="btn btn-primary text-white " value="true"><i class="fa-solid fa-check"></i> Ok</button>
+        </form>
+    </div>
   </dialog>
 
   </body>
