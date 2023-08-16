@@ -23,7 +23,6 @@
     "fs": "^0.0.1-security",
     "fs-extra": "^11.1.0",
     "intro.js": "^5.1.0",
-    "npm": "^9.8.0",
     "sharp": "^0.31.3"
   },
   "devDependencies": {
