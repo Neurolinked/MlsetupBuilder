@@ -6,7 +6,7 @@ var spawner = require('child_process').spawn;
 const path = require('path')
 const fs = require('fs')
 const fse = require('fs-extra')
-const store = require('electron-store');
+const store = require('electron-store'); //https://github.com/sindresorhus/electron-store#readme
 const sharp = require('sharp');
 const dree = require('dree');
 const outside = require('electron').shell;
@@ -89,7 +89,7 @@ const schema = {
 	},
 };
 const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit/config.json');
-console.log(wolvenkitPrefFile);
+
 const preferences = new store({schema,
 	migrations: {
 		'<=1.6.2': store => {
@@ -675,6 +675,32 @@ ipcMain.on('main:handle_args', (event, payload) => {
 //setup the version of the software where needed
 ipcMain.on('main:getversion',(event, arg) =>{
 	event.reply('preload:setversion',app.getVersion())
+	/*
+		Since it's the first operation requested from the renderer
+		And it's expected the store to be already initialized, i will
+		test the values for Depot and Game Archives and if they are empty
+		i will look for the Wolvenkit configuration file, to setup the
+		preferences
+	*/
+	if (preferences.get('depot')==""){
+		fs.readFile(path.normalize(wolvenkitPrefFile),(err,wolvenkitConfigHandle)=>{
+			if (err){
+				event.reply('preload:logEntry',`No traces of Wolvenkit installation`,false);
+			}else{
+				try {
+					var WolvenkitConfig = JSON.parse(wolvenkitConfigHandle)
+					if (WolvenkitConfig.hasOwnProperty('MaterialRepositoryPath')){
+						preferences.set(`depot`,WolvenkitConfig.MaterialRepositoryPath);
+					}
+					if ((WolvenkitConfig.hasOwnProperty('CP77ExecutablePath')) && (preferences.get(`game`)=='')) {
+						preferences.set(`game`,WolvenkitConfig.CP77ExecutablePath.replace("\\bin\\x64\\Cyberpunk2077.exe","\\archive\\pc\\content"))
+					}
+				} catch (error) {
+					event.reply('preload:logEntry',`The file is there, but i got an error:${error}`,false);
+				}
+			}
+		})
+	}
 })
 
 ipcMain.handle('main:folderSetup',dirOpen)
