@@ -536,6 +536,19 @@ div.dataTables_wrapper div.dataTables_info {padding:0;}
   margin-bottom: 0;
 }
 
+/*caret fix for Datatables CSS*/
+table.dataTable td.dt-control:before {
+  content:"";
+  font-family: "Font Awesome 6 Free";
+  font-weight:900;
+}
+table.dataTable tr.dt-hasChild td.dt-control:before {
+  content:"";
+  color:var(--bs-primary);
+}
+table.dataTable tr:hover td:not([colspan]){
+  background-color: var(--layer-2);
+}
 /*
 .loadingtext:after {
   overflow: hidden;
