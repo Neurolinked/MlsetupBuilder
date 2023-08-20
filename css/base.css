@@ -549,6 +549,13 @@ table.dataTable tr.dt-hasChild td.dt-control:before {
 table.dataTable tr:hover td:not([colspan]){
   background-color: var(--layer-2);
 }
+#DataModelsLibrary_wrapper .dataTables_filter{
+  float:none;
+  text-align: left;
+  margin-right: 1rem;
+  > label{ display:block; }
+  > label > input {width:100%; }
+}
 /*
 .loadingtext:after {
   overflow: hidden;

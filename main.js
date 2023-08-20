@@ -488,9 +488,11 @@ app.on('browser-window-focus', () => {
 	globalShortcut.register("CommandOrControl+W", () => {
 	//stuff here
 	})
+	/*
 	globalShortcut.register("CommandOrControl+A",() => {
 		mainWindow.webContents.send('preload:activate', '#applytoMyLayer')
 	})
+	*/
 })
 
 app.on('browser-window-blur', () => {

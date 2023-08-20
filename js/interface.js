@@ -385,18 +385,18 @@ $(function(){
 
   $(document).on('keydown', function(e) {
     var ev = e // Event object 'ev'
-    var key = ev.which || ev.keyCode; // Detecting keyCode
+    var key = ev.code; // Detecting keyCode
 
     var ctrl =  ev.ctrlKey ? ev.ctrlKey : ((key === 17) ? true : false);
     var shift = ev.shiftKey ? ev.shiftKey : ((key === 16) ? true : false);
 
     //CTRL + SHIFT + w
-    if (ctrl && shift && (key==87)){
+    if (ctrl && shift && (key=='KeyW')){
       Workspaces.dom.attr('href',Workspaces.walk());
       movecontent();
     }
-
-    if (ctrl && (key=='KeyA')){
+    //CTRL + SHIFT + A
+    if (ctrl && shift && (key=='KeyA')){
       $("#applytoMyLayer").click();
     }
 
@@ -923,10 +923,10 @@ $("#resetShades span.choose").click(function(){
     var maskString ='';
     var normString = '';
     if (((d.mask!=null)||(d.mask!==undefined)) && parseInt(d.mask) ){
-      maskString = `<dt class="text-secondary">mask:</dt><dd class="ps-4">${maskList[d.mask].mask.replace('{format}',textureformat)}</dd>`;
+      maskString = `<dt class="text-primary">mask:</dt><dd class="ps-4 text-break">${maskList[d.mask].mask.replace('{format}',textureformat)}</dd>`;
     }
     if (((d.normal!=null)||(d.normal!==undefined)) && parseInt(d.normal)){
-      normString = `<dt class="text-secondary">normal:</dt><dd class="ps-4">${normList[d.normal].replace('{format}',textureformat)}</dd>`;
+      normString = `<dt class="text-primary">normal:</dt><dd class="ps-4 text-break">${normList[d.normal].replace('{format}',textureformat)}</dd>`;
     }
     return (
         `<dl class="p-2 ps-4 bg-secondary">`+
@@ -980,9 +980,12 @@ $("#resetShades span.choose").click(function(){
       {target:'_all',visible:false,searchable:false}
       ],
     deferRender: true,
-    dom:"<'row g-0'<'col-sm-12 col-md-3'B><'col-sm-12 col-md-3'il><'col-sm-12 col-md-6'f>>" +
+    dom:"<'row g-0'<'col-sm-12 col-md-7'f><'col-sm-12 col-md-5'il>>" +
     "<'row g-0'<'col-sm-12'tr>>" +
     "<'row g-0'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'>>",
+    language: {
+      search: ""
+    },
     order: [[ 2, 'asc' ]],
     processing:true,
     rowGroup:{
@@ -1000,7 +1003,7 @@ $("#resetShades span.choose").click(function(){
     scrollY: (window.innerHeight-290),
     select: {
       style:'single',
-      blurable: true
+      toggleable: false
     },
     initComplete: function(settings, json){
       var customRows = thePIT.getModels();
@@ -1029,7 +1032,6 @@ $("#resetShades span.choose").click(function(){
     }
   })
   .on('select', function(e, dt, type, indexes ) {
-    //console.log(dt);
     var data = CPModels.row({selected:true}).data();
 
     MLSB.TreeD.lastModel = data.file;
@@ -1055,6 +1057,11 @@ $("#resetShades span.choose").click(function(){
         row.child(DTformatChild(row.data())).show();
     }
   });
+
+  $('#DataModelsLibrary_filter input[type=search]').each(function () {
+    $(this).attr("placeholder", "Search...");
+  });
+
   //when the loading of the layer configuration setup a microblend
   //it activate the display onto the preview
 

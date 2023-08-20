@@ -33,6 +33,7 @@
 	--rendView:600px;
   --matrender:128px;
   --mblendSize:64px;
+  --dt-row-selected:154, 0, 54;
 }
 html, body{margin:0;padding:0;}
 body{width: 100vw;height: 95vh;background-color:var(--layer-0);color:white;}
