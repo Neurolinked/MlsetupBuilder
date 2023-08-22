@@ -28,11 +28,16 @@
 #layer_settings {
     grid-column-start: 2;
 }
+#SettingsSummary{
+    grid-column-start: 3;
+    grid-column-end: 3;
+    height: 130px;
+}
 #SettingsScroller{
     grid-column-start: 3;
     grid-column-end: 3;
     overflow-y: auto;
-    max-height: calc(100vh - (2.75rem + 27px));
+    max-height: calc(100vh - (130px + 2.75rem + 27px));
 }
 
 #SettingsScroller::-webkit-scrollbar{width:5px!important;}

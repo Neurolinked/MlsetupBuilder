@@ -6,6 +6,36 @@ const normalMapInfo = {
   width : 128,
   height : 128
 }
+
+function genTexture(color,size=4){
+	if (parseInt(size)>0){
+		var dataColor = new Uint8Array(4 *size);
+		var color = new THREE.Color( color );
+		if (color.isColor){
+			var r= Math.floor(color.r * 255);
+			var g= Math.floor(color.g * 255);
+			var b= Math.floor(color.b * 255);
+			for ( let i = 0; i < size; i ++ ) {
+				const stride = i * 4;
+				dataColor[ stride ] = r;
+				dataColor[ stride + 1 ] = g;
+				dataColor[ stride + 2 ] = b;
+				dataColor[ stride + 3 ] = 255;
+			}
+			return dataColor;
+		}else{
+			return new Uint8Array(4 *size);
+		}
+	}
+	return false;
+}
+
+const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
+const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0,5 ) ),4,4);
+const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
+
+var materialStack = new Set();
+
 const materialTypeCheck = {
 	metal_base : ["engine\\materials\\metal_base.remt"],
 	multilayer : ["engine\\materials\\multilayered.mt"],
@@ -69,7 +99,6 @@ thacanvas.addEventListener('mouseup',(event)=>{
 
 thacanvas.addEventListener( 'mousemove', (event)=>{
 	event.preventDefault();
-
 });
 
 function onMouseMove( event ) {
@@ -334,8 +363,6 @@ paintMaskHT.addEventListener( 'pointerleave', function () {
 	paint = false;
   paintMaskCTX.closePath();
 });
-
-
 
 canvUVWrapped.addEventListener('dblclick',function(){
   try{
@@ -645,12 +672,9 @@ function str2ab(str) {
 }
 
 function loadNormOntheFly(path){
-	//let Normed = document.querySelector('#withbones svg:nth-child(2) path');
-  let Normed = document.querySelector('#withbones i.icon-normals');
-  //const encoder = new TextEncoder()
-	path = path.replaceAll(/\//g,'\\')//.replace(/\.xbm$/,".png"); //pngWay
-	//path = path.replaceAll(/\//g,'\\');
-  var bufferimage = thePIT.ApriStream(path,'binary');
+	let Normed = document.querySelector('#withbones i.icon-normals');
+	path = path.replaceAll(/\//g,'\\')
+  	var bufferimage = thePIT.ApriStream(path,'binary');
 	var ab = str2ab(bufferimage);
   
   if (path.endsWith(".png")){
@@ -693,10 +717,9 @@ function loadNormOntheFly(path){
 
   				if (pngWidth>0){
   					context = nMeKanv.getContext('2d');
-  					//console.log(pngWidth,pngHeight);
   					/* Size is setted up */
-            nMeKanv.width = normalMapInfo.width = pngWidth;
-            nMeKanv.height = normalMapInfo.height = pngHeight;
+					nMeKanv.width = normalMapInfo.width = pngWidth;
+					nMeKanv.height = normalMapInfo.height = pngHeight;
 
   					var encodedData = btoa(bufferimage);
   					var dataURI = "data:image/png;base64," + encodedData;
@@ -704,40 +727,23 @@ function loadNormOntheFly(path){
   					nMap.onload = function(){
   						context.drawImage(nMap, 0, 0, normalMapInfo.width,normalMapInfo.height);
   						var imageData = context.getImageData(0,0,normalMapInfo.width,normalMapInfo.height);
-              if (window.Worker) { imgWorker.postMessage(imageData) }
-              /*
-  						for (let i = 0, l=imageData.data.length; i < l; i += 4) {
-  						 // Modify pixel data
-  						 imageData.data[i + 2] = 255;  // B value
-             }*/
-  						//context.putImageData(imageData,0,0,0,0,pngWidth,pngHeight);
-  						//normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
-  						//material.normalMap = normMe;
-              //material.normalMap.needsUpdate = true
-  						//material.map.needsUpdate = true;
-  						//material.normalMap.flipY = false;
-              Normed.style.color = 'var(--normal)';
-  						//Normed.setAttribute("fill",'rgb(120,119,255)'); //display the normal flag
+              			if (window.Worker) { imgWorker.postMessage(imageData) }
+						Normed.style.color = 'var(--normal)';
   					}
   					nMap.src = dataURI;
   				}else{
   					//console.log('no sizes found');
   					notify3D('no sizes found');
   					safeNormal();
-  					//Normed.setAttribute("fill",'currentColor');
-            Normed.style.color = '';
-  					//var texture = new THREE.CanvasTexture(nMeKanv)
-  					//material.normalMap = texture;
-            //material.normalMap.needsUpdate = true
+  					
+            		Normed.style.color = '';
   				}
 
   			}else{
-  				//Normed.setAttribute("fill",'rgb(255,0,0)');
-          Normed.style.color = 'rgb(255,0,0)';
+          		Normed.style.color = 'rgb(255,0,0)';
   				notify3D('another format');
   			}
   	}else{
-  		//Normed.setAttribute("fill",'rgb(255,128,0)');
       Normed.style.color = 'rgb(255,128,0)';
   	}
   }else if(path.endsWith(".dds")){
@@ -823,7 +829,11 @@ function loadMapOntheFly(path){
     notific.textContent = err_counter;
     material.color.set(0x000055);
     clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
+	material.map.needsUpdate = true;
     notify3D('An error happened during the load of the file: '+mipreference.value+path);
+	for (i=$("#layeringsystem li.active").index();i<=19;i++){
+		$("#layeringsystem li").eq(i).attr('disabled','disabled')
+	}
   }
 }
 
@@ -840,38 +850,35 @@ function cleanScene(){
 function mBuildAppearances(model){
 	var menuAppearances = document.querySelector("#appearanceSwitcher ul");
 	menuAppearances.innerHTML="";
-  	document.getElementById("appeInfo").innerHTML="";
+	document.getElementById("appeInfo").innerHTML="";
 
-  if ((model.length>0) && (typeof(model)=='object')){
-    if (model.length<=0){
-      return
-    }
-	if (model[0]?.appearanceCode===undefined){
-		console.log(model[0]);
-		return;
+	if ((model.length>0) && (typeof(model)=='object')){
+		if (model.length<=0){ return }
+		if (model[0]?.appearanceCode===undefined){
+			console.log(model[0]);
+			return;
+		}
+
+		if (model[0]?.appearanceCode.length <= 0) {	return }
+
+		model[0].appearanceCode.forEach((app,index)=>{
+			menuAppearances.innerHTML += `<li><a class="dropdown-item ${index==0 ? 'active':''}"  href="#" data-name="${app}"> ${app}</a></li>`;
+		});
+		
+		let names = model.map(x=> x.name.replace('_LOD_1',''));
+		model.forEach((el,index)=>{
+			let infoGui = new Object();
+			infoGui[`Vert-${el.name}`] = `${el.vertexes}`;
+			GuiInfo.add(infoGui, `Vert-${el.name}`)
+		});
+		
+		GuiInfo.__controllers.forEach((item, i) => {
+			item.domElement.children[0].readOnly=true;
+		});
+
+	}else{
+		menuAppearances.innerHTML = `<li><a class="dropdown-item" href="#" disabled>No Appearances</a></li>`;
 	}
-    if (model[0]?.appearanceCode.length <= 0) {
-      return
-    }
-
-	model[0].appearanceCode.forEach((app,index)=>{
-		menuAppearances.innerHTML += `<li><a class="dropdown-item ${index==0 ? 'active':''}"  href="#" data-name="${app}"> ${app}</a></li>`;
-	});
-    //oAppeinfo.innerHTML+=`<span class="badge d-block txt-secondary rounded-0 mt-2"></span>`;
-    let names = model.map(x=> x.name.replace('_LOD_1',''));
-    model.forEach((el,index)=>{
-      let infoGui = new Object();
-      infoGui[`Vert-${el.name}`] = `${el.vertexes}`;
-      GuiInfo.add(infoGui, `Vert-${el.name}`)
-    });
-    
-    GuiInfo.__controllers.forEach((item, i) => {
-      item.domElement.children[0].readOnly=true;
-    });
-
-  }else{
-	menuAppearances.innerHTML = `<li><a class="dropdown-item" href="#" disabled>No Appearances</a></li>`;
-  }
 }
 
 function LoadModelOntheFly(path){
@@ -891,16 +898,16 @@ function LoadModelOntheFly(path){
   	data = str2ab(modelfile);
 
 	if (data.byteLength>0){
-	  loader.parse( data ,'', ( glbscene ) => {
-	  gui.removeFolder("Submesh Toggle");
-      gui.removeFolder("Submesh Info");
-      
-      UVSbmeshENA.innerHTML=""; //remove all the buttons in the uv calculator
-      clearCanvas(canvUVWrapped,'',768)
+	  	loader.parse( data ,'', ( glbscene ) => {
+	  	gui.removeFolder("Submesh Toggle");
+      	gui.removeFolder("Submesh Info");      
+		UVSbmeshENA.innerHTML=""; //remove all the buttons in the uv calculator
+		clearCanvas(canvUVWrapped,'',768)
 
-	  GuiSubmesh = gui.addFolder("Submesh Toggle");
-      GuiInfo = gui.addFolder("Submesh Info");
-	  //Check on parser extension KHR_material_variants
+		GuiSubmesh = gui.addFolder("Submesh Toggle");
+		GuiInfo = gui.addFolder("Submesh Info");
+	  	//Check on parser extension KHR_material_variants
+
 		if (glbscene.parser.extensions?.KHR_binary_glTF!=undefined){
 			var materialExt
 			try {
@@ -915,15 +922,15 @@ function LoadModelOntheFly(path){
 			iStitches = false;
 			if ((child.type=="SkinnedMesh") && (!Boned)){Boned=true;}
 
-	      if ( child.isMesh ) {
+	      if ( child.isMesh ) {	
           	mobjInfo.push(
 				{	"name":child.name,
 					"appearanceCode":child.userData.materialNames,
-					"materials":[...new Set(child.userData.materialNames)].toString().replaceAll(",",", "),
 					"vertexes":child.geometry.attributes.uv.count}
 				);
 			child.frustumCulled = false;
 			if ((child.userData?.materialNames!=null) && (child.userData?.materialNames!=undefined)){
+				materialStack.add(child.userData.materialNames[0]);
 				if (!(/(vehicle_lights)|(logos)|(neon_rims)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|(default_tpp)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
 					if (modelType=='hair'){
 						if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
@@ -970,17 +977,20 @@ function LoadModelOntheFly(path){
 			GuiSubmesh.add(child, 'visible').name( child.name );
 		}
 
-		UVSbmeshENA.innerHTML+='<input type="checkbox" class="btn-check" id="uvchk_'+child.name+'" checked  ><label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_'+child.name+'" autocomplete="off">'+child.name+'</label>';
-
+		UVSbmeshENA.innerHTML+=`<div class="form-check form-switch mx-2">
+			<input class="form-check-input" type="checkbox" role="switch" id="uvchk_${child.name}" checked>
+			<label class="form-check-label" for="uvchk_${child.name}" autocomplete="off">${child.name}</label>
+	  	</div>`;
+		//'<input type="checkbox" class="btn-check" id="uvchk_'+child.name+'" checked  ><label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_'+child.name+'" autocomplete="off">'+child.name+'</label>';
 		}
 	    });
       	mBuildAppearances(mobjInfo);
 	    //if (Boned){MasksOn.classList.add('on');}else{MasksOn.classList.remove('on');}
-			if (Boned){MasksOn.setAttribute("fill","red");}else{MasksOn.setAttribute("fill","currentColor");}
+		if (Boned){MasksOn.setAttribute("fill","red");}else{MasksOn.setAttribute("fill","currentColor");}
 	    if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
 	    scene.add(glbscene.scene);
 	    //Autocentering
-			var helper = new THREE.BoxHelper(glbscene.scene);
+		var helper = new THREE.BoxHelper(glbscene.scene);
 	    helper.geometry.computeBoundingBox();
 	    var centerPoint = new THREE.Vector3();
 	    centerPoint.x = (helper.geometry.boundingBox.max.x + helper.geometry.boundingBox.min.x) / 2;
@@ -994,7 +1004,7 @@ function LoadModelOntheFly(path){
 	  });
 	}else{
 		notify3D(`-- The 3d model wasn't there when i try to load it --`); //https://github.com/Neurolinked/MlsetupBuilder/issues/8
-    //TODO activate an export of the file, if successeful go and do shit.
+    	//TODO activate an export of the file, if successeful go and do shit.
 	}
 }
 
@@ -1030,7 +1040,6 @@ function customLoad(e){
   	//material.map.needsUpdate = true;
 	//CustomLoadButton.setAttribute('disabled','disabled');
 	thePIT.ThreeDAsset();
-	//let Normed = document.querySelector('#withbones svg:nth-child(2) path');
   	let Normed = document.querySelector('#withbones i.icon-normals');
 	//Normed.setAttribute("fill",'currentColor');
   	Normed.style.color='';

@@ -29,6 +29,9 @@
     grid-column-start: 1;
     grid-column-end: 1;
 }
+#SettingsSummary{
+    display: none;
+}
 #layer_settings {
     grid-column-start: 2;
     grid-column-end: 2;

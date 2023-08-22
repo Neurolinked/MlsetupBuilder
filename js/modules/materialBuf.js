@@ -2,7 +2,7 @@ class Appearance{
 	Name = ''
 	Materials=Array()
 
-	costructor(name,materials){
+	constructor(name,materials){
 		this.Name = name;
 		this.Materials = materials;
 	}
@@ -139,9 +139,15 @@ class MaterialBuffer {
 				if  (mbDummy.MaterialTemplates.length>0){
 					this.MaterialTemplates = mbDummy.MaterialTemplates
 				}
-				if (mbDummy.hasOwnProperty("Appearances")){
-					this.Appearances = mbDummy.Appearances
+				if (mbDummy.hasOwnProperty('Appearances')){
+					this.Appearances = []
+					let names = Object.keys(mbDummy.Appearances);
+					
+					names.forEach(name => {
+						this.pushAppearance(new Appearance(name.replace(new RegExp(/\d+$/),''),mbDummy.Appearances[name]))
+					});
 				}
+				console.log(this.Appearances);
 				return true;
 			}else{
 				return false;
@@ -197,14 +203,25 @@ class MaterialBuffer {
 	codeAppearances(template='',index=null){
 		let codeMaterial =''
 		if (template==''){
-			template =`<div class="col"><div class="card"><div class="card-header">$APPEARANCE$</div><div class="card-body">$MATERIALS$</div></div></div>`
+			template =`<div class="col">
+							<div class="card">
+								<div class="card-header d-flex justify-content-between">
+									<span>$APPEARANCE$</span>
+									<button type="button" data-appearance="$APPEARANCE$" class="btn btn-sm btn-outline-primary">
+										<i class="fa-solid fa-circle-check"></i>
+									</button>
+								</div>
+								<div class="card-body">$MATERIALS$</div>
+							</div>
+						</div>`
 		}
 		try {
 			if ((index != null) && (parseInt(index) >= 0) && (parseInt(index) < Object.keys(this.Appearances).length)) {
-				codeMaterial = template.replace("$APPEARANCE$", Object.keys(this.Appearances)[index]).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${Object.values(this.Appearances)[index].join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
+				codeMaterial = template.replaceAll("$APPEARANCE$", Object.keys(this.Appearances)[index]).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${Object.values(this.Appearances)[index].join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
 			} else {
-				for (const [key, material] of Object.entries(this.Appearances)) {
-					codeMaterial += template.replace("$APPEARANCE$", key).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${material.join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
+				for (const [key, app] of Object.entries(this.Appearances)) {
+					
+					codeMaterial += template.replaceAll("$APPEARANCE$", app.Name).replace("$MATERIALS$", `<ul class="list-group list-group-flush" ><li class="list-group-item list-group-item-dark">${app.Materials.join('</li><li class="list-group-item list-group-item-dark">')}</li></ul>`)
 				}
 			}	
 		} catch (error) {

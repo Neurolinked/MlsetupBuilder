@@ -217,8 +217,8 @@ $(function(){
       $("#layer_settings").appendTo("#SettingsScroller");
       $("#micropanel").appendTo("#SettingsScroller");
     }else{
-      $("#layer_settings").insertBefore($("#SettingsScroller"));
-      $("#micropanel").insertBefore($("#SettingsScroller"));
+      $("#layer_settings").insertBefore($("#Settings"));
+      $("#micropanel").insertBefore($("#Settings"));
     }
   }
 
@@ -287,6 +287,12 @@ $(function(){
     }
   });
 
+  $("body").on("click","#appeInfo button[data-appearance]",function(){
+    $(`#nav-appearance div.card`).removeClass('active');
+    let setAppearance = $(this).attr("data-appearance");
+    $(this).closest(".card").addClass('active');
+    $(`body #appearanceSwitcher li a[data-name='${setAppearance}']`).click();
+  });
 
   var mls_Offcanvas = document.getElementById('off_MLSetups')
   var off_MLSetup = new bootstrap.Offcanvas(mls_Offcanvas)
@@ -836,7 +842,7 @@ $("#resetShades span.choose").click(function(){
 	var TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
-	$('#layeringsystem li').click(function(e){
+	$("#layeringsystem li").click(function(e){
 
 		if (!$(this).attr("disabled")){
       //activate the new one only if isn't disabled
@@ -1039,7 +1045,7 @@ $("#resetShades span.choose").click(function(){
 
     $("#modelTarget").val(MLSB.TreeD.lastModel);
     $("#masksTemplate").val(data.mask!=null?maskList[data.mask].mask.replace('{format}',textureformat):'');
-    $("normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
+    $("#normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
     $('#btnMdlLoader').click();
   });
 
@@ -2361,6 +2367,32 @@ unCooKonfirm.addEventListener("click", (event) => {
       });
     }else{
       $("#appeInfo div.col").show();
+    }
+  });
+
+  $("body").on('click','#appearanceSwitcher .dropdown-menu li a',function(e){
+    if ($(this).data("name")!==undefined){
+      $("#appearanceSwitcher ul.dropdown-menu li a").removeClass('active');
+      $(this).addClass('active');
+      
+      $(`#nav-appearance div.card`).removeClass('active');
+      $(`#nav-appearance div.card button[data-appearance='${$(this).attr('data-name')}']`).closest('.card').addClass('active');
+      /* Read the configuration of materials */
+
+      console.log(materialJSON);
+      
+      /*
+      scene.children.at(-1).children.forEach((element,index) => {
+        if (element.hasOwnProperty(`type`)){
+          if (element.type=='SkinnedMesh'){
+
+            console.log(
+              materialJSON.Materials.filter(el => el.Name == element.userData.materialNames[$("#appearanceSwitcher ul.dropdown-menu li a").index($(this))])
+            );
+          }
+        }
+      });
+      */
     }
   });
 
