@@ -123,8 +123,43 @@
   </div>
   <div class="offcanvas-body m-2 p-2"></div>
 </div>
+<!-- -->
+<div class="offcanvas offcanvas-start bg-dark bg-gradient text-light" tabindex="-1" id="editorConfig" aria-labelledby="EDCLabel" data-bs-scroll="true" data-bs-backdrop="false">
+  <div class="offcanvas-header bg-warning">
+    <h5 class="offcanvas-title text-dark" id="EDCLabel">Editor configuration</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body m-2 p-2">
+      <span class="badge bg-layer0 w-100 mb-1">Layer</span>
+      <!-- max layer tiles-->
+      <div class="input-group input-group-sm mb-1">
+        <div class="badge my-auto">Max Tiles</div>
+        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="150.0" step="0.1" min="150.0" data-target="#layerTile">
+      </div>
+      <span class="badge bg-layer0 w-100 mt-3 mb-1">&micro;blends</span>
+      <!-- max microblend tiles-->
+      <div class="input-group input-group-sm mb-1">
+        <div class="badge my-auto">Max Tiles</div>
+        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="150.0" step="0.1" min="150.0" data-target="#mbTile">
+      </div>
+      <!-- max microblend contrast-->
+      <div class="input-group input-group-sm mb-1">
+        <div class="badge my-auto">Max Contrast</div>
+        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="1.0" step="0.1" min="1.0" data-target="#mbCont">
+      </div>
+      <!-- max microblend tiles-->
+      <div class="input-group input-group-sm mb-1">
+        <div class="badge my-auto">Max Normal</div>
+        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="2.0" step="0.1" min="2.0" data-target="#mbNorm">
+      </div>
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-secondary" type="button" id="EDconfigChange"><i class="fa-solid fa-sliders" ></i> Save Defauts</button>
+        <button class="btn btn-success" type="button" id="EDconfigReset">Reset Defaults</button>
+      </div>
+  </div>
+</div>
 <!--  -->
-<div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light coverFullEditor" data-bs-backdrop="false" tabindex="-1" id="HairTool" aria-labelledby="HTLabel" >
+<div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light coverFullEditor" data-bs-backdrop="false" id="HairTool" aria-labelledby="HTLabel" >
   <div class="offcanvas-header bg-dark">
     <h5 class="offcanvas-title text-light" id="HTLabel">Hair tool</h5>
     <button type="button" class="btn text-reset text-light" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
@@ -155,7 +190,7 @@
 	</div>
 </div>
 <!--Offcanvas Import previewer -->
-<div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" id="off_MLSetups" aria-labelledby="lblmlsetupseP" data-bs-backdrop="false">
+<div class="offcanvas offcanvas-start bg-dark text-light" id="off_MLSetups" aria-labelledby="lblmlsetupseP" data-bs-backdrop="false">
   <div class="offcanvas-header border border-dark p-1">
     <h5 class="offcanvas-title text-dark" id="lblmlsetupseP"><i class="fa-solid fa-vest"></i> MLsetup Preview</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -168,7 +203,7 @@
   </div>
 </div>
 <!--Offcanvas Import close -->
-<div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" id="off-MLab" aria-labelledby="offcanvasLabel">
+<div class="offcanvas offcanvas-start bg-dark text-light" id="off-MLab" aria-labelledby="offcanvasLabel">
   <div class="offcanvas-header border border-dark p-1">
     <h5 class="offcanvas-title text-dark" id="offcanvasLabel"><i class="fa-solid fa-puzzle-piece"></i> &micro;blends Lab</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -251,7 +286,7 @@
   </li>
 </ul>
 <div class="tab-content ps-1 layer1" id="nav-tabMLSB">
-  <div class="tab-pane fade show active" id="nav-editor" role="tabpanel" aria-labelledby="pills-editor-tab" tabindex="0">
+  <div class="tab-pane fade show active" id="nav-editor" role="tabpanel" aria-labelledby="pills-editor-tab" tabindex="-1">
 <!--The New Editor-->
     <div id="editor-container">
 <div id="MlEditor" class="text-white layer-1 rounded">
@@ -265,7 +300,7 @@
     </div>
   <span class="badge w-100 rounded-0 ">Layers</span>
   <div class="d-grid"><button class="btn btn-out-Prim btn-sm rounded-0" id="applytoMyLayer" type="button" data-toggle="tooltip" data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
-  <ul id="layeringsystem" class="layer-2">
+  <ul id="layeringsystem" class="layer-2" tabindex="1">
     <li  data-labels="(null_null) unused"  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >0</li>
       <li  data-labels="(null_null) unused"   data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >1</li>
       <li  data-labels="(null_null) unused"  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >2</li>
@@ -327,7 +362,10 @@
 </div>
 <!--End layersList-->
 <div id="layer_settings" class="layer-2 rounded-0">
-  <span class="badge badge-layer0 w-100 rounded-0">Parameters</span>
+  <div class="d-flex justify-content-between">
+    <span class="px-2 py-1">Parameters</span>
+    <button type="button" class="btn btn-outline-warning m-0 mx-1" data-bs-toggle="offcanvas" data-bs-target="#editorConfig"><i class="fa-solid fa-sliders"></i></button>
+  </div>
   <div id="matdisplay" class="no-gutters layer-3" >
     <div><canvas id="materialDis" width="128" height="128" data-bs-toggle="modal" data-bs-target="#materialModal" ></canvas></div>
       <div>
@@ -415,7 +453,9 @@
       <button type="button" id="colorReset" data-toggle="tooltip" title="" class="btn btn-outline-info" data-bs-original-title="Choose the basic override null_null"><i class="fa-solid fa-eraser"></i></button>
     </div>
     <div id="colordisplay" class="layer-2">
-      <div id="cagecolors"><span style="background-color:rgb(50%,50%,50%);" data-lum='0.5' title='null_null' >&nbsp;</span></div>
+      <div id="cagecolors">
+        <span style="background-color:rgb(50%,50%,50%);" data-lum='0.5' title='null_null' >&nbsp;</span>
+      </div>
     </div>
   </div>
 
@@ -435,7 +475,7 @@
         <div id="MicroblendsLibrary">
           <span class="badge w-100 rounded-0" >core &micro;blends</span>
           <div id="microdisplay" class="layer-2">
-            <div id="cagethemicroblends" >
+            <div id="cagethemicroblends" tabindex="1">
               <li style="background-image:url('./images/thumbs/default.gif');" data-package='source' data-toggle="tooltip" title="default"> </li>
             </div>
           </div>
@@ -471,7 +511,7 @@
         <div class="input-group input-group-sm layer-2 mb-1">
           <div class="badge my-auto">contrast</div>
           <input type="number" class="form-control rounded-0" id="mbCont" value="0.0" step="0.01"  data-toggle="tooltip" title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
-          <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbCont" value="1.0" step="0.01"  min="0.0" max="1.0">
+          <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbCont" value="0.0" step="0.01"  min="0.0" max="1.0">
         </div>
         <div class="input-group input-group-sm layer-2 mb-1">
             <div class="badge my-auto">normals</div>
@@ -510,11 +550,11 @@
   </div>
     <!--End of the New Editor-->
   </div>
-  <div class="tab-pane fade " id="nav-appearance" role="tabpanel" aria-labelledby="pills-appearance-tab" tabindex="2">
+  <div class="tab-pane fade " id="nav-appearance" role="tabpanel" aria-labelledby="pills-appearance-tab" tabindex="-1">
     <input id="MBAFinder" class="form-control" type="search" placeholder="Search in the MaterialBufferArray list" aria-label="Search in the MaterialBufferArray list">
     <div id="appeInfo" class="row row-cols-3 row-cols-xs-2 g-4 m-1 p-1 fs-90" > </div>
   </div>
-  <div class="tab-pane fade " id="nav-Maps" role="tabpanel" aria-labelledby="nav-Maps-tab" tabindex="4">
+  <div class="tab-pane fade " id="nav-Maps" role="tabpanel" aria-labelledby="nav-Maps-tab" tabindex="-1">
     <div class="text-center">
       <ul class="nav nav-pills layer-2 px-2 fs-80" id="textureTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -629,7 +669,7 @@
       </div>
     </div>
   </div>
-  <div class="tab-pane fade " id="nav-modDatlib" role="tabpanel" aria-labelledby="nav-modDatlib-tab" tabindex="2">
+  <div class="tab-pane fade " id="nav-modDatlib" role="tabpanel" aria-labelledby="nav-modDatlib-tab" tabindex="-1">
 <!-- Model info for models-->
 <form id='modelUserDataForm' class="p-2 bg-layer1">
   <input type="text" class='d-none'  id="lastCustomMDL" readonly />

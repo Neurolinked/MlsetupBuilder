@@ -2,9 +2,8 @@ window.$ = window.jQuery;
 var notifications = 0;
 var materialJSON = new MaterialBuffer();
 var uncookMyFile = false;
-var DepotPath = '';
+var MLSBConfig = thePIT.RConfig();
 var textureformat = ''
-var Ptextformat = thePIT.RConfig('maskformat');
 
 function notifyMe(message, warning = true){
   let Data = new Date(Date.now());
@@ -18,11 +17,6 @@ function notifyMe(message, warning = true){
   $("#foot-message").text(`${message}`);
 }
 
-Ptextformat.then((format)=>{
-  textureformat = format
-}).catch((error)=>{
-  notifyMe(error);
-})
 
 //Broadcasting manager section
 const bc = new BroadcastChannel("streaming"); //communication between opened interafce windows
@@ -222,12 +216,32 @@ $(function(){
     }
   }
 
+  MLSBConfig.then((config)=>{
+    console.log(config);
+    if (config.hasOwnProperty('maskformat')){
+      textureformat = config.maskformat
+    }
+    if (config.hasOwnProperty('editorCfg')){
+      $(`.ed-config[data-target="#layerTile"]`).val(config.editorCfg.layer.tiles.value);
+      $(`.ed-config[data-target="#mbTile"]`).val(config.editorCfg.mblend.tiles.value);
+      $(`.ed-config[data-target="#mbCont"]`).val(config.editorCfg.mblend.contrast.value);
+      $(`.ed-config[data-target="#mbNorm"]`).val(config.editorCfg.mblend.normal.value);
+      $(".ed-config").change();
+    }
+    if (config.hasOwnProperty('workspace')){
+      Workspaces.dom.attr('href',Workspaces.config(config.workspace));
+      movecontent();
+    }
+  }).catch((error)=>{
+    notifyMe(error);
+  });
+  /*
   var styleConfig = thePIT.RConfig('workspace');
   styleConfig.then((style)=>{
     Workspaces.dom.attr('href',Workspaces.config(style));
     movecontent();
   }).catch((error)=>console.error(error));
-  
+  */
 
   $(".friendo").on("input",function(e){
     $($(this).data("control")).val($(this).val());
@@ -2398,6 +2412,53 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   $("#DialogForSettings").click(function(){
     thePIT.clickTheMenuVoice('preferences');
+  });
+
+  $(".ed-config").change(function(){
+    if ($($(this).data("target"))){
+      var configControl = $($(this).data("target"));
+      configControl.attr("max",$(this).val())
+    }
+    if ( $(`.friendo[data-control='${$(this).data("target")}']`)){
+      var friendoControl = $(`.friendo[data-control='${$(this).data("target")}'`);
+      friendoControl.attr("max",$(this).val())
+    }
+  });
+
+  $("#EDconfigChange").click(function(){
+    let saved = thePIT.savePref({
+      editorCfg:{
+        layer:{
+          tiles:{
+            value:Number($(`.ed-config[data-target="#layerTile"]`).val())
+          }
+        },
+        mblend:{
+          tiles:{
+            value:Number($(`.ed-config[data-target="#mbTile"]`).val())
+          },
+          contrast:{
+            value:Number($(`.ed-config[data-target="#mbCont"]`).val())
+          },
+          normal:{
+            value:Number($(`.ed-config[data-target="#mbNorm"]`).val())
+          }
+        }
+      }
+    });
+    saved.then(()=>{
+      SOnotify("Editor preferences saved");
+    }).catch(error=>notifyMe(error));
+  });
+
+  $("#EDconfigReset").click(function(){
+    let dummy = thePIT.RConfig('editorCfg');
+    dummy.then((valuesCFG)=>{
+      $(`.ed-config[data-target="#layerTile"]`).val(valuesCFG?.layer?.tiles?.default!==undefined ? valuesCFG.layer.tiles.default:150).change();
+      $(`.ed-config[data-target="#mbTile"]`).val(valuesCFG?.mblend?.tiles?.default!==undefined ? valuesCFG.mblend.tiles.default:150).change();
+      $(`.ed-config[data-target="#mbCont"]`).val(valuesCFG?.mblend?.contrast?.default!==undefined ? valuesCFG.mblend.contrast.default:1.0).change();
+      $(`.ed-config[data-target="#mbNorm"]`).val(valuesCFG?.mblend?.normal?.default!==undefined ? valuesCFG.mblend.normal.default:2.0).change();
+    }).catch(error=>notifyMe(error));
   });
 
 });

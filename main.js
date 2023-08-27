@@ -87,6 +87,31 @@ const schema = {
 		type:'number',
 		default: 0
 	},
+	editorCfg : {
+		type:'object',
+		default: {
+			layer:{
+				tiles:{
+					default: 150.0,
+					value: 150.0
+				}
+			},
+			mblend:{
+				tiles:{
+					default: 150.0,
+					value: 150.0
+				},
+				contrast:{
+					deafult: 1.0,
+					value: 1.0
+				},
+				normal:{
+					default: 2.0,
+					value: 2.0
+				}
+			}
+		}
+	}
 };
 const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit/config.json');
 
@@ -117,7 +142,31 @@ const preferences = new store({schema,
 			store.set('flipnorm',false)
 		},
 		'1.6.8': store =>{
-			store.set('workspace', 0)
+			store.set('workspace', 0),
+			store.set({
+				editorCfg:{
+					layer:{
+						tiles:{
+							default: 150.0,
+							value: 150.0
+						}
+					},
+					mblend:{
+						tiles:{
+							default: 150.0,
+							value: 150.0
+						},
+						contrast:{
+							deafult: 1.0,
+							value: 1.0
+						},
+						normal:{
+							default: 2.0,
+							value:2.0
+						}
+					}
+				}
+			})
 		}
 	}
 });
@@ -799,6 +848,16 @@ ipcMain.on('main:saveStore',(event, arg) => {
 	}
 	if (arg.hasOwnProperty('workspace')){
 		preferences.set('workspace',arg.workspace);
+	}
+	if (arg.hasOwnProperty('workspace')){
+		preferences.set('workspace',arg.workspace);
+	}
+
+	if (arg.hasOwnProperty('editorCfg')){
+		preferences.set('editorCfg.layer.tiles.value',arg.editorCfg.layer.tiles.value);
+		preferences.set('editorCfg.mblend.tiles.value',arg.editorCfg.mblend.tiles.value);
+		preferences.set('editorCfg.mblend.contrast.value',arg.editorCfg.mblend.contrast.value);
+		preferences.set('editorCfg.mblend.normal.value',arg.editorCfg.mblend.normal.value);
 	}
 })
 

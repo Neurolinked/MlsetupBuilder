@@ -47,7 +47,7 @@ contextBridge.exposeInMainWorld(
       getMuBlends: async ()=>{
         return await ipcRenderer.invoke('main:loadUseRSource','microblends');
       },
-			savePref: (conf)=>{
+			savePref: async (conf) =>{
 				ipcRenderer.send('main:saveStore',conf);
 			},
       /*

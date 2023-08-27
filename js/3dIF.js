@@ -1072,7 +1072,7 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 });
 
 /*MDLloadingButton button click */
-document.getElementById('btnMdlLoader').addEventListener('click',(e)=>{
+MDLloadingButton.addEventListener('click',(e)=>{
  var nthLayer = document.querySelector("#layeringsystem").children;
  var activeLayer = document.querySelector("#layeringsystem li.active");
 
