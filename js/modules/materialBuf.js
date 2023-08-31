@@ -238,22 +238,34 @@ class MaterialBuffer {
 		return codeMaterial
 	}
 	
-	codeMaterial(index=NaN){
+	codeMaterial(index=NaN,template=''){
 		let codeMaterial = ''
+		if (template==''){
+			//setting up the default template
+			template=`<div class="mat_instance mb-1" >
+				<details class="border outline-l1" >
+					<summary data-type="$_BASEMATERIAL">$_MATERIALNAME</summary>
+						$_MATERIALTEMPLATE
+					<button type="button" class="mt-2 d-block btn btn-sm btn-danger btn-tiny sendtoTrash" data-materialIndex='$_MATERIALID'><i class="fa-solid fa-trash"></i></button>
+				</details>
+				<span class="d-block-inline bg-dark" >
+					<span class="text-warning ps-1 pe-2 sendtoEdit " data-materialIndex='$_MATERIALID'><i class="fa-solid fa-square-arrow-up-right"></i></span>
+				</span>
+			</div>`;
+		}
+
 		if (Number.isNaN(index)){
 			for (const [key, material] of Object.entries(this.Materials)) {
-				codeMaterial += `<div class="mat_instance mb-1" ><details class="border outline-l1" >
-						<summary data-type="${material.BaseMaterial}">${material.Name.replaceAll("_"," ")}</summary>
-						${material.MaterialTemplate}
-						<button type="button" class="mt-2 d-block btn btn-sm btn-danger btn-tiny sendtoTrash" data-materialIndex='${key}'><i class="fa-solid fa-trash"></i></button>
-					</details><span class="d-block-inline bg-dark" ><span class="text-warning ps-1 pe-2 sendtoEdit " data-materialIndex='${key}'><i class="fa-solid fa-square-arrow-up-right"></i></span></span></div>`;
+				codeMaterial += template.replaceAll("$_BASEMATERIAL",material.BaseMaterial)
+								.replaceAll("$_MATERIALNAME",material.Name.replaceAll("_"," "))
+								.replaceAll("$_MATERIALTEMPLATE",material.MaterialTemplate)
+								.replaceAll("$_MATERIALID",key);
 			}
 		}else{
-			codeMaterial = `<div class="mat_instance mb-1" ><details class="border outline-l1" >
-					<summary data-type="${this.Materials[index].BaseMaterial}">${this.Materials[index].Name.replaceAll("_"," ")}</summary>
-					${this.Materials[index].MaterialTemplate}
-					<button type="button" class="mt-2 d-block btn btn-sm btn-danger btn-tiny sendtoTrash" data-materialIndex='${index}'><i class="fa-solid fa-trash"></i></button>
-				</details><span class="d-block-inline bg-dark" ><span class="text-warning ps-1 pe-2 sendtoEdit " data-materialIndex='${index}'><i class="fa-solid fa-square-arrow-up-right"></i></span></span></div>`;
+			codeMaterial = template.replaceAll("$_BASEMATERIAL",this.Materials[index].BaseMaterial)
+							.replaceAll("$_MATERIALNAME",this.Materials[index].Name.replaceAll("_"," "))
+							.replaceAll("$_MATERIALTEMPLATE",this.Materials[index].MaterialTemplate)
+							.replaceAll("$_MATERIALID",index);
 		}
 		this.#UpdateTextures()
 		return codeMaterial;
