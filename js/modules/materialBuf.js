@@ -131,13 +131,21 @@ class MaterialBuffer {
 				(mbDummy.hasOwnProperty("MaterialTemplates")) ){	
 						
 				if  (mbDummy.Materials.length>0){
-					this.Materials = mbDummy.Materials
+					this.Materials = [];
+					mbDummy.Materials.forEach(rawMat =>{
+						this.push(new Material(rawMat.Name,rawMat.BaseMaterial,rawMat.MaterialTemplate,rawMat.Data))
+					})
 				}
 				if  (mbDummy.TexturesList.length>0){
 					this.TexturesList = mbDummy.TexturesList
 				}
 				if  (mbDummy.MaterialTemplates.length>0){
-					this.MaterialTemplates = mbDummy.MaterialTemplates
+					this.MaterialTemplates = [];
+
+					mbDummy.MaterialTemplates.forEach((template)=>{
+						this.pushTemplate(new MaterialTemplate(template.Name,template.Data))
+					})
+					//this.MaterialTemplates = mbDummy.MaterialTemplates
 				}
 				if (mbDummy.hasOwnProperty('Appearances')){
 					this.Appearances = []
@@ -147,7 +155,7 @@ class MaterialBuffer {
 						this.pushAppearance(new Appearance(name.replace(new RegExp(/\d+$/),''),mbDummy.Appearances[name]))
 					});
 				}
-				console.log(this.Appearances);
+				//console.log(this.Appearances);
 				return true;
 			}else{
 				return false;

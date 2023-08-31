@@ -217,7 +217,6 @@ $(function(){
   }
 
   MLSBConfig.then((config)=>{
-    console.log(config);
     if (config.hasOwnProperty('maskformat')){
       textureformat = config.maskformat
     }
@@ -295,7 +294,6 @@ $(function(){
       var materialAppearances = JSON.parse($("#materialJson").val());
       materialJSON.import($("#materialJson").val());
       $("#appeInfo").html(materialJSON.codeAppearances());
-      //console.log(materialJSON);
     } catch (error) {
       notifyMe(error,false);
     }
@@ -859,11 +857,12 @@ $("#resetShades span.choose").click(function(){
 	$("#layeringsystem li").click(function(e){
 
 		if (!$(this).attr("disabled")){
+      MLSB.Editor.layerSelected = $(this).index();
       //activate the new one only if isn't disabled
 			$('#layeringsystem li').removeClass('active notsync');
       //sync with the mask paint editor
       $("#masksPanel li.active").removeClass("active");
-      $("#masksPanel li").eq($(this).index()).addClass("active");
+      $("#masksPanel li").eq(MLSB.Editor.layerSelected).addClass("active");
 			$(this).addClass('active');
 			$("#maskLayer").attr("value",$(this).text());
       //if the model is already loaded it fires the event to load the masks

@@ -113,6 +113,7 @@ const schema = {
 		}
 	}
 };
+
 const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit/config.json');
 
 const preferences = new store({schema,
@@ -583,27 +584,6 @@ ipcMain.on('main:giveModels',(event) => {
 	})
 })
 
-function readMaterials(materialfile = ''){
-	if (materialfile!=``){
-		materialfile = materialfile.replace(/\.glb$/,".Material.json")
-		fs.readFile(materialfile,(err,contenutofile) =>{
-	    	if (err) {
-	      		if (err.code=='ENOENT'){
-					mainWindow.webContents.send('preload:logEntry',`Material file not found in: ${materialfile}`);
-				}
-				return;
-			}
-			try {
-				materialcontent = JSON.parse(contenutofile)
-			} catch (error){
-				mainWindow.webContents.send('preload:logEntry', 'Error in the parsing the material file')
-			}
-			mainWindow.webContents.send('preload:materiaload', materialcontent);
-			mainWindow.webContents.send('preload:logEntry',`Material file found at ${materialfile}`);
-		})
-	}
-	return;
-}
 //read file on disk
 ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 	var whereLoadFrom
@@ -660,8 +640,7 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 			}
 			contenutofile=""
 		}
-		readMaterials(a3dMatModel); //launch a search for the material
-		//event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
+		event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
 		event.returnValue = contenutofile
   	})
 })

@@ -17,6 +17,8 @@
   - [ ] Appearances Editor
   - [ ] Panels column slider
   - [ ] Content list and editor together
+- [ ] Layer interface selection events unified
+  - [ ] Layer property read from Mlsetup instance instead of the interface
 - [x] Interface Workspace setup saved and reloaded from session to session
 - [x] Keyboard shortcut override
   - [x] CTRL+A Apply the edits on the current layer
