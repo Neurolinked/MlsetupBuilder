@@ -133,7 +133,7 @@ class MaterialBuffer {
 				if  (mbDummy.Materials.length>0){
 					this.Materials = [];
 					mbDummy.Materials.forEach(rawMat =>{
-						this.push(new Material(rawMat.Name,rawMat.BaseMaterial,rawMat.MaterialTemplate,rawMat.Data))
+						this.pushMaterial(new Material(rawMat.Name,rawMat.BaseMaterial,rawMat.MaterialTemplate,rawMat.Data))
 					})
 				}
 				if  (mbDummy.TexturesList.length>0){
@@ -165,7 +165,7 @@ class MaterialBuffer {
 		}
 	}
 	
-	push(newMaterial){
+	pushMaterial(newMaterial){
 		if (!(newMaterial instanceof Material)){
 			return false
 		}
@@ -257,12 +257,14 @@ class MaterialBuffer {
 		if (Number.isNaN(index)){
 			for (const [key, material] of Object.entries(this.Materials)) {
 				codeMaterial += template.replaceAll("$_BASEMATERIAL",material.BaseMaterial)
+								.replaceAll("$_MATERIALSHORTNAME",material.Name.replace(new RegExp(/^ml_/),'').replace("masksset",''))
 								.replaceAll("$_MATERIALNAME",material.Name.replaceAll("_"," "))
 								.replaceAll("$_MATERIALTEMPLATE",material.MaterialTemplate)
 								.replaceAll("$_MATERIALID",key);
 			}
 		}else{
 			codeMaterial = template.replaceAll("$_BASEMATERIAL",this.Materials[index].BaseMaterial)
+							.replaceAll("$_MATERIALSHORTNAME",this.Materials[index].Name.replace(new RegExp(/^ml_/),'').replace("_masksset",'').replaceAll("_"," ") )
 							.replaceAll("$_MATERIALNAME",this.Materials[index].Name.replaceAll("_"," "))
 							.replaceAll("$_MATERIALTEMPLATE",this.Materials[index].MaterialTemplate)
 							.replaceAll("$_MATERIALID",index);
