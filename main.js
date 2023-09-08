@@ -626,7 +626,9 @@ ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
 						event.reply('preload:logEntry', 'File not found in : '+whereLoadFrom,true)
 					}else{
 						a3dMatModel="";
-						dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
+						if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
+							dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
+						}
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 					contenutofile = ""
