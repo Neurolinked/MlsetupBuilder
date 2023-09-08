@@ -210,13 +210,20 @@ $(function(){
     if (Workspaces.index==2) {
       $("#layer_settings").appendTo("#SettingsScroller");
       $("#micropanel").appendTo("#SettingsScroller");
+      $("#materialDis").appendTo("#SettingsSummary");
+      $("#mb-preview").appendTo("#SettingsSummary");
     }else{
       $("#layer_settings").insertBefore($("#Settings"));
       $("#micropanel").insertBefore($("#Settings"));
+      $("#materialDis").appendTo("#matdisplay > div:nth-child(1)");
+      $("#mb-preview").insertAfter("#MicroblendsLibrary");
     }
   }
 
   MLSBConfig.then((config)=>{
+    if (config.hasOwnProperty('depot')){
+      materialJSON = new MaterialBuffer(config.depot);
+    }
     if (config.hasOwnProperty('maskformat')){
       textureformat = config.maskformat
     }
@@ -234,13 +241,6 @@ $(function(){
   }).catch((error)=>{
     notifyMe(error);
   });
-  /*
-  var styleConfig = thePIT.RConfig('workspace');
-  styleConfig.then((style)=>{
-    Workspaces.dom.attr('href',Workspaces.config(style));
-    movecontent();
-  }).catch((error)=>console.error(error));
-  */
 
   $(".friendo").on("input",function(e){
     $($(this).data("control")).val($(this).val());
@@ -1475,15 +1475,17 @@ $("#resetShades span.choose").click(function(){
     $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
     $(this).addClass("MBactive");
     let theoneselected = $(this).data('path');
+    console.log(theoneselected);
     $("#mbSelect option").removeAttr("selected")
     document.getElementById("cu_mu_display").scrollLeft = ($(`#cagetheCuMBlends li[data-path='${theoneselected}']`).index() * (mblendPrevSize+2))
-    //console.log(theoneselected+" :contains('"+theoneselected+"')");
+    
     $("#mbSelect option").removeAttr("selected");
     let mbZelected = $("#mbSelect option").filter(function() {
        return $(this).val() === theoneselected;
-     })
-    mbZelected.attr('selected', true);
-    $("#mbInput").val($(`#cagetheCuMBlends li[data-path='${theoneselected}']`).data("path"));
+     });
+     
+    mbZelected.attr('selected', true).change();
+    $("#mbInput").val(theoneselected);
   })
 
 const scrollMBContainer = document.getElementById("microdisplay");

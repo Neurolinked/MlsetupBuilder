@@ -42,6 +42,10 @@
 
 #SettingsScroller::-webkit-scrollbar{width:5px!important;}
 
+#matdisplay{display:grid;grid-template-columns: 0 1fr;}
+#mb-preview {width:128px;}
+#materialDis{border:none;}
+
 #layeringsystem{
     counter-reset: layer -1;
     max-height: 40vh;
