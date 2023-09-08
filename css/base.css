@@ -2,11 +2,14 @@
 :root{
   --bs-dropdown-link-active-bg: #9a0036;
 }
+*{outline:none;}
 .plus_1_layer{background-color:rgba(255,255,255,0.05);}
 .plus_2_layer{background-color:rgba(255,255,255,0.08);}
 .plus_3_layer{background-color:rgba(255,255,255,0.11);}
 .plus_4_layer{background-color:rgba(255,255,255,0.12);}
 .plus_5_layer{background-color:rgba(255,255,255,0.14);}
+
+
 
 .dropdown-menu-dark{
   --bs-dropdown-link-active-bg: #9a0036;
