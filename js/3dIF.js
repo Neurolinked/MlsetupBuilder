@@ -36,6 +36,7 @@ const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4)
 const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 ) ),4,4);
 
 var materialStack = new Set();
+var multilayerStack = new Set();
 
 const materialTypeCheck = {
 	decals: [
@@ -49,7 +50,8 @@ const materialTypeCheck = {
 		"base\\fx\\shaders\\parallaxscreen.mt",
 		"base\\materials\\vehicle_lights.mt",
 		"base\\fx\\shaders\\device_diode.mt",
-		"base\\fx\\_shaders\\holo_mask.mt"
+		"base\\fx\\_shaders\\holo_mask.mt",
+		"base\\fx\\shaders\\hologram.mt"
 	],
 	glass: [
 		"base\\materials\\glass.mt",
@@ -260,7 +262,7 @@ const metal_base = new THREE.MeshStandardMaterial({color: 0x808080});
 const skin = new THREE.MeshNormalMaterial(); //MeshStandardMaterial({color: 0xe65c8c});
 const noMaterial = new THREE.MeshStandardMaterial({color: 0x808000});
 
-const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.3,   transmission: 1, thickness: 0.05});
+const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
 //material for stitches zip and other things
 const stitchMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_d01.png");
 const stitchNorMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_n01.png");
@@ -821,10 +823,8 @@ function cleanScene(){
 	if (scene.children.length==6){
 		scene.traverse(oggetti=>{
 			if (!oggetti.isMesh) return
-			console.log(`--Material Disposing`);
-			oggetti.material.dispose();
-			console.log(`--Geometry Disposing`);
-			oggetti.geometry.dispose();
+			oggetti.material.dispose(); //Remove materials
+			oggetti.geometry.dispose(); //Remove geometry
 		})
 		scene.children.pop(scene.children[5]);
 	}
@@ -842,8 +842,7 @@ function mBuildAppearances(model){
 			return;
 		}
 
-		if (model[0]?.appearanceCode.length <= 0) {	return }
-
+		if (model[0]?.appearanceCode.length <= 0) {	return }		
 		model[0].appearanceCode.forEach((app,index)=>{
 			menuAppearances.innerHTML += `<li><a class="dropdown-item ${index==0 ? 'active':''}"  href="#" data-name="${app}"> ${app}</a></li>`;
 		});
@@ -907,6 +906,8 @@ function LoadModelOntheFly(path){
 			}
 		}
 		materialStack.clear();
+		multilayerStack.clear();
+
 		//console.clear();
 	    glbscene.scene.traverse( function ( child ) {
 			Decal = false;
@@ -915,7 +916,8 @@ function LoadModelOntheFly(path){
 
 			if ((child.type=="SkinnedMesh") && (!Boned)){Boned=true;}
 
-			if ( child.isMesh ) {	
+			if ( child.isMesh ) {
+				console.log(child);
           		mobjInfo.push({
 					"name":child.name,
 					"appearanceCode":child.userData.materialNames,
@@ -938,21 +940,23 @@ function LoadModelOntheFly(path){
 						
 					}
 					
-					console.log(actualTemplate,actualMaterial);
+					//console.log(actualTemplate,actualMaterial);
 					
 
 					if (materialTypeCheck.metal_base.includes(actualTemplate)){
 						child.material = metal_base;
 						GuiSubmesh.add(child, 'visible').name('<i class="fa-solid fa-microchip text-danger"></i> '+child.name);
-						console.log(actualMaterial.Data.Normal.replace(new RegExp(/\.xbm$/),`.${textureformat}`) );
+						//console.log(actualMaterial.Data.Normal.replace(new RegExp(/\.xbm$/),`.${textureformat}`) );
 
 					}else if (materialTypeCheck.decals.includes(actualTemplate)){
 
 						child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(20*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 255)"), opacity:0.3,transparent:true});
 						GuiSubmesh.add(child, 'visible').name(`<i class="fas fa-tag text-warning"></i> ${child.name}`);
+						/*
 						console.log(
 							actualMaterial.Data?.BaseColor!==undefined?actualMaterial.Data.BaseColor:''
 						);
+						*/
 					}else if (materialTypeCheck.fx.includes(actualTemplate)){
 						child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(50*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 0)"), opacity:0.7,transparent:true,wireframe:true});
 						
@@ -983,9 +987,10 @@ function LoadModelOntheFly(path){
 						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-hand-dots"></i> ${child.name}`);
 
 					}else if (materialTypeCheck.multilayer.includes(actualTemplate)){
+						multilayerStack.add(actualMaterial.Name);
 						child.material = material;
 						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-layer-group text-primary"></i> ${child.name}`);
-						console.log(actualMaterial.Data.GlobalNormal.replace(new RegExp(/\.xbm$/),`.${textureformat}`) );
+						//console.log(actualMaterial.Data.GlobalNormal.replace(new RegExp(/\.xbm$/),`.${textureformat}`) );
 					}else{
 						child.material = noMaterial;
 						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-question"></i> ${child.name}` );
@@ -1034,12 +1039,36 @@ function LoadModelOntheFly(path){
 			<input class="form-check-input" type="checkbox" role="switch" id="uvchk_${child.name}" checked>
 			<label class="form-check-label" for="uvchk_${child.name}" autocomplete="off">${child.name}</label>
 	  	</div>`;
-		//'<input type="checkbox" class="btn-check" id="uvchk_'+child.name+'" checked  ><label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_'+child.name+'" autocomplete="off">'+child.name+'</label>';
 		}
 	    });
-      	mBuildAppearances(mobjInfo);
-	    //if (Boned){MasksOn.classList.add('on');}else{MasksOn.classList.remove('on');}
-		if (Boned){MasksOn.setAttribute("fill","red");}else{MasksOn.setAttribute("fill","currentColor");}
+
+		$("#Mlswitcher").html("");
+		if (multilayerStack.size>0){
+			multilayerStack.forEach(function(name,key,set){
+				$("#Mlswitcher").append(materialJSON.codeMaterial(materialJSON.find(name),`<div class="bg-layer2 border border-secondary rounded fs-75 p-2 mb-1 d-flex mlSelectionRadio" >
+				<input class="form-check-input me-2" type="radio" name="mlSelectRadio" id="sel$_MATERIALID">
+				<label class="form-check-label" for="sel$_MATERIALID">
+					$_MATERIALSHORTNAME
+				</label>
+				</div>`));
+			});
+			$("#Mlswitcher div").eq(0).addClass(`active`);
+		}
+
+		/*
+		$("#appearanceSwitcher ul").html(materialJSON.codeAppearances(
+			`<li><a class="dropdown-item"  href="#" data-name="$APPEARANCE$">$APPEARANCE$</a></li>`
+			))
+		$("#appearanceSwitcher ul li:first-child a").addClass('active');
+		*/
+		mBuildAppearances(mobjInfo);
+	    
+		if (Boned){
+			MasksOn.setAttribute("fill","red");
+		}else{
+			MasksOn.setAttribute("fill","currentColor");
+		}
+
 	    if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
 	    scene.add(glbscene.scene);
 	    //Autocentering
@@ -1051,7 +1080,9 @@ function LoadModelOntheFly(path){
 	    centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
 	    //camera.target = centerPoint;
 	    controls.target = centerPoint;
-		console.log(materialStack);
+		multilayerStack.forEach(function(name,key,set){
+			console.log(`--${name}`);
+		});
 	  }, (error) => {
 	    notify3D(error);
 	  });
@@ -1123,6 +1154,7 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
 /*MDLloadingButton button click */
 MDLloadingButton.addEventListener('click',(e)=>{
 	MDLloadingButton.setAttribute('disabled','disabled');
+
 	var nthLayer = document.querySelector("#layeringsystem").children;
 	var activeLayer = MLSB.Editor.layerSelected;
 
