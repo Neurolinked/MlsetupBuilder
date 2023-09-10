@@ -949,14 +949,19 @@ function LoadModelOntheFly(path){
 						//console.log(actualMaterial.Data.Normal.replace(new RegExp(/\.xbm$/),`.${textureformat}`) );
 
 					}else if (materialTypeCheck.decals.includes(actualTemplate)){
-
-						child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(20*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 255)"), opacity:0.3,transparent:true});
+						if (actualMaterial.Data.hasOwnProperty('DiffuseColor')){
+							let defColor = actualMaterial.Data.DiffuseColor;
+							child.material = new THREE.MeshBasicMaterial({color:new THREE.Color(`rgb(${defColor.Red},${defColor.Green},${defColor.Blue})`), opacity: (defColor.Alpha/255), transparent:true});
+						}else{
+							child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(20*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 255)"), opacity:0.3,transparent:true});
+						}
+						
 						GuiSubmesh.add(child, 'visible').name(`<i class="fas fa-tag text-warning"></i> ${child.name}`);
-						/*
-						console.log(
-							actualMaterial.Data?.BaseColor!==undefined?actualMaterial.Data.BaseColor:''
+						
+						console.log('Decal',
+							actualMaterial.Data
 						);
-						*/
+						
 					}else if (materialTypeCheck.fx.includes(actualTemplate)){
 						child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(50*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 0)"), opacity:0.7,transparent:true,wireframe:true});
 						
