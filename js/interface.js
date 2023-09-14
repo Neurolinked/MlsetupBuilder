@@ -913,7 +913,7 @@ $("#resetShades span.choose").click(function(){
       $("#layerOffU").val($(this).data("offsetu"));
       $("#layerOffV").val($(this).data("offsetv"));
       //Microblend section
-      $("#mbInput").val($(this).data("mblend"));
+      $("#mbInput").val($(this).data("mblend")).change();
       $("#mbTile").val($(this).data("mbtile")).change();
       $("#mbCont").val($(this).data("mbcontrast")).change();
       $("#mbNorm").val($(this).data("mbnormal")).change();
@@ -924,7 +924,7 @@ $("#resetShades span.choose").click(function(){
       $("#cagecolors span").removeClass("active");
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
 			$("#mbInput").focusout(); //fires up the change of material blending preview
-      $("#mbSelect").trigger('change');
+      //$("#mbSelect").trigger('change');
 		}
 	});
 
