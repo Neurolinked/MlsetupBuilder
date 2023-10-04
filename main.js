@@ -387,16 +387,20 @@ const template = [
     label: 'File',
     submenu: [
 			{
-          label: 'Mlsetup',
-          submenu: [
-						{label: 'Import',accelerator: 'Ctrl+i', click: () =>{
-							mainWindow.webContents.send('preload:activate','#importTech')
-						}},
-						{label: 'Export',accelerator: 'Ctrl+e', click: () =>{
-							mainWindow.webContents.send('preload:activate','#exportversions')
-						}},
-          ]
-      },
+			label: 'Mlsetup',
+			submenu: [
+					{label: 'Import',accelerator: 'Ctrl+i', click: () =>{
+						mainWindow.webContents.send('preload:activate','#importTech')
+					}},
+					{label: 'Export',accelerator: 'Ctrl+e', click: () =>{
+						mainWindow.webContents.send('preload:activate','#exportversions')
+					}}
+			]
+      		},
+			{
+				label: 'Recent',
+				submenu:[]
+			},
 			{ type: 'separator' },
 			{label: '&Preferences', click: () =>{ openSettings() }},
 			{ type: 'separator' },
@@ -585,7 +589,7 @@ ipcMain.on('main:giveModels',(event) => {
 })
 
 //read file on disk
-ipcMain.on('main:readFile',(event,percorso,flags,no_repo)=>{
+ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
 	var whereLoadFrom
 	if (no_repo){
 		whereLoadFrom = path.normalize(percorso)
@@ -803,42 +807,22 @@ ipcMain.on('main:3dialog',(event, arg) => {
 })
 //Save the preferences
 ipcMain.on('main:saveStore',(event, arg) => {
-	if (arg.hasOwnProperty('unbundle')){
-		preferences.set('unbundle',arg.unbundle);
-	}
-	if (arg.hasOwnProperty('wcli')){
-		preferences.set('wcli',arg.wcli);
-	}
-	if (arg.hasOwnProperty('maskformat')){
-		preferences.set('maskformat',arg.maskformat);
-	}
-	if (arg.hasOwnProperty('legacymaterial')){
-		preferences.set('legacymaterial',arg.legacymaterial);
-	}
-	if (arg.hasOwnProperty('game')){
-		preferences.set('game',arg.game);
-	}
-	if (arg.hasOwnProperty('depot')){
-		preferences.set('depot',arg.depot);
-	}
-	if (arg.hasOwnProperty('flipnorm')){
-		preferences.set('flipnorm',arg.flipnorm);
-	}
-	if (arg.hasOwnProperty('flipmasks')){
-		preferences.set('flipmasks',arg.flipmasks);
-	}
-	if (arg.hasOwnProperty('workspace')){
-		preferences.set('workspace',arg.workspace);
-	}
-	if (arg.hasOwnProperty('workspace')){
-		preferences.set('workspace',arg.workspace);
-	}
-
 	if (arg.hasOwnProperty('editorCfg')){
 		preferences.set('editorCfg.layer.tiles.value',arg.editorCfg.layer.tiles.value);
 		preferences.set('editorCfg.mblend.tiles.value',arg.editorCfg.mblend.tiles.value);
 		preferences.set('editorCfg.mblend.contrast.value',arg.editorCfg.mblend.contrast.value);
 		preferences.set('editorCfg.mblend.normal.value',arg.editorCfg.mblend.normal.value);
+	}else{
+		/*
+		Get the object property and cycle them, test if they are there
+		then they are been setup
+		*/
+		var Arguments = Object.keys(arg);
+		Arguments.forEach((setting)=>{
+			if (preferences.has(setting)){
+				preferences.set(setting, arg[setting]);
+			}
+		});
 	}
 })
 
