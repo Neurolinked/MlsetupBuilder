@@ -780,7 +780,7 @@ $("#resetShades span.choose").click(function(){
   if (lastExportFormat!=null){
     $("select[name='exportVersion']").val(String(lastExportFormat));
   }else{
-    $("select[name='exportVersion']").val(2);
+    $("select[name='exportVersion']").val(3);
   }
 
   /*
@@ -1055,10 +1055,9 @@ $("#resetShades span.choose").click(function(){
 
     MLSB.TreeD.lastModel = data.file;
     localStorage.setItem(`lastModelOpened`,data.file);
-
-    $("#modelTarget").val(MLSB.TreeD.lastModel);
     $("#masksTemplate").val(data.mask!=null?maskList[data.mask].mask.replace('{format}',textureformat):'');
     $("#normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
+    $("#modelTarget").val(MLSB.TreeD.lastModel);
     $('#btnMdlLoader').click();
   });
 
@@ -1434,7 +1433,7 @@ $("#resetShades span.choose").click(function(){
       }
     }
   });
-
+  
   /*simulate the selection of the null_null color */
   $("#colorReset").click(function(){
     $("body #cagecolors span[title='null_null']").click();
@@ -1451,7 +1450,7 @@ $("#resetShades span.choose").click(function(){
 	  let choosed_color = tinycolor(colorSwatchValue);
 	  $("#colorPntage").html(choosed_color.toPercentageRgbString());
     $("#layerColor").val(colorchanger).change();
-		//$("#layerColor").change();
+    $("#colorManagament").html(colorchanger);
 	});
 
   $("#cagethemicroblends li").click(function(){
@@ -2111,7 +2110,6 @@ $(".xportJSON").click(function(){
     					+'          "normalStrength": "'+$("#layeringsystem li").eq(k).data('normal')+'",\r\n'
     					+'          "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n'
     					+'          "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n'
-    					+'          "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n'
     					+jsonOpacity
     					+'          "overrides": 0,\r\n'
     					+'          "roughLevelsIn": "null",\r\n'
@@ -2120,6 +2118,111 @@ $(".xportJSON").click(function(){
         }
 
         break;
+        case 3:
+          preamble ='{\r\n'
+          +'  "Header": {\r\n'
+          +'    "WolvenKitVersion": "8.11.0",\r\n'
+          +'    "WKitJsonVersion": "0.0.8",\r\n'
+          +'    "GameVersion": 2000,\r\n'
+          +'    "ExportedDateTime": "'+jsonDate+'",\r\n'
+          +'    "DataType": "CR2W",\r\n'
+          +'    "ArchiveFileName": ""\r\n'
+          +'  },\r\n'
+          +'  "Data": {\r\n'
+          +'    "Version": 195,\r\n'
+          +'    "BuildVersion": 0,\r\n'
+          +'    "RootChunk": {\r\n'
+          +'      "$type": "Multilayer_Setup",\r\n'
+          +'      "cookingPlatform": "PLATFORM_PC",\r\n'
+          +'      "layers": [\r\n';
+          
+          ratiovalue='\r\n';
+    		  ratioIVal = $("#layerRatio").val();
+          if ((!isNaN(ratioIVal)) && (typeof(ratioIVal)!==undefined)){
+              ratiovalue = ',\r\n      "ratio": '+Number(ratioIVal)+',\r\n';
+          }else{
+              ratiovalue = ',\r\n      "ratio": 1,\r\n';
+          }
+
+          if ($('#useNormals').is(':checked')){
+            useNormal = '      "useNormal": 1\r\n'
+          }else{
+            useNormal = '      "useNormal": 0\r\n'
+          }
+          closing = '\r\n      ]'+ratiovalue+useNormal+'    },\r\n    "EmbeddedFiles": []\r\n  }\r\n}';
+          jsonbody = '';
+          for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
+            jsonOpacity='';
+            if (k!=0){
+              //no Opacity
+              //no offsetu no offsetv
+              jsonOpacity='          "opacity": '+Number($("#layeringsystem li").eq(k).data('opacity')).toFixed(Number($("#layeringsystem li").eq(k).data('opacity')).countDecimals())+',\r\n';
+            }
+            if ($("#layeringsystem li").eq(k).data('opacity')==1){ jsonOpacity=''; }
+            jsonbody += '        {\r\n          "$type": "Multilayer_Layer",\r\n'
+                +'          "colorScale": {\r\n'
+                +'            "$type": "CName",\r\n'
+                +'            "$storage": "string",\r\n'
+                +'            "$value": "'+$("#layeringsystem li").eq(k).data('color')+'"\r\n'
+                +'          },\r\n'
+                +'          "material": {\r\n'
+                +'            "DepotPath": {\r\n'
+                +'              "$type": "ResourcePath",\r\n'
+                +'              "$storage": "string",\r\n'
+                +'              "$value": "'+$("#layeringsystem li").eq(k).data('material').replaceAll(/\\/g, '\\\\')+'"\r\n'
+                +'            },\r\n'
+                +'            "Flags": "Default"\r\n'
+                +'          },\r\n'
+                +'          "matTile": '+Number($("#layeringsystem li").eq(k).data('mattile')).toFixed(2)+',\r\n'
+                +'          "mbTile": '+Number($("#layeringsystem li").eq(k).data('mbtile')).toFixed(Number($("#layeringsystem li").eq(k).data('mbtile')).countDecimals())+',\r\n'
+                +'          "metalLevelsIn": {\r\n'
+                +'            "$type": "CName",\r\n'
+                +'            "$storage": "string",\r\n'
+                +'            "$value": "null"\r\n'
+                +'          },\r\n'
+                +'          "metalLevelsOut": {\r\n'
+                +'            "$type": "CName",\r\n'
+                +'            "$storage": "string",\r\n'
+                +'            "$value": "'+$("#layeringsystem li").eq(k).data('metalout')+'"\r\n'
+                +'          },\r\n'
+                +'          "microblend": {\r\n'
+                +'            "DepotPath": {\r\n'
+                +'              "$type": "ResourcePath",\r\n'
+                +'              "$storage": "string",\r\n'
+                +'              "$value": "'+$("#layeringsystem li").eq(k).data('mblend').replaceAll(/\\/g, '\\\\')+'"\r\n'
+                +'            },\r\n'
+                +'            "Flags": "Default"\r\n'
+                +'          },\r\n'
+                +'          "microblendContrast": '+Number($("#layeringsystem li").eq(k).data('mbcontrast')).toFixed(2)+',\r\n'
+                +'          "microblendNormalStrength": '+Number($("#layeringsystem li").eq(k).data('mbnormal')).toFixed(2)+',\r\n'
+                +'          "microblendOffsetU": '+Number($("#layeringsystem li").eq(k).data('mboffu')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffu')).countDecimals())+',\r\n'
+                +'          "microblendOffsetV": '+Number($("#layeringsystem li").eq(k).data('mboffv')).toFixed(Number($("#layeringsystem li").eq(k).data('mboffv')).countDecimals())+',\r\n'
+                +'          "normalStrength":{\r\n'
+                +'            "$type": "CName",\r\n'
+                +'            "$storage": "string",\r\n'
+                +'            "$value": "'+$("#layeringsystem li").eq(k).data('normal')+'"\r\n'
+                +'          },\r\n'
+                +'          "offsetU": '+Number($("#layeringsystem li").eq(k).data('offsetu')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetu')).countDecimals())+',\r\n'
+                +'          "offsetV": '+Number($("#layeringsystem li").eq(k).data('offsetv')).toFixed(Number($("#layeringsystem li").eq(k).data('offsetv')).countDecimals())+',\r\n'
+                +jsonOpacity
+                +'          "overrides": {\r\n'
+                +'            "$type": "CName",\r\n'
+                +'            "$storage": "string",\r\n'
+                +'            "$value": "None"\r\n'
+                +'          },\r\n'
+                +'          "roughLevelsIn": {\r\n'
+                +'            "$type": "CName",\r\n'
+                +'            "$storage": "string",\r\n'
+                +'            "$value": "null"\r\n'
+                +'          },\r\n'
+                +'          "roughLevelsOut": {\r\n'
+                +'            "$type": "CName",\r\n'
+                +'            "$storage": "string",\r\n'
+                +'            "$value": "'+$("#layeringsystem li").eq(k).data('roughout')+'"\r\n'
+                +'          }\r\n'
+                +'        },\r\n';
+          }
+          break;
     }
 
     jsonbody = jsonbody.slice(0,-3); //removes latest commas
@@ -2462,4 +2565,19 @@ unCooKonfirm.addEventListener("click", (event) => {
     }).catch(error=>notifyMe(error));
   });
 
+  $(".copyMe").click(function(e){
+    var copyBle = $(this).prev("input").val();
+    console.log(copyBle);
+    navigator.clipboard.writeText(copyBle);
+  });
+
+  $.get(`jsons/tablemodels.json`).done(function(result){
+    try{
+      //var ModelContent = JSON.parse(result);
+      console.log(result);
+    }catch(error){
+      console.log(error);
+    }
+  });
+  
 });

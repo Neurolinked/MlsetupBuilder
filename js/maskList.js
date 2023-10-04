@@ -1248,7 +1248,7 @@ const maskList = [
     {"layers": 19,"mask": "/base/weapons/firearms/smg/arasaka_shingen/entities/meshes/textures/w_smg__arasaka_shingen__mag_stdr_01_default_masksset_X.{format}"},
     {"layers": 19,"mask": "/base/weapons/firearms/smg/darra_pulsar/entities/meshes/textures/ml_w_smg__darra_pulsar__base1_01_masksset_X.{format}"},
     {"layers": 9,"mask": "/base/weapons/firearms/smg/darra_pulsar/entities/meshes/textures/ml_w_smg__darra_pulsar__mag_std_01_masksset_X.{format}"},
-    {"layers": 19,"mask": "/base/weapons/firearms/smg/militech_saratoga/entities/meshes/textures/ml_w_smg__militech_saratoga__base1_01_raffenshiv_maskssettpp_X.{format}"},
+    {"layers": 19,"mask": "/base/weapons/firearms/smg/militech_saratoga/entities/meshes/textures/ml_w_smg__militech_saratoga__base1_01_raffenshiv_masksset_X.{format}"},
     {"layers": 18,"mask": "/base/weapons/firearms/smg/militech_saratoga/entities/meshes/textures/ml_w_smg__militech_saratoga__base1_01_ironsight_01_default_masksset_X.{format}"},
     {"layers": 18,"mask": "/base/weapons/firearms/smg/militech_saratoga/entities/meshes/textures/ml_w_smg__militech_saratoga__rcv1_01_stock_01_default_masksset_X.{format}"},
     {"layers": 19,"mask": "/base/weapons/firearms/smg/militech_saratoga/entities/meshes/textures/ml_w_smg__militech_saratoga__base1_02_default_masksset_X.{format}"},

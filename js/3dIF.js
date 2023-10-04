@@ -7,11 +7,12 @@ const normalMapInfo = {
   height : 128
 }
 
-function genTexture(color,size=4){
+function genTexture(color,size=16){
 	if (parseInt(size)>0){
-		var dataColor = new Uint8Array(4 *size);
-		var color = new THREE.Color( color );
-		if (color.isColor){
+		var dataColor = new Uint8Array(4 * size);
+		//var color = new THREE.Color( color );
+		
+		if (color.hasOwnProperty('r') && color.hasOwnProperty('g') && color.hasOwnProperty('b')){
 			var r= Math.floor(color.r * 255);
 			var g= Math.floor(color.g * 255);
 			var b= Math.floor(color.b * 255);
@@ -33,10 +34,22 @@ function genTexture(color,size=4){
 const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
 const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0,5 ) ),4,4);
 const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
-const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 ) ),4,4);
+const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
 
-var materialStack = new Set();
+function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
+	if (mapName=="engine\\textures\\editor\\black.xbm"){
+		return 0.0;
+	}
+	if (mapName=="engine\\textures\\editor\\white.xbm"){
+		return 1.0;
+	}
+	return -1.0;
+}
+
+var materialStack = new Array();
+var materialSet = new Set();
 var multilayerStack = new Set();
+var TextureStack = new Array();
 
 const materialTypeCheck = {
 	decals: [
@@ -75,6 +88,7 @@ if (window.Worker) {
   imgWorker = new Worker('js/workers/imgWork.js');
 
   imgWorker.onmessage = (event) =>{
+	
     context = nMeKanv.getContext('2d');
     context.putImageData(event.data,0,0,0,0,normalMapInfo.width,normalMapInfo.height);
     //normMe = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
@@ -236,7 +250,7 @@ const params = {
  rotationspeed: 6,
  wireframe: false,
  onesided: false,
- lightpower:2,
+ lightpower:0.5,
  alpha:0,
  maskColor:[50, 0, 0],
  fog:{
@@ -264,15 +278,6 @@ const noMaterial = new THREE.MeshStandardMaterial({color: 0x808000});
 
 const glass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
 //material for stitches zip and other things
-const stitchMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_d01.png");
-const stitchNorMap = new THREE.TextureLoader().load("./images/cpsource/garment_decals_n01.png");
-stitchMap.wrapS = THREE.RepeatWrapping;
-stitchMap.wrapT = THREE.RepeatWrapping;
-stitchNorMap.wrapS = THREE.RepeatWrapping;
-stitchNorMap.wrapT = THREE.RepeatWrapping;
-stitchNorMap.premultiplyAlpha = true;
-
-const stitches = new THREE.MeshStandardMaterial({map:stitchMap,normalMap:stitchNorMap, transparent: true,opacity: 0.7, color: 0xffffff});
 //-------------Hairs Materials----------------------------------
 var hairShading = document.getElementById('hairTex');
 HairTexture();
@@ -658,7 +663,6 @@ function loadNormOntheFly(path){
 	path = path.replaceAll(/\//g,'\\')
   	var bufferimage = thePIT.ApriStream(path,'binary');
 	var ab = str2ab(bufferimage);
-  
   if (path.endsWith(".png")){
   	if (ab.byteLength>0){
   			var filePointer = 0;
@@ -754,6 +758,88 @@ function loadNormOntheFly(path){
   material.map.needsUpdate = true;
 }
 
+function dataToTeX(binaryData,channels=4, format = THREE.RGBAFormat){
+	var bufferData = str2ab(binaryData);
+	const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
+
+	if (
+		(headerData[0]==0x44) &&
+		(headerData[1]==0x44) &&
+		(headerData[2]==0x53) ){
+		//DDS Case
+		const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
+		let height = spaceData[3];
+		let width = spaceData[4];
+		let size = height * width * channels;
+
+		const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
+
+		var imageDatas
+		if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+			if (format == THREE.RGBAFormat){
+				imageDatas = new Uint32Array( bufferData, 148, size );
+			}else{
+				imageDatas = new Uint8Array( bufferData, 148, size );
+			}
+		}else{
+			//or legacy RGBA Unorm
+			imageDatas = new Uint8Array( bufferData, 148, size );
+		}
+		let resultTex = new THREE.DataTexture(imageDatas,width,height,format);
+		resultTex.wrapS=THREE.RepeatWrapping;
+		resultTex.wrapT=THREE.RepeatWrapping;
+		return resultTex;
+	}else if (
+		(headerData[0]==0x89)
+		&& (headerData[1]==0x50)
+		&& (headerData[2]==0x4e)
+		&& (headerData[3]==0x47)
+		&& (headerData[4]==0x0d)
+		&& (headerData[5]==0x0a)
+		&& (headerData[6]==0x1a)
+		&& (headerData[7]==0x0a) ){
+		//PNG Case
+		var chunkslenght, chunkstype
+		var pngWidth = pngHeight = 0;
+		var imgByteLenght = ab.byteLength
+
+		//Search for the chunks with the Size of the texture
+		while ((pngWidth==0) && (pngWidth==0) && (filePointer<imgByteLenght)) {
+			chunkslenght = parseInt(new DataView(ab,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
+			chunkstype = new Uint8Array(ab,filePointer+4,4);
+			filePointer+=8;
+			if ( (chunkstype[0]==0x49)
+				&&(chunkstype[1]==0x48)
+				&&(chunkstype[2]==0x44)
+				&&(chunkstype[3]==0x52) ){
+				//go for the read of the length
+				pngWidth=parseInt(new DataView(ab,filePointer,4).getUint32());
+				pngHeight=parseInt(new DataView(ab,filePointer+4,4).getUint32());
+			}
+			filePointer+=chunkslenght+4; //last 4 byte are for the checksum
+		}
+		// Connect the image to the Texture
+		var texture = new THREE.Texture();
+		if (pngWidth>0){
+			// Connect the image to the Texture
+			var texture = new THREE.Texture();
+			var encodedData = btoa(bufferData);
+			var dataURI = "data:image/png;base64," + encodedData;
+			var pngMap = new Image();
+			pngMap.onload = function () {
+				texture.image = image;
+				texture.needsUpdate = true;
+				return texture;
+			};
+			pngMap.src = dataURI;
+		}else{
+			return BLACK;
+		}
+	}else{
+		return BLACK;
+	}
+}
+
 function loadMapOntheFly(path){
   //const encoder = new TextEncoder()
   path = path.replaceAll(/\//g,'\\');
@@ -820,6 +906,7 @@ function loadMapOntheFly(path){
 }
 
 function cleanScene(){
+	TextureStack.forEach( (element) => element.dispose() );
 	if (scene.children.length==6){
 		scene.traverse(oggetti=>{
 			if (!oggetti.isMesh) return
@@ -869,7 +956,7 @@ function LoadModelOntheFly(path){
 	let Boned = false;
 	let MasksOn = document.querySelector('#withbones svg:nth-child(1) path');
 
-  	var modelStream, Decal, actualMaterial, actualTemplate
+  	var modelStream, Decal, actualMaterial, actualTemplate, matTextureOpacity
 	var MlmaskTestString
 
 
@@ -905,19 +992,21 @@ function LoadModelOntheFly(path){
 				console.error(error);
 			}
 		}
-		materialStack.clear();
+		materialSet.clear();
 		multilayerStack.clear();
+		materialStack.forEach((el)=>{
+			el.dispose();
+		}); // Change into Clean Every material and textures
 
 		//console.clear();
 	    glbscene.scene.traverse( function ( child ) {
 			Decal = false;
-			iStitches = false;
 			actualMaterial = '';
 
 			if ((child.type=="SkinnedMesh") && (!Boned)){Boned=true;}
 
 			if ( child.isMesh ) {
-				console.log(child);
+				
           		mobjInfo.push({
 					"name":child.name,
 					"appearanceCode":child.userData.materialNames,
@@ -926,10 +1015,12 @@ function LoadModelOntheFly(path){
 				child.frustumCulled = false;
 				
 				if ((child.userData?.materialNames!=null) && (child.userData?.materialNames!=undefined)){
-					materialStack.add(child.userData.materialNames[0]);
+
+					materialSet.add(child.userData.materialNames[0]);
 
 					actualMaterial = materialJSON.Materials.filter(el=>el.Name==child.userData.materialNames[0])[0];
 					actualTemplate = actualMaterial?.MaterialTemplate==='undefined'?'':actualMaterial.MaterialTemplate;
+					console.log(actualMaterial);
 
 					if ($("#masksTemplate").val()==''){
 						MlmaskTestString = '/'+
@@ -939,28 +1030,110 @@ function LoadModelOntheFly(path){
 						}
 						
 					}
-					
-					//console.log(actualTemplate,actualMaterial);
-					
-
 					if (materialTypeCheck.metal_base.includes(actualTemplate)){
-						child.material = metal_base;
+						
 						GuiSubmesh.add(child, 'visible').name('<i class="fa-solid fa-microchip text-danger"></i> '+child.name);
-						//console.log(actualMaterial.Data.Normal.replace(new RegExp(/\.xbm$/),`.${textureformat}`) );
+						
+						if (materialStack[actualMaterial.Name]===undefined){
+							materialStack[actualMaterial.Name] = new THREE.MeshStandardMaterial({color: 0x808080});
+
+							if (actualMaterial.Data.hasOwnProperty('BaseColor')){
+								let textureMD5Code = CryptoJS.MD5(actualMaterial.Data.BaseColor)
+								if (TextureStack[textureMD5Code]===undefined){
+									//thePIT.ApriStream((actualMaterial.Data.DiffuseTexture).replace('.xbm',`.${textureformat}`),'binary');
+									
+									let temporaryTexture = thePIT.ApriStream((actualMaterial.Data.BaseColor).replace('.xbm',`.${textureformat}`),'binary');
+									//dataToTeX(temporaryTexture);
+									TextureStack[textureMD5Code]=dataToTeX(temporaryTexture);
+
+									materialStack[actualMaterial.Name].map = TextureStack[textureMD5Code];
+								}else{
+									materialStack[actualMaterial.Name].map=TextureStack[textureMD5Code];
+								}
+							}
+
+							if (actualMaterial.Data.hasOwnProperty('BaseColorScale')){
+								let mb_Color = actualMaterial.Data.BaseColorScale;
+								materialStack[actualMaterial.Name].color = new THREE.Color(`rgb(${parseInt(mb_Color.X*255)},${parseInt(mb_Color.Y*255)},${parseInt(mb_Color.Z*255)})`);
+							}else{
+								materialStack[actualMaterial.Name] = new THREE.MeshStandardMaterial({color: 0x808080});
+							}
+
+							if (actualMaterial.Data.hasOwnProperty('AlphaThreshold')){
+								materialStack[actualMaterial.Name].opacity = 1 - actualMaterial.Data.AlphaThreshold;
+								materialStack[actualMaterial.Name].transparent = true;
+							}
+
+							child.material = materialStack[actualMaterial.Name];
+							child.material.needsUpdate = true;
+						}else{
+							child.material = materialStack[actualMaterial.Name]
+						}
+
+						console.error(actualMaterial.Data);
 
 					}else if (materialTypeCheck.decals.includes(actualTemplate)){
+						
 						if (actualMaterial.Data.hasOwnProperty('DiffuseColor')){
 							let defColor = actualMaterial.Data.DiffuseColor;
 							child.material = new THREE.MeshBasicMaterial({color:new THREE.Color(`rgb(${defColor.Red},${defColor.Green},${defColor.Blue})`), opacity: (defColor.Alpha/255), transparent:true});
 						}else{
 							child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(20*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 255)"), opacity:0.3,transparent:true});
 						}
+						child.material.side = THREE.DoubleSide;
+
+						if (actualMaterial.Data.hasOwnProperty('DiffuseAlpha')){
+							matTextureOpacity = actualMaterial.Data.DiffuseAlpha * 255;
+						}else{
+							matTextureOpacity = 255;
+						}
+						if (actualMaterial.Data.hasOwnProperty('DiffuseTexture')){
+							//function to load the texture with the right alpha
+							let textureMD5Code = CryptoJS.MD5(actualMaterial.Data.DiffuseTexture)
+							if (TextureStack[textureMD5Code]===undefined){
+								//thePIT.ApriStream((actualMaterial.Data.DiffuseTexture).replace('.xbm',`.${textureformat}`),'binary');
+								
+								let temporaryTexture = thePIT.ApriStream((actualMaterial.Data.DiffuseTexture).replace('.xbm',`.${textureformat}`),'binary');
+								//dataToTeX(temporaryTexture);
+								TextureStack[textureMD5Code]=dataToTeX(temporaryTexture);
+								child.material.map = TextureStack[textureMD5Code];
+							}else{
+								child.material.map=TextureStack[textureMD5Code];
+							}
+						}
+
+						if (actualMaterial.Data.hasOwnProperty('RoughnessTexture')){
+							if (roughnessValue = checkMaps(actualMaterial.Data.RoughnessTexture)>=0){
+								child.material.roughness = roughnessValue;
+							}else{
+								let RnessMD5Code = CryptoJS.MD5(actualMaterial.Data.RoughnessTexture)
+								if (TextureStack[RnessMD5Code]===undefined){
+									let RnessTempTexture = thePIT.ApriStream((actualMaterial.Data.RoughnessTexture).replace('.xbm',`.${textureformat}`),'binary');
+									TextureStack[RnessMD5Code]=dataToTeX(RnessTempTexture,1,THREE.RedFormat);
+									child.material.roughnessMap = TextureStack[RnessMD5Code];
+								}else{
+									child.material.roughnessMap = TextureStack[RnessMD5Code];
+								}
+							}
+						}
+
+						if (actualMaterial.Data.hasOwnProperty('MetalnessTexture')){
+							if (metalnessValue = checkMaps(actualMaterial.Data.MetalnessTexture)>=0){
+								child.material.metalness = metalnessValue;
+							}else{
+								let MnessMD5Code = CryptoJS.MD5(actualMaterial.Data.MetalnessTexture)
+								if (TextureStack[MnessMD5Code]===undefined){
+									let MnessTempTexture = thePIT.ApriStream((actualMaterial.Data.MetalnessTexture).replace('.xbm',`.${textureformat}`),'binary');
+									TextureStack[MnessMD5Code]=dataToTeX(MnessTempTexture);
+									child.material.metalnessMap = TextureStack[MnessMD5Code];
+								}else{
+									child.material.metalnessMap = TextureStack[MnessMD5Code];
+								}
+							}
+						}
 						
 						GuiSubmesh.add(child, 'visible').name(`<i class="fas fa-tag text-warning"></i> ${child.name}`);
-						
-						console.log('Decal',
-							actualMaterial.Data
-						);
+						child.material.needsUpdate=true;
 						
 					}else if (materialTypeCheck.fx.includes(actualTemplate)){
 						child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(50*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 0)"), opacity:0.7,transparent:true,wireframe:true});
@@ -1000,40 +1173,6 @@ function LoadModelOntheFly(path){
 						child.material = noMaterial;
 						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-question"></i> ${child.name}` );
 					}
-					
-				/*
-				if (!(/(vehicle_lights)|(logos)|(neon_rims)|(visor)|(rivets)|(\bnone\b)|(logo_spacestation.+)|(default_tpp)|((.+)?glass(.+)?)|(multilayer_lizzard)|(phongE1SG1.+)|((.+)?stickers(.+)?)|(stiti.+)|(stit?ch.+)|(black_lighter)|(eyescreen)|(dec_.+)|((.+)?screen(.+)?)|((.+)?decal(.+)?)|(.+_dec\d+)|(02_ca_limestone_1.*)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString()))){
-					if (modelType=='hair'){
-						if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
-							child.material = hair_cap;
-						}else if((/.+_short.+/).test(child.userData.materialNames.toString())){
-							child.material = hair_short;
-						}else if((/.+_card(s).+/).test(child.userData.materialNames.toString())){
-							child.material = hair_card;
-							hair_card.map.needsUpdate = true;
-						}else if((/lambert/).test(child.userData.materialNames.toString())){
-							child.material = material;
-						}else{
-							child.material = hair_other;
-						}
-					}else{
-						child.material = material;
-					}
-				}else if(/(stiti.+)|(stit?ch.+)|(dec_stitches.+)|(zi(p)+er.+)/g.test(child.userData.materialNames.toString())){
-					child.material = stitches;
-                	iStitches = true;
-				}else{
-					if ((/.+(masksset).+/g.test(child.userData.materialNames.toString())) || (/^ml_.+/g.test(child.userData.materialNames.toString()))){
-						child.material = material;
-					}else if (/((.+)?glass(.+))/g.test(child.userData.materialNames.toString())) {
-						child.material = glass;
-						Decal = true;
-					}else{
-						//if is a decoration, a zipper a stiches apply a semitransparent material with autogenerated color
-						child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(20*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 255)"), opacity:0.3,transparent:true});
-									Decal = true;
-					}
-				}*/
 		}else{
 			child.material = material;
 		}
@@ -1085,9 +1224,13 @@ function LoadModelOntheFly(path){
 	    centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
 	    //camera.target = centerPoint;
 	    controls.target = centerPoint;
+		/*
 		multilayerStack.forEach(function(name,key,set){
 			console.log(`--${name}`);
-		});
+		});*/
+
+		console.log(TextureStack);
+
 	  }, (error) => {
 	    notify3D(error);
 	  });
@@ -1189,14 +1332,14 @@ MDLloadingButton.addEventListener('click',(e)=>{
 	let Normed = document.querySelector('#withbones i.icon-normals');
 
 	if (theNormal.match(/^[/|\w|\.]+.[dds|png]/)){
-	loadNormOntheFly(theNormal);
+		loadNormOntheFly(theNormal);
 	}else{
-	safeNormal();
-	Normed.style.color = '';
-	//var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
-	//material.normalMap = texture;
-	material.normalMap.needsUpdate = true
-	notify3D('No Normal, reset to safeNorm');
+		safeNormal();
+		Normed.style.color = '';
+		//var texture = new THREE.CanvasTexture(nMeKanv,THREE.UVMapping,THREE.RepeatWrapping)
+		//material.normalMap = texture;
+		material.normalMap.needsUpdate = true
+		notify3D('No Normal, reset to safeNorm');
 	}
 
 
@@ -1233,14 +1376,15 @@ init();
 
 function init() {
 	scene = new THREE.Scene();
-	/*    const axesHelper = new THREE.AxesHelper( 5 );    scene.add( axesHelper ); to understand position of the objects */
+	/* 
+	const axesHelper = new THREE.AxesHelper( 1 );    scene.add( axesHelper ); to understand position of the objects */
 	var thacanvas = document.getElementById('thacanvas');
 	thacanvas.setAttribute('data-engine',THREE.REVISION);
-  	renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true});
+  	renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true,logarithmicDepthBuffer: true });
 	if (window.innerHeight-80<512){
-	renderer.setSize(renderwidth,renderwidth);
+		renderer.setSize(renderwidth,renderwidth);
 	}else{
-	renderer.setSize(renderwidth,window.innerHeight-80);
+		renderer.setSize(renderwidth,window.innerHeight-80);
 	}
 
 	renderer.gammaFactor = 2.2;
@@ -1400,7 +1544,7 @@ function animate() {
 			imgDataShot = renderer.domElement.toDataURL('image/png');
 			getImageData = false;
 			a.href = imgDataShot;
-			a.download = "lastscreen.png";
+			a.download = `screen${ new Date().valueOf()}.png`;
 			//console.log(imgDataShot);
 	}
   requestAnimationFrame(animate);
