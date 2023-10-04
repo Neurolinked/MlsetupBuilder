@@ -58,7 +58,7 @@
     <div id="floatLayer" class="d-none position-absolute">
       <img id="currentMat" class="d-inline" width="128" height="128">
       <img id="currentMblend" class="d-inline flipreverse" width="128" height="128">
-      <div class="d-inline-block colDisplayer" title="null_null">&nbsp;</div>
+      <div class="d-inline-block colDisplayer" titl e="null_null">&nbsp;</div>
       <footer class="px-1"></footer>
     </div>
     <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
@@ -77,6 +77,7 @@
           </div>
           <div class="mb-1">
             <select name="exportVersion" class="form-select form-select-sm rounded-0 dropSelect">
+              <option value="3">Json v0.0.8 (Wkit 8.11+)</option>
               <option value="2">Json v0.0.2 (Wkit 8.7+)</option>
               <option value="1">Json v0.0.1 (Wkit 8.5)</option>
               <option value="0">pre-Wkit 8.5</option>
@@ -363,10 +364,7 @@
 </div>
 <!--End layersList-->
 <div id="layer_settings" class="layer-2 rounded-0">
-  <div class="d-flex justify-content-between">
-    <span class="px-2 py-1">Parameters</span>
-    <button type="button" class="btn btn-outline-warning m-0 mx-1" data-bs-toggle="offcanvas" data-bs-target="#editorConfig"><i class="fa-solid fa-sliders"></i></button>
-  </div>
+  
   <div id="matdisplay" class="no-gutters layer-3" >
     <div><canvas id="materialDis" width="128" height="128" data-bs-toggle="modal" data-bs-target="#materialModal" ></canvas></div>
       <div>
@@ -426,10 +424,11 @@
         </div>
       </div>
     </div>
-    <details id="legacyMatSector"><summary id="materialSummary" >unused</summary>
     <div class="input-group mb-1">
       <input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
+      <button class="btn d-inline-block btn-sm float-end rounded copyMe" type="button">Copy</button>
     </div>
+    <details id="legacyMatSector"><summary id="materialSummary" >unused</summary>
     <div class="input-group layer-4">
       <input id="legacyMatFinder" class="form-control" type="text" placeholder="Filter the materials" aria-label="material searcher">
       <button type="button" id="legacyMatFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
@@ -439,10 +438,18 @@
       </ul>
     </div>
     </details>
-    <div id="colorGrid">
-      <div><span class="badge  w-100 rounded-0">ColorCode</span><input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13"></div>
-      <div><span class="badge  w-100 rounded-0" id="colorPntage">rgb();</span><span class="badge border border-secondary w-100 rounded-0 tint" > </span></div>
-    </div>
+    <details open><summary id="colorManagament">null_null</summary>
+      <div id="colorGrid">
+        <div>
+          <span class="badge  w-100 rounded-0">ColorCode</span>
+            <input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13">
+        </div>
+        <div>
+          <span class="badge  w-100 rounded-0" id="colorPntage">rgb();</span>
+          <span class="badge border border-secondary w-100 rounded-0 tint" > </span>
+        </div>
+      </div>
+    </details>
     <div class="input-group input-group-sm">
       <span class="input-group-text">Color filter</span>
       <input type="text" class="form-control" aria-label="Sizing example input" id="colorLbFinder" placeholder="write a label to find the color">
@@ -543,6 +550,10 @@
         </div>
      </div>
     <div id="Settings">
+      <div class="d-flex justify-content-between layer-1">
+        <span class="px-2 py-1 ">Parameters</span>
+        <button type="button" class="btn btn-sm rounded-0 btn-outline-warning m-0 mx-1" data-bs-toggle="offcanvas" data-bs-target="#editorConfig"><i class="fa-solid fa-sliders"></i></button>
+      </div>
      <div id="SettingsSummary" class="d-flex justify-content-start"></div>
      <div id="SettingsScroller" class="pe-1" >
     </div>

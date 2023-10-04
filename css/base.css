@@ -9,8 +9,6 @@
 .plus_4_layer{background-color:rgba(255,255,255,0.12);}
 .plus_5_layer{background-color:rgba(255,255,255,0.14);}
 
-
-
 .dropdown-menu-dark{
   --bs-dropdown-link-active-bg: #9a0036;
 }
@@ -112,7 +110,7 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #colorGrid{display:grid;grid-template-columns:1.5fr 2.3fr;}
 #matdisplay{display:grid;grid-template-columns: var(--matrender) 1fr;} /*display the materials and it's datas*/
 
-#legacyMaterial{height:140px;overflow-y: scroll;border:1px solid #4d5154!important;}
+#legacyMaterial{height:200px;overflow-y: scroll;border:1px solid #4d5154!important;}
 #cagethematerials{height:270px;overflow-y: scroll;border:1px solid #4d5154!important;}
 #cagemLibrary{height:calc(2 * var(--matsizes));overflow-y: scroll;border:1px solid #4d5154!important;}
 #cagemLibrary::-webkit-scrollbar ,
@@ -361,6 +359,7 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #materialSummary{background-color:var(--bs-secondary);padding:0 .5em;}
 #materialSummary::before{content: 'Material: ';font-size:calc(100% * .8);}
 #materialModal .modal-body{background:radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(39,39,39,1) 100%);background-repeat: no-repeat;max-height:calc(3*var(--matsizes))!important;max-width:calc(4*var(--matsizes) + 16px)!important;}
+#colorManagament:before{content: 'Color: ';font-size:calc(100% * .8);}
 #materialDis,
 #materialChoser{background:radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(39,39,39,1) 100%);background-repeat: no-repeat;max-height:var(--matrender)!important;max-width:var(--matrender)!important;}
 #materialDis,
@@ -562,6 +561,14 @@ table.dataTable tr:hover td:not([colspan]){
   margin-right: 1rem;
   > label{ display:block; }
   > label > input {width:100%; }
+}
+
+#editorConfig{
+  > .offcanvas-body{
+    > div.input-group{
+      > span{min-width:50%;}
+    }
+  }
 }
 /*
 .loadingtext:after {
