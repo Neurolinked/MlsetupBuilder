@@ -1055,7 +1055,7 @@ function uncookRun(toggle,params,stepbar,logger){
 						case 'micro_opt01':
 						case 'micro_opt02':
 						case 'micro_opt03':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends step done</span>','#microLogger')
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends step done</span>','#microLogger div')
 							break;
 					}
 					if (stepbar){
@@ -1243,11 +1243,11 @@ function microBuilder(contentdir){
 			var countingOnYou = 0
 
 			if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
-				mainWindow.webContents.send('preload:uncookLogClean','#microLogger')
+				mainWindow.webContents.send('preload:uncookLogClean','#microLogger div')
 
-				uncookRun(true,["uncook", "-p", path.join(contentpath,archives.engine), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger')
-					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger'))
-					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger'))
+				uncookRun(true,["uncook", "-p", path.join(contentpath,archives.engine), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div')
+					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger div'))
+					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger div'))
 					.then(()=> {
 						return new Promise((resolve,reject) =>{
 							fs.readdir(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/'),(err,files)=>{
@@ -1293,11 +1293,14 @@ function microBuilder(contentdir){
 								k++
 							})
 						}catch(err){
-							mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
+							mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div');
 						}
 					})
 					.catch((err)=>{mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')})
-					.finally(() => { 	mainWindow.webContents.send('preload:enable',"#MycroMe") })
+					.finally(() => {
+						mainWindow.webContents.send('preload:enable',"#MycroMe");
+						mainWindow.webContents.send('preload:trigEvent',{target:"body", trigger:'updateMBlends'});
+					})
 			}
 	})
 }

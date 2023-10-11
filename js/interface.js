@@ -2579,5 +2579,14 @@ unCooKonfirm.addEventListener("click", (event) => {
       console.log(error);
     }
   });
+
+  $("body").bind("updateMBlends",function(){
+    setTimeout(()=>{
+      $("#cagethemicroblends li").each((idx,elem)=>{
+        let styleToGet = $(elem).attr('style');
+        $(elem).attr('style',`background-image:${styleToGet.split(':')[1].replace('.png',`.png?${(new Date()).getTime()}`)}`);
+      });
+    },10000);
+  });
   
 });

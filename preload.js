@@ -320,3 +320,11 @@ ipcRenderer.on("preload:activate",(event,target)=>{
   let objtarget = document.querySelector(target)
 	objtarget.click()
 });
+
+ipcRenderer.on("preload:trigEvent",(event,targetAction)=>{
+  if (targetAction.hasOwnProperty('target') && targetAction.hasOwnProperty('trigger')){
+    const myEvent = new Event(targetAction.trigger);
+    let objtarget = document.querySelector(targetAction.target);
+    objtarget.dispatchEvent(myEvent);
+  }
+});
