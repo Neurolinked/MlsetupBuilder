@@ -961,7 +961,23 @@ $("#resetShades span.choose").click(function(){
       dataSrc:'models',
       url:'jsons/tablemodels.json'
     },
-    buttons: [ ],
+    buttons: [
+      {
+        extend:'searchBuilder',
+        className:'btn btn-sm btn-secondary my-1',
+        config: {
+          columns: [3],
+          preDefined: {
+            criteria: [
+                {
+                    data: 'Tags',
+
+                }
+             ]
+          }
+        }
+      }
+    ],
     columns:[
       {
         className: 'dt-control',
@@ -972,19 +988,20 @@ $("#resetShades span.choose").click(function(){
       {data:'name'},
       {data:'file',searchable:true},
       {
-        data:'tags'/*
+        data:'tags',
         render: function( data, type, row, meta ){
-          var howmany = data.split(",");
+          var howmany = String(data).split(",");
           tagString = '';
           howmany.forEach((el,idx)=>{
             if (idx % 2){
-              tagString +=`<span class="badge rounded-pill text-bg-info">${el}</span>`;
+              tagString +=`<span class="badge rounded-pill text-bg-info me-1">${el}</span>`;
             }else{
-              tagString +=`<span class="badge rounded-pill text-bg-primary">${el}</span>`;
+              tagString +=`<span class="badge rounded-pill text-bg-primary me-1">${el}</span>`;
             }
           })
-          return tagString;
-        }*/
+          return type === 'display'? tagString : data;
+        },
+        searchable:true
       },
       {data:'mask'},
       {data:'normal'},
@@ -999,11 +1016,14 @@ $("#resetShades span.choose").click(function(){
       {target:'_all',visible:false,searchable:false}
       ],
     deferRender: true,
-    dom:"<'row g-0'<'col-sm-12 col-md-7'f><'col-sm-12 col-md-5'il>>" +
+    dom:"<'row g-0'<'col-sm-12 col-md-7'Bf><'col-sm-12 col-md-5'il>>" +
     "<'row g-0'<'col-sm-12'tr>>" +
     "<'row g-0'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'>>",
     language: {
-      search: ""
+      search: "",
+      searchBuilder: {
+        button: 'tags filter',
+      }
     },
     order: [[ 2, 'asc' ]],
     processing:true,
@@ -1019,7 +1039,7 @@ $("#resetShades span.choose").click(function(){
     },
     scrollCollapse: true,
     scroller: true,
-    scrollY: (window.innerHeight-290),
+    scrollY: (window.innerHeight-320),
     select: {
       style:'single',
       toggleable: false
@@ -1041,6 +1061,7 @@ $("#resetShades span.choose").click(function(){
           }
         }
         table.draw(true);
+        $(".dt-buttons button" ).removeClass("dt-button");
       }
       var filtered = CPModels.data().flatten().filter((value,index)=>{ return value.file==MLSB.TreeD.lastModel});
       filtered = filtered.length==1 ? filtered[0] : {};
@@ -1059,6 +1080,7 @@ $("#resetShades span.choose").click(function(){
     $("#normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
     $("#modelTarget").val(MLSB.TreeD.lastModel);
     $('#btnMdlLoader').click();
+    
   });
 
   CPModels.select.selector( 'td:not(:first-child)' ); //
@@ -2256,7 +2278,7 @@ $("#unCookModal .modal-body .form-check-input").click(function(){
 	}
 })
 
-$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_DEC4, #arc_FNT4").change(function(){
+$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_FNT4").change(function(){
 	//console.log($(this))
 	if ($(this).is(':checked')){
 		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');
@@ -2265,19 +2287,27 @@ $("#arc_GA4, #arc_AP4, #arc_NC3, #arc_DEC4, #arc_FNT4").change(function(){
 	}
 });
 
+var uncookTimer
+
 $("#triggerUncook").click(function(){
   $("#stopUncook").prop("disabled",false);
 	$("#triggerUncook").prop("disabled",true);
 	$("#uncookCog").removeClass('d-none');
+  $("#triggerUncook").prepend('<i class="fa-solid fa-gear fa-spin"></i> ');
 	let files = new Array()
-	$('#uncookCheck > div > input.form-check-input').each(function(){
+	$('#uncookCheck > details > div > input.form-check-input').each(function(){
 		files.push($(this).is(':checked'))
 	})
 	thePIT.UnCookMe(files);
+  uncookTimer = setInterval(()=>{
+    $("#uncookLogger div").html("");
+  },60000);
 });
 
 $("#stopUncook").click(function(){
+  $("#triggerUncook svg").remove();
   thePIT.stopUncook();
+  clearInterval(uncookTimer);
 });
 
 $("#MycroMe").click(function(){
@@ -2296,8 +2326,8 @@ $("body").on("click","#customMaskSelector option",function(ev){
 
 $("#masksCFinder").on('keyup',function(ev){
 	if ($("#masksCFinder").val()!=''){
-		$("#customMaskSelector option:contains('"+escape($("#masksCFinder").val())+"')").removeClass('d-none');
-		$("#customMaskSelector option").not(":contains('"+escape($("#masksCFinder").val())+"')").addClass('d-none');
+		$("#customMaskSelector option:contains('"+encodeURI($("#masksCFinder").val())+"')").removeClass('d-none');
+		$("#customMaskSelector option").not(":contains('"+encodeURI($("#masksCFinder").val())+"')").addClass('d-none');
 	}else{
 		$("#customMaskSelector option").removeClass('d-none');
 	}
@@ -2432,7 +2462,7 @@ const unCooKonfirm = document.getElementById("unCooKonfirm");
 uncookfile.addEventListener("close", (e) => {
   if (uncookfile.returnValue == "true") {
     notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel}`);
-    thePIT.UnCookSingle(MLSB.TreeD.lastModel.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\"));
+    thePIT.UnCookSingle(MLSB.TreeD.lastModel.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\").replaceAll("\\ep1\\","ep1\\"));
     taskProcessBar();
   }else{
     notifyMe("File uncook cancelled by the user")

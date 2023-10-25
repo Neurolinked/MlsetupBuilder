@@ -219,9 +219,10 @@ ipcRenderer.on('preload:scanReply',(event,result)=>{
 ipcRenderer.on('preload:enable',(event,target) => {
 		let obj = document.querySelector(target)
 		obj.disabled = false
+
 		if (target=='#triggerUncook'){
-			let loadCog = document.querySelector('#uncookCog')
-			loadCog.classList.add('d-none')
+			let loadCog = document.querySelector('#uncookCog i')
+			loadCog.remove();
 		}else if(target=='#MycroMe'){
 			let mycroCog = document.querySelector('#mycroCog')
 			mycroCog.classList.add('d-none')

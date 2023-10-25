@@ -256,7 +256,8 @@
         <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipNorm" autocomplete="off">
           <label class="btn btn-outline-normal" for="flipNorm"><i class="icon-normals"></i></label>
       </div>
-		<div class="btn-group ms-2 me-1" role="group" aria-label="model loading">
+		<div class="btn-group btn-group-sm ms-2 me-1" role="group" aria-label="model loading">
+      <button type="button" id="btnModPaths" data-toggle="tooltip" title="Setup a mod path to take assets from" class="btn btn-outline-info"><i class="fa-solid fa-folder-tree"></i></button>
 	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
 		</div>
     <div v class="btn-group" role="group" aria-label="model info">
@@ -784,49 +785,75 @@
     <div class="modal-content rounded-0">
       <div class="modal-body p-0 ">
 				<div class="row no-gutters">
-					<div id='uncookCheck' class="col-7 p-3">
-						<div class="form-check form-switch">
-						  <input class="form-check-input" type="checkbox" role="switch" id="arc_NC3" checked>
-							<span class="badge bg-warning text-dark">basegame_3_nightcity.archive</span>
-						</div>
-						<div class="progress border border-dark  my-1 bg-layer0" style="height: 1.5rem;" >
-						  <div id="uncook_step1" class=" bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-							<!--<div id="uncook_step2" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>-->
-						</div>
-						<div class="form-check form-switch">
-							<input class="form-check-input" type="checkbox" role="switch" id="arc_AP4" checked>
-							<span class="badge bg-warning text-dark">basegame_4_appearance.archive</span>
-						</div>
-						<div class="progress border border-dark  my-1 bg-layer0" style="height: 1.5rem;" >
-							<div id="uncook_step3" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-							<!--<div id="uncook_step4" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>-->
-						</div>
-						<div class="form-check form-switch">
-							<input class="form-check-input" type="checkbox" role="switch" id="arc_GA4" checked>
-							<span class="badge bg-warning text-dark">basegame_4_gamedata.archive</span>
-						</div>
-						<div class="progress border border-dark  my-1 bg-layer0" style="height: 1.5rem;" >
-							<div id="uncook_step5" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-							<!--<div id="uncook_step6" class="border-start border-dark progress-bar bg-normal progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>-->
-						</div>
-						<!-- TODO to this code-->
-						<div class="form-check form-switch">
-							<input class="form-check-input" type="checkbox" role="switch" id="arc_DEC4" checked>
-							<span class="badge bg-warning text-dark">Decal materials</span>
-						</div>
-						<div class="progress border border-dark  my-1 bg-layer0" style="height: 1.5rem;" >
-							<div id="uncook_step7" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-							<div id="uncook_step8" class="border-start border-dark progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-						</div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="arc_FNT4" checked>
-              <span class="badge bg-warning text-dark">Fonts</span>
-            </div>
-            <div class="progress border border-dark  my-1 bg-layer0" style="height: 1.5rem;" >
-              <div id="uncook_step9" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-            </div>
-						<!-- TODO to this code-->
-						<div class="text-center mt-3"><i id="uncookCog" class="fas fa-cog fa-pulse fa-4x text-danger d-none"></i></div>
+					<div id='uncookCheck' class="col-7">
+            <details open class="pb-1" ><summary class="mb-2">Base Game</summary>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="arc_NC3" checked>
+                <span class="badge bg-warning text-dark">basegame_3_nightcity.archive</span>
+              </div>
+              <div class="progress border border-dark  my-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step1" class=" bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="arc_AP4" checked>
+                <span class="badge bg-warning text-dark">basegame_4_appearance.archive</span>
+              </div>
+              <div class="progress border border-dark  my-1 bg-layer0  mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step3" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="arc_GA4" checked>
+                <span class="badge bg-warning text-dark">basegame_4_gamedata.archive</span>
+              </div>
+              <div class="progress border border-dark  my-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step5" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+              <!-- TODO to this code-->
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="arc_FNT4" checked>
+                <span class="badge bg-warning text-dark">Fonts</span>
+              </div>
+              <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step9" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+            </details>
+            <details open><summary>Phantom Liberty</summary>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="ep1_CH" checked>
+                <span class="badge bg-warning text-dark">Characters</span>
+              </div>
+              <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step10" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="ep1_WE" checked>
+                <span class="badge bg-warning text-dark">Weapons</span>
+              </div>
+              <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step11" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="ep1_VE" checked>
+                <span class="badge bg-warning text-dark">Vehicles</span>
+              </div>
+              <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step12" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="ep1_ME" >
+                <span class="badge bg-warning text-dark">Mechanical</span>
+              </div>
+              <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step13" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+              <div class="form-check form-switch mx-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="ep1_EN" >
+                <span class="badge bg-warning text-dark">Environment</span>
+              </div>
+              <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
+                <div id="uncook_step14" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+              </div>
+            </details>
 					</div>
 					<div id="uncookLogger" class="col-5 p-1 bg-layer0" >
 						<div class="text-muted"> </div>

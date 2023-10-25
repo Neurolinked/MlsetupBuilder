@@ -87,6 +87,14 @@ const schema = {
 		type:'number',
 		default: 0
 	},
+	paths:{
+		type:'object',
+		default : {
+			game:'',
+			depot: '',
+			lastmod: ''
+		}
+	},
 	editorCfg : {
 		type:'object',
 		default: {
@@ -168,9 +176,29 @@ const preferences = new store({schema,
 					}
 				}
 			})
+			
+			var fixGamePath = store.get('game');
+			if (fixGamePath!=''){
+				fixGamePath = fixGamePath.replace("\\archive\\pc\\content","")
+			}
+			store.set({
+				paths:{
+					type:'object',
+					default : {
+						game:fixGamePath,
+						depot: store.get('depot'),
+						lastmod: ''
+					}
+				}
+			})
 		}
 	}
 });
+
+var spotfolder={
+	base: "archive/pc/content",
+	pl: "archive/pc/ep1"
+}
 
 var archives={
 	engine : "basegame_1_engine.archive",
@@ -475,7 +503,7 @@ const template = [
 		{	label:'Download Wolvenkit.CLI',
 			click:()=>{
 				//Download the stable version
-				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit/releases/download/8.9.0/WolvenKit.Console-1.8.2.zip`);
+				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit/releases/download/8.11.0/WolvenKit.Console-1.11.0.zip`);
 			}
 		},
 		{	label:'License',click: () =>{
@@ -968,9 +996,18 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 });
 
 ipcMain.on('main:modelExport',(event,conf)=>{
-	let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
+	let unbundlefoWkit = preferences.get('unbundle')
 	let uncooker = preferences.get('wcli')
-	var contentpath = preferences.get('game')
+	var contentpath = preferences.get('paths.default.game')
+
+	if (conf.match(/^ep1\\.+/)){
+		contentpath = path.join(contentpath,spotfolder.pl);
+	}else{
+		contentpath = path.join(contentpath,spotfolder.base);
+	}
+
+	console.log(contentpath,conf);
+
 	var exportFormatGE = preferences.get('maskformat')
 
 	fs.access(path.normalize(unbundlefoWkit),fs.constants.W_OK,(err)=>{
@@ -983,7 +1020,7 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 			}else{
 				event.reply('preload:logEntry',`Searching for the file in the whole archive, be patient`,true);
 				if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
-					uncookRun(true,["uncook", "-p", path.join(contentpath), "-w",path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],false,'#NotificationCenter .offcanvas-body')
+					uncookRun(true,["uncook", "-p", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],false,'#NotificationCenter .offcanvas-body')
 					.then(()=>{
 						event.reply('preload:logEntry',"Export of the model Done, reload");
 						mainWindow.webContents.send('preload:noBar','');
@@ -1086,7 +1123,7 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
-			var gameContentPath = preferences.get('game')
+			var gameContentPath = preferences.get('paths.default.game');
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
 				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
@@ -1094,7 +1131,7 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 				mainWindow.webContents.send('preload:logEntry',`The export will be done into ${preferences.get('unbundle')}`)
 				var archiveFilter = repoBuilder(gameContentPath,conf)
 			}else{
-				var archivefold = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
+				var archivefold = dialog.showOpenDialog({title:'Select the game folder (Cyberpunk 2077)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
 				.then(selection => {
 					if (!selection.canceled){
 						repoBuilder(selection.filePaths[0],conf)
@@ -1107,96 +1144,40 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 
 //function to execute the series of uncook
 function repoBuilder(contentdir, conf){
-	contentpath = contentdir
+
+	vanillaContentPath = path.join(contentdir,spotfolder.base)
+	phantomLContentPath = path.join(contentdir,spotfolder.pl)
+
 	return new Promise((resolve,reject) =>{
-		let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
+		let unbundlefoWkit = preferences.get('unbundle')
 		let uncooker = preferences.get('wcli')
+		
 		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 			if (typeof(conf)=='object'){
 				mainWindow.webContents.send('preload:uncookLogClean')
 				var exportFormatGE = preferences.get('maskformat')
-				//previous configuration ["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","-or",unbundlefoWkit,"-o",unbundlefoWkit],'step1'
-				uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],'step1')
-					//.then(()=> uncookRun(conf[0],["uncook", "-p", path.join(contentpath,archives.nightcity), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step2'))
+				uncookRun(conf[0],["uncook", "-p", path.join(vanillaContentPath,archives.nightcity), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.(mesh|mlmask)$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],'step1')
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
-					.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step3'))
-					//.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step4'))
+					.then(()=>uncookRun(conf[1],["uncook", "-p", path.join(vanillaContentPath,archives.appearances), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step3'))
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_AP4")})
-					.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step5'))
-					//.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.+n[0-9]{2}\.xbm$","--uext","png","-o",unbundlefoWkit],'step6'))
+					.then(()=>uncookRun(conf[2],["uncook", "-p", path.join(vanillaContentPath,archives.gamedata), "-r","^base.(vehicles|weapons|characters|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step5'))
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
-					.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(contentpath,archives.appearances), "-r","^base.characters.common.textures.decals.+\.xbm$","--uext","png","-o",unbundlefoWkit],'step7'))
-					.then(()=> {
-						return new Promise((resolve,reject) =>{
-							if (conf[3]){
-								fs.readdir(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/'),(err,files)=>{
-									if (err){
-											mainWindow.webContents.send('preload:uncookErr',`${err}`)
-											reject()
-									}else {
-										var decalfiles = []
-										files.forEach((el)=>{
-											if (el.match(/garment_decals_[d|n]\d{2}\.png$/))
-											decalfiles.push(el)
-										})
-										mainWindow.webContents.send('preload:uncookErr',`Found ${decalfiles.length} decals to process`)
-										resolve(decalfiles)
-									}
-								})
-							}else{
-								resolve([])
-							}
-						})
-					})
-					.then((files)=>{
-						try{
-							var perc = Number(100/files.length).toFixed(2)
-							var k = 0
-							files.forEach((png)=>{
-								if (/.+n\d{2}\.png$/.test(png)){
-									k++
-									sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
-									.raw()
-									.toBuffer({ resolveWithObject: true })
-									.then(({ data, info }) => {
-										const { width, height, channels } = info;
-										for (let i = 0, l=data.length; i < l; i += 4) {
-										 data[i + 2] = 255;  // B value
-										}
-										sharp(data, { raw: { width, height, channels } })
-										.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
-											 if(err){
-												 mainWindow.webContents.send('preload:uncookErr',`${err}`)
-											 }
-										 })
-									})
-									.catch(err => { console.log(err) })
-								}else{
-									sharp(path.join(String(preferences.get('unbundle')),'base/characters/common/textures/decals/',png))
-										.toFile(path.join(app.getAppPath(),'images/cpsource/',png), (err, info) => {
-											 if(err){
-												 mainWindow.webContents.send('preload:uncookErr',`${err}`)
-											 }else{
-												 k++
-												 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'step8')
-											 }
-											})
-								}
-
-							})
-							if (conf[3]) mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals copied and edited</span>')
-						}catch(err){
-							if (conf[3]) mainWindow.webContents.send('preload:uncookErr',`${err}`)
-						}
-					})
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_DEC4") })
-					.then(()=>uncookRun(conf[4],["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
+					.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(vanillaContentPath,archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
+					.then(()=>uncookRun(conf[4],["uncook", "-p", phantomLContentPath, "-r","^ep1.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step10'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_CH")})
+					.then(()=>uncookRun(conf[5],["uncook", "-p", phantomLContentPath, "-r","^ep1.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step11'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_WE")})
+					.then(()=>uncookRun(conf[6],["uncook", "-p", phantomLContentPath, "-r","^ep1.vehicles.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step12'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_VE")})
+					.then(()=>uncookRun(conf[7],["uncook", "-p", phantomLContentPath, "-r","^ep1.mechanical.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step13'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ME")})
+					.then(()=>uncookRun(conf[7],["uncook", "-p", phantomLContentPath, "-r","^ep1.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step14'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_EN")})
 					.catch(err => { console.log(err) })
 					.finally(() => {
 						mainWindow.webContents.send('preload:enable',"#triggerUncook")
 						mainWindow.webContents.send('preload:disable',"#stopUncook")
-
 					})
 				}
 		}
