@@ -563,6 +563,10 @@ table.dataTable tr:hover td:not([colspan]){
   > label > input {width:100%; }
 }
 
+#DataModelsLibrary_wrapper .badge{
+  font-size: .8rem!important;
+}
+
 #editorConfig{
   > .offcanvas-body{
     > div.input-group{
@@ -570,26 +574,7 @@ table.dataTable tr:hover td:not([colspan]){
     }
   }
 }
-/*
-.loadingtext:after {
-  overflow: hidden;
-  display: inline-block;
-  vertical-align: bottom;
-  -webkit-animation: ellipsis steps(4, end) 700ms infinite;
-  animation: ellipsis steps(4, end) 700ms infinite;
-  content: "\2026";
-  /* ascii code for the ellipsis character *
-  width: 0px;
-}
 
-@keyframes ellipsis {
-  to {
-    width: 40px;
-  }
+#uncookCheck details{
+  background-color: #9a003699;
 }
-
-@-webkit-keyframes ellipsis {
-  to {
-    width: 40px;
-  }
-}*/
