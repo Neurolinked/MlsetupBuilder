@@ -57,7 +57,8 @@ const materialTypeCheck = {
 		"base\\materials\\mesh_decal_emissive.mt",
 		"base\\materials\\vehicle_mesh_decal.mt",
 		"base\\materials\\mesh_decal_double_diffuse.mt",
-		"base\\materials\\mesh_decal_parallax.mt"
+		"base\\materials\\mesh_decal_parallax.mt",
+		"base\\materials\\mesh_decal_gradientmap_recolor.mt"
 		],
 	fx:[
 		"base\\fx\\shaders\\parallaxscreen.mt",
@@ -71,7 +72,10 @@ const materialTypeCheck = {
 		"base\\materials\\glass_onesided.mt",
 		"base\\materials\\vehicle_glass"
 		],
-	hair: ["base\\materials\\hair.mt"],
+	hair: [
+		"base\\materials\\hair.mt",
+		"base\\characters\\common\\hair\\textures\\hair_profiles\\_master__long.mi"
+		],
 	metal_base : [
 		"engine\\materials\\metal_base.remt"
 		],
@@ -770,12 +774,14 @@ function dataToTeX(binaryData,channels=4, format = THREE.RGBAFormat){
 		const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
 		let height = spaceData[3];
 		let width = spaceData[4];
+		console.log(`texture ${width}x${height}px`);
 		let size = height * width * channels;
 
 		const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
 
 		var imageDatas
 		if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+			console.log(`DDS ${format}`);
 			if (format == THREE.RGBAFormat){
 				imageDatas = new Uint32Array( bufferData, 148, size );
 			}else{
@@ -828,6 +834,8 @@ function dataToTeX(binaryData,channels=4, format = THREE.RGBAFormat){
 			var pngMap = new Image();
 			pngMap.onload = function () {
 				texture.image = image;
+				texture.wrapS=THREE.RepeatWrapping;
+				texture.wrapT=THREE.RepeatWrapping;
 				texture.needsUpdate = true;
 				return texture;
 			};
@@ -1073,7 +1081,7 @@ function LoadModelOntheFly(path){
 						console.error(actualMaterial.Data);
 
 					}else if (materialTypeCheck.decals.includes(actualTemplate)){
-						
+
 						if (actualMaterial.Data.hasOwnProperty('DiffuseColor')){
 							let defColor = actualMaterial.Data.DiffuseColor;
 							child.material = new THREE.MeshBasicMaterial({color:new THREE.Color(`rgb(${defColor.Red},${defColor.Green},${defColor.Blue})`), opacity: (defColor.Alpha/255), transparent:true});
@@ -1087,6 +1095,7 @@ function LoadModelOntheFly(path){
 						}else{
 							matTextureOpacity = 255;
 						}
+
 						if (actualMaterial.Data.hasOwnProperty('DiffuseTexture')){
 							//function to load the texture with the right alpha
 							let textureMD5Code = CryptoJS.MD5(actualMaterial.Data.DiffuseTexture)
@@ -1131,6 +1140,23 @@ function LoadModelOntheFly(path){
 								}
 							}
 						}
+
+						if (actualMaterial.Data.hasOwnProperty('MaskTexture')){
+
+							if (maskValue = checkMaps(actualMaterial.Data.MaskTexture)>=0){
+								child.material.alphaMap = maskValue;
+							}else{
+								let MaskMD5Code = CryptoJS.MD5(actualMaterial.Data.MaskTexture)
+								if (TextureStack[MaskMD5Code]===undefined){
+									let MaskTempTexture = thePIT.ApriStream((actualMaterial.Data.MaskTexture).replace('.xbm',`.${textureformat}`),'binary');
+									TextureStack[MaskMD5Code]=dataToTeX(MaskTempTexture);
+									child.material.alphaMap = TextureStack[MaskMD5Code];
+								}else{
+									child.material.alphaMap = TextureStack[MaskMD5Code];
+								}
+							}
+							child.material.opacity = .9;
+						}
 						
 						GuiSubmesh.add(child, 'visible').name(`<i class="fas fa-tag text-warning"></i> ${child.name}`);
 						child.material.needsUpdate=true;
@@ -1146,18 +1172,68 @@ function LoadModelOntheFly(path){
 						GuiSubmesh.add(child, 'visible').name( `<i class="fa-solid fa-wine-glass-empty text-secondary"></i> ${child.name}` );
 
 					}else if (materialTypeCheck.hair.includes(actualTemplate)){
-						if ((/.+_cap.+/).test(child.userData.materialNames.toString())){
-							child.material = hair_cap;
-						}else if((/.+_short.+/).test(child.userData.materialNames.toString())){
-							child.material = hair_short;
-						}else if((/.+_card(s).+/).test(child.userData.materialNames.toString())){
-							child.material = hair_card;
-							hair_card.map.needsUpdate = true;
-						}else if((/lambert/).test(child.userData.materialNames.toString())){
-							child.material = material;
+						console.log("Hairs!")
+						if ((/.+hair_profiles.+/).test(actualMaterial?.BaseMaterial)){
+							child.material = new THREE.MeshBasicMaterial({opacity:.9,transparent:true,side:THREE.DoubleSide});
+
+							if (actualMaterial.Data.hasOwnProperty('Strand_Gradient')){
+								if (StrandGradient = checkMaps(actualMaterial.Data.Strand_Gradient)>=0){
+									child.material.map = StrandGradient;
+								}else{
+									let SGradMD5Code = CryptoJS.MD5(actualMaterial.Data.Strand_Gradient)
+									if (TextureStack[SGradMD5Code]===undefined){
+										let SGradTempTexture = thePIT.ApriStream((actualMaterial.Data.Strand_Gradient).replace('.xbm',`.${textureformat}`),'binary');
+										TextureStack[SGradMD5Code]=dataToTeX(SGradTempTexture);
+										child.material.map = TextureStack[SGradMD5Code];
+									}else{
+										child.material.map = TextureStack[SGradMD5Code];
+									}
+								}
+							}
+
+							if (actualMaterial.Data.hasOwnProperty('Strand_Alpha')){
+								if (StrandAlpha = checkMaps(actualMaterial.Data.Strand_Alpha)>=0){
+									child.material.alphaMap = StrandAlpha;
+								}else{
+									let SAlphaMD5Code = CryptoJS.MD5(actualMaterial.Data.Strand_Alpha)
+									if (TextureStack[SAlphaMD5Code]===undefined){
+										let SAlphaTempTexture = thePIT.ApriStream((actualMaterial.Data.Strand_Alpha).replace('.xbm',`.${textureformat}`),'binary');
+										TextureStack[SAlphaMD5Code]=dataToTeX(SAlphaTempTexture);
+										child.material.alphaMap = TextureStack[SAlphaMD5Code];
+
+									}else{
+										child.material.alphaMap = TextureStack[SAlphaMD5Code];
+									}
+								}
+							}
+
+							
+
+							child.material.needsUpdate = true;
 						}else{
-							child.material = hair_other;
+							if ((/.+_cap$/).test(actualMaterial.Name)){
+								child.material = new THREE.MeshBasicMaterial({side:THREE.DoubleSide});
+								if (actualMaterial.Data.hasOwnProperty('DiffuseTexture')){
+
+									let textureMD5Code = CryptoJS.MD5(actualMaterial.Data.DiffuseTexture)
+									if (TextureStack[textureMD5Code]===undefined){
+										let temporaryTexture = thePIT.ApriStream((actualMaterial.Data.DiffuseTexture).replace('.xbm',`.${textureformat}`),'binary');
+										TextureStack[textureMD5Code]=dataToTeX(temporaryTexture);
+										child.material.map = TextureStack[textureMD5Code];
+									}else{
+										child.material.map=TextureStack[textureMD5Code];
+									}
+								}
+							}else if((/.+_short.+/).test(child.userData.materialNames.toString())){
+								child.material = hair_short;
+							}else if((/.+_card(s).+/).test(child.userData.materialNames.toString())){
+								child.material = hair_card;
+								hair_card.map.needsUpdate = true;
+							}else if((/lambert/).test(child.userData.materialNames.toString())){
+								child.material = material;
+							}
 						}
+
 						GuiSubmesh.add(child, 'visible').name( `<i class="fa-solid fa-scissors text-secondary"></i> ${child.name}` );
 
 					}else if (materialTypeCheck.skin.includes(actualTemplate)){
@@ -1369,6 +1445,7 @@ MDLloadingButton.addEventListener('click',(e)=>{
 	 MDLloadingButton.disabled=false;
 	 notify3D(`We are searching for .glb files and then this ${MLSB.TreeD.lastModel} one showed up, we can\'t open it now`);
  }
+ $("#layeringsystem li.active").click();
 
 });
 
@@ -1386,6 +1463,7 @@ function init() {
 	}else{
 		renderer.setSize(renderwidth,window.innerHeight-80);
 	}
+	renderer.setPixelRatio( window.devicePixelRatio );
 
 	renderer.gammaFactor = 2.2;
   	renderer.outputEncoding = THREE.sRGBEncoding;
@@ -1429,19 +1507,6 @@ function init() {
   pointlight_2.position.set(-5,0,-5);
   pointlight_3.position.set(0,0.5,-3);
   pointlight_4.position.set(0,3,3);
-
-	/*
-	pointlight.castShadow = true
-
-	pointlight.shadow.mapSize.width = 256; // default
-	pointlight.shadow.mapSize.height = 256; // default
-	pointlight.shadow.camera.near = 0.05; // default
-	pointlight.shadow.camera.far = 20; // default
-	/*
-	pointlight_2.castShadow = true
-	pointlight_3.castShadow = true
-	pointlight_4.castShadow = true
-	*/
   scene.add(pointlight);
   scene.add(pointlight_2);
   scene.add(pointlight_3);
