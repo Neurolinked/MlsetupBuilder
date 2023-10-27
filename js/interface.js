@@ -770,11 +770,11 @@ $("#resetShades span.choose").click(function(){
   var openCloseMBlend = localStorage.getItem('customMicroblend_I');
 
   if (openCloseMBlend){
-    $("#cu_mu_display").addClass("d-none");
-    $("#btn_dis_cBlend svg").removeClass("fa-eye-slash").addClass("fa-eye");
-  }else{
     $("#cu_mu_display").removeClass("d-none");
     $("#btn_dis_cBlend svg").removeClass("fa-eye").addClass("fa-eye-slash");
+  }else{
+    $("#cu_mu_display").addClass("d-none");
+    $("#btn_dis_cBlend svg").removeClass("fa-eye-slash").addClass("fa-eye");
   }
 
   if (lastExportFormat!=null){
@@ -1020,6 +1020,8 @@ $("#resetShades span.choose").click(function(){
     "<'row g-0'<'col-sm-12'tr>>" +
     "<'row g-0'<'col-sm-12 col-md-5'><'col-sm-12 col-md-7'>>",
     language: {
+      info: `<i class="fa-solid fa-eye"></i> _START_ to _END_ of _TOTAL_`,
+      infoFiltered: "(filtered from _MAX_)",
       search: "",
       searchBuilder: {
         button: 'tags filter',
@@ -2278,7 +2280,7 @@ $("#unCookModal .modal-body .form-check-input").click(function(){
 	}
 })
 
-$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_FNT4").change(function(){
+$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_FNT4, #ep1_WE, #ep1_VE, #ep1_ME, #ep1_EN").change(function(){
 	//console.log($(this))
 	if ($(this).is(':checked')){
 		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');

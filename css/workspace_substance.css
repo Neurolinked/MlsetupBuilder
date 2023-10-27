@@ -32,6 +32,7 @@
     grid-column-start: 3;
     grid-column-end: 3;
     height: 130px;
+    box-shadow: 0 0.5rem 1rem black;
 }
 #SettingsScroller{
     grid-column-start: 3;

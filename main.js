@@ -1037,6 +1037,7 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 
 function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
+		var oldmsg = '';
 		if (toggle){
 			let uncooker = preferences.get('wcli')
 			subproc = spawner(uncooker,params).on('error',function(err){
@@ -1047,7 +1048,10 @@ function uncookRun(toggle,params,stepbar,logger){
 			subproc.stdout.on('data', (data) => {
 
 				if (!(/%/.test(data.toString()))){
-					mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
+					//don't clog the logger with duplicates
+					if (oldmsg!=data.toString()){
+						mainWindow.webContents.send('preload:uncookErr',`${data}`,logger)
+					}
 				}else{
 					if (oldtxt != data.toString().split("%")[0]){
 						oldtxt = data.toString().split("%")[0]
@@ -1088,6 +1092,24 @@ function uncookRun(toggle,params,stepbar,logger){
 							break;
 						case 'step9':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Fonts exported</span>')
+							break;
+						case 'step10':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Fonts exported</span>')
+							break;
+						case 'step11':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty chars exported</span>')
+							break;
+						case 'step12':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty weapons exported</span>')
+							break;
+						case 'step13':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty vehicles exported</span>')
+							break;
+						case 'step14':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty mechanical exported</span>')
+							break;
+						case 'step15':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
 							break;
 						case 'micro_opt01':
 						case 'micro_opt02':

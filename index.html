@@ -470,65 +470,46 @@
 
 <!-- Microblend part-->
     <div id="micropanel" class="layer-2 rounded-0">
-      <div class="" >
-        <span class="badge w-100 rounded-0">&micro;blends</span>
-        <div class="input-group input-group-sm mb-1">
-          <input type="text" class="form-control rounded-0 " id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
-          <button class="btn btn-outline-danger rounded-0" id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
-        </div>
-        <select class="form-select rounded-0" id="mbSelect" aria-label="microblends selection lists">
-          <optgroup label='core'>
-            <option data-package="source" data-thumbnail="./images/default.gif" value="base\surfaces\microblends\default.xbm" selected >default</option>
-          </optgroup>
-        </select>
-        <div id="MicroblendsLibrary">
-          <span class="badge w-100 rounded-0" >core &micro;blends</span>
-          <div id="microdisplay" class="layer-2">
-            <div id="cagethemicroblends" tabindex="1">
-              <li style="background-image:url('./images/thumbs/default.gif');" data-package='source' data-toggle="tooltip" title="default"> </li>
-            </div>
+      <span class="d-block bg-normal text-black rounded-0 p-2">&micro;blends</span>
+      <div class="input-group input-group-sm mb-1">
+        <input type="text" class="form-control rounded-0 " id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
+        <button class="btn btn-outline-danger rounded-0" id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="MicroblendsLibrary" class="my-2">
+        <span class="w-100 rounded-0 p-2" >Core &micro;blends</span>
+        <div id="microdisplay" class="layer-2 mx-2">
+          <div id="cagethemicroblends" tabindex="1">
+            <li style="background-image:url('./images/thumbs/default.gif');" data-package='source' data-toggle="tooltip" title="default"> </li>
           </div>
         </div>
-        <img id="mb-preview" style="background-color:#000;" alt="microblend preview" src='./images/default.gif' >
-        <div class='row gx-0'>
-          <div class="col-6 m-0">
-            <input id="bg-changer" type="color" value="#000000" data-toggle="tooltip" title="Background color check for microblend">
+      </div>
+      <details open>
+        <summary class="bg-normal text-black">&micro;blends Parameters</summary>
+        <div class="p-2">
+          <select class="form-select rounded-0" id="mbSelect" aria-label="microblends selection lists">
+            <optgroup label='core'>
+              <option data-package="source" data-thumbnail="./images/default.gif" value="base\surfaces\microblends\default.xbm" selected >default</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="p-2">
+          <div class="input-group input-group-sm layer-2 ">
+            <div class="badge my-auto">Tiles</div> <input type="number" class="form-control rounded-0 " id="mbTile" value="1.0" step="0.01"  min="0.01" max="150">
+            <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbTile" value="1.0" step="0.01"  min="0.01" max="150">
           </div>
-          <div class="col-6 m-0">
-            <div class="btn-group btn-group-sm w-100" role="group" aria-label="microblend fx">
-              <button class="btn btn-outline-info rounded-0" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
-              <button class="btn btn-outline-warning rounded-0" id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
-            </div>
-
+          <div class="input-group input-group-sm layer-2">
+            <div class="badge my-auto">contrast</div>
+            <input type="number" class="form-control rounded-0" id="mbCont" value="0.0" step="0.01"  data-toggle="tooltip" title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
+            <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbCont" value="0.0" step="0.01"  min="0.0" max="1.0">
           </div>
-        </div>
-
-        <div id="CustMicroblendsGallery">
-          <span class="badge w-100 rounded-0" >custom &micro;blends <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
-            <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye-slash"></i></button>
-            <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
-          </div></span>
-          <div id="cu_mu_display" class="layer-2">
-            <div id="cagetheCuMBlends" ></div>
+          <div class="input-group input-group-sm layer-2 ">
+              <div class="badge my-auto">normals</div>
+            <input type="number" class="form-control rounded-0" id="mbNorm" value="1.0" step="0.01">
+            <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbNorm" value="1.0" step="0.01"  min="0.0" max="2.0">
           </div>
-        </div>
-        <!-- microblends-data -->
-        <div class="input-group input-group-sm layer-2 my-1">
-          <div class="badge my-auto">Tiles</div> <input type="number" class="form-control rounded-0 " id="mbTile" value="1.0" step="0.01"  min="0.01" max="150">
-          <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbTile" value="1.0" step="0.01"  min="0.01" max="150">
-        </div>
-        <div class="input-group input-group-sm layer-2 mb-1">
-          <div class="badge my-auto">contrast</div>
-          <input type="number" class="form-control rounded-0" id="mbCont" value="0.0" step="0.01"  data-toggle="tooltip" title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
-          <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbCont" value="0.0" step="0.01"  min="0.0" max="1.0">
-        </div>
-        <div class="input-group input-group-sm layer-2 mb-1">
-            <div class="badge my-auto">normals</div>
-          <input type="number" class="form-control rounded-0" id="mbNorm" value="1.0" step="0.01">
-          <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbNorm" value="1.0" step="0.01"  min="0.0" max="2.0">
         </div>
         <div class="layer-3 m-1 p-1">
-          <span class="badge w-100 rounded-0 ">&micro;blend offset</span>
+          <span class="d-block rounded-0 p-2"><i class="fas fa-crosshairs"></i> &micro;blend offset</span>
           <div class="treeColGrid my-1">
             <div class="input-group input-group-sm">
               <span class="input-group-text rounded-0 bg-dark text-warning  border-0">U</span> <input type="number" class="form-control rounded-0 text-end" id="mbOffU" value="0" step="0.01">
@@ -536,9 +517,45 @@
             <div class="input-group input-group-sm">
               <span class="input-group-text rounded-0 bg-dark text-warning border-0">V</span> <input type="number" class="form-control rounded-0 text-end" id="mbOffV" value="0" step="0.01">
             </div>
-            <button class="btn btn-Prim rounded-0 btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
+            <button class="btn btn-normal rounded-0 btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
           </div>
         </div>
+        <div id="CustMicroblendsGallery" class="my-2">
+          <div class="d-flex justify-content-between">
+            <span class=" d-block ps-2" >Custom &micro;blends </span>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
+              <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye-slash"></i></button>
+              <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
+            </div>
+          </div>
+          <div id="cu_mu_display" class="layer-2 mx-2">
+            <div id="cagetheCuMBlends" ></div>
+          </div>
+        </div>
+        <div class="m-2">
+          <span class="w-100 rounded-0 p-2" >&micro;blend preview tool</span>
+          <div class='row gx-0'>
+            <div class="col-6 m-0">
+              <input id="bg-changer" type="color" value="#000000" data-toggle="tooltip" title="Background color check for microblend">
+            </div>
+            <div class="col-6 m-0">
+              <div class="btn-group btn-group-sm w-100" role="group" aria-label="microblend fx">
+                <button class="btn btn-outline-info rounded-0" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
+                <button class="btn btn-outline-warning rounded-0" id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span> </span>
+      </details>
+      <div class="" >
+        <img id="mb-preview" style="background-color:#000;" alt="microblend preview" src='./images/default.gif' >
+        
+
+        
+        <!-- microblends-data -->
+
+        
       </div>
         <div id="versionDisplay">
           <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
@@ -555,7 +572,7 @@
         <span class="px-2 py-1 ">Parameters</span>
         <button type="button" class="btn btn-sm rounded-0 btn-outline-warning m-0 mx-1" data-bs-toggle="offcanvas" data-bs-target="#editorConfig"><i class="fa-solid fa-sliders"></i></button>
       </div>
-     <div id="SettingsSummary" class="d-flex justify-content-start"></div>
+     <div id="SettingsSummary" class="d-flex justify-content-start border-bottom border-secondary"></div>
      <div id="SettingsScroller" class="pe-1" >
     </div>
       <!-- LayerConfig -->
@@ -631,14 +648,6 @@
                     <option value="50"></option>
                   </datalist>
                 </div>
-                <!--
-								<div class="d-flex justify-content-center my-1 py-1 layer-2 rounded">
-									<div class="form-check form-switch">
-									  <input class="form-check-input" type="checkbox" role="switch" id="gScalePaint">
-									  <label class="form-check-label" for="gScalePaint">Grayscale</label>
-									</div>
-								</div>
-                -->
                 <div id="resetShades" class="d-flex justify-content-center my-1 py-1 layer-2 rounded">
                   <span class="choose" data-color="000000" style="background-color:#000000"> </span>
                   <span class="choose" data-color="FF0000" style="background-color:#FFFFFF"> </span>
