@@ -527,6 +527,7 @@ dialog::backdrop{background: rgba(0, 0, 0, 0.5);}
   padding:.4rem;
 }
 dialog{outline:none;}
+dialog#setupModPath{min-width:60%;}
 
 div.dataTables_wrapper div.dataTables_info {padding:0;}
 #DataModelsLibrary_filter input[type='search']{min-width:300px;}

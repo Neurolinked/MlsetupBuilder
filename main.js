@@ -784,6 +784,20 @@ ipcMain.on('main:setupUnbundle',(event, arg) => {
   })
 })
 
+ipcMain.on('main:pickWkitPorject',(ev)=>{
+	const result = dialog.showOpenDialog({
+		title:'Choose a Wolvenkit Project file',
+		filters:[ { name: 'Wolvenkit Project', extensions: ['cpmodproj'] }],
+	}).then(result => {
+	if (!result.canceled){
+		var dirPath = path.dirname(result.filePaths[0]);
+		preferences.set('paths.default.lastmod',dirPath);
+	 	ev.reply('preload:set_new_modPath',dirPath);
+	}
+  }).catch(err => {
+	dialog.showErrorBox("File picking error",err.message)
+  })
+});
 
 //dialog To choose a mlmask file
 ipcMain.on('main:pickMlmask',(event, arg) => {
@@ -1480,3 +1494,5 @@ ipcMain.on('main:WindopenExt',(event,resource)=>{
 			break
 	}
 })
+
+

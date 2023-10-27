@@ -5,6 +5,7 @@ var uncookMyFile = false;
 var MLSBConfig = thePIT.RConfig();
 var textureformat = ''
 
+      
 function notifyMe(message, warning = true){
   let Data = new Date(Date.now());
   if (warning){
@@ -183,6 +184,7 @@ $(window).on("load", function (e) {
 })
 
 $(function(){
+  var setupModPath = document.getElementById('setupModPath');
   let buildmyHairs = abuildHairs(hairs);
   
   var Workspaces = {
@@ -237,6 +239,10 @@ $(function(){
     if (config.hasOwnProperty('workspace')){
       Workspaces.dom.attr('href',Workspaces.config(config.workspace));
       movecontent();
+    }
+
+    if (config.hasOwnProperty('paths')){
+      $("dialog#setupModPath input").val(config.paths.default.lastmod);
     }
   }).catch((error)=>{
     notifyMe(error);
@@ -2619,6 +2625,16 @@ unCooKonfirm.addEventListener("click", (event) => {
         $(elem).attr('style',`background-image:${styleToGet.split(':')[1].replace('.png',`.png?${(new Date()).getTime()}`)}`);
       });
     },10000);
+  });
+
+  //Open the modal to setup the path of a project
+  $("#btnModPaths").click(function(ev){
+    setupModPath.showModal();
+  });
+
+  $("#pickProjectMod").click(function(ev){
+    $("dialog#setupModPath input").val("");
+    thePIT.pickPrjPath();
   });
   
 });

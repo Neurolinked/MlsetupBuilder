@@ -1141,5 +1141,24 @@ THE SOFTWARE.</p>
     </div>
   </dialog>
 
+  <dialog id="setupModPath" class="border border-secondary rounded bg-layer0">
+    <div class="modal-header pb-3">
+      <h5 class="modal-title text-primary">Mod Path support</h5>
+    </div>
+    <div class="text-white-50">
+      Choose a Wolvenkit project file to get the right values
+      <form method="dialog">
+        <div class="input-group mb-3">
+          <span class="input-group-text">Path </span>
+          <input type="text" class="form-control" readonly placeholder="Select the mod project file">
+        </div>
+        <div class="d-flex justify-content-between">
+          <button class="btn btn-secondary" type="button" id="pickProjectMod"><i class="fa-solid fa-hand-lizard fa-rotate-270"></i> Pick Project file</button>
+          <button value="cancel" class="btn btn-dark" formmethod="dialog"><i class="fa-solid fa-xmark"></i> Close</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
   </body>
 </html>

@@ -76,6 +76,9 @@ Scan a folder searching for GLB files
       },
       openAim : (setups)=>{
         ipcRenderer.send('main:aimMicros',setups);
+      },
+      pickPrjPath : ()=>{
+        ipcRenderer.send('main:pickWkitPorject')
       }
 	},
 )
@@ -250,6 +253,12 @@ ipcRenderer.on('preload:set_new_mask_name',(event,result) => {
 	var fileSelected = document.querySelector("#lblmasktoAdd")
 	fileSelected.setAttribute('value',result)
   fileSelected.dispatchEvent(new Event('update', { 'bubbles': true }));
+})
+
+ipcRenderer.on('preload:set_new_modPath',(event,result)=>{
+  var tobeSet = document.querySelector("#setupModPath input[type='text']")
+  tobeSet.value=result;
+  tobeSet.dispatchEvent(new Event('change', { 'bubbles': true }));
 })
 
 ipcRenderer.on('preload:noBar',(event,result)=>{

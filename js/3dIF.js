@@ -120,14 +120,12 @@ function notify3D(message){
 	NTextarea.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+'<br/>'+NTextarea.innerHTML;
 }
 
-
 function fogApply(fogType){
 	console.log(typeof(fogType.color));
 	if ((fogType?.color) && (fogType.far) && fogType.near){
 		return new THREE.Fog( fogType.color, fogType.near,fogType.far)
 	}
 }
-/*thacanvas events*/
 
 thacanvas.addEventListener('mousedown',(event)=>{
 	event.preventDefault();
@@ -135,6 +133,7 @@ thacanvas.addEventListener('mousedown',(event)=>{
 		paintMaskCTX.beginPath();
 	}
 });
+
 thacanvas.addEventListener('mouseup',(event)=>{
 	event.preventDefault();
 	if (event.shiftKey &&  (event.button==0)){
