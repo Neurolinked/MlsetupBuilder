@@ -19,12 +19,14 @@
           "path": "base\\surfaces\\microblends\\pattern_n_tri.xbm"
         },
         {
-          "path": "base\\surfaces\\microblends\\pattern_tech_3lobe_01.xbm",
-          "hash": "71eeaa95b2a04fee082048d110decdd1"
+          "path": "base\\surfaces\\microblends\\pattern_n_tech_3lobe_01.xbm"
         },
         {
-          "path": "base\\surfaces\\microblends\\pattern_tech_3lobe_02.xbm",
-          "hash": "abc2e1622d284bb554ed910e98e8f069"
+          "path": "base\\surfaces\\microblends\\pattern_n_tech_3lobe_02.xbm"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_net.xbm",
+          "hash": "94691d94404fcd4ec84bfe643a0a297e"
         }
       ]
     }
