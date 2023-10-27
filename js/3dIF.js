@@ -1430,7 +1430,6 @@ MDLloadingButton.addEventListener('click',(e)=>{
 	}
 	LoadModelOntheFly(MLSB.TreeD.lastModel);
 	//Disattivazione livelli non utilizzabili
-	layersActive(maxLayer_thisModel);
    	//defUVUnwrap()
    	clearCanvas(canvUVWrapped,',768');
 	//material.needUpdates =true;
@@ -1445,7 +1444,6 @@ MDLloadingButton.addEventListener('click',(e)=>{
 	 MDLloadingButton.disabled=false;
 	 notify3D(`We are searching for .glb files and then this ${MLSB.TreeD.lastModel} one showed up, we can\'t open it now`);
  }
- $("#layeringsystem li.active").click();
 
 });
 
