@@ -41,5 +41,6 @@
     grid-column-end: 3;
     overflow-y: auto;
     padding: 0 3px;
+    max-height: calc(100vh - 5rem);
 }
 #layeringsystem li::after {content: ' ' attr(data-labels);}

@@ -42,6 +42,7 @@
     grid-column-end: 3;
     overflow-y: auto;
     padding: 0 3px;
+    max-height: calc(100vh - 5rem);
 }
 #layeringsystem{display: grid;grid-template-columns: 1fr 1fr 1fr 1fr;}
 #layeringsystem li{margin:2px;}

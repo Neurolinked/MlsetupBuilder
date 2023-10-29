@@ -53,7 +53,7 @@
   <link rel="stylesheet" href="./css/iconmoon.css" />
   <style id="panelsSize" type="text/css"> </style>
   </head>
-  <body class="px-1">
+  <body data-bs-theme="dark" class="px-1">
 		<div id="floatMat" class="d-none position-absolute"> </div>
     <div id="floatLayer" class="d-none position-absolute">
       <img id="currentMat" class="d-inline" width="128" height="128">
@@ -118,9 +118,12 @@
   <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
 <!--Notification Area -->
 <div class="offcanvas offcanvas-bottom bg-dark bg-gradient text-light" tabindex="-1" id="NotificationCenter" aria-labelledby="NCLabel">
-  <div class="offcanvas-header bg-info">
-    <h5 class="offcanvas-title text-dark" id="NCLabel">Notification center</h5>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  <div class="offcanvas-header bg-layer0">
+    <h5 class="offcanvas-title " id="NCLabel">Notification center</h5>
+    <div class="btn-group">
+      <button type="button" class="btn btn-tiny btn-dark" aria-label="Clean" id="emptyNotyLog"><i class="fa-solid fa-broom"></i></button>
+      <button type="button" class="btn btn-close my-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
   </div>
   <div class="offcanvas-body m-2 p-2"></div>
 </div>
@@ -256,13 +259,21 @@
         <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipNorm" autocomplete="off">
           <label class="btn btn-outline-normal" for="flipNorm"><i class="icon-normals"></i></label>
       </div>
-		<div class="btn-group btn-group-sm ms-2 me-1" role="group" aria-label="model loading">
-      <button type="button" id="btnModPaths" data-toggle="tooltip" title="Setup a mod path to take assets from" class="btn btn-outline-info"><i class="fa-solid fa-folder-tree"></i></button>
-	    <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
-		</div>
-    <div v class="btn-group" role="group" aria-label="model info">
-      <span id="withbones" class="text-layer2"><i class="fa-solid fa-bone fa-2x"></i> <i class="icon-normals fa-2x"></i></span>
-    </div>
+      <div class="btn-group btn-group-sm ms-2 me-1" role="group" aria-label="model loading">
+        <button type="button" id="btnModPaths" data-toggle="tooltip" title="Setup a mod path to take assets from" class="btn btn-outline-info"><i class="fa-solid fa-folder-tree"></i></button>
+        <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
+      </div>
+      <div v class="btn-group" role="group" aria-label="model info">
+        <span id="withbones" class="text-layer2"><i class="fa-solid fa-bone fa-2x"></i> <i class="icon-normals fa-2x"></i></span>
+      </div>
+      <div id="Settings">
+        <div class="d-flex justify-content-between layer-1">
+          <span class="px-2 py-1 ">Parameters</span>
+          <button type="button" class="btn btn-sm rounded-0 btn-outline-warning m-0 mx-1" data-bs-toggle="offcanvas" data-bs-target="#editorConfig"><i class="fa-solid fa-sliders"></i></button>
+        </div>
+        <div id="SettingsSummary" class="d-flex justify-content-start border-bottom border-secondary"></div>
+        <div id="SettingsScroller" class="pe-1" ></div>
+      </div>
     </div>
   </div>
 
@@ -365,7 +376,6 @@
 </div>
 <!--End layersList-->
 <div id="layer_settings" class="layer-2 rounded-0">
-  
   <div id="matdisplay" class="no-gutters layer-3" >
     <div><canvas id="materialDis" width="128" height="128" data-bs-toggle="modal" data-bs-target="#materialModal" ></canvas></div>
       <div>
@@ -567,16 +577,6 @@
           <a href="#" class="d-none" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter">Notification Center</a>
         </div>
      </div>
-    <div id="Settings">
-      <div class="d-flex justify-content-between layer-1">
-        <span class="px-2 py-1 ">Parameters</span>
-        <button type="button" class="btn btn-sm rounded-0 btn-outline-warning m-0 mx-1" data-bs-toggle="offcanvas" data-bs-target="#editorConfig"><i class="fa-solid fa-sliders"></i></button>
-      </div>
-     <div id="SettingsSummary" class="d-flex justify-content-start border-bottom border-secondary"></div>
-     <div id="SettingsScroller" class="pe-1" >
-    </div>
-      <!-- LayerConfig -->
-    </div>
   </div>
     <!--End of the New Editor-->
   </div>

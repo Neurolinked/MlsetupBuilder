@@ -25,8 +25,6 @@ bc.onmessage = (event)=>{
   console.log(event.data);
 };
 
-// lowest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)<0.095));
-// Highest color console.log(ml_libraries.canvas_clean_01_30.overrides.colorScale.filter(maxred => maxred.v.reduce((a, b) => a + b, 0)>0.9));
 var mLsetup = new Mlsetup();
 
 var layerSwapstart = null;
@@ -210,15 +208,17 @@ $(function(){
 
   function movecontent(){
     if (Workspaces.index==2) {
+      $("#Settings").insertAfter("#layer_settings")
       $("#layer_settings").appendTo("#SettingsScroller");
       $("#micropanel").appendTo("#SettingsScroller");
       $("#materialDis").appendTo("#SettingsSummary");
       $("#mb-preview").appendTo("#SettingsSummary");
     }else{
-      $("#layer_settings").insertBefore($("#Settings"));
-      $("#micropanel").insertBefore($("#Settings"));
+      $("#layer_settings").insertAfter($("#MlEditor"));
+      $("#micropanel").insertAfter($("#layer_settings"));
       $("#materialDis").appendTo("#matdisplay > div:nth-child(1)");
       $("#mb-preview").insertAfter("#MicroblendsLibrary");
+      $("#Settings").appendTo("#modelsNavbar");
     }
   }
 
@@ -2608,7 +2608,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     console.log(copyBle);
     navigator.clipboard.writeText(copyBle);
   });
-
+  /*
   $.get(`jsons/tablemodels.json`).done(function(result){
     try{
       //var ModelContent = JSON.parse(result);
@@ -2616,7 +2616,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     }catch(error){
       console.log(error);
     }
-  });
+  });*/
 
   $("body").bind("updateMBlends",function(){
     setTimeout(()=>{
@@ -2637,4 +2637,9 @@ unCooKonfirm.addEventListener("click", (event) => {
     thePIT.pickPrjPath();
   });
   
+  $("#emptyNotyLog").click(function(){
+    $("#NotificationCenter .offcanvas-body").html("");
+    notifyMe("Log reset",false);
+  })
+
 });
