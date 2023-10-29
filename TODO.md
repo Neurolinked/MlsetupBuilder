@@ -4,15 +4,16 @@
 - [x] New model Library based on DataTables
   - [x] Row grouping by type : vanilla, custom
   - [ ] Row ordering based on grouping model name
+  - [x] Tag addition and complex filtering on
 - [ ] New shaders management based on .Material.json file
-  - [ ] Assign shaders as from appearances
-  - [ ] masks loading from material configuration
+  - [x] Assign shaders as from appearances
+  - [x] masks loading from material configuration
   - [ ] multilayer.mt conversion to three.js format
   - [ ] metal_base.remt conversion to three.js format
-  - [ ] mesh_decal.mt conversion to three.js format
+  - [x] mesh_decal.mt conversion to three.js format
 - [ ] Custom models Material.json search and usage
   - [ ] Override masks selection from legacy list
-- [ ] UI redesign for the new materials management
+- [x] UI redesign for the new materials management
 - [ ] Material Composer extension
   - [ ] Appearances Editor
   - [ ] Panels column slider

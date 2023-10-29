@@ -90,9 +90,10 @@ const schema = {
 	paths:{
 		type:'object',
 		default : {
-			game:'',
 			depot: '',
-			lastmod: ''
+			game:'',
+			lastmod: '',
+			wcli:''
 		}
 	},
 	editorCfg : {
@@ -185,9 +186,10 @@ const preferences = new store({schema,
 				paths:{
 					type:'object',
 					default : {
-						game:fixGamePath,
 						depot: store.get('depot'),
-						lastmod: ''
+						game:fixGamePath,
+						lastmod: '',
+						wcli: store.get('wcli')
 					}
 				}
 			})
@@ -847,9 +849,11 @@ ipcMain.on('main:3dialog',(event, arg) => {
 	event.reply('preload:enable','#cstMdlLoader')
   })
 })
+
 //Save the preferences
 ipcMain.on('main:saveStore',(event, arg) => {
 	if (arg.hasOwnProperty('editorCfg')){
+		//MMMMMMM to be reworked
 		preferences.set('editorCfg.layer.tiles.value',arg.editorCfg.layer.tiles.value);
 		preferences.set('editorCfg.mblend.tiles.value',arg.editorCfg.mblend.tiles.value);
 		preferences.set('editorCfg.mblend.contrast.value',arg.editorCfg.mblend.contrast.value);
