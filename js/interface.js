@@ -1048,6 +1048,9 @@ $("#resetShades span.choose").click(function(){
     scrollCollapse: true,
     scroller: true,
     scrollY: (window.innerHeight-320),
+    search:{
+      "regex": true
+    },
     select: {
       style:'single',
       toggleable: false
@@ -1244,7 +1247,20 @@ $("#resetShades span.choose").click(function(){
           break;
       }
       $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
-      $("#currentMblend").attr("src", `images/${mblendlName}.png`);
+      //if the microblend is custom it has to build the attribute finding the right one
+
+      if ((coreMblends.microblends.filter(el => el.name==mblendlName).length==1) || (mblendlName=='default')) {
+        $("#currentMblend").attr("src", `images/${mblendlName}.png`);
+      }else{
+        let dummyMblend = $("#cagetheCuMBlends").find($(`li[title='${mblendlName}']`));
+        
+        if (dummyMblend.length==1){
+          let bg = $(dummyMblend).css('background-image');
+          bg = bg.replace('url(','').replace(')','').replace(/\"/gi, "").replace("/thumbs","");
+          $("#currentMblend").attr("src", bg);
+        }
+      }
+      
       $("#floatLayer div.colDisplayer").attr("title", $(this).data('color'));
       $("#floatLayer div.colDisplayer").css("background-color", `#${tinycolor.fromRatio({ r: colormaterial.v[0], g: colormaterial.v[1], b: colormaterial.v[2] }).toHex()}`);
       $("#floatLayer footer").html(`<strong>M:</strong> ${materialName}<br><strong>&micro;b:</strong> ${mblendlName}<br><strong>C:</strong> ${$(this).data('color')}`)
@@ -1493,7 +1509,6 @@ $("#resetShades span.choose").click(function(){
     $("#mbSelect option").removeAttr("selected")
     let mbZelected = $("#mbSelect option").filter(function() { return $(this).text() === theoneselected;})
     mbZelected.attr('selected', true);
-
     $("#mbInput").val($(`#cagethemicroblends li[title='${theoneselected}']`).data("path"));
     $("#mbInput").focusout();
   });
@@ -1726,7 +1741,7 @@ function passTheMlsetup(textContent=""){
       mls_content = JSON.parse(textContent,mlsContRevive);
       mLsetup = new Mlsetup();
       mLsetup.import(mls_content);
-      let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' style='transform:scale(1, -1);' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
+      let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
       $(".mlpreviewBody").html(test)
     }catch(error){
       notifyMe(`Error: ${error}`)
