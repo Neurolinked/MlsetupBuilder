@@ -213,7 +213,10 @@ $(function(){
       $("#micropanel").appendTo("#SettingsScroller");
       $("#materialDis").appendTo("#SettingsSummary");
       $("#mb-preview").appendTo("#SettingsSummary");
+      $("#SettingsSummary").append("<div class='cube tint'> </div>");
+      $("body #cagecolors span.active").click();
     }else{
+      $("div.cube.tint").remove()
       $("#layer_settings").insertAfter($("#MlEditor"));
       $("#micropanel").insertAfter($("#layer_settings"));
       $("#materialDis").appendTo("#matdisplay > div:nth-child(1)");
@@ -1005,7 +1008,7 @@ $("#resetShades span.choose").click(function(){
               tagString +=`<span class="badge rounded-pill text-bg-primary me-1">${el}</span>`;
             }
           })
-          return type === 'display'? tagString : data;
+          return type === 'display'? tagString : String(data).replaceAll(","," ");
         },
         searchable:true
       },
@@ -1494,6 +1497,10 @@ $("#resetShades span.choose").click(function(){
     let colorSwatchValue = $(this).css("background-color")
     $(".tint").prop('style','background-color:'+colorSwatchValue+"!important;");
 	  let choosed_color = tinycolor(colorSwatchValue);
+    if ($(".cube.tint")){
+      let dummyCol = choosed_color.toPercentageRgb()
+      $(".cube.tint").attr("data-color",`red.${dummyCol.r}\r\ngreen.${dummyCol.g}\r\nblue.${dummyCol.b}\r\n`)
+    }
 	  $("#colorPntage").html(choosed_color.toPercentageRgbString());
     $("#layerColor").val(colorchanger).change();
     $("#colorManagament").html(colorchanger);

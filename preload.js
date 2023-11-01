@@ -224,7 +224,7 @@ ipcRenderer.on('preload:enable',(event,target) => {
 		obj.disabled = false
 
 		if (target=='#triggerUncook'){
-			let loadCog = document.querySelector('#uncookCog i')
+			let loadCog = document.querySelector('#triggerUncook svg')
 			loadCog.remove();
 		}else if(target=='#MycroMe'){
 			let mycroCog = document.querySelector('#mycroCog')

@@ -1230,13 +1230,13 @@ ipcMain.on('main:setMicroCoords',(event,datas)=>{
 })
 
 ipcMain.on('main:uncookMicroblends',(event)=>{
-	fs.access(path.normalize(preferences.get('unbundle')),fs.constants.W_OK,(err)=>{
+	fs.access(path.normalize(preferences.get('paths.default.depot')),fs.constants.W_OK,(err)=>{
 		if (err){
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
 
-			var gameContentPath = preferences.get('game')
+			var gameContentPath = preferences.get('paths.default.game')
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
 				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
@@ -1256,10 +1256,10 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 })
 
 function microBuilder(contentdir){
-	contentpath = contentdir
+	contentpath = path.join(contentdir,spotfolder.base)
 	return new Promise((resolve,reject) =>{
 
-			let unbundlefoWkit = preferences.get('unbundle') //String(preferences.get('unbundle')).replace(/base$/,'')
+			let unbundlefoWkit = preferences.get('paths.default.depot') //String(preferences.get('unbundle')).replace(/base$/,'')
 			let uncooker = preferences.get('wcli')
 			var countingOnYou = 0
 
@@ -1271,7 +1271,7 @@ function microBuilder(contentdir){
 					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger div'))
 					.then(()=> {
 						return new Promise((resolve,reject) =>{
-							fs.readdir(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/'),(err,files)=>{
+							fs.readdir(path.join(String(preferences.get('paths.default.depot')),'base/surfaces/microblends/'),(err,files)=>{
 								if (err){
 										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 										reject()
