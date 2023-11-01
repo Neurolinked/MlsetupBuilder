@@ -1,4 +1,10 @@
-@import "./variables.css";
+@import "variables.css";
+:root{
+  --bs-dropdown-link-active-bg: #9a0036;
+}
+*{outline:none;}
+.form-check-input,.form-check-input:focus{background-color: var(--bs-secondary);border-color:var(--bs-primary);}
+.form-check-input:checked {background-color: var(--active-sel);border-color:var(--bs-primary);}
 body{overflow-y: scroll;overflow-x: hidden;}
 
 canvas{background-color:black;border:1px solid var(--secondary);margin:3px;}

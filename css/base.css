@@ -579,3 +579,23 @@ table.dataTable tr:hover td:not([colspan]){
 #uncookCheck details{
   background-color: #9a003699;
 }
+
+#editorConfig .offcanvas-body .badge{min-width:35%;}
+#SettingsSummary div.cube{
+  width:120px;
+  height:120px!important;
+  margin:4px;
+  border: 1px dashed var(--bs-primary);
+}
+
+#SettingsSummary div.cube.tint::after {
+  content: attr(data-color);
+  color: white;
+  display: block;
+  text-shadow:0 0 0.2rem #000, 0 0 0.2rem #000, 0 0 0.2rem #000,0 0 0.2rem #000;
+  word-spacing: 100vw;
+  height: 120px!important;
+  text-align: center;
+  line-height: 30px;
+  padding-top: 10px;
+}
