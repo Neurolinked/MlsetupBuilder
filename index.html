@@ -84,7 +84,7 @@
             </select>
           </div>
           <div class="mb-1">
-            <input type="checkbox" class="form-check-input rounded me-2 ms-1" id="checkCompile" autocomplete="off" ><label class="form-check-label fs-80" for="checkCompile" >Compile</label>
+            <input type="checkbox" class="form-check-input rounded-pill me-2 ms-1" id="checkCompile" autocomplete="off" ><label class="form-check-label fs-80" for="checkCompile" >Compile</label>
           </div>
         </form>
         <li><h6 class="dropdown-header bg-info text-black">Utility</h6></li>
@@ -350,11 +350,11 @@
            <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
              <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu bg-layer1 border border-warning p-2" style="width:22rem;">
                <div class="form-check form-switch">
-                 <input class="form-check-input rounded" type="checkbox" id="rndOnOff">
+                 <input class="form-check-input rounded-pill" type="checkbox" id="rndOnOff">
                  <label class="form-check-label" for="rndOnOff"><details><summary>Turn On/Off layers</summary>It enable activation of un-active layers ( un-active layers are identified by Opacity=0 ).</details></label>
                </div>
                <div class="form-check form-switch">
-                 <input class="form-check-input rounded" type="checkbox" id="rndMbWild">
+                 <input class="form-check-input rounded-pill" type="checkbox" id="rndMbWild">
                  <label class="form-check-label" for="rndMbWild"><details><summary>Wild randomize &micro;blends</summary>On a basis, the microblend are setup to use the flat default one, the last two are assigned with dirts and only one is chosen to get a possible randomized one. Enabling this option remove this system and just randomize every layer filtered from the previous options.</details></label>
                </div>
              </div>
@@ -369,7 +369,7 @@
     </div>
     <div class="layer-2 m-2"><span class="badge w-100 rounded-0 "> Normal </span>
       <div class="form-check form-switch d-flex justify-content-center">
-        <input class="form-check-input rounded " type="checkbox" role="switch" id="useNormals" checked>
+        <input class="form-check-input rounded-pill " type="checkbox" role="switch" id="useNormals" checked>
       </div>
     </div>
   </div>
@@ -797,21 +797,21 @@
 					<div id='uncookCheck' class="col-7">
             <details open class="pb-1" ><summary class="mb-2">Base Game</summary>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="arc_NC3" checked>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_NC3" checked>
                 <span class="badge bg-warning text-dark">basegame_3_nightcity.archive</span>
               </div>
               <div class="progress border border-dark  my-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step1" class=" bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="arc_AP4" checked>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_AP4" checked>
                 <span class="badge bg-warning text-dark">basegame_4_appearance.archive</span>
               </div>
               <div class="progress border border-dark  my-1 bg-layer0  mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step3" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="arc_GA4" checked>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_GA4" checked>
                 <span class="badge bg-warning text-dark">basegame_4_gamedata.archive</span>
               </div>
               <div class="progress border border-dark  my-1 bg-layer0 mx-3" style="height: 1.5rem;" >
@@ -819,7 +819,7 @@
               </div>
               <!-- TODO to this code-->
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="arc_FNT4" checked>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_FNT4" checked>
                 <span class="badge bg-warning text-dark">Fonts</span>
               </div>
               <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
@@ -828,35 +828,35 @@
             </details>
             <details open><summary>Phantom Liberty</summary>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="ep1_CH" checked>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="ep1_CH" checked>
                 <span class="badge bg-warning text-dark">Characters</span>
               </div>
               <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step10" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="ep1_WE" checked>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="ep1_WE" checked>
                 <span class="badge bg-warning text-dark">Weapons</span>
               </div>
               <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step11" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="ep1_VE" checked>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="ep1_VE" checked>
                 <span class="badge bg-warning text-dark">Vehicles</span>
               </div>
               <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step12" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="ep1_ME" >
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="ep1_ME" >
                 <span class="badge bg-dark">Mechanical</span>
               </div>
               <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step13" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded" type="checkbox" role="switch" id="ep1_EN" >
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="ep1_EN" >
                 <span class="badge bg-dark">Environment</span>
               </div>
               <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >

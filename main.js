@@ -1053,6 +1053,61 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 	})
 })
 
+function checkMakeSymlinks(){
+	return new Promise((resolve,reject) =>{
+		
+		phantomLFolder= path.join(preferences.get("paths.default.game"),spotfolder.pl)
+		try{
+			if (!fs.existsSync(path.join(phantomLFolder,"basegame_3_nightcity.archive"))){
+				//try to create it
+				fs.symlink(
+					path.join(preferences.get("paths.default.game"),spotfolder.base,"basegame_3_nightcity.archive"),
+					path.join(phantomLFolder,"basegame_3_nightcity.archive"),
+					"file",
+					(err)=>{
+						if (err){
+							mainWindow.webContents.send('preload:logEntry',`stderr: ${err}`,true);
+						}else{
+							mainWindow.webContents.send('preload:logEntry',`symlink 1 created`,false);
+						}
+					});
+			}
+			if (!fs.existsSync(path.join(phantomLFolder,"basegame_4_appearance.archive"))){
+				//try to create it
+				fs.symlink(
+					path.join(preferences.get("paths.default.game"),spotfolder.base,"basegame_4_appearance.archive"),
+					path.join(phantomLFolder,"basegame_4_appearance.archive"),
+					"file",
+					(err)=>{
+						if (err){
+							mainWindow.webContents.send('preload:logEntry',`stderr: ${err}`,true);
+						}else{
+							mainWindow.webContents.send('preload:logEntry',`symlink 2 created`,false);
+						}
+					});
+			}
+			if (!fs.existsSync(path.join(phantomLFolder,"basegame_4_gamedata.archive"))){
+				//try to create it
+				fs.symlink(
+					path.join(preferences.get("paths.default.game"),spotfolder.base,"basegame_4_gamedata.archive"),
+					path.join(phantomLFolder,"basegame_4_gamedata.archive"),
+					"file",
+					(err)=>{
+						if (err){
+							mainWindow.webContents.send('preload:logEntry',`stderr: ${err}`,true);
+						}else{
+							mainWindow.webContents.send('preload:logEntry',`symlink 3 created`,false);
+						}
+					});
+			}
+			resolve()
+		}catch(err){
+			mainWindow.webContents.send('preload:logEntry',`stderr: ${err}`,true);
+			reject()
+		}
+	})
+}
+
 function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
 		var oldmsg = '';
@@ -1204,6 +1259,7 @@ function repoBuilder(contentdir, conf){
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
 					.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(vanillaContentPath,archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
+					.then(()=>{checkMakeSymlinks()})
 					.then(()=>uncookRun(conf[4],["uncook", "-p", phantomLContentPath, "-r","^ep1.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step10'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_CH")})
 					.then(()=>uncookRun(conf[5],["uncook", "-p", phantomLContentPath, "-r","^ep1.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step11'))

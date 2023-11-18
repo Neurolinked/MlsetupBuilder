@@ -41,7 +41,7 @@
     max-height: calc(100vh - (130px + 2.75rem + 27px + 32px));
 }
 
-#SettingsScroller::-webkit-scrollbar{width:5px!important;}
+#SettingsScroller::-webkit-scrollbar{width:8px!important;}
 
 #matdisplay{display:grid;grid-template-columns: 0 1fr;}
 #mb-preview {width:128px;}
