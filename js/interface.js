@@ -980,8 +980,7 @@ $("#resetShades span.choose").click(function(){
             criteria: [
                 {
                     data: 'Tags',
-
-                }
+                },
              ]
           }
         }

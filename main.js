@@ -834,9 +834,10 @@ ipcMain.on('main:setupCR2Wr',(event, arg) => {
 ipcMain.on('main:3dialog',(event, arg) => {
 	const result = dialog.showOpenDialog({
 		title:'Load a 3d asset',
-		filters:[ /*{ name: 'Autodesk FBX', extensions: ['fbx'] },*/{ name: 'GL Transmission Format', extensions: ['glb','gltf'] }],
+		filters:[{ name: 'GL Transmission Format', extensions: ['glb','gltf'] }],
 		properties :['openFile']
 	}).then(threeDAsset => {
+
     if (!threeDAsset.canceled){
 			event.reply('preload:logEntry', 'File choosen : '+threeDAsset.filePaths[0]+'<br/>')
 			event.reply('preload:set_3d_asset_name',threeDAsset.filePaths[0]);
@@ -848,6 +849,7 @@ ipcMain.on('main:3dialog',(event, arg) => {
     dialog.showErrorBox("Error reading the file :",err.message)
 	event.reply('preload:enable','#cstMdlLoader')
   })
+  
 })
 
 //Save the preferences

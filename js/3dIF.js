@@ -496,6 +496,24 @@ function paintDatas(textureData,w,h){
   oc.remove();
 }
 
+function DDSSize(binaryData){
+	var bufferData = str2ab(binaryData);
+	const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
+
+	if (
+		(headerData[0]==0x44) &&
+		(headerData[1]==0x44) &&
+		(headerData[2]==0x53) ){
+		//DDS Case
+		const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
+		let height = spaceData[3];
+		let width = spaceData[4];
+		return[height,width];
+	}else{
+		return [0,0];
+	}
+}
+
 function DDSNormal(textureData,w,h){
   var oc = document.createElement('canvas');
   oc.width=w;
@@ -761,7 +779,7 @@ function loadNormOntheFly(path){
   material.map.needsUpdate = true;
 }
 
-function dataToTeX(binaryData,channels=4, format = THREE.RGBAFormat){
+function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat){
 	var bufferData = str2ab(binaryData);
 	const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
 
@@ -781,6 +799,7 @@ function dataToTeX(binaryData,channels=4, format = THREE.RGBAFormat){
 		var imageDatas
 		if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
 			console.log(`DDS ${format}`);
+			console.log(dx10Data);
 			if (format == THREE.RGBAFormat){
 				imageDatas = new Uint32Array( bufferData, 148, size );
 			}else{
@@ -1071,13 +1090,36 @@ function LoadModelOntheFly(path){
 								materialStack[actualMaterial.Name].transparent = true;
 							}
 
+							if (actualMaterial.Data.hasOwnProperty('Normal')){
+								console.error("Normal:",actualMaterial.Data.Normal);
+
+								if (actualMaterial.Data.Normal=='engine\\textures\\editor\\normal.xbm'){
+									materialStack[actualMaterial.Name].normalMap = FlatNORM;
+								}else{
+									let normMD5Code = CryptoJS.MD5(actualMaterial.Data.Normal)
+									if (TextureStack[normMD5Code]===undefined){
+										let temporaryTexture = thePIT.ApriStream((actualMaterial.Data.Normal).replace('.xbm',`.${textureformat}`),'binary');
+										//dataToTeX(temporaryTexture);
+										TextureStack[normMD5Code]=dataToTeX(temporaryTexture);
+	
+										materialStack[actualMaterial.Name].normalMap = TextureStack[normMD5Code];
+									}else{
+										materialStack[actualMaterial.Name].normalMap = TextureStack[normMD5Code];
+									}
+								}
+							}
+							if (actualMaterial.Data.hasOwnProperty('NormalStrenght')){
+								if (actualMaterial.Data.NormalStrenght!=1){
+									materialStack[actualMaterial.Name].normalScale = actualMaterial.Data.NormalStrenght;
+								}
+							}
 							child.material = materialStack[actualMaterial.Name];
 							child.material.needsUpdate = true;
 						}else{
 							child.material = materialStack[actualMaterial.Name]
 						}
 
-						console.error(actualMaterial.Data);
+						console.log(actualMaterial.Data);
 
 					}else if (materialTypeCheck.decals.includes(actualTemplate)){
 
@@ -1156,6 +1198,27 @@ function LoadModelOntheFly(path){
 							}
 							child.material.opacity = .9;
 						}
+
+						/*
+						if (actualMaterial.Data.hasOwnProperty('NormalTexture')){
+							
+							if (actualMaterial.Data.NormalTexture=='engine\\textures\\editor\\normal.xbm'){
+								child.material.normalMap = FlatNORM;
+							}else{
+								let normMD5Code = CryptoJS.MD5(actualMaterial.Data.NormalTexture)
+
+								if (TextureStack[normMD5Code]===undefined){
+									console.error("Normal:",actualMaterial.Data.NormalTexture);
+									let temporaryTexture = thePIT.ApriStream((actualMaterial.Data.NormalTexture).replace('.xbm',`.${textureformat}`),'binary');
+									//dataToTeX(temporaryTexture);
+									TextureStack[normMD5Code]=dataToTeX(temporaryTexture);
+									
+									//child.material.normalMap = TextureStack[normMD5Code];
+								}else{
+									//child.material.normalMap = TextureStack[normMD5Code];
+								}
+							}
+						}*/
 						
 						GuiSubmesh.add(child, 'visible').name(`<i class="fas fa-tag text-warning"></i> ${child.name}`);
 						child.material.needsUpdate=true;
@@ -1205,9 +1268,6 @@ function LoadModelOntheFly(path){
 									}
 								}
 							}
-
-							
-
 							child.material.needsUpdate = true;
 						}else{
 							if ((/.+_cap$/).test(actualMaterial.Name)){
@@ -1263,15 +1323,17 @@ function LoadModelOntheFly(path){
 
 		$("#Mlswitcher").html("");
 		if (multilayerStack.size>0){
+			$("#Mlswitcher").append(`<ul class="list-group mx-1"></ul>`);
+
 			multilayerStack.forEach(function(name,key,set){
-				$("#Mlswitcher").append(materialJSON.codeMaterial(materialJSON.find(name),`<div class="bg-layer2 border border-secondary rounded fs-75 p-2 mb-1 d-flex mlSelectionRadio" >
-				<input class="form-check-input me-2" type="radio" name="mlSelectRadio" id="sel$_MATERIALID">
+				$("#Mlswitcher ul").append(materialJSON.codeMaterial(materialJSON.find(name),` <li class="list-group-item p-1">
+				<input class="form-check-input me-1" type="radio" name="mlSelectRadio" id="sel$_MATERIALID">
 				<label class="form-check-label" for="sel$_MATERIALID">
 					$_MATERIALSHORTNAME
 				</label>
-				</div>`));
+				</li>`));
 			});
-			$("#Mlswitcher div").eq(0).addClass(`active`);
+			$("#Mlswitcher ul li:nth-child(1) input").prop(`checked`,true);
 		}
 
 		/*
@@ -1363,7 +1425,6 @@ document.getElementById('lastCustomMDL').addEventListener('change',(e)=>{
     	safeNormal();
 		cleanScene();
     	LoadModelOntheFly(file.value)
-
 		layersActive(0);
 		material.map.needsUpdate =true;
 		control_reset = true;
