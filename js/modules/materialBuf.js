@@ -6,6 +6,28 @@ class Appearance{
 		this.Name = name;
 		this.Materials = materials;
 	}
+
+	push(materialString='default',pos=(this.Materials.length)){
+		if (typeof(materialString)=='string'){
+			this.Materials.splice(pos,0,materialString);
+		}
+	}
+
+	pop(index=(this.Materials.length-1)){
+		if ((index<this.Materials.length) && (this.Materials.length > 0)){
+			this.Materials.splice(index,1);
+		}
+	}
+
+	replace(index=(this.Materials.length-1),materialString='default'){
+		if ((index<this.Materials.length) && (this.Materials.length > 0)){
+			this.Materials.splice(index,1,materialString);
+		}
+	}
+	
+	entries(){
+		return this.Materials.length
+	}
 }
 
 class MaterialTemplate{
