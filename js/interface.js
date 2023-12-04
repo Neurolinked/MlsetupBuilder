@@ -208,6 +208,7 @@ $(function(){
 
   function movecontent(){
     if (Workspaces.index==2) {
+      $("#MatSelector").insertBefore("#MlEditor");
       $("#Settings").insertAfter("#layer_settings")
       $("#layer_settings").appendTo("#SettingsScroller");
       $("#micropanel").appendTo("#SettingsScroller");
@@ -215,6 +216,7 @@ $(function(){
       $("#mb-preview").appendTo("#SettingsSummary");
       $("#SettingsSummary").append("<div class='cube tint'> </div>");
       $("body #cagecolors span.active").click();
+      $("#Mlswitcher").attr('open','');
     }else{
       $("div.cube.tint").remove()
       $("#layer_settings").insertAfter($("#MlEditor"));
@@ -222,6 +224,8 @@ $(function(){
       $("#materialDis").appendTo("#matdisplay > div:nth-child(1)");
       $("#mb-preview").insertAfter("#MicroblendsLibrary");
       $("#Settings").appendTo("#modelsNavbar");
+      $("#MatSelector").insertBefore("#appearanceSwitcher");
+      $("#Mlswitcher").removeAttr('open');
     }
   }
 

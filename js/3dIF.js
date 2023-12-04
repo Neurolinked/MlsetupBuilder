@@ -1321,7 +1321,7 @@ function LoadModelOntheFly(path){
 		}
 	    });
 
-		$("#Mlswitcher").html("");
+		$("#Mlswitcher ul").remove();
 		if (multilayerStack.size>0){
 			$("#Mlswitcher").append(`<ul class="list-group mx-1"></ul>`);
 
