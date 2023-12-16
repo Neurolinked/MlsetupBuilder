@@ -79,7 +79,9 @@ ul.vakata-context.jstree-contextmenu.jstree-default-dark-contextmenu li > a >svg
 #interface canvas{ background: radial-gradient(#010101, #121212);background-repeat: no-repeat}
 #dat-container {background-color:var(--layer-1); position: absolute; top: 0px; left: 40px; border:1px solid var(--bs-secondary)!important;z-index:11;}
 #dat-container .dg.main .close-button { border:1px solid var(--bs-secondary)!important; }
-#materialTrees, #layeringsystem, .offcanvas *:not(.svg-inline--fa), .dropdown-menu li,#cagemLibrary div{font-size:0.75rem!important;}
+#materialTrees, #layeringsystem,
+ .offcanvas *:not(.svg-inline--fa, .fs-120),
+ .dropdown-menu li,#cagemLibrary div{font-size:0.75rem!important;}
 #MainMenu .dropdown-menu li{font-size: 0.8rem!important;}
 
 

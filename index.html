@@ -38,7 +38,6 @@
 	<!--hardcoded help tree DB --><script src="./js/help.js" type="text/javascript"></script><!--hardcoded DB -->
 	<!--hardcoded normals DB //--><script src="./js/normList.js" type="text/javascript" ></script><!--hardcoded normal DB//-->
   <!--hardcoded MaskList DB --><script src="./js/maskList.js" type="text/javascript"></script><!--hardcoded DB -->
-  <!--hardcoded default Model-only  DB <script src="./js/models.js" type="text/javascript"></script>hardcoded DB -->
 	<!--hardcoded default Model-only  DB --><script src="./js/hairs.js" type="text/javascript"></script><!--hardcoded DB -->
 <!--Material Tree  --><script src="./js/materialTree.js"></script><!--Material Tree -->
 <!--Tiny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
@@ -99,16 +98,6 @@
       </div>
     </div>
     <div id="dat-container"></div>
-<!--THREE.js libraries -->
-<!--
-    <script src='./js/threejs/146/build/three.min.js'></script>
-    <script src='./js/threejs/146/examples/js/controls/OrbitControls.js'></script>
-		<script type='module' src='./js/threejs/146/src/math/MathUtils.js'></script>
-		<script type='module' src='./js/threejs/146/src/math/Color.js'></script>
-		<script type='module' src='./js/threejs/146/src/scene/Fog.js'></script>
-    <script src='./js/threejs/146/examples/js/loaders/GLTFLoader.js'></script>
-    <script src='./js/threejs/146/examples/js/libs/dat.gui.min.js'></script>
-  -->
   <script src='./js/threejs/build/three.min.js'></script>
   <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
   <script type='module' src='./js/threejs/src/math/MathUtils.js'></script>
@@ -221,7 +210,7 @@
         <span class="badge layer-9 rounded-0 ">Package</span>
         <input type="text" class="form-control form-control-sm rounded-0"  list="mbListPackages" id="mbListPackage" />
       </div>
-      <span class='d-block text-center layer-9' >Write every path as in the archives</span>
+      <span class='d-block text-center bg-active text-light fs-120' >Write every path as in the archives</span>
       <datalist id="mbListPackages">
       </datalist>
       <div id="mblendUserManager" >
@@ -304,7 +293,7 @@
     <div id="editor-container">
       <div id="MatSelector">
         <details open id="Mlswitcher" class="" title="">
-          <summary>Multilayer edit selector</summary>
+          <summary>ML mat. selector (working soon)</summary>
         </details>
       </div>      
 <div id="MlEditor" class="text-white layer-1 rounded">
@@ -710,7 +699,7 @@
   </div>
   <div class="input-group input-group-sm border-secondary mb-2">
     <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-mask"></i></span>
-    <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" readonly>
+    <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" >
     <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
     <button id="masksOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
   </div>
