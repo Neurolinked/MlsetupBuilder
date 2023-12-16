@@ -787,32 +787,37 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat){
 		(headerData[0]==0x44) &&
 		(headerData[1]==0x44) &&
 		(headerData[2]==0x53) ){
+		try {
 		//DDS Case
-		const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
-		let height = spaceData[3];
-		let width = spaceData[4];
-		console.log(`texture ${width}x${height}px`);
-		let size = height * width * channels;
+			const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
+			let height = spaceData[3];
+			let width = spaceData[4];
+			console.log(`texture ${width}x${height}px`);
+			let size = height * width * channels;
 
-		const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
+			const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
 
-		var imageDatas
-		if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
-			console.log(`DDS ${format}`);
-			console.log(dx10Data);
-			if (format == THREE.RGBAFormat){
-				imageDatas = new Uint32Array( bufferData, 148, size );
+			var imageDatas
+			if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
+				console.log(`DDS ${format}`);
+				console.log(dx10Data);
+				if (format == THREE.RGBAFormat){
+					imageDatas = new Uint32Array( bufferData, 148, size );
+				}else{
+					imageDatas = new Uint8Array( bufferData, 148, size );
+				}
 			}else{
+				//or legacy RGBA Unorm
 				imageDatas = new Uint8Array( bufferData, 148, size );
 			}
-		}else{
-			//or legacy RGBA Unorm
-			imageDatas = new Uint8Array( bufferData, 148, size );
+			let resultTex = new THREE.DataTexture(imageDatas,width,height,format);
+			resultTex.wrapS=THREE.RepeatWrapping;
+			resultTex.wrapT=THREE.RepeatWrapping;
+			return resultTex;
+		}catch(error){
+			notify3D(error);
+			return BLACK;
 		}
-		let resultTex = new THREE.DataTexture(imageDatas,width,height,format);
-		resultTex.wrapS=THREE.RepeatWrapping;
-		resultTex.wrapT=THREE.RepeatWrapping;
-		return resultTex;
 	}else if (
 		(headerData[0]==0x89)
 		&& (headerData[1]==0x50)
@@ -822,43 +827,49 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat){
 		&& (headerData[5]==0x0a)
 		&& (headerData[6]==0x1a)
 		&& (headerData[7]==0x0a) ){
-		//PNG Case
-		var chunkslenght, chunkstype
-		var pngWidth = pngHeight = 0;
-		var imgByteLenght = ab.byteLength
 
-		//Search for the chunks with the Size of the texture
-		while ((pngWidth==0) && (pngWidth==0) && (filePointer<imgByteLenght)) {
-			chunkslenght = parseInt(new DataView(ab,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
-			chunkstype = new Uint8Array(ab,filePointer+4,4);
-			filePointer+=8;
-			if ( (chunkstype[0]==0x49)
-				&&(chunkstype[1]==0x48)
-				&&(chunkstype[2]==0x44)
-				&&(chunkstype[3]==0x52) ){
-				//go for the read of the length
-				pngWidth=parseInt(new DataView(ab,filePointer,4).getUint32());
-				pngHeight=parseInt(new DataView(ab,filePointer+4,4).getUint32());
+		try {
+			//PNG Case
+			var chunkslenght, chunkstype
+			var pngWidth = pngHeight = 0;
+			var imgByteLenght = bufferData.byteLength
+			var filePointer = 8; /*after the header */
+			//Search for the chunks with the Size of the texture
+			while ((pngWidth==0) && (pngWidth==0) && (filePointer<imgByteLenght)) {
+				chunkslenght = parseInt(new DataView(bufferData,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
+				chunkstype = new Uint8Array(bufferData,filePointer+4,4);
+				filePointer+=8;
+				if ( (chunkstype[0]==0x49)
+					&&(chunkstype[1]==0x48)
+					&&(chunkstype[2]==0x44)
+					&&(chunkstype[3]==0x52) ){
+					//go for the read of the length
+					pngWidth=parseInt(new DataView(bufferData,filePointer,4).getUint32());
+					pngHeight=parseInt(new DataView(bufferData,filePointer+4,4).getUint32());
+				}
+				filePointer+=chunkslenght+4; //last 4 byte are for the checksum
 			}
-			filePointer+=chunkslenght+4; //last 4 byte are for the checksum
-		}
-		// Connect the image to the Texture
-		var texture = new THREE.Texture();
-		if (pngWidth>0){
 			// Connect the image to the Texture
 			var texture = new THREE.Texture();
-			var encodedData = btoa(bufferData);
-			var dataURI = "data:image/png;base64," + encodedData;
-			var pngMap = new Image();
-			pngMap.onload = function () {
-				texture.image = image;
-				texture.wrapS=THREE.RepeatWrapping;
-				texture.wrapT=THREE.RepeatWrapping;
-				texture.needsUpdate = true;
-				return texture;
-			};
-			pngMap.src = dataURI;
-		}else{
+			if (pngWidth>0){
+				// Connect the image to the Texture
+				var texture = new THREE.Texture();
+				var encodedData = btoa(bufferData);
+				var dataURI = "data:image/png;base64," + encodedData;
+				var pngMap = new Image();
+				pngMap.onload = function () {
+					texture.image = image;
+					texture.wrapS=THREE.RepeatWrapping;
+					texture.wrapT=THREE.RepeatWrapping;
+					texture.needsUpdate = true;
+					return texture;
+				};
+				pngMap.src = dataURI;
+			}else{
+				return BLACK;
+			}
+		}catch(error){
+			notify3D(error);
 			return BLACK;
 		}
 	}else{
