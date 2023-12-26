@@ -24,7 +24,8 @@
     "fs": "^0.0.1-security",
     "fs-extra": "^11.2.0",
     "intro.js": "^7.2.0",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "tweakpane": "^4.0.3"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^6.5.1",

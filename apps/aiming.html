@@ -12,6 +12,24 @@
 	<!--FontAwesome --><link rel="stylesheet" href="../public/fontawesome-free/css/all.min.css" />
 	<!--FontAwesome --><script type="text/javascript" src="../public/fontawesome-free/js/all.min.js" ></script>
 	<script type="text/javascript" src='../js/jquery-3.7.0.min.js'></script>
+  <script type="module">
+    import {Pane} from '../public/tweakpane/tweakpane.min.js';
+    const PARAMS = {
+      offsetH: 0.0,
+      offsetV: 0.0,
+      tiles: 1.0,
+      chained: false
+    };
+    const panel = new Pane({
+      title:'Microblend Aim parameters',
+      container: document.getElementById('tweakMe'),
+    });
+    panel.addBinding(PARAMS, 'offsetH',{min:-2, max:2});
+    panel.addBinding(PARAMS, 'offsetV',{min:-2, max:2});
+    panel.addBinding(PARAMS, 'tiles',{min:0.001, max:100.0});
+    panel.addBinding(PARAMS, 'chained');
+
+  </script>
   <link rel="stylesheet" href="../css/aim.css" />
   </head>
   <body class="w-100">
@@ -35,8 +53,9 @@
             <button id="confirmAim" class="btn btn-sm btn-block btn-outline-warning" >Done</button>
             <button id="reloadAim" class="btn btn-sm btn-block btn-outline-danger" >Reset</button>
           </div>
+        </div>
+        <section id="tweakMe"></section>
       </div>
-    </div>
 		<script type="text/javascript" src='../js/utilities.js'></script>
 		<script src="./rendaim.js"></script>
   </body>

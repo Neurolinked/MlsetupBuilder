@@ -585,7 +585,7 @@ app.on('browser-window-blur', () => {
 
 ipcMain.on('main:aimMicros',(event,configurations) =>{
 	lastMicroConf = configurations
-	aimWindow = createModal("apps/aiming.html",mainWindow,1380,532,'Microblends aiming', {preload: path.join(__dirname, 'apps/preloadaim.js')});
+	aimWindow = createModal("apps/aiming.html",mainWindow,1380,802,'Microblends aiming', {preload: path.join(__dirname, 'apps/preloadaim.js')});
 	//setTimeout(()=>{aimWindow.webContents.send('preload:configure',configurations)},400)
 })
 

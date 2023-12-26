@@ -50,5 +50,6 @@ $(function(){
 				S: Number($("#AimMTile").val()),
 				Link: $("#AimChain").is(":checked")
 			})
-	})
+	});
+
 });
