@@ -1,119 +1,103 @@
+/*
 var helpJson=[
 {"id": "i_0","parent": "#","text": "What this software do ?","type": "info"},
 {"id": "hdi_0","parent": "#","text": "How do i ...","type": "howdoi","state": {"opened": true}},
 {"id": "hdi_001","parent": "hdi_0","text": " .. start with it","type": "basic"} ,
-/* Link section */
+/* Link section 
 {"id": "url_0","parent": "#","text": "Documentation","type": "urlroot"},
 {"id": "url_001","parent": "url_0","text": "RedModding wiki","type": "url"},
-/* Video Section */
+/* Video Section 
 {"id": "vid_0","parent": "#","text": "Videos","type": "videoroot"},
 {"id": "vid_001","parent": "vid_0","text": "Official features video channel" , "type":"video"},
 {"id": "vid_002","parent": "vid_0","text": "CP77 Color and Material Mod Tutorial 2022" , "type":"video"}
-];
+];*/
 
 $(function(){
 	var HelpOffcanvas = new bootstrap.Offcanvas(document.getElementById('HowDoI'));
 
-	var HelpLibrary = $('#HelpTree').jstree({
-		'core' : {"themes": {"name": "default-dark","dots": true,"icons": true},
-		'check_callback' : true,
-		'data' : helpJson
-		},
-		'types' : {
-				"info" : { "icon" : "text-info fa-solid fa-circle-info" },
-				"howdoi" : { "icon" : "text-warning fa-solid fa-circle-question" },
-				"basic" : {"icon" : "text-warning fa-solid fa-question"},
-        "advanced" : { "icon" : "fa-solid fa-brain" },
-				"videoroot" : {"icon" : "text-danger fa-solid fa-clapperboard"},
-				"video" : {"icon" : "text-danger fa-solid fa-video"},
-				"urlroot" : {"icon" : "text-primary fa-solid fa-arrow-up-right-from-square"},
-				"url" : {"icon" : "text-primary fa-solid fa-link"},
-			},
-			"plugins" : ["types" ]
-	}).on('select_node.jstree',function(ev,node){
-    HelpOffcanvas.hide();
+	$("#Helplist li a").click(function(ev){
+		ev.preventDefault();
+		HelpOffcanvas.hide();
+		
+		console.log($(this).attr('id') );
 
-		switch (node.node.id) {
-			case 'url_0':
-			case 'vid_0':
-				ev.preventDefault();
-			break;
+		switch ( $(this).attr('id') ) {
 			case 'vid_001':
 			case 'vid_002':
-				thePIT.ExtOpen({type:'video',param:node.node.id})
-			break;
+				thePIT.ExtOpen({type:'video',param: $(this).attr('id')})
+				break;
 			case 'url_001':
 				thePIT.ExtOpen({type:'url',param:'redwiki'})
-			break;
-			case 'i_0':
-				introJs().setOptions({
-					tooltipClass: 'biggerTooltip',
-					steps: [{
-					    title: 'What this software do ?',
-					    intro: 'The software is ment to help you creating .json files that can be compiled in .mlsetup format and assigned with everything that use the Cyberpunk 2077 multilayer systems'
-					  },
-						{
-							title: 'Layer system',
-					    element: document.querySelector('#layeringsystem'),
-					    intro: 'The multilayer editor system does not need a model to be displayed in the viewport to work'
-					  },
-						{
-							title: '3D viewport',
-							element:document.querySelector('#thacanvas'),
-							intro: 'It has a 3d viewport to load exported 3d models from the game. This is useful to acknowledge where the material you are editing goes on.'
-						},
-						{
-							title: 'Model Library',
-							element: document.querySelector('#modelsNavbar div.btn-group:nth-child(2)'),
-							intro:'A searchable model library with simple icon that display the type of 3d model (man, woman or kid target models, car pieces, weapons ecc...)',
-						},
-						{
-							title:'Import files',
-							element:document.querySelector('#importTech'),
-							intro:'From here you can import the json format of mlsetup file',
-							position:'bottom'
-						},
-						{
-							title:'Materials',
-							element:document.querySelector('#materialChoser'),
-							intro:'There is a material database that include every basic material the game use and automatically load value for normals, colors,metalness and roughness',
-							position:'bottom'
-						},
-						{
-							title:'Material colors',
-							element: document.querySelector('#cagecolors'),
-							intro:'There is a color picker with swatches created for the chosen materials',
-							position:'left'
-						},
-						{
-							title:'Microblends',
-							element: document.querySelector('#mb-preview'),
-							intro:'There is a microblend preview display, a gallery for them and a system to place them surgically on a model.<br/><strong>What are microblends ?</strong><br />Something like <u>stencil</u> that you use to apply materials',
-							position:'left'
-						},
-						{
-							title:'Microblend Aim System',
-							element: document.querySelector('[data-bs-target="#AimBlend"]'),
-							intro: 'Developed a visual system for microblend positioning over the current layer mlmasks, with that you can:<p>Move resize and syncro the edits to the offset of the current material</p>',
-							position:'left'
-						},
-						{
-							title:'Export and compile',
-							element: document.querySelector('#exportversions'),
-							intro: 'Export you edit to json format, and if you have configured the software, found your file compiled and ready to be used for a mod',
-							position:'left'
-						}
-					]
-				}).start()
-				.onbeforechange(function(){
-					//
-				})
-				.oncomplete	(function(){
-					HelpOffcanvas.show();
-				})
-				.onexit(function(){
-					HelpOffcanvas.show();
-				});
+				break;
+			case 'startHelp':
+				introJs()
+					.setOptions({
+						tooltipClass: 'biggerTooltip',
+						steps: [{
+							title: 'What this software do ?',
+							intro: 'The software is ment to help you creating .json files that can be compiled in .mlsetup format and assigned with everything that use the Cyberpunk 2077 multilayer systems'
+							},
+							{
+								title: 'Layer system',
+							element: document.querySelector('#layeringsystem'),
+							intro: 'The multilayer editor system does not need a model to be displayed in the viewport to work'
+							},
+							{
+								title: '3D viewport',
+								element:document.querySelector('#thacanvas'),
+								intro: 'It has a 3d viewport to load exported 3d models from the game. This is useful to acknowledge where the material you are editing goes on.'
+							},
+							{
+								title: 'Model Library',
+								element: document.querySelector('#modelsNavbar div.btn-group:nth-child(2)'),
+								intro:'A searchable model library with simple icon that display the type of 3d model (man, woman or kid target models, car pieces, weapons ecc...)',
+							},
+							{
+								title:'Import files',
+								element:document.querySelector('#importTech'),
+								intro:'From here you can import the json format of mlsetup file',
+								position:'bottom'
+							},
+							{
+								title:'Materials',
+								element:document.querySelector('#materialChoser'),
+								intro:'There is a material database that include every basic material the game use and automatically load value for normals, colors,metalness and roughness',
+								position:'bottom'
+							},
+							{
+								title:'Material colors',
+								element: document.querySelector('#cagecolors'),
+								intro:'There is a color picker with swatches created for the chosen materials',
+								position:'left'
+							},
+							{
+								title:'Microblends',
+								element: document.querySelector('#mb-preview'),
+								intro:'There is a microblend preview display, a gallery for them and a system to place them surgically on a model.<br/><strong>What are microblends ?</strong><br />Something like <u>stencil</u> that you use to apply materials',
+								position:'left'
+							},
+							{
+								title:'Microblend Aim System',
+								element: document.querySelector('[data-bs-target="#AimBlend"]'),
+								intro: 'Developed a visual system for microblend positioning over the current layer mlmasks, with that you can:<p>Move resize and syncro the edits to the offset of the current material</p>',
+								position:'left'
+							},
+							{
+								title:'Export and compile',
+								element: document.querySelector('#exportversions'),
+								intro: 'Export you edit to json format, and if you have configured the software, found your file compiled and ready to be used for a mod',
+								position:'left'
+							}
+						]
+					}).start()
+					.onbeforechange(function(){
+					})
+					.oncomplete	(function(){
+						HelpOffcanvas.show();
+					})
+					.onexit(function(){
+						HelpOffcanvas.show();
+					});
 				break;
 			case 'hdi_001':
 			introJs().setOptions({
@@ -202,16 +186,19 @@ $(function(){
 					}
 					]
 				}).start()
-					.onbeforechange(function(){
-						//
-					})
-					.oncomplete	(function(){
-						HelpOffcanvas.show();
-					})
-					.onexit(function(){
-						HelpOffcanvas.show();
-					});
+				.onbeforechange(function(){
+					//
+				})
+				.oncomplete	(function(){
+					HelpOffcanvas.show();
+				})
+				.onexit(function(){
+					HelpOffcanvas.show();
+				});
+				break;
+			default:
 				break;
 		}
 	});
+	
 });

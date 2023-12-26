@@ -59,6 +59,7 @@ Number.prototype.countDecimals = function () {
 
 const range = (start, stop, step = 1) =>  Array(Math.ceil((stop - start) / step)+1).fill(start).map((x, y) => x + y * step)
 
+/*
 async function abuildMaskSelector(listOfMasks){
 	if (typeof(listOfMasks)=="object"){
 			var maskSel = document.querySelector("#customMaskSelector");
@@ -70,7 +71,8 @@ async function abuildMaskSelector(listOfMasks){
 			maskSel.innerHTML+=dummytxt;
 			return;
 	}
-}
+}*/
+
 //Build the microblends gallery and compile the microblends select options
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
@@ -352,13 +354,6 @@ $(function(){
   FolderImport.reset();
 
 	const materialsize = window.getComputedStyle(document.body).getPropertyValue('--matsizes').replace(/px/,'');
-	const masksModal  = new bootstrap.Modal(document.getElementById('masksModal'));
-
-	document.getElementById('masksModal').addEventListener('show.bs.modal', function () {
-		$('#customMaskSelector option:selected').prop("selected", false); //remove selection from the last mask
-		$("#lblmaskselected").text('none').removeClass('text-white').addClass('text-muted')
-		$("#masksCFinder").val('').keyup();
-	});
 
   //Building the list of microblends
   let buildmyMicroblends = abuildMB(coreMblends);
@@ -375,7 +370,7 @@ $(function(){
 
 	let buildmyNuMaterial = abuildMaterial(materialCore);
 	
-	let buildmyMasks = abuildMaskSelector(maskList)
+	//let buildmyMasks = abuildMaskSelector(maskList)
 
   const ml_randomized = Object.keys(ml_libraries)
     .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g))
@@ -777,6 +772,8 @@ $("#resetShades span.choose").click(function(){
 	const licenseWindow = document.getElementById('LicenseModal');
   const lastExportFormat = localStorage.getItem('ExportFormat');
   const lastModelOpened = localStorage.getItem('lastModelOpened');
+  const lastLuminosity = localStorage.getItem('luminosity');
+
   MLSB.TreeD.lastModel = lastModelOpened;
   $("#modelTarget").val(MLSB.TreeD.lastModel);
   
@@ -794,6 +791,11 @@ $("#resetShades span.choose").click(function(){
     $("select[name='exportVersion']").val(String(lastExportFormat));
   }else{
     $("select[name='exportVersion']").val(3);
+  }
+
+  if (lastLuminosity!=null){
+    $("#colorLum").val(parseFloat(lastLuminosity));
+    setTimeout(()=>{$("#colorLum").change()},1000);
   }
 
   /*
@@ -825,12 +827,6 @@ $("#resetShades span.choose").click(function(){
   $("#slidemask").on("input",function(){
 		let hexacol
     hexacol = String(Number($(this).val()).toString(16)).padStart(2, '0').repeat(3);
-    /*
-		if ($("#gScalePaint").is(":checked")){
-			
-		}else{
-			hexacol = Number($(this).val()).toString(16).padStart(2, '0')+"0000";
-		} */
 		$("#maskoolor").data("color",hexacol);
 		$("#maskoolor").attr("data-color",hexacol);
 		$("#maskoolor").css("background-color","#"+hexacol);
@@ -843,6 +839,7 @@ $("#resetShades span.choose").click(function(){
     $("#maskoolor").attr("data-color",middlecolor);
     $("#maskoolor").css("background-color","#"+middlecolor);
   });
+  
 	//Displays of the license
 	licenseWindow.addEventListener('hidden.bs.modal', function (event) {
     localStorage.setItem('LicenseRead',Date.now());
@@ -1406,6 +1403,16 @@ $("#resetShades span.choose").click(function(){
       $("#cagecolors").find('span').sort(function(a, b) {
       	return +a.getAttribute('data-order') - +b.getAttribute('data-order');
   		}).appendTo($("#cagecolors"));
+    }
+  });
+
+  //Color Luminosity
+  $("#colorLum").on("change input",function(ev){
+    let illuminazione = $(this).val();
+    $("#cagecolors").css("filter",`brightness(${illuminazione})`);
+    console.log(ev.bubble);
+    if(!ev.bubble){
+      localStorage.setItem("luminosity",illuminazione);
     }
   });
 //filter materials by name and display badge links to select them
@@ -2371,26 +2378,6 @@ $("#masksFinderClearer").click(function(){
 	$("#masksCFinder").keyup();
 })
 
-$("#choseThisMask").click(function(){
-	if ($("#customMaskSelector option:selected").length==1){
-		let selectedNode = ModelsLibrary.jstree("get_selected",true)
-		if (selectedNode[0].hasOwnProperty('children')){
-			if (selectedNode[0].children.length==0){
-				ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val(),"layers":maskList[$("#customMaskSelector").val()].layers}},"first")
-        ModelsLibrary.jstree(true).open_node('#'+selectedNode[0].li_attr.id);
-			}else{
-				let figli = ModelsLibrary.jstree(true).get_json('#'+selectedNode[0].li_attr.id).children
-				if (figli.filter(el => el.li_attr.masks == $("#customMaskSelector").val()).length <= 0){
-					ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val(),"layers":maskList[$("#customMaskSelector").val()].layers}},"first")
-				}
-			}
-		}else{
-			ModelsLibrary.jstree(true).create_node('#'+selectedNode[0].li_attr.id,{"text":$("#customMaskSelector option:selected").text().split("\/").reverse()[0],"type":"custmask","li_attr":{"model":selectedNode[0].li_attr.model,"masks":$("#customMaskSelector").val()}},"first")
-		}
-		$("#customMaskSelector").prop('selectedIndex',-1);
-	}
-});
-
 /* let the user choose a mlmask file */
 $("#pickCustMask").click(function(){
   let getinfo = thePIT.RConfig('unbundle')
@@ -2633,15 +2620,6 @@ unCooKonfirm.addEventListener("click", (event) => {
     console.log(copyBle);
     navigator.clipboard.writeText(copyBle);
   });
-  /*
-  $.get(`jsons/tablemodels.json`).done(function(result){
-    try{
-      //var ModelContent = JSON.parse(result);
-      console.log(result);
-    }catch(error){
-      console.log(error);
-    }
-  });*/
 
   $("body").bind("updateMBlends",function(){
     setTimeout(()=>{

@@ -30,11 +30,6 @@
   <!-- materialbuffer Class Description -->
   <script type="text/javascript" src='./js/modules/materialBuf.js'></script>
   <script type="text/javascript" src='./js/modules/MLSB.js'></script>
-  <!--jstree library DB -->
-	<link rel="stylesheet" href="./js/jstree/themes/default/style.min.css" />
-  <link rel="stylesheet" href="./js/jstree/themes/default-dark/style.min.css" />
-  <script src="./js/jstree/jstree.min.js" data-source='https://www.jstree.com/' ></script>
-  <!--End jstree -->
 	<!--hardcoded help tree DB --><script src="./js/help.js" type="text/javascript"></script><!--hardcoded DB -->
 	<!--hardcoded normals DB //--><script src="./js/normList.js" type="text/javascript" ></script><!--hardcoded normal DB//-->
   <!--hardcoded MaskList DB --><script src="./js/maskList.js" type="text/javascript"></script><!--hardcoded DB -->
@@ -229,7 +224,27 @@
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body m-2 p-2">
-		<div id="HelpTree" class="layer-2 px-1 pb-1 mt-2 shadow rounded "></div>
+    <div class="layer-2 p-2 mt-2 shadow rounded ">
+      <ul id="Helplist">
+        <li class="mb-3"><a href="#" id="startHelp"><i class="fa-solid fa-circle-info text-info"></i> What this software Do ?</a></li>
+        <li><i class="text-warning fa-solid fa-circle-question "></i> How do I ...
+          <ul class="layer-2">
+            <li><a href="#" id="hdi_001"><i class="text-warning fa-solid fa-question "></i> ... Start with it</a></li>
+          </ul>
+        </li>
+        <li><i class="text-primary fa-solid fa-arrow-up-right-from-square "></i> Online Documentation
+          <ul class="layer-2">
+            <li><a href="#" id="url_001"><i class="text-primary fa-solid fa-link "></i> RedModding Wiki</a></li>
+          </ul>
+        </li>
+        <li><i class="text-danger fa-solid fa-clapperboard"></i> Videos
+          <ul class="layer-2">
+            <li><a href="#" id="vid_001"><i class="text-danger fa-solid fa-video "></i> Official features video Channel</a></li>
+            <li><a href="#" id="vid_002"><i class="text-danger fa-solid fa-video "></i> CP77 Color and Material Mod Tutorial 2022</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
 	</div>
 </div>
 <div id="interface">
@@ -453,6 +468,13 @@
           <span class="badge border border-secondary w-100 rounded-0 tint" > </span>
         </div>
       </div>
+      <div>
+        <div class="input-group input-group-sm mb-1">
+          <div class="badge my-auto">Luminosity</div>
+            <input type="number" class="form-control rounded-0" id="colorLum" value="1.0" step="0.01" min="0.01" max="150.0">
+            <input type="range" class="friendo flex-grow-1 border-0" data-control="#colorLum" value="1.0" step="0.01"  min="0.01" max="10.0">
+          </div>
+        </div>
     </details>
     <div class="input-group input-group-sm">
       <span class="input-group-text">Color filter</span>
@@ -744,44 +766,6 @@
   </div>
 </div>
 
-<div class="modal fade " id="masksModal"  tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
-    <div class="modal-content rounded-0">
-      <div class="modal-header bg-secondary text-warning p-1 border-bottom-0">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-0">
-				<div>
-					<div class="input-group input-group-sm">
-						<button type="button" id="masksFinderClearer" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-eraser"></i></button>
-					  <input type="text" id="masksCFinder" class="form-control rounded-0" placeholder="search in the masklist" aria-label="Masks paths">
-					</div>
-				</div>
-				<div>
-					<div class="input-group input-group-sm">
-						<span class="input-group-text bg-secondary text-dark border-0 rounded-0"><i class="fas fa-mask"></i></span>
-						<span id="lblmaskselected" class="input-group-text text-secondary flex-grow-1 border-0 rounded-0 fs-80">none</span>
-						<button type="button" id="choseThisMask" class="btn btn-outline-secondary rounded-0"><i class="fa fa-link"></i> Choose</button>
-					</div>
-          <span class="badge bg-secondary text-black rounded-0 d-block mt-1">Vanilla game masks</span>
-					<select id="customMaskSelector" class="form-select rounded-0 p-0 " size="10" aria-label="size 10 select with default masks">
-					</select>
-          <span class="badge bg-active text-black rounded-0 d-block mt-1">User custom masks</span>
-					<select id="personalMaskSelector" class="form-select rounded-0 p-0 " size="10" aria-label="size 10 select with custom masks">
-					</select>
-          <div class="input-group input-group-sm mt-1 overflow-auto">
-            <button type="button" id="pickCustMask" class="btn btn-outline-active rounded-0"><i class="fa-regular fa-folder-open"></i> Choose</button>
-            <span class="input-group-text bg-active text-dark border-0 rounded-0"><i class="fa-solid fa-layer-group"></i></span>
-            <input id="layersMasktoAdd" style="max-width: 4rem;" type="number" class="form-control text-active" value="0" min="0" step="1" max="19" >
-            <span id="lblmasktoAdd" class="input-group-text text-active flex-grow-1 border-0 rounded-0 fs-80" value="">...</span>
-            <button type="button" id="pushMask" class="btn btn-outline-active rounded-0"><i class="fa fa-plus"></i> Add</button>
-          </div>
-				</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal fade " id="unCookModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
     <div class="modal-content rounded-0">
@@ -962,9 +946,6 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="TinyColTab" data-bs-toggle="tab" data-bs-target="#tinycollicense" type="button" role="tab" aria-controls="tinycollicense" aria-selected="false">Tinicolor.js License</button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="jstreeTab" data-bs-toggle="tab" data-bs-target="#jstreelicense" type="button" role="tab" aria-controls="jstreelicense" aria-selected="false">jstree License</button>
-          </li>
         </ul>
         <div class="tab-content" id="tabLicenseBox">
           <div class="tab-pane fade " id="jquerylicense" role="tabpanel" aria-labelledby="JQColTab"><code class="text-light">
@@ -1010,30 +991,6 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
             </code>
-          </div>
-          <div class="tab-pane fade" id="jstreelicense" role="tabpanel" aria-labelledby="jstreeTab"><code class="text-light">
-<p class="text-center">Copyright (c) 2014 Ivan Bozhanov</p>
-
-<p>Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:</p>
-
-<p>The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.</p>
-
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.</p></code>
           </div>
           <div class="tab-pane fade" id="threejslicense" role="tabpanel" aria-labelledby="threejsTab"><code class="text-light">
             <p class="text-center">Copyright © 2010-2021 three.js authors</p>
