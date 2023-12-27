@@ -23,3 +23,5 @@ input[type=range]:focus {outline: none;}
 
 #AimManager{position:fixed;top:30px;right:10px;background-color: var(--layer-5);max-width:300px;}
 #theAimerOverlay{border: 1px dotted var(--active-sel);width: 1024px;height: 1024px;position: absolute;left: 0px;top: 0px;margin: 3px;box-sizing: content-box;}
+
+.dragme{cursor: grab;}
