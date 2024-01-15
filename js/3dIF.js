@@ -987,6 +987,7 @@ function mBuildAppearances(model){
 	}
 }
 
+
 function LoadModelOntheFly(path){
 	path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
   	var mobjInfo = [];
@@ -1012,7 +1013,10 @@ function LoadModelOntheFly(path){
 	if (data.byteLength>0){
 	  	loader.parse( data ,'', ( glbscene ) => {
 	  	gui.removeFolder("Submesh Toggle");
-      	gui.removeFolder("Submesh Info");      
+      	gui.removeFolder("Submesh Info");
+		
+		$(window).trigger('cleanTweakPanes');
+		
 		UVSbmeshENA.innerHTML=""; //remove all the buttons in the uv calculator
 		clearCanvas(canvUVWrapped,'',768)
 
@@ -1102,7 +1106,7 @@ function LoadModelOntheFly(path){
 							}
 
 							if (actualMaterial.Data.hasOwnProperty('Normal')){
-								console.error("Normal:",actualMaterial.Data.Normal);
+								console.log("Normal:",actualMaterial.Data.Normal);
 
 								if (actualMaterial.Data.Normal=='engine\\textures\\editor\\normal.xbm'){
 									materialStack[actualMaterial.Name].normalMap = FlatNORM;
@@ -1313,8 +1317,27 @@ function LoadModelOntheFly(path){
 					}else if (materialTypeCheck.multilayer.includes(actualTemplate)){
 						multilayerStack.add(actualMaterial.Name);
 						child.material = material;
+						
 						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-layer-group text-primary"></i> ${child.name}`);
-						//console.log(actualMaterial.Data.GlobalNormal.replace(new RegExp(/\.xbm$/),`.${textureformat}`) );
+/*
+						if (actualMaterial.Data.hasOwnProperty('GlobalNormal')){
+							console.log("GlobalNormal:",actualMaterial.Data.GlobalNormal);
+							
+							if (actualMaterial.Data.GlobalNormal=='engine\\textures\\editor\\normal.xbm'){
+								child.material.normalMap = FlatNORM;
+							}else{
+								let normMD5Code = CryptoJS.MD5(actualMaterial.Data.GlobalNormal)
+								if (TextureStack[normMD5Code]===undefined){
+									let temporaryTexture = thePIT.ApriStream((actualMaterial.Data.GlobalNormal).replace('.xbm',`.${textureformat}`),'binary');
+									TextureStack[normMD5Code]=dataToTeX(temporaryTexture);
+
+									child.material.normalMap = TextureStack[normMD5Code];
+								}else{
+									child.material.normalMap = TextureStack[normMD5Code];
+								}
+							}
+						}
+*/
 					}else{
 						child.material = noMaterial;
 						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-question"></i> ${child.name}` );

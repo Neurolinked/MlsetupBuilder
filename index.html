@@ -55,7 +55,9 @@
       <div class="d-inline-block colDisplayer" titl e="null_null">&nbsp;</div>
       <footer class="px-1"></footer>
     </div>
-    <!--hardcoded material DB //--><script type="text/javascript" src="./jsons/material_overrides.json" ></script><!--hardcoded material DB//-->
+    <!--hardcoded material DB //-->
+    <script type="text/javascript" src="./jsons/material_overrides.json" ></script>
+    <!--hardcoded material DB//-->
     <div id="MainMenu" class="btn-group">
       <button class="btn btn-sm btn-secondary rounded" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false"><i class="fa-solid fa-caret-down"></i></button>
       <ul class="dropdown-menu dropdown-menu-dark rounded-0 pt-0">
@@ -93,6 +95,7 @@
       </div>
     </div>
     <div id="dat-container"></div>
+    <div id="tweakContainer"></div>
   <script src='./js/threejs/build/three.min.js'></script>
   <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
   <script type='module' src='./js/threejs/src/math/MathUtils.js'></script>
@@ -1054,6 +1057,9 @@ THE SOFTWARE.</p>
     <li data-action="wipeall"><i class="fa-solid fa-soap text-light"></i> Wipe All</li>
     <li data-action="plug"><i class="fa-solid fa-plug text-light"></i> Connect new</li>
   </ul>
+<!--Insertin the TweakPane before the 3d viewport manager to call functions-->
+  <script type="module" src="./js/modules/mainTweakpane.js" ></script>
+<!--Insertin the TweakPane before the 3d viewport manager to call functions-->
   <script defer src='./js/3dIF.js'></script>
   <script src="./renderer.js"></script>
 	<script type="text/javascript" src="./public/introjs/intro.min.js" ></script>
@@ -1109,6 +1115,5 @@ THE SOFTWARE.</p>
       </form>
     </div>
   </dialog>
-
   </body>
 </html>

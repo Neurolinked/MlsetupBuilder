@@ -12,22 +12,19 @@
 	<!--FontAwesome --><link rel="stylesheet" href="../public/fontawesome-free/css/all.min.css" />
 	<!--FontAwesome --><script type="text/javascript" src="../public/fontawesome-free/js/all.min.js" ></script>
 	<script type="text/javascript" src='../js/jquery-3.7.0.min.js'></script>
-  <script type="module">
- 
-
-  </script>
   <link rel="stylesheet" href="../css/aim.css" />
   </head>
   <body class="w-100">
-    <canvas id="theAimer" width="1024" height="1024" ></canvas><div id="theAimerOverlay" ></div>
-  		<div id="AimManager" class="rounded">
-        <span class="d-block badge bg-secondary rounded p-2 dragme">Microblend Aim parameters</span>
-        <input id="mblendImg" type="hidden" value="">
-        <input id="AimU" type="hidden" min="-10.0" max="10.0" value="0.0" step="0.001">
-        <input id="AimV" type="hidden" min="-10.0" max="10.0" value="0.0" step="0.001">
-        <input id="AimMTile" type="hidden" min="0.05" max="200.0" value="0.05" step="0.001">
-        <section id="tweakMe" class="m-1"></section>
-      </div>
+    <canvas id="theAimer" width="1024" height="1024" ></canvas>
+    <div id="theAimerOverlay" ></div>
+    <div id="AimManager" class="rounded">
+      <span class="d-block badge bg-secondary rounded p-2 dragme">Microblend Aim parameters</span>
+      <input id="mblendImg" type="hidden" value="">
+      <input id="AimU" type="hidden" min="-10.0" max="10.0" value="0.0" step="0.001">
+      <input id="AimV" type="hidden" min="-10.0" max="10.0" value="0.0" step="0.001">
+      <input id="AimMTile" type="hidden" min="0.05" max="200.0" value="0.05" step="0.001">
+      <section id="tweakMe" class="m-1"></section>
+    </div>
 		<script type="text/javascript" src='../js/utilities.js'></script>
 		<script src="./rendaim.js" type="module"></script>
   </body>

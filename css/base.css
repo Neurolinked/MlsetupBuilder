@@ -594,3 +594,9 @@ table.dataTable tr:hover td:not([colspan]){
   line-height: 30px;
   padding-top: 10px;
 }
+
+#tweakContainer{
+  position: absolute;
+  min-width: calc(var(--rendView) - 160px);
+  left: 80px;
+}
