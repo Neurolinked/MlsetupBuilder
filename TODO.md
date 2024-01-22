@@ -1,11 +1,11 @@
 #MlsetupBuilder
 
 ### Todo 1.6.8
-- [ ] Packages upgrade
+- [x] Packages upgrade
 - [x] New model Library based on DataTables
   - [x] Row grouping by type : vanilla, custom
   - [x] Tag addition and complex filtering on
-- [ ] New shaders management based on .Material.json file
+- [x] New shaders management based on .Material.json file
   - [x] Assign shaders as from appearances
   - [x] masks loading from material configuration
   - [ ] multilayer.mt conversion to three.js format

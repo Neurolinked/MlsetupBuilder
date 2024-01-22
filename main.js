@@ -57,7 +57,7 @@ const schema = {
 	},
 	maskformat:{
 		type: 'string',
-		default: 'dds'
+		default: 'png'
 	},
 	legacymaterial:{
 		type:'boolean',
