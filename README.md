@@ -38,4 +38,4 @@ New shaders base on different materials
 ![New shaders base on different materials](https://www.kientzproduction.com/gitcontent/mlsb_168_b1_III.png)
 
 New microblends aiming controls interface
-![New Microblend aiming controls](https://www.kientzproduction.com/gitcontent/mlsb_168_b1_IV.png)
+![New Microblend aiming controls](https://www.kientzproduction.com/gitcontent/mlsb_168_b1_4.png)
