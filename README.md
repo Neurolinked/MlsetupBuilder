@@ -2,7 +2,9 @@
 Cyberpunk 2077 modding tool to build json version of .mlsetup files (electron version).
 A Compiled version is under the Release section on the right side
 
-![New Main window](https://www.kientzproduction.com/gitcontent/mlsb_166_1.png)
+MLSB 1.6.8 Beta I
+
+![New models interface with Tags](https://www.kientzproduction.com/gitcontent/mlsb_168_b1_I.png)
 
 ## Displaying the models
 
@@ -29,9 +31,11 @@ Personal videos: https://youtu.be/vpT_crK5K1M
 How to use it with Wolvenkit: https://youtu.be/uCOHjMPvpgc
 
 # Screenshots
+1.6.8b 1 can reach read Phantom Liberty meshes
+![1.6.8 can reach read PL meshes](https://www.kientzproduction.com/gitcontent/mlsb_168_b1_II.png)
 
-New Microblend aiming window
-![New Microblend aiming window](https://www.kientzproduction.com/gitcontent/mlsb_166_2.png)
+New shaders base on different materials
+![New shaders base on different materials](https://www.kientzproduction.com/gitcontent/mlsb_168_b1_III.png)
 
-Material Composer Editor
-![Material Composer Editor](https://www.kientzproduction.com/gitcontent/mlsb_166_3.png)
+New microblends aiming controls interface
+![New Microblend aiming controls](https://www.kientzproduction.com/gitcontent/mlsb_168_b1_IV.png)
