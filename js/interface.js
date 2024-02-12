@@ -34,7 +34,7 @@ var mlSetupContent = '';
 
 
 function checkOnSettings(){
-  var checkDepot = thePIT.RConfig('depot');
+  var checkDepot = thePIT.RConfig('paths.depot');
   checkDepot.then((result)=>{
     try {
       if (result=='') {
@@ -232,18 +232,11 @@ $(function(){
   }
 
   MLSBConfig.then((config)=>{
-    if (config.hasOwnProperty('depot')){
-      materialJSON = new MaterialBuffer(config.depot);
+    if (config.hasOwnProperty('paths')){
+      materialJSON = new MaterialBuffer(config.paths.depot);
     }
     if (config.hasOwnProperty('maskformat')){
       textureformat = config.maskformat
-    }
-    if (config.hasOwnProperty('editorCfg')){
-      $(`.ed-config[data-target="#layerTile"]`).val(config.editorCfg.layer.tiles.value);
-      $(`.ed-config[data-target="#mbTile"]`).val(config.editorCfg.mblend.tiles.value);
-      $(`.ed-config[data-target="#mbCont"]`).val(config.editorCfg.mblend.contrast.value);
-      $(`.ed-config[data-target="#mbNorm"]`).val(config.editorCfg.mblend.normal.value);
-      $(".ed-config").change();
     }
     if (config.hasOwnProperty('workspace')){
       Workspaces.dom.attr('href',Workspaces.config(config.workspace));
@@ -251,7 +244,7 @@ $(function(){
     }
 
     if (config.hasOwnProperty('paths')){
-      $("dialog#setupModPath input").val(config.paths.default.lastmod);
+      $("dialog#setupModPath input").val(config.paths.lastmod);
     }
   }).catch((error)=>{
     notifyMe(error);
@@ -1931,10 +1924,12 @@ $("#TheMagicIsHere").click(function(){
         "data-mboffv":mLsetup.Layers[k].microblend.offset.v
       });
     }
-    console.log(`%c- Imported ${$("#importTech").val()} -`,"background-color:green;color:yellow;")
-    //$("#load-info").html('<span class="badge bg-info text-dark">Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1)+' </span>');
-    notifyMe('Imported : '+$("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1),false);
-    $('#nametoexport').val($("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1));
+    var nomefile  = $("#importTech").val()=="" ? $('#nametoexport').val() : $("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1);
+
+    console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
+
+    notifyMe(`Imported : ${nomefile}`,false);
+    $('#nametoexport').val(nomefile);
     $("#importTech").val("");
     $("#layeringsystem li.active").click();
 
@@ -2380,7 +2375,7 @@ $("#masksFinderClearer").click(function(){
 
 /* let the user choose a mlmask file */
 $("#pickCustMask").click(function(){
-  let getinfo = thePIT.RConfig('unbundle')
+  let getinfo = thePIT.RConfig('paths.depot')
   getinfo.then((uncook)=>{
     thePIT.PickMask(uncook);
   }).catch((error)=>{
@@ -2400,7 +2395,7 @@ $("#modelCustomPath").click(function(e){
 $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
   let percorso = $(this).parent().children("input[type='text']").val();
   if (percorso!=""){
-    let getinfo = thePIT.RConfig('unbundle')
+    let getinfo = thePIT.RConfig('paths.depot')
     getinfo.then((uncook)=>{
       thePIT.Foldering(uncook+percorso.substring(0,percorso.lastIndexOf('\/')+1));
     }).catch((error)=>{
@@ -2566,53 +2561,6 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   $("#DialogForSettings").click(function(){
     thePIT.clickTheMenuVoice('preferences');
-  });
-
-  $(".ed-config").change(function(){
-    if ($($(this).data("target"))){
-      var configControl = $($(this).data("target"));
-      configControl.attr("max",$(this).val())
-    }
-    if ( $(`.friendo[data-control='${$(this).data("target")}']`)){
-      var friendoControl = $(`.friendo[data-control='${$(this).data("target")}'`);
-      friendoControl.attr("max",$(this).val())
-    }
-  });
-
-  $("#EDconfigChange").click(function(){
-    let saved = thePIT.savePref({
-      editorCfg:{
-        layer:{
-          tiles:{
-            value:Number($(`.ed-config[data-target="#layerTile"]`).val())
-          }
-        },
-        mblend:{
-          tiles:{
-            value:Number($(`.ed-config[data-target="#mbTile"]`).val())
-          },
-          contrast:{
-            value:Number($(`.ed-config[data-target="#mbCont"]`).val())
-          },
-          normal:{
-            value:Number($(`.ed-config[data-target="#mbNorm"]`).val())
-          }
-        }
-      }
-    });
-    saved.then(()=>{
-      SOnotify("Editor preferences saved");
-    }).catch(error=>notifyMe(error));
-  });
-
-  $("#EDconfigReset").click(function(){
-    let dummy = thePIT.RConfig('editorCfg');
-    dummy.then((valuesCFG)=>{
-      $(`.ed-config[data-target="#layerTile"]`).val(valuesCFG?.layer?.tiles?.default!==undefined ? valuesCFG.layer.tiles.default:150).change();
-      $(`.ed-config[data-target="#mbTile"]`).val(valuesCFG?.mblend?.tiles?.default!==undefined ? valuesCFG.mblend.tiles.default:150).change();
-      $(`.ed-config[data-target="#mbCont"]`).val(valuesCFG?.mblend?.contrast?.default!==undefined ? valuesCFG.mblend.contrast.default:1.0).change();
-      $(`.ed-config[data-target="#mbNorm"]`).val(valuesCFG?.mblend?.normal?.default!==undefined ? valuesCFG.mblend.normal.default:2.0).change();
-    }).catch(error=>notifyMe(error));
   });
 
   $(".copyMe").click(function(e){

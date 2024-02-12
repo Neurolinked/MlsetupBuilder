@@ -102,9 +102,11 @@ ipcRenderer.on('preload:setversion', (event, nuversion) => {
 })
 
 //Load The files in the arguments
-ipcRenderer.on('preload:load_source', (event, jsoncontent) => {
-  var textareaDummy = document.querySelector("#passaggio")
+ipcRenderer.on('preload:load_source', (event, jsoncontent, filename = "") => {
+  var filecompletePath = document.querySelector("#nametoexport");
+  var textareaDummy = document.querySelector("#passaggio");
   //pass from JSON Object to text
+  filecompletePath.value = filename;
   textareaDummy.value = JSON.stringify(jsoncontent)
   //fire the load events
   document.querySelector("#importFromWkit").click();

@@ -47,14 +47,6 @@ var userRfiles = {
 
 var objwkitto = {}
 const schema = {
-	unbundle: {
-		type: 'string',
-		default: ''
-	},
-	wcli: {
-		type: 'string',
-		default: ''
-	},
 	maskformat:{
 		type: 'string',
 		default: 'png'
@@ -66,14 +58,6 @@ const schema = {
 	usermigration:{
 		type:'boolean',
 		default: false
-	},
-	game:{
-		type:'string',
-		default: ''
-	},
-	depot:{
-		type:'string',
-		default: ''
 	},
 	flipmasks:{
 		type:'boolean',
@@ -111,7 +95,7 @@ const schema = {
 					value: 150.0
 				},
 				contrast:{
-					deafult: 1.0,
+					default: 1.0,
 					value: 1.0
 				},
 				normal:{
@@ -167,7 +151,7 @@ const preferences = new store({schema,
 							value: 150.0
 						},
 						contrast:{
-							deafult: 1.0,
+							default: 1.0,
 							value: 1.0
 						},
 						normal:{
@@ -184,15 +168,16 @@ const preferences = new store({schema,
 			}
 			store.set({
 				paths:{
-					type:'object',
-					default : {
 						depot: store.get('depot'),
 						game:fixGamePath,
 						lastmod: '',
 						wcli: store.get('wcli')
 					}
-				}
-			})
+				})
+			store.delete("depot")
+			store.delete("game")
+			store.delete("unbundle")
+			store.delete("wcli")
 		}
 	}
 });
@@ -400,7 +385,7 @@ const childWindow = (htmlFile, parentWindow, width, height, title='MlsetupBuilde
 const isMac = process.platform === 'darwin'
 var wcliExecutable = new RegExp(/.+WolvenKit\.CLI\.exe$/)
 var normals = new RegExp(/.+n\d{2}\.(xbm|png|dds)$/)
-var buildMenu = wcliExecutable.test(preferences.get('wcli'),'i');
+var buildMenu = wcliExecutable.test(preferences.get('paths.wcli'),'i');
 
 function openSettings(){
 	createModal("apps/prefs.html",mainWindow,800,350,'Preferences', {preload: path.join(__dirname, 'apps/preloadpref.js')} );
@@ -623,17 +608,17 @@ ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
 	if (no_repo){
 		whereLoadFrom = path.normalize(percorso)
 	}else{
-		whereLoadFrom = path.join(preferences.get('unbundle'),percorso)
+		whereLoadFrom = path.join(preferences.get('paths.depot'),percorso)
 	}
 	var a3dMatModel = whereLoadFrom.search(/^.+\.glb$/g)>-1 ? whereLoadFrom: ``; //path of the hypotethical material file
-	var hasDepot = preferences.get('depot')!=preferences.get('unbundle') ? true : false
+	var hasDepot = preferences.get('paths.lastmod')!=preferences.get('paths.depot') ? true : false
   	fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
     	if (err) {
       		if (err.code=='ENOENT'){
 				if (hasDepot){
 
 					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom} - trying in the Depot Folder`)
-					whereLoadFrom = path.join(preferences.get('depot'),percorso)
+					whereLoadFrom = path.join(preferences.get('paths.lastmod'),percorso)
 
 					fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
 						if (err){
@@ -699,7 +684,7 @@ ipcMain.on('main:handle_args', (event, payload) => {
              dialog.showErrorBox("File error","Reading error: wrong json file format")
              mlsetup_content = ""
           }
-          event.reply('preload:load_source',mlsetup_content)
+          event.reply('preload:load_source',mlsetup_content, mljson)
         })
       }
     })
@@ -747,7 +732,7 @@ ipcMain.on('main:getversion',(event, arg) =>{
 		i will look for the Wolvenkit configuration file, to setup the
 		preferences
 	*/
-	if (preferences.get('depot')==""){
+	if (preferences.get('paths.depot')==""){
 		fs.readFile(path.normalize(wolvenkitPrefFile),(err,wolvenkitConfigHandle)=>{
 			if (err){
 				event.reply('preload:logEntry',`No traces of Wolvenkit installation`,false);
@@ -792,7 +777,7 @@ ipcMain.on('main:pickWkitPorject',(ev)=>{
 	}).then(result => {
 	if (!result.canceled){
 		var dirPath = path.dirname(result.filePaths[0]);
-		preferences.set('paths.default.lastmod',dirPath);
+		preferences.set('paths.lastmod',dirPath);
 	 	ev.reply('preload:set_new_modPath',dirPath);
 	}
   }).catch(err => {
@@ -823,7 +808,7 @@ ipcMain.on('main:setupCR2Wr',(event, arg) => {
 	}).then(result => {
     if (!result.canceled){
 			event.reply('preload:upd_config',{'value':result.filePaths[0],'id':'wCLIexe'})
-			buildMenu = wcliExecutable.test(preferences.get('wcli'),'i');
+			buildMenu = wcliExecutable.test(preferences.get('paths.wcli'),'i');
     }
   }).catch(err => {
     dialog.showErrorBox("Preferences setup error",err.message)
@@ -908,7 +893,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 							return
 						}else{
 							if ((!objwkitto.hasOwnProperty('major')) && (arg.compile) ){
-								let test = preferences.get('wcli')
+								let test = preferences.get('paths.wcli')
 								if (test.match(/.+WolvenKit\.CLI\.exe$/)){
 									child( test, ["cr2w", "-p",salvataggio.filePath, "-d"],(err, data)=>{
 										if (err){
@@ -1015,9 +1000,9 @@ ipcMain.handle('main:getStoreValue', (event, key) => {
 });
 
 ipcMain.on('main:modelExport',(event,conf)=>{
-	let unbundlefoWkit = preferences.get('unbundle')
-	let uncooker = preferences.get('wcli')
-	var contentpath = preferences.get('paths.default.game')
+	let unbundlefoWkit = preferences.get('paths.depot')
+	let uncooker = preferences.get('paths.wcli')
+	var contentpath = preferences.get('paths.game')
 
 	if (conf.match(/^ep1\\.+/)){
 		contentpath = path.join(contentpath,spotfolder.pl);
@@ -1057,12 +1042,12 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 function checkMakeSymlinks(){
 	return new Promise((resolve,reject) =>{
 		
-		phantomLFolder= path.join(preferences.get("paths.default.game"),spotfolder.pl)
+		phantomLFolder= path.join(preferences.get("paths.game"),spotfolder.pl)
 		try{
 			if (!fs.existsSync(path.join(phantomLFolder,"basegame_3_nightcity.archive"))){
 				//try to create it
 				fs.symlink(
-					path.join(preferences.get("paths.default.game"),spotfolder.base,"basegame_3_nightcity.archive"),
+					path.join(preferences.get("paths.game"),spotfolder.base,"basegame_3_nightcity.archive"),
 					path.join(phantomLFolder,"basegame_3_nightcity.archive"),
 					"file",
 					(err)=>{
@@ -1076,7 +1061,7 @@ function checkMakeSymlinks(){
 			if (!fs.existsSync(path.join(phantomLFolder,"basegame_4_appearance.archive"))){
 				//try to create it
 				fs.symlink(
-					path.join(preferences.get("paths.default.game"),spotfolder.base,"basegame_4_appearance.archive"),
+					path.join(preferences.get("paths.game"),spotfolder.base,"basegame_4_appearance.archive"),
 					path.join(phantomLFolder,"basegame_4_appearance.archive"),
 					"file",
 					(err)=>{
@@ -1090,7 +1075,7 @@ function checkMakeSymlinks(){
 			if (!fs.existsSync(path.join(phantomLFolder,"basegame_4_gamedata.archive"))){
 				//try to create it
 				fs.symlink(
-					path.join(preferences.get("paths.default.game"),spotfolder.base,"basegame_4_gamedata.archive"),
+					path.join(preferences.get("paths.game"),spotfolder.base,"basegame_4_gamedata.archive"),
 					path.join(phantomLFolder,"basegame_4_gamedata.archive"),
 					"file",
 					(err)=>{
@@ -1113,7 +1098,7 @@ function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
 		var oldmsg = '';
 		if (toggle){
-			let uncooker = preferences.get('wcli')
+			let uncooker = preferences.get('paths.wcli')
 			subproc = spawner(uncooker,params).on('error',function(err){
 				mainWindow.webContents.send('preload:uncookErr',err)
 			})
@@ -1214,17 +1199,17 @@ ipcMain.on('main:stopTheuncook',(event)=>{
 })
 
 ipcMain.on('main:uncookForRepo',(event,conf)=> {
-	fs.access(path.normalize(preferences.get('unbundle')),fs.constants.W_OK,(err)=>{
+	fs.access(path.normalize(preferences.get('paths.depot')),fs.constants.W_OK,(err)=>{
 		if (err){
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
-			var gameContentPath = preferences.get('paths.default.game');
+			var gameContentPath = preferences.get('paths.game');
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
 				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
 				in ${gameContentPath}`)
-				mainWindow.webContents.send('preload:logEntry',`The export will be done into ${preferences.get('unbundle')}`)
+				mainWindow.webContents.send('preload:logEntry',`The export will be done into ${preferences.get('paths.depot')}`)
 				var archiveFilter = repoBuilder(gameContentPath,conf)
 			}else{
 				var archivefold = dialog.showOpenDialog({title:'Select the game folder (Cyberpunk 2077)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
@@ -1245,8 +1230,8 @@ function repoBuilder(contentdir, conf){
 	phantomLContentPath = path.join(contentdir,spotfolder.pl)
 
 	return new Promise((resolve,reject) =>{
-		let unbundlefoWkit = preferences.get('unbundle')
-		let uncooker = preferences.get('wcli')
+		let unbundlefoWkit = preferences.get('paths.depot')
+		let uncooker = preferences.get('paths.wcli')
 		
 		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 			if (typeof(conf)=='object'){
@@ -1287,13 +1272,13 @@ ipcMain.on('main:setMicroCoords',(event,datas)=>{
 })
 
 ipcMain.on('main:uncookMicroblends',(event)=>{
-	fs.access(path.normalize(preferences.get('paths.default.depot')),fs.constants.W_OK,(err)=>{
+	fs.access(path.normalize(preferences.get('paths.depot')),fs.constants.W_OK,(err)=>{
 		if (err){
 			// The folder isn't accessible for writing
 			dialog.showErrorBox("It seems that you can't write in your unbundle folder. Try to check your permissions for that folder ",err.message)
 		}else{
 
-			var gameContentPath = preferences.get('paths.default.game')
+			var gameContentPath = preferences.get('paths.game')
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
 				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
@@ -1316,8 +1301,8 @@ function microBuilder(contentdir){
 	contentpath = path.join(contentdir,spotfolder.base)
 	return new Promise((resolve,reject) =>{
 
-			let unbundlefoWkit = preferences.get('paths.default.depot') //String(preferences.get('unbundle')).replace(/base$/,'')
-			let uncooker = preferences.get('wcli')
+			let unbundlefoWkit = preferences.get('paths.depot') //String(preferences.get('unbundle')).replace(/base$/,'')
+			let uncooker = preferences.get('paths.wcli')
 			var countingOnYou = 0
 
 			if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
@@ -1328,7 +1313,7 @@ function microBuilder(contentdir){
 					.then(()=> 	uncookRun(true,["uncook", "-p", path.join(contentpath,archives.gamedata), "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger div'))
 					.then(()=> {
 						return new Promise((resolve,reject) =>{
-							fs.readdir(path.join(String(preferences.get('paths.default.depot')),'base/surfaces/microblends/'),(err,files)=>{
+							fs.readdir(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/'),(err,files)=>{
 								if (err){
 										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 										reject()
@@ -1351,7 +1336,7 @@ function microBuilder(contentdir){
 							var k = 1
 							files.forEach((png)=>{
 
-								sharp(path.join(String(preferences.get('unbundle')),'base/surfaces/microblends/',png))
+								sharp(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/',png))
 									.resize(256)
 									.toFile(path.join(app.getAppPath(),'images/',png), (err, info) => {
 										 if(err){
@@ -1519,7 +1504,7 @@ ipcMain.on('main:scanFolder',()=>{
 	var archive = dialog.showOpenDialog({title:'Select a folder you want to scan',properties: ['openDirectory'],defaultPath:app.getPath('recent')})
 		.then(selection => {
 			if (!selection.canceled){
-				if (selection.filePaths[0] == preferences.get('unbundle')){
+				if (selection.filePaths[0] == preferences.get('paths.depot')){
 					mainWindow.webContents.send('preload:scanreply',"");
 				}else{
 					var foldertree = dree.scanAsync(selection.filePaths[0],dreeOptions)

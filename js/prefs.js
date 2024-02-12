@@ -7,10 +7,10 @@ $(function(){
 	//thePIT.RConfig();
 	//function to update the form
 	function compiletheform(configurazione){
-		$("#prefxunbundle").val(configurazione.unbundle);
-		$("#wCLIexe").val(configurazione.wcli);
-		$("#gameArch").val(configurazione.game);
-		$("#wCLIDep").val(configurazione.depot);
+		$("#prefxunbundle").val(configurazione.paths.depot);
+		$("#wCLIexe").val(configurazione.paths.wcli);
+		$("#gameArch").val(configurazione.paths.game);
+		//$("#wCLIDep").val(configurazione.depot);
 		$("input[name='maskExtFormat']").prop("checked", false);
 		$("input[name='maskExtFormat'][value='"+configurazione.maskformat+"']").prop("checked", true);
 	}
@@ -19,10 +19,11 @@ $(function(){
 
 	loading.then(function(result){
 		compiletheform(result);
+		console.log(result);
 		pref_recent = result;
 	})
 
-$("#gameArch, #wCLIDep, #prefxunbundle").click(async function(){
+$("#gameArch, #prefxunbundle").click(async function(){
 		var id = $(this).attr("id");
 		var titleDialog =''
 		switch (id){
@@ -32,9 +33,10 @@ $("#gameArch, #wCLIDep, #prefxunbundle").click(async function(){
 			case 'gameArch':
 				titleDialog = `Choose the game archive folder`
 				break;
+			/* to be removed
 			case 'wCLIDep':
 				titleDialog = `Choose the Wolvenkit Depot Folder`
-				break;
+				break;*/
 		}
 		var config = await thePIT.chooseAFolder($(this).val(),titleDialog);
 		$(this).val(config);
@@ -47,7 +49,14 @@ $("#gameArch, #wCLIDep, #prefxunbundle").click(async function(){
 
 	$("#writePreferences").click(function(){
 		console.log($("input[name='maskExtFormat']:checked").val());
-		var dummy = {unbundle:$('#prefxunbundle').val(), wcli:$('#wCLIexe').val(),maskformat:	$("input[name='maskExtFormat']:checked").val(),game:$("#gameArch").val(),depot:$("#wCLIDep").val()}
+		var dummy = {
+			paths:{
+				depot:$('#prefxunbundle').val(),
+				wcli:$('#wCLIexe').val(),
+				game:$("#gameArch").val()
+			},
+			maskformat:	$("input[name='maskExtFormat']:checked").val()
+		}
 		thePIT.SaveAll(dummy);
 		$("#alertmessage").addClass('d-none');
 		pref_recent = dummy;
@@ -62,15 +71,22 @@ $("#gameArch, #wCLIDep, #prefxunbundle").click(async function(){
 		});
 	});
 
-	$("#prefxunbundle, #wCLIexe, #gameArch, #wCLIDep").on('focusout',function(){
+	$("#prefxunbundle, #wCLIexe, #gameArch").on('focusout',function(){
 		if ($("#wCLIexe").hasClass('d-none')){
-			if (($("#prefxunbundle").val()==pref_recent.unbundle) && ($("#gameArch").val()==pref_recent.game) && ($("#wCLIDep").val()==pref_recent.depot)) {
+			if (
+				($("#prefxunbundle").val()==pref_recent.paths.depot) && 
+				($("#gameArch").val()==pref_recent.paths.game)
+			) {
 				$("#alertmessage").addClass('d-none');
 			}else{
 				$("#alertmessage").removeClass('d-none');
 			}
 		}else{
-			if (($("#prefxunbundle").val()==pref_recent.unbundle) && ($("#wCLIexe").val()==pref_recent.wcli) && ($("#gameArch").val()==pref_recent.game) && ($("#wCLIDep").val()==pref_recent.depot)){
+			if (
+				($("#prefxunbundle").val()==pref_recent.paths.depot) && 
+				($("#wCLIexe").val()==pref_recent.paths.wcli) && 
+				($("#gameArch").val()==pref_recent.paths.game)
+			){
 				$("#alertmessage").addClass('d-none');
 			}else{
 				$("#alertmessage").removeClass('d-none');
