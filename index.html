@@ -114,41 +114,6 @@
   </div>
   <div class="offcanvas-body m-2 p-2"></div>
 </div>
-<!-- -->
-<div class="offcanvas offcanvas-start bg-gradient text-light" tabindex="-1" id="editorConfig" aria-labelledby="EDCLabel" data-bs-scroll="true" data-bs-backdrop="false">
-  <div class="offcanvas-header bg-warning">
-    <h5 class="offcanvas-title text-dark" id="EDCLabel">Editor configuration</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-theme="light"></button>
-  </div>
-  <div class="offcanvas-body m-2 p-2">
-      <span class="badge bg-layer0 w-100 mb-1">Layer</span>
-      <!-- max layer tiles-->
-      <div class="input-group input-group-sm mb-1">
-        <div class="badge my-auto">Max Tiles</div>
-        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="150.0" step="0.1" min="150.0" data-target="#layerTile">
-      </div>
-      <span class="badge bg-layer0 w-100 mt-3 mb-1">&micro;blends</span>
-      <!-- max microblend tiles-->
-      <div class="input-group input-group-sm mb-1">
-        <div class="badge my-auto">Max Tiles</div>
-        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="150.0" step="0.1" min="150.0" data-target="#mbTile">
-      </div>
-      <!-- max microblend contrast-->
-      <div class="input-group input-group-sm mb-1">
-        <div class="badge my-auto">Max Contrast</div>
-        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="1.0" step="0.1" min="1.0" data-target="#mbCont">
-      </div>
-      <!-- max microblend tiles-->
-      <div class="input-group input-group-sm mb-1">
-        <div class="badge my-auto">Max Normal</div>
-        <input type="number" class="form-control border border-warning rounded-0 ed-config" value="2.0" step="0.1" min="2.0" data-target="#mbNorm">
-      </div>
-      <div class="d-flex gap-2 mt-3">
-        <button class="btn btn-secondary" type="button" id="EDconfigChange"><i class="fa-solid fa-sliders" ></i> Save Defauts</button>
-        <button class="btn btn-success" type="button" id="EDconfigReset">Reset Defaults</button>
-      </div>
-  </div>
-</div>
 <!--  -->
 <div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light coverFullEditor" data-bs-backdrop="false" id="HairTool" aria-labelledby="HTLabel" >
   <div class="offcanvas-header bg-dark">
@@ -274,10 +239,6 @@
         <span id="withbones" class="text-layer2"><i class="fa-solid fa-bone fa-2x"></i> <i class="icon-normals fa-2x"></i></span>
       </div>
       <div id="Settings">
-        <div class="d-flex justify-content-between layer-1">
-          <span class="px-2 py-1 ">Parameters</span>
-          <button type="button" class="btn btn-sm rounded-0 btn-outline-warning m-0 mx-1" data-bs-toggle="offcanvas" data-bs-target="#editorConfig"><i class="fa-solid fa-sliders"></i></button>
-        </div>
         <div id="SettingsSummary" class="d-flex justify-content-start border-bottom border-secondary"> </div>
         <div id="SettingsScroller" class="pe-1" ></div>
       </div>

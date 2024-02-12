@@ -1,6 +1,30 @@
 import {Pane} from '../../public/tweakpane/tweakpane.min.js';
 import * as EssentialsPlugin from '../../public/tweakpane/tweakpane-plugin-essentials.min.js';
 
+function TW_notify(message){
+  if (!("Notification" in window)) {
+    // Check if the browser supports notifications
+    alert("This browser does not support desktop notification");
+  } else if (Notification.permission === "granted") {
+    // Check whether notification permissions have already been granted;
+    // if so, create a notification
+    const notification = new Notification(message);
+    // …
+  } else if (Notification.permission !== "denied") {
+    // We need to ask the user for permission
+    Notification.requestPermission().then((permission) => {
+      // If the user accepts, let's create a notification
+      if (permission === "granted") {
+        const notification = new Notification(message);
+        // …
+      }
+    });
+  }
+}
+
+let defPromise = thePIT.RConfig('editorCfg');
+var tw_Defaults = {}
+
 const PARAMS = {
 	rotation: false,
 	speed: 6.0,
@@ -10,11 +34,18 @@ const PARAMS = {
   maskChannel: 0.0,
   fogcolor:'#9b9d3f',
   fognear:10,
-  fogfar:105
+  fogfar:105,
+  EDLayerMaxTiles:150,
+  EDMblendMaxTiles:150,
+  EDMaxContrast:1,
+  EDMaxNormal:2,
+  ForceZeroOpacity:true
 };
 
 const submeshInfo = 1;
 const submeshToggle = 0;
+const tw_EDSave = 0;
+const tw_EDRestore = 1;
 
 export const panel = new Pane({
     container: document.getElementById('tweakContainer'),
@@ -27,8 +58,11 @@ const TDtabManager = panel.addTab({
     pages: [
         {title: 'Viewport'},
         {title: 'Model'},
+        {title: 'Editor'},
       ]
 });
+
+
 
 TDtabManager.pages[0].addBinding(PARAMS, 'rotation',{label:'3D view auto-rotation'});
 TDtabManager.pages[0].addBinding(PARAMS, 'speed',{min:0,max:20,label:'Rotation speed'})
@@ -54,4 +88,93 @@ const smeshtab =  TDtabManager.pages[1].addTab({
         {title: 'Toggle'},
         {title: 'Info'},
       ]
+});
+const EDLayer = TDtabManager.pages[2].addFolder({
+  title:'Layer'
+});
+EDLayer.addBinding(PARAMS,'EDLayerMaxTiles',{min:0.01,max:1000,step:0.01,label:'Max Tiles'}).on('change', (ev) => {
+  //Change the values in the interface
+  $("#layerTile, [data-control='#layerTile']").prop('max',PARAMS.EDLayerMaxTiles).trigger('change');
+});
+
+const EDMblend = TDtabManager.pages[2].addFolder({
+  title:'microblends'
+});
+EDMblend.addBinding(PARAMS,'EDMblendMaxTiles',{min:0.01,max:1000,step:0.01,label:'Max Tiles'}).on('change', (ev) => {
+  //Change the values in the interface
+  $("#mbTile, [data-control='#mbTile']").prop('max',PARAMS.EDMblendMaxTiles).trigger('change');
+});
+EDMblend.addBinding(PARAMS,'EDMaxContrast',{min:0.01,max:5,step:0.01,label:'Max Contrast'}).on('change', (ev) => {
+  //Change the values in the interface
+  $("#mbCont, [data-control='#mbCont']").prop('max',PARAMS.EDMaxContrast).trigger('change');
+});
+EDMblend.addBinding(PARAMS,'EDMaxNormal',{min:0.01,max:20,step:0.01,label:'Max Normals'}).on('change', (ev) => {
+  //Change the values in the interface
+  $("#mbNorm, [data-control='#mbNorm']").prop('max',PARAMS.EDMaxNormal).trigger('change');
+});
+
+const EDAdvSetup = TDtabManager.pages[2].addFolder({
+  title:'Advanced Setup'
+});
+EDAdvSetup.addBinding(PARAMS,'ForceZeroOpacity',{label:'Force Layer 0 opacity to 1'}).on('change', (ev) => {
+  //Change the values in the interface
+});
+
+TDtabManager.pages[2].addBlade({
+  view: 'buttongrid',
+  size: [2, 1],
+  cells: (x, y) => ({
+  title: [
+    ['Save', 'Reset to Default'],
+  ][y][x],
+  }),
+}).on('click', (ev) => {
+  if (ev.index[0]==tw_EDSave){
+
+    let saved = thePIT.savePref({
+      editorCfg:{
+        layer:{
+          tiles:{
+            value:PARAMS.EDLayerMaxTiles
+          }
+        },
+        mblend:{
+          tiles:{
+            value: PARAMS.EDMblendMaxTiles
+          },
+          contrast:{
+            value:PARAMS.EDMaxContrast
+          },
+          normal:{
+            value:PARAMS.EDMaxNormal
+          }
+        }
+      }
+    });
+
+    saved.then(()=>{
+      TW_notify("Editor preferences saved");
+    }).catch(error=>notifyMe(error));
+
+  }else if (ev.index[0]==tw_EDRestore){
+    PARAMS.EDLayerMaxTiles = Number(tw_Defaults?.layer?.tiles?.default!==undefined ? tw_Defaults.layer.tiles.default:150.00);
+    PARAMS.EDMblendMaxTiles = Number(tw_Defaults?.mblend?.tiles?.default!==undefined ? tw_Defaults.mblend.tiles.default:150.00);
+    PARAMS.EDMaxContrast = Number(tw_Defaults?.mblend?.contrast?.default!==undefined ? tw_Defaults.mblend.contrast.default:1.0);
+    PARAMS.EDMaxNormal = Number(tw_Defaults?.mblend?.normal?.default!==undefined ? tw_Defaults.mblend.normal.default:2.0);
+    TDtabManager.pages[2].refresh();
+  }
+});
+
+
+defPromise.then((valuesDEF)=>{
+    tw_Defaults = valuesDEF;
+  console.log(valuesDEF);
+    PARAMS.EDLayerMaxTiles = Number(valuesDEF?.layer?.tiles?.value!==undefined ? valuesDEF.layer.tiles.value:150.00);
+    PARAMS.EDMblendMaxTiles = Number(valuesDEF?.mblend?.tiles?.value!==undefined ? valuesDEF.mblend.tiles.value:150.00);
+    PARAMS.EDMaxContrast = Number(valuesDEF?.mblend?.contrast?.value!==undefined ? valuesDEF.mblend.contrast.value:1.0);
+    PARAMS.EDMaxNormal = Number(valuesDEF?.mblend?.normal?.value!==undefined ? valuesDEF.mblend.normal.value:2.0);
+
+    TDtabManager.pages[2].refresh();
+}).catch((error)=>{
+  console.error(error);
 });
