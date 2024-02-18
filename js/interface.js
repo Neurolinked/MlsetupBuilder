@@ -973,9 +973,10 @@ $("#resetShades span.choose").click(function(){
           preDefined: {
             criteria: [
                 {
-                    data: 'Tags',
+                  condition:'contains',
+                  data: 'Tags',
                 },
-             ]
+             ],logic: 'AND'
           }
         }
       }
