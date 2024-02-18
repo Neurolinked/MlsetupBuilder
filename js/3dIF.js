@@ -164,6 +164,10 @@ function onMouseMove( event ) {
 	}
 }
 
+$("body").on('click','#cagecolors span',function(){
+	material.color=new THREE.Color($(this).css("background-color"));
+	material.needsUpdate;
+});
 /*TODO Aggiungere filtro dell'attuale scena con solo i membri in gruppo filtrati per rimuovere inutili mesh da controllare.*/
 
 function getMousePosition( dom, x, y ) {
@@ -1586,13 +1590,13 @@ function init() {
 
   controls.target.set(0.01,0.7,0.07);
 
-  ambientlight = new THREE.AmbientLight( 0x606060,3 ); // soft white light
+  ambientlight = new THREE.AmbientLight( 0x606060,2 ); // soft white light
   //ambientlight.intensity=1;
   scene.add( ambientlight );
 
   pointlight = new THREE.PointLight(0x75cb04,params.lightpower); //6C5624
   pointlight_2 = new THREE.PointLight(0xf5f503,params.lightpower);
-  pointlight_3 = new THREE.PointLight(0x6078F5,params.lightpower+1);
+  pointlight_3 = new THREE.PointLight(0x6078F5,params.lightpower);
   pointlight_4 = new THREE.PointLight(0x6078F5,params.lightpower);
 
   pointlight.position.set(5,0,5);
@@ -1640,7 +1644,7 @@ function init() {
    if (params.onesided){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
    //material.NeedUpdates;
    });
-	GuiBasicsetup.add( params, 'lightpower',0.5, 10 ).name( 'Light power' ).onChange(() => {
+	GuiBasicsetup.add( params, 'lightpower',0.01, 10 ).name( 'Light power' ).onChange(() => {
 		changeLumen = true;
 	});
 	GuiBasicsetup.add(params, 'alpha', 0, 0.08,0.005).name('Maskchannel').onChange(()=>{
