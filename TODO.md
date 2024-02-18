@@ -2,9 +2,20 @@
 
 ### Todo 1.6.8
 - [x] Packages upgrade
+- [ ] Import/export
+  - [ ] Autocompile in Wolvenkit project from raw to archive folder
+- [x] Redesign preferences
+  - [x] Unbundle and depot folder reunified
+  - [x] access to Mod path source files
 - [x] New model Library based on DataTables
   - [x] Row grouping by type : vanilla, custom
   - [x] Tag addition and complex filtering on
+    - [ ] default tag filter configuration
+- [ ] Replacing DAT.gui with Tweakpane library
+  - [x] Light configuration addition 
+- [ ] Three.js library Update
+  - [ ] Rewriting the 3d management code to be more maintainable
+  - [ ] Add fx support
 - [x] New shaders management based on .Material.json file
   - [x] Assign shaders as from appearances
   - [x] masks loading from material configuration
