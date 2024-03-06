@@ -490,7 +490,7 @@ const template = [
 		{	label:'Download Wolvenkit.CLI',
 			click:()=>{
 				//Download the stable version
-				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit/releases/download/8.11.0/WolvenKit.Console-1.11.0.zip`);
+				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit-nightly-releases/releases/download/8.12.3-nightly.2024-02-17/WolvenKit.Console-8.12.3-nightly.2024-02-17.zip`);
 			}
 		},
 		{	label:'License',click: () =>{
@@ -1039,6 +1039,7 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 	})
 })
 
+/*
 function checkMakeSymlinks(){
 	return new Promise((resolve,reject) =>{
 		
@@ -1092,7 +1093,7 @@ function checkMakeSymlinks(){
 			reject()
 		}
 	})
-}
+}*/
 
 function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
@@ -1245,7 +1246,7 @@ function repoBuilder(contentdir, conf){
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
 					.then(()=>uncookRun(conf[3],["uncook", "-p", path.join(vanillaContentPath,archives.gamedata), "-r","^base.gameplay.gui.fonts.+\.fnt$","-o",unbundlefoWkit,"-or",unbundlefoWkit],'step9'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_FNT4")})
-					.then(()=>{checkMakeSymlinks()})
+					//.then(()=>{checkMakeSymlinks()})
 					.then(()=>uncookRun(conf[4],["uncook", "-p", phantomLContentPath, "-r","^ep1.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step10'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_CH")})
 					.then(()=>uncookRun(conf[5],["uncook", "-p", phantomLContentPath, "-r","^ep1.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step11'))
