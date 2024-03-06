@@ -94,7 +94,7 @@
         <input type="text" id="materialJson" class="d-none" />
       </div>
     </div>
-    <div id="dat-container"></div>
+<!--     <div id="dat-container"></div> -->
     <div id="tweakContainer"></div>
   <script src='./js/threejs/build/three.min.js'></script>
   <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
@@ -271,6 +271,10 @@
 <!--The New Editor-->
     <div id="editor-container">
       <div id="MatSelector">
+        <details id="sbmeshEN">
+          <summary>Submesh Toggler</summary>
+          <ul></ul>
+        </details>
         <details open id="Mlswitcher" class="" title="">
           <summary>ML mat. selector (working soon)</summary>
         </details>
@@ -413,8 +417,8 @@
     </div>
     <details id="legacyMatSector"><summary id="materialSummary" >unused</summary>
     <div class="input-group layer-4">
-      <input id="legacyMatFinder" class="form-control" type="text" placeholder="Filter the materials" aria-label="material searcher">
-      <button type="button" id="legacyMatFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button>
+      <input id="legacyMatFinder" class="form-control" type="search" placeholder="Filter the materials" aria-label="material searcher">
+   <!--    <button type="button" id="legacyMatFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button> -->
     </div>
     <div id="legacyMaterial" >
       <ul class="p-0" id="materiaList">

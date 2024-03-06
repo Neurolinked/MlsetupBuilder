@@ -25,7 +25,7 @@ function TW_notify(message){
 let defPromise = thePIT.RConfig('editorCfg');
 var tw_Defaults = {}
 
-const PARAMS = {
+/* const PARAMS = {
 	rotation: false,
 	speed: 6.0,
   wireframes: false,
@@ -54,7 +54,7 @@ const PARAMS = {
   l2_pos:{x:-5,y:0,z:-5},
   l3_pos:{x:0,y:0.5,z:-3},
   l4_pos:{x:0,y:3,z:3},
-};
+}; */
 
 const submeshInfo = 1;
 const submeshToggle = 0;
@@ -80,10 +80,17 @@ const TDtabManager = panel.addTab({
 
 TDtabManager.pages[0].addBinding(PARAMS, 'rotation',{label:'3D view auto-rotation'});
 TDtabManager.pages[0].addBinding(PARAMS, 'speed',{min:0,max:20,label:'Rotation speed'})
-TDtabManager.pages[0].addBinding(PARAMS, 'wireframes',{label:'Display wireframes'});
-TDtabManager.pages[0].addBinding(PARAMS, 'lightPower',{min:0.5,max:10.0, label:'Light Power'});
-TDtabManager.pages[0].addBinding(PARAMS, 'maskChannel',{min:0.0,max:1.0, step:0.01, label:'Mask opacity filter'});
-TDtabManager.pages[0].addBinding(PARAMS, 'oneside',{label:'One side rendering'});
+TDtabManager.pages[0].addBinding(PARAMS, 'wireframes',{label:'Display wireframes'}).on('change',(ev)=>{
+  $("#thacanvas").trigger("theWire");
+});
+
+TDtabManager.pages[0].addBinding(PARAMS, 'maskChannel',{min:0.0,max:1.0, step:0.01, label:'Mask layer opacity (only 3d viewport)'}).on('change',(ev)=>{
+  $("#thacanvas").trigger('maskAlpha');
+});
+
+TDtabManager.pages[0].addBinding(PARAMS, 'oneside',{label:'One side rendering'}).on('change',(ev)=>{
+  $("#thacanvas").trigger('sided');
+});
 
 const lightpane = TDtabManager.pages[0].addFolder({
   title:'Lights',
@@ -93,41 +100,79 @@ const lightpane = TDtabManager.pages[0].addFolder({
 const alight = lightpane.addFolder({
   title:'Ambient'
 })
-alight.addBinding(PARAMS,'A_light_pow',{label:'Power',min:0.1,max:5});
-alight.addBinding(PARAMS,'A_light_color',{label:'Color',view:'color'});
+alight.addBinding(PARAMS,'A_light_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',0);
+});
+alight.addBinding(PARAMS,'A_light_color',{label:'Color',view:'color'}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',0);
+});
+
 const plight1 = lightpane.addFolder({
   title:'Point light 1'
 })
-plight1.addBinding(PARAMS,'p_light1_pow',{label:'Power',min:0.1,max:5});
-plight1.addBinding(PARAMS,'p_light1_col',{label:'Color',view:'color'});
-plight1.addBinding(PARAMS,'l1_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}});
+plight1.addBinding(PARAMS,'p_light1_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',1);
+});;
+plight1.addBinding(PARAMS,'p_light1_col',{label:'Color',view:'color'}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',1);
+});;
+plight1.addBinding(PARAMS,'l1_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
+  $("#thacanvas").trigger('lightpos',1);
+});
 
 const plight2 = lightpane.addFolder({
   title:'Point light 2'
 })
-plight2.addBinding(PARAMS,'p_light2_pow',{label:'Power',min:0.1,max:5});
-plight2.addBinding(PARAMS,'p_light2_col',{label:'Color',view:'color'});
-plight2.addBinding(PARAMS,'l2_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}});
+plight2.addBinding(PARAMS,'p_light2_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',2);
+});;
+plight2.addBinding(PARAMS,'p_light2_col',{label:'Color',view:'color'}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',2);
+});
+plight2.addBinding(PARAMS,'l2_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
+  $("#thacanvas").trigger('lightpos',2);
+});
+
 const plight3 = lightpane.addFolder({
   title:'Point light 3'
 })
-plight3.addBinding(PARAMS,'p_light3_pow',{label:'Power',min:0.1,max:5});
-plight3.addBinding(PARAMS,'p_light3_col',{label:'Color',view:'color'});
-plight3.addBinding(PARAMS,'l3_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}});
+plight3.addBinding(PARAMS,'p_light3_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',3);
+});;
+plight3.addBinding(PARAMS,'p_light3_col',{label:'Color',view:'color'}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',3);
+});
+plight3.addBinding(PARAMS,'l3_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
+  $("#thacanvas").trigger('lightpos',3);
+});;
+
+
 const plight4 = lightpane.addFolder({
   title:'Point light 4'
 })
-plight4.addBinding(PARAMS,'p_light4_pow',{label:'Power',min:0.1,max:5});
-plight4.addBinding(PARAMS,'p_light4_col',{label:'Color',view:'color'});
-plight4.addBinding(PARAMS,'l4_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}});
+plight4.addBinding(PARAMS,'p_light4_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',4);
+});
+plight4.addBinding(PARAMS,'p_light4_col',{label:'Color',view:'color'}).on('change', (ev) => {
+  $("#thacanvas").trigger('newlights',4);
+});
+plight4.addBinding(PARAMS,'l4_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
+  $("#thacanvas").trigger('lightpos',4);
+});
 
 const fogpane = TDtabManager.pages[0].addFolder({
     title: 'Fog',
     expanded: false,
   });
-fogpane.addBinding(PARAMS,'fogcolor',{view: 'color',label:'Color'});
-fogpane.addBinding(PARAMS, 'fognear',{min:0,max:100,label:'Near'});
-fogpane.addBinding(PARAMS, 'fogfar',{min:0,max:1000,step:1,label:'Far'});
+fogpane.addBinding(PARAMS,'fogcolor',{view: 'color',label:'Color'}).on('change', (ev) => {
+ $("#thacanvas").trigger('fogNew');
+});
+fogpane.addBinding(PARAMS, 'fognear',{min:0,max:100,label:'Near'}).on('change', (ev) => {
+  $("#thacanvas").trigger('fogNew');
+ });;
+fogpane.addBinding(PARAMS, 'fogfar',{min:0,max:1000,step:1,label:'Far'}).on('change', (ev) => {
+  $("#thacanvas").trigger('fogNew');
+ });;
 
 const tweakReset = TDtabManager.pages[0].addButton({
     title: 'Reset to Default',
@@ -218,7 +263,6 @@ TDtabManager.pages[2].addBlade({
 
 defPromise.then((valuesDEF)=>{
     tw_Defaults = valuesDEF;
-  console.log(valuesDEF);
     PARAMS.EDLayerMaxTiles = Number(valuesDEF?.layer?.tiles?.value!==undefined ? valuesDEF.layer.tiles.value:150.00);
     PARAMS.EDMblendMaxTiles = Number(valuesDEF?.mblend?.tiles?.value!==undefined ? valuesDEF.mblend.tiles.value:150.00);
     PARAMS.EDMaxContrast = Number(valuesDEF?.mblend?.contrast?.value!==undefined ? valuesDEF.mblend.contrast.value:1.0);

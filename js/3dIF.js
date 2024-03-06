@@ -120,12 +120,66 @@ function notify3D(message){
 	NTextarea.innerHTML = '[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+'<br/>'+NTextarea.innerHTML;
 }
 
-function fogApply(fogType){
-	console.log(typeof(fogType.color));
-	if ((fogType?.color) && (fogType.far) && fogType.near){
-		return new THREE.Fog( fogType.color, fogType.near,fogType.far)
+$("#thacanvas").on('fogNew',function(ev){
+	try{
+		scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
+	}catch(error){
+		console.error(error);
+		notify3D(error);
 	}
-}
+});
+
+$("#thacanvas").on('newlights',function(event,index){
+	switch (index) {
+		case 0:
+			ambientlight.color = new THREE.Color(PARAMS.A_light_color);
+			ambientlight.intensity = PARAMS.A_light_pow;
+			break;
+		case 1:
+			pointLights[1].color = new THREE.Color(PARAMS.p_light1_col);
+			pointLights[1].intensity = PARAMS.p_light1_pow;
+			break;
+		case 2:
+			pointLights[2].color = new THREE.Color(PARAMS.p_light2_col);
+			pointLights[2].intensity = PARAMS.p_light2_pow;
+		case 3:
+			pointLights[3].color = new THREE.Color(PARAMS.p_light3_col);
+			pointLights[3].intensity = PARAMS.p_light3_pow;
+		case 4:
+			pointLights[4].color = new THREE.Color(PARAMS.p_light4_col);
+			pointLights[4].intensity = PARAMS.p_light4_pow;
+		default:
+			break;
+	}
+	console.log(index);
+});
+$("#thacanvas").on('lightpos',function(event,index){
+	switch (index) {
+		case 1:
+			pointLights[1].position.set(PARAMS.l1_pos.x,PARAMS.l1_pos.y,PARAMS.l1_pos.z);
+			break;
+		case 2:
+			pointLights[2].position.set(PARAMS.l2_pos.x,PARAMS.l2_pos.y,PARAMS.l2_pos.z);
+		case 3:
+			pointLights[3].position.set(PARAMS.l3_pos.x,PARAMS.l3_pos.y,PARAMS.l3_pos.z);
+		case 4:
+			pointLights[4].position.set(PARAMS.l4_pos.x,PARAMS.l4_pos.y,PARAMS.l4_pos.z);
+		default:
+			break;
+	}
+	console.log(index);
+});
+
+$("#thacanvas").on('sided',function(event){
+	if (PARAMS.oneside){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
+})
+
+$("#thacanvas").on('maskAlpha',function(event){
+	material.alphaTest = PARAMS.maskChannel;
+});
+$("#thacanvas").on("theWire",function(event){
+	material.wireframe =  hair_cap.wireframe = hair_card.wireframe = hair_short.wireframe = hair_other.wireframe = PARAMS.wireframes;
+})
 
 thacanvas.addEventListener('mousedown',(event)=>{
 	event.preventDefault();
@@ -248,24 +302,9 @@ function theChecked( sons ){
  var control_side = false;
  var getImageData = false;
  var imgDataShot = null;
- let scene, camera, renderer, controls, axesHelper;
- let pointlight, ambientlight, pointlight_2, pointlight_3, pointlight_4;
- var changeLumen = false;
- //-------------parameter for Dat Window-----------------------
-const params = {
- autorotation: false,
- rotationspeed: 6,
- wireframe: false,
- onesided: false,
- lightpower:0.5,
- alpha:0,
- maskColor:[50, 0, 0],
- fog:{
-	color: 0x9b9d3f,
-	near: 10,
-	far: 105
-	}
-};
+ var scene, camera, renderer, controls, axesHelper;
+ let ambientlight;
+ var pointLights = [];
 //-------------Aiming box for the camera ----------------------
 
 //basic material map
@@ -315,10 +354,6 @@ var canvUVWrapped = document.getElementById('UVMapMe');
 const loader = new THREE.GLTFLoader(); //loader for Gltf and glb models
 //const loader = new GLTFLoader();
 //const fbxloader = new THREE.FBXLoader(); //loader for FBX Format
-const gui = new dat.GUI({autoPlace:false,width:350});
-var GuiSubmesh =gui.addFolder("Submesh Toggle");
-var GuiInfo = gui.addFolder("Submesh Info");
-GuiSubmesh.close();//closes the submeshes folder
 
 
 /*control onto the flip*/
@@ -958,6 +993,16 @@ function cleanScene(){
 	}
 }
 
+function targetVisible(byname='submesh_00_LOD_1',toggle=false){
+	if (scene.children.length==6){
+		scene.traverse(oggetti=>{
+			if (oggetti.name==byname.trim()){
+				oggetti.visible=toggle;
+			}
+		})
+	}
+}
+
 function mBuildAppearances(model){
 	var menuAppearances = document.querySelector("#appearanceSwitcher ul");
 	menuAppearances.innerHTML="";
@@ -976,15 +1021,6 @@ function mBuildAppearances(model){
 		});
 		
 		let names = model.map(x=> x.name.replace('_LOD_1',''));
-		model.forEach((el,index)=>{
-			let infoGui = new Object();
-			infoGui[`Vert-${el.name}`] = `${el.vertexes}`;
-			GuiInfo.add(infoGui, `Vert-${el.name}`)
-		});
-		
-		GuiInfo.__controllers.forEach((item, i) => {
-			item.domElement.children[0].readOnly=true;
-		});
 
 	}else{
 		menuAppearances.innerHTML = `<li><a class="dropdown-item" href="#" disabled>No Appearances</a></li>`;
@@ -1016,16 +1052,12 @@ function LoadModelOntheFly(path){
 
 	if (data.byteLength>0){
 	  	loader.parse( data ,'', ( glbscene ) => {
-	  	gui.removeFolder("Submesh Toggle");
-      	gui.removeFolder("Submesh Info");
+			$("#sbmeshEN > ul").html("");
 		
 		$(window).trigger('cleanTweakPanes');
 		
 		UVSbmeshENA.innerHTML=""; //remove all the buttons in the uv calculator
 		clearCanvas(canvUVWrapped,'',768)
-
-		GuiSubmesh = gui.addFolder("Submesh Toggle");
-		GuiInfo = gui.addFolder("Submesh Info");
 	  	//Check on parser extension KHR_material_variants
 
 		if (glbscene.parser.extensions?.KHR_binary_glTF!=undefined){
@@ -1060,6 +1092,8 @@ function LoadModelOntheFly(path){
 				child.frustumCulled = false;
 				
 				if ((child.userData?.materialNames!=null) && (child.userData?.materialNames!=undefined)){
+					
+					$("#sbmeshEN > ul").append(`<li class="form-check" data-material="${child.userData.materialNames[0]}"><label for="${child.name}" class="form-check-label">${child.name}</label><input name="${child.name}" type="checkbox" class="form-check-input" checked></li>`);
 
 					materialSet.add(child.userData.materialNames[0]);
 
@@ -1076,9 +1110,7 @@ function LoadModelOntheFly(path){
 						
 					}
 					if (materialTypeCheck.metal_base.includes(actualTemplate)){
-						
-						GuiSubmesh.add(child, 'visible').name('<i class="fa-solid fa-microchip text-danger"></i> '+child.name);
-						
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fa-solid fa-microchip text-danger"></i>`);
 						if (materialStack[actualMaterial.Name]===undefined){
 							materialStack[actualMaterial.Name] = new THREE.MeshStandardMaterial({color: 0x808080});
 
@@ -1238,19 +1270,19 @@ function LoadModelOntheFly(path){
 								}
 							}
 						}*/
-						
-						GuiSubmesh.add(child, 'visible').name(`<i class="fas fa-tag text-warning"></i> ${child.name}`);
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fas fa-tag text-warning"></i>`);
 						child.material.needsUpdate=true;
 						
 					}else if (materialTypeCheck.fx.includes(actualTemplate)){
 						child.material = new THREE.MeshBasicMaterial({color:new THREE.Color("rgb("+Number.parseInt(50*Math.random())+", "+Number.parseInt(50*Math.random()+100)+", 0)"), opacity:0.7,transparent:true,wireframe:true});
 						
-						GuiSubmesh.add(child, 'visible').name( `<i class="fa-solid fa-lightbulb text-warning"></i> ${child.name}` );
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fa-solid fa-lightbulb text-warning"></i>`);
 
 					}else if (materialTypeCheck.glass.includes(actualTemplate)){
 						child.material = glass;
 						Decal = true;
-						GuiSubmesh.add(child, 'visible').name( `<i class="fa-solid fa-wine-glass-empty text-secondary"></i> ${child.name}` );
+
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fa-solid fa-wine-glass-empty text-secondary"></i>`);
 
 					}else if (materialTypeCheck.hair.includes(actualTemplate)){
 						console.log("Hairs!")
@@ -1312,39 +1344,19 @@ function LoadModelOntheFly(path){
 							}
 						}
 
-						GuiSubmesh.add(child, 'visible').name( `<i class="fa-solid fa-scissors text-secondary"></i> ${child.name}` );
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fa-solid fa-scissors text-secondary"></i>`);
+
 
 					}else if (materialTypeCheck.skin.includes(actualTemplate)){
 						child.material = skin;
-						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-hand-dots"></i> ${child.name}`);
-
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fa-solid fa-hand-dots"></i>`);
 					}else if (materialTypeCheck.multilayer.includes(actualTemplate)){
 						multilayerStack.add(actualMaterial.Name);
 						child.material = material;
-						
-						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-layer-group text-primary"></i> ${child.name}`);
-/*
-						if (actualMaterial.Data.hasOwnProperty('GlobalNormal')){
-							console.log("GlobalNormal:",actualMaterial.Data.GlobalNormal);
-							
-							if (actualMaterial.Data.GlobalNormal=='engine\\textures\\editor\\normal.xbm'){
-								child.material.normalMap = FlatNORM;
-							}else{
-								let normMD5Code = CryptoJS.MD5(actualMaterial.Data.GlobalNormal)
-								if (TextureStack[normMD5Code]===undefined){
-									let temporaryTexture = thePIT.ApriStream((actualMaterial.Data.GlobalNormal).replace('.xbm',`.${textureformat}`),'binary');
-									TextureStack[normMD5Code]=dataToTeX(temporaryTexture);
-
-									child.material.normalMap = TextureStack[normMD5Code];
-								}else{
-									child.material.normalMap = TextureStack[normMD5Code];
-								}
-							}
-						}
-*/
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fa-solid fa-layer-group text-primary"></i>`);
 					}else{
 						child.material = noMaterial;
-						GuiSubmesh.add(child, 'visible').name(`<i class="fa-solid fa-question"></i> ${child.name}` );
+						$("#sbmeshEN > ul li:last-child label").append(` <i class="fa-solid fa-question"></i>`);
 					}
 		}else{
 			child.material = material;
@@ -1374,12 +1386,6 @@ function LoadModelOntheFly(path){
 			$("#Mlswitcher ul li:nth-child(1) input").prop(`checked`,true);
 		}
 
-		/*
-		$("#appearanceSwitcher ul").html(materialJSON.codeAppearances(
-			`<li><a class="dropdown-item"  href="#" data-name="$APPEARANCE$">$APPEARANCE$</a></li>`
-			))
-		$("#appearanceSwitcher ul li:first-child a").addClass('active');
-		*/
 		mBuildAppearances(mobjInfo);
 	    
 		if (Boned){
@@ -1388,7 +1394,12 @@ function LoadModelOntheFly(path){
 			MasksOn.setAttribute("fill","currentColor");
 		}
 
-	    if (params.onesided){material.side=null; }else{material.side=THREE.DoubleSide;}
+	    if (PARAMS.oneside){
+			material.side=THREE.FrontSide;
+		}else{
+			material.side=THREE.DoubleSide;
+		}
+
 	    scene.add(glbscene.scene);
 	    //Autocentering
 		var helper = new THREE.BoxHelper(glbscene.scene);
@@ -1399,12 +1410,6 @@ function LoadModelOntheFly(path){
 	    centerPoint.z = (helper.geometry.boundingBox.max.z + helper.geometry.boundingBox.min.z) / 2;
 	    //camera.target = centerPoint;
 	    controls.target = centerPoint;
-		/*
-		multilayerStack.forEach(function(name,key,set){
-			console.log(`--${name}`);
-		});*/
-
-		console.log(TextureStack);
 
 	  }, (error) => {
 	    notify3D(error);
@@ -1414,7 +1419,6 @@ function LoadModelOntheFly(path){
     	//TODO activate an export of the file, if successeful go and do shit.
 	}
 }
-
 
 document.getElementById("takeashot").addEventListener('click', (e) =>{
 	getImageData = true;
@@ -1553,6 +1557,7 @@ function init() {
 	const axesHelper = new THREE.AxesHelper( 1 );    scene.add( axesHelper ); to understand position of the objects */
 	var thacanvas = document.getElementById('thacanvas');
 	thacanvas.setAttribute('data-engine',THREE.REVISION);
+
   	renderer = new THREE.WebGLRenderer({canvas:thacanvas, alpha:true, antialias:true,logarithmicDepthBuffer: true });
 	if (window.innerHeight-80<512){
 		renderer.setSize(renderwidth,renderwidth);
@@ -1582,31 +1587,32 @@ function init() {
   */
   controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  controls.autoRotate = false;
-  controls.autoRotateSpeed = params.rotationspeed;
+  controls.autoRotate = PARAMS.rotation;
+  controls.autoRotateSpeed = PARAMS.speed;
 
   controls.enableDamping = true;
   controls.enablePan = true;
 
   controls.target.set(0.01,0.7,0.07);
 
-  ambientlight = new THREE.AmbientLight( 0x606060,2 ); // soft white light
+  ambientlight = new THREE.AmbientLight( PARAMS.A_light_color,PARAMS.A_light_pow ); // soft white light
   //ambientlight.intensity=1;
   scene.add( ambientlight );
 
-  pointlight = new THREE.PointLight(0x75cb04,params.lightpower); //6C5624
-  pointlight_2 = new THREE.PointLight(0xf5f503,params.lightpower);
-  pointlight_3 = new THREE.PointLight(0x6078F5,params.lightpower);
-  pointlight_4 = new THREE.PointLight(0x6078F5,params.lightpower);
+  pointLights[1] = new THREE.PointLight(PARAMS.p_light1_col,PARAMS.p_light1_pow); //6C5624
+  pointLights[2] = new THREE.PointLight(PARAMS.p_light2_col,PARAMS.p_light2_pow);
+  pointLights[3] = new THREE.PointLight(PARAMS.p_light3_col,PARAMS.p_light3_pow);
+  pointLights[4] = new THREE.PointLight(PARAMS.p_light4_col,PARAMS.p_light4_pow);
 
-  pointlight.position.set(5,0,5);
-  pointlight_2.position.set(-5,0,-5);
-  pointlight_3.position.set(0,0.5,-3);
-  pointlight_4.position.set(0,3,3);
-  scene.add(pointlight);
-  scene.add(pointlight_2);
-  scene.add(pointlight_3);
-  scene.add(pointlight_4);
+  pointLights[1].position.set(PARAMS.l1_pos.x,PARAMS.l1_pos.y,PARAMS.l1_pos.z);
+  pointLights[2].position.set(PARAMS.l2_pos.x,PARAMS.l2_pos.y,PARAMS.l2_pos.z);
+  pointLights[3].position.set(PARAMS.l3_pos.x,PARAMS.l3_pos.y,PARAMS.l3_pos.z);
+  pointLights[4].position.set(PARAMS.l4_pos.x,PARAMS.l4_pos.y,PARAMS.l4_pos.z);
+
+  scene.add(pointLights[1]);
+  scene.add(pointLights[2]);
+  scene.add(pointLights[3]);
+  scene.add(pointLights[4]);
 
   //load a text file and output the result to the console
   //material.map = safeMap;
@@ -1614,62 +1620,10 @@ function init() {
 
 	//fog
 	//TODO adding fog to the scene
-	scene.fog = new THREE.Fog( params.fog.color, params.fog.near,params.fog.far);
-
-  //Setup the DAT position
-  	const GuiBasicsetup = gui.addFolder("Basic Setup");
-	/*
-	GuiBasicsetup.addColor(params, 'maskColor').onChange(()=>{
-		material.color = new THREE.Color(`rgb(${parseInt(params.maskColor[0])},${parseInt(params.maskColor[1])},${params.maskColor[2]})`);
-	});*/
-  	GuiBasicsetup.add( params, 'autorotation' ).name( 'Auto Rotation' );
-  	GuiBasicsetup.add( params, 'rotationspeed',2, 10 ).name( 'Rotation speed' );
-	GuiBasicsetup.add( params, 'wireframe').name( 'View wireframe' ).onChange(() => {
-   	if (params.wireframe){
-		 material.wireframe=true;
-		 hair_cap.wireframe = true;
-		 hair_card.wireframe = true;
-		 hair_short.wireframe = true;
-		 hair_other.wireframe = true;
-	}else{
-		 material.wireframe=false;
-		 hair_cap.wireframe = false;
-		 hair_card.wireframe = false;
-		 hair_short.wireframe = false;
-		 hair_other.wireframe = false;
-	}
-   //material.NeedUpdates;
-   });;
-  GuiBasicsetup.add( params, 'onesided').name( '1-side' ).onChange(() => {
-   if (params.onesided){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
-   //material.NeedUpdates;
-   });
-	GuiBasicsetup.add( params, 'lightpower',0.01, 10 ).name( 'Light power' ).onChange(() => {
-		changeLumen = true;
-	});
-	GuiBasicsetup.add(params, 'alpha', 0, 0.08,0.005).name('Maskchannel').onChange(()=>{
-		material.alphaTest = params.alpha
-	})
-  GuiBasicsetup.close();
-
-  const GuiFogSetup = gui.addFolder("Fog config");
-
-  GuiFogSetup.addColor(params.fog, 'color').onChange((e)=>{
-	scene.fog = fogApply(params.fog);
-  });
-
-  GuiFogSetup.add( params.fog, 'near',0,100 ).name( 'Near Distance' ).onChange((e)=>{
-	scene.fog = fogApply(params.fog);
-  });
-
-  GuiFogSetup.add( params.fog, 'far',params.fog.near,10000 ).name( 'Far Distance' ).onChange((e)=>{
-	scene.fog = fogApply(params.fog);
-  });
-
-  gui.close(); //close the whole dat.gui
-
+	scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
+/* 
   var datpotision = document.getElementById('dat-container');
-  datpotision.appendChild(gui.domElement);
+  datpotision.appendChild(gui.domElement); */
   animate();
 }
 
@@ -1678,38 +1632,42 @@ function animate() {
   if (resized) resize()
 
 	if (!paintMask3D){
-		controls.autoRotate = params.autorotation;
-		controls.autoRotateSpeed = params.rotationspeed;
+		controls.autoRotate = PARAMS.rotation;
+		controls.autoRotateSpeed = PARAMS.speed;
 	}else{
 		controls.autoRotate = false;
 	}
 
-  //check mesh reload
-  if (control_reset){
-   control_reset = false;
-   camera.position.set(0,1,-7);
-  }else{
-   controls.update();
-  }
-  if (control_side){control_side=false;}
-	if (changeLumen) {
-    pointlight.intensity=params.lightpower;
-    pointlight_2.intensity=params.lightpower;
-    pointlight_3.intensity=params.lightpower+2;
-    pointlight_4.intensity=params.lightpower;
-    changeLumen=false;
-  }
-  renderer.render(scene, camera);
-	if(getImageData == true){
-			let a = document.getElementById('takeashot');
-			imgDataShot = renderer.domElement.toDataURL('image/png');
-			getImageData = false;
-			a.href = imgDataShot;
-			a.download = `screen${ new Date().valueOf()}.png`;
-			//console.log(imgDataShot);
+	//check mesh reload
+	if (control_reset){
+		control_reset = false;
+		camera.position.set(0,1,-7);
+	}else{
+		controls.update();
 	}
-  requestAnimationFrame(animate);
+
+	if (control_side){
+		control_side=false;
+	}
+
+	renderer.render(scene, camera);
+
+	if(getImageData == true){
+		let a = document.getElementById('takeashot');
+		imgDataShot = renderer.domElement.toDataURL('image/png');
+		getImageData = false;
+		a.href = imgDataShot;
+		a.download = `screen${ new Date().valueOf()}.png`;
+	}
+
+	requestAnimationFrame(animate);
 }
+
+$("body").on("click","#sbmeshEN li input",function(ev){
+	ev.stopPropagation();
+	var nome = $(this).parent().text();
+	targetVisible(nome,$(this).is(":checked"));
+});
 
 function resize() {
 		 resized = false
@@ -1742,5 +1700,6 @@ function resize() {
  		paintMask3D=false;
 		controls.enabled = true;
  	}
-
  });
+
+ 

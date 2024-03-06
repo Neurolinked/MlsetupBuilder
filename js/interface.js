@@ -843,7 +843,7 @@ $("#resetShades span.choose").click(function(){
   
 
 	//activate/deactivate wireframe display
-  $("#wireFrame").click(function(){
+ /*  $("#wireFrame").click(function(){
     var sideBox = $("#dat-container ul > li:first-child li:nth-child(4) input[type='checkbox']");
     sideBox.click();//("checked",!sideBox.prop("checked"));
   });
@@ -852,7 +852,7 @@ $("#resetShades span.choose").click(function(){
   $("#onlyOneSide").click(function(){
     var sideBox = $("#dat-container ul > li:first-child  li:nth-child(5) input[type='checkbox']");
     sideBox.click();//("checked",!sideBox.prop("checked"));
-  });
+  }); */
 
 	var TextureLoad = new Event('fire');
 
@@ -1204,16 +1204,23 @@ $("#resetShades span.choose").click(function(){
 
   //every time the switch skin it's clicked, it reload automatically the mesh
 
-	$("#legacyMatFinderCleared").click(function(){$("#legacyMatFinder").val("").keyup()})
+	/* $("#legacyMatFinderCleared").click(function(){$("#legacyMatFinder").val("").keyup()}); */
+
 	$("#matModFinderCleared").click(function(){$("#matModFinder").val("").keyup()})
 
-
-	$("#legacyMatFinder").keyup(function () {
-		if ($(this).val()==''){
+  $("#legacyMatFinder").on("input",function () {
+    var search = $(this).val();
+		if (search==''){
 			$("#materiaList li").removeClass('d-none');
 		}else{
-			$("#materiaList li:not(:contains('"+$(this).val()+"'))").addClass('d-none');
-			$("#materiaList li:contains('"+$(this).val()+"')").removeClass('d-none');
+
+      $("#materiaList li").each(function(index){
+        if (~$(this).data("path").indexOf(search)){
+          $(this).removeClass('d-none');
+        }else{
+          $(this).addClass('d-none');
+        }
+      });
 		}
 	});
 
