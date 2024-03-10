@@ -610,6 +610,10 @@ table.dataTable tr:hover td:not([colspan]){
     overflow-y: auto;
     > li{
       margin-bottom:3px;
+      
+      &:hover{
+        background-color: var(--sec-hover);
+      }
 
       &::after{
         display:block;

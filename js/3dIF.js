@@ -1662,12 +1662,34 @@ function animate() {
 
 	requestAnimationFrame(animate);
 }
-
-$("body").on("click","#sbmeshEN li input",function(ev){
+$("body").on("click","#sbmeshEN li, #sbmeshEN li input,#sbmeshEN li label",function(ev){
 	ev.stopPropagation();
-	var nome = $(this).parent().text();
-	targetVisible(nome,$(this).is(":checked"));
-});
+	var nome
+	switch ($(this)[0].nodeName) {
+		case "LI":
+			nome = $(this).text();
+			var elm = $($(this).find('input')[0]);
+			elm.attr("checked",!elm.is(':checked'));
+			var value = elm.is(":checked");
+			targetVisible(nome,$($(this).find('input')[0]).is(":checked"));	
+			break;
+		case "INPUT":
+			nome = $(this).parent().text();
+			var value = $(this).is(":checked");
+			targetVisible(nome,value);	
+			break;
+		case "LABEL":
+			nome = $(this).parent().text();
+			var elm = $($(this).next('input')[0]);
+			elm.attr("checked",!elm.is(':checked'));
+			var value = elm.is(":checked");
+			targetVisible(nome,value);	
+			break;
+		default:
+			break;
+	}
+	//targetVisible(nome,$(this).find("input").is(":checked"));
+})
 
 function resize() {
 		 resized = false
