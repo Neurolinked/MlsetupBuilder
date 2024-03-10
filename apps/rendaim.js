@@ -18,7 +18,6 @@ const panel = new Pane({
 panel.registerPlugin(EssentialsPlugin);
 
 $(function(){
-	var shiftSpeedup=false;
 
 	function reworkMBlend(Tiles,U,V){
 		microblendRatio = Tiles
