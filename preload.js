@@ -98,7 +98,7 @@ const updblends = new Event('updMBlends');
 
 //autosetup version from the package
 ipcRenderer.on('preload:setversion', (event, nuversion) => {
-    document.title = document.title + " - " + nuversion
+    document.title = document.title + " - v"+nuversion+" "
 })
 
 //Load The files in the arguments
