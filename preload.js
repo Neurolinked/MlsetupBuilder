@@ -160,8 +160,6 @@ ipcRenderer.on('preload:logEntry',(event, resultSave, warning = false, date = tr
 		if (notiCounter.innerText==''){
 			notiCounter.innerText = 0
 		}
-    console.log(`${resultSave} ${notiCounter.innerText}`)
-    
 		let noterrorz = parseInt(notiCounter.innerText)
 		noterrorz++
 		notiCounter.innerText = noterrorz

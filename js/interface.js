@@ -1,6 +1,6 @@
 window.$ = window.jQuery;
 var notifications = 0;
-var materialJSON = new MaterialBuffer();
+//var materialJSON = new MaterialBuffer();
 var uncookMyFile = false;
 var MLSBConfig = thePIT.RConfig();
 var textureformat = ''
@@ -750,6 +750,7 @@ $("#resetShades span.choose").click(function(){
 
   MLSB.TreeD.lastModel = lastModelOpened;
   $("#modelTarget").val(MLSB.TreeD.lastModel);
+  $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb$/,".Material.json"));
   
   var openCloseMBlend = localStorage.getItem('customMicroblend_I');
 
@@ -1036,7 +1037,7 @@ $("#resetShades span.choose").click(function(){
     },
     scrollCollapse: true,
     scroller: true,
-    scrollY: (window.innerHeight-320),
+    scrollY: (window.innerHeight-350),
     search:{
       "regex": true
     },
@@ -1079,7 +1080,7 @@ $("#resetShades span.choose").click(function(){
     $("#normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
     $("#modelTarget").val(MLSB.TreeD.lastModel);
     $('#btnMdlLoader').click();
-    
+    $("#thacanvas").trigger("loadScene");
   });
 
   CPModels.select.selector( 'td:not(:first-child)' ); //
@@ -1399,10 +1400,10 @@ $("#resetShades span.choose").click(function(){
   });
 
   //Color Luminosity
-  $("#colorLum").on("change input",function(ev){
+  $("#colorLum").on("change, input",function(ev){
     let illuminazione = $(this).val();
     $("#cagecolors").css("filter",`brightness(${illuminazione})`);
-    console.log(ev.bubble);
+
     if(!ev.bubble){
       localStorage.setItem("luminosity",illuminazione);
     }
@@ -2403,7 +2404,14 @@ $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
     })
   }
 });
-//use the copy function for paths
+
+$(".copyinfo").click(function(ev){
+  let theTarget = $(this).data("target");
+  if ($(theTarget).val()!=''){
+    navigator.clipboard.writeText($("#prefxunbundle").val()+$(theTarget).val().replaceAll(/\//g,'\\'));
+  }
+});
+/* //use the copy function for paths
  $("#modelCopyPath").click(function(){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$("#modelTarget").val().replaceAll(/\//g,'\\'));
   });
@@ -2412,7 +2420,7 @@ $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
   });
 	$("#modelNorPath").click(function(){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$("#normTemplate").val().replaceAll(/\//g,'\\'));
-   });
+   }); */
 
 	var legacyMatOpen = thePIT.RConfig('legacymaterial')
 	legacyMatOpen.then((isopen)=>{

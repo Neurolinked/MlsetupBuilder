@@ -45,3 +45,5 @@ const PARAMS = {
 	l3_pos:{x:0,y:0.5,z:-3},
 	l4_pos:{x:0,y:3,z:3},
 };
+
+var materialJSON = new MaterialBuffer();

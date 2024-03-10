@@ -103,7 +103,7 @@ if (window.Worker) {
   }
 }
 
-dat.GUI.prototype.removeFolder = function(name) {
+/* dat.GUI.prototype.removeFolder = function(name) {
    var folder = this.__folders[name];
    if (!folder) {
      return;
@@ -112,7 +112,7 @@ dat.GUI.prototype.removeFolder = function(name) {
    this.__ul.removeChild(folder.domElement.parentNode);
    delete this.__folders[name];
    this.onResize();
- }
+ } */
 
 function notify3D(message){
 	let Data = new Date(Date.now());
@@ -169,11 +169,19 @@ $("#thacanvas").on('lightpos',function(event,index){
 	}
 	console.log(index);
 });
-
+$("#thacanvas").on('loadScene',function(event){
+	/*
+	Load Materials
+		if there is no Material file try to export it
+	Load First Layer mask
+		if not found replace with a def. one and disable all layers except 0
+	Load the Models and Apply Materials
+	*/
+	LoadMaterials($("#materialTarget").val());
+});
 $("#thacanvas").on('sided',function(event){
 	if (PARAMS.oneside){material.side=THREE.FrontSide;}else{material.side=THREE.DoubleSide;}
 })
-
 $("#thacanvas").on('maskAlpha',function(event){
 	material.alphaTest = PARAMS.maskChannel;
 });
@@ -971,7 +979,7 @@ function loadMapOntheFly(path){
 
     err_counter = err_counter+1;
     notific.textContent = err_counter;
-    material.color.set(0x000055);
+    //material.color.set(0x000055);
     clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
 	material.map.needsUpdate = true;
     notify3D('An error happened during the load of the file: '+mipreference.value+path);
@@ -1027,6 +1035,24 @@ function mBuildAppearances(model){
 	}
 }
 
+function LoadMaterials(path){
+	path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
+	tempMaterial
+	if (/^[\w|\W]:\\.+/.test(path)){
+		tempMaterial = thePIT.ApriStream(path.replace(/\.glb$/,".Material.json"),'binary',true)
+	}else{
+		tempMaterial = thePIT.ApriStream(path.replace(/\.glb$/,".Material.json"),'binary')
+	}
+
+	try {
+		materialJSON.import(tempMaterial);
+		//$("#appeInfo").html(materialJSON.codeAppearances());
+		console.log(materialJSON);
+	} catch (error) {
+		notifyMe(error,false);
+	}
+	//$("#materialJson").val(tempMaterial).trigger('update');
+}
 
 function LoadModelOntheFly(path){
 	path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
@@ -1045,7 +1071,7 @@ function LoadModelOntheFly(path){
 		tempMaterial = thePIT.ApriStream(path.replace(/\.glb$/,".Material.json"),'binary')
 		modelStream = thePIT.ApriStream(path,'binary');
 	}
-	//console.log(tempMaterial);
+
 	$("#materialJson").val(tempMaterial).trigger('update');
 
   	data = str2ab(modelStream);
@@ -1093,13 +1119,13 @@ function LoadModelOntheFly(path){
 				
 				if ((child.userData?.materialNames!=null) && (child.userData?.materialNames!=undefined)){
 					
-					$("#sbmeshEN > ul").append(`<li class="form-check" data-material="${child.userData.materialNames[0]}"><label for="${child.name}" class="form-check-label">${child.name}</label><input name="${child.name}" type="checkbox" class="form-check-input" checked></li>`);
+					$("#sbmeshEN > ul").append(`<li class="form-check" data-material="${child.userData.materialNames[0]}"><label for="${child.name}" class="form-check-label">${child.name}</label><input name="${child.name}" type="checkbox" class="form-check-input" checked ></li>`);
 
 					materialSet.add(child.userData.materialNames[0]);
 
 					actualMaterial = materialJSON.Materials.filter(el=>el.Name==child.userData.materialNames[0])[0];
 					actualTemplate = actualMaterial?.MaterialTemplate==='undefined'?'':actualMaterial.MaterialTemplate;
-					console.log(actualMaterial);
+					console.table(actualMaterial);
 
 					if ($("#masksTemplate").val()==''){
 						MlmaskTestString = '/'+
@@ -1500,7 +1526,6 @@ MDLloadingButton.addEventListener('click',(e)=>{
 		loadMapOntheFly(theMaskLayer);
 		//material.needUpdates =true; //setup the mask I'll set the material to update
 	}else{
-		material.color.set(0x000055);
 		clearCanvas(paintMaskHT,'rgb(256,256,256)',768);//material.map = safeMap;
 		material.map.needsUpdate = true;
 		notify3D('the texture '+theMaskLayer+' does not exists');
@@ -1665,11 +1690,12 @@ function animate() {
 $("body").on("click","#sbmeshEN li, #sbmeshEN li input,#sbmeshEN li label",function(ev){
 	ev.stopPropagation();
 	var nome
+	console.log(`activation :${$(this)[0].nodeName}`);
 	switch ($(this)[0].nodeName) {
 		case "LI":
 			nome = $(this).text();
 			var elm = $($(this).find('input')[0]);
-			elm.attr("checked",!elm.is(':checked'));
+			elm.prop("checked",!elm.is(':checked'));
 			var value = elm.is(":checked");
 			targetVisible(nome,$($(this).find('input')[0]).is(":checked"));	
 			break;
@@ -1681,7 +1707,7 @@ $("body").on("click","#sbmeshEN li, #sbmeshEN li input,#sbmeshEN li label",funct
 		case "LABEL":
 			nome = $(this).parent().text();
 			var elm = $($(this).next('input')[0]);
-			elm.attr("checked",!elm.is(':checked'));
+			elm.prop("checked",!elm.is(':checked'));
 			var value = elm.is(":checked");
 			targetVisible(nome,value);	
 			break;

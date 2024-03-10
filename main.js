@@ -605,11 +605,13 @@ ipcMain.on('main:giveModels',(event) => {
 //read file on disk
 ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
 	var whereLoadFrom
+	//If there is no repo, it's a custom loading
 	if (no_repo){
 		whereLoadFrom = path.normalize(percorso)
 	}else{
 		whereLoadFrom = path.join(preferences.get('paths.depot'),percorso)
 	}
+
 	var a3dMatModel = whereLoadFrom.search(/^.+\.glb$/g)>-1 ? whereLoadFrom: ``; //path of the hypotethical material file
 	var hasDepot = preferences.get('paths.lastmod')!=preferences.get('paths.depot') ? true : false
   	fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
@@ -617,7 +619,7 @@ ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
       		if (err.code=='ENOENT'){
 				if (hasDepot){
 
-					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom} - trying in the Depot Folder`)
+					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom} - trying in the last Mod Folder`)
 					whereLoadFrom = path.join(preferences.get('paths.lastmod'),percorso)
 
 					fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
@@ -636,7 +638,7 @@ ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
 								mainWindow.webContents.send('preload:request_uncook')
 							}
 						}else{
-							event.reply('preload:logEntry', 'File found in the Depot Folder, Yay')
+							event.reply('preload:logEntry', 'File found in the Last Mod Folder, Yay!')
 						}
 					})
 				}else{
