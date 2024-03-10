@@ -59,20 +59,6 @@ Number.prototype.countDecimals = function () {
 
 const range = (start, stop, step = 1) =>  Array(Math.ceil((stop - start) / step)+1).fill(start).map((x, y) => x + y * step)
 
-/*
-async function abuildMaskSelector(listOfMasks){
-	if (typeof(listOfMasks)=="object"){
-			var maskSel = document.querySelector("#customMaskSelector");
-			let dummytxt = '';
-			for (k=0, j=listOfMasks.length;k<j;k++){
-				dummytxt +="<option value='"+k+"' >"+listOfMasks[k].mask.replace("{format}",textureformat)+"</option>";
-        //$("#customMaskSelector").append("<option value='"+k+"' >"+listOfMasks[k].mask+"</option>");
-      }
-			maskSel.innerHTML+=dummytxt;
-			return;
-	}
-}*/
-
 //Build the microblends gallery and compile the microblends select options
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
@@ -167,7 +153,7 @@ async function abuildHairs(aHairs){
 					}
 				}
 				//console.log(hair_colors)
-				$("#hairSwatches").append("<span data-toggle='tooltip' data-set='"+hair.set+"'  title='"+hair.name+"' data-name='"+hair.name+"' data-crtt='linear-gradient("+hair_colors+")' data-cid='linear-gradient("+shade+")' style='background:linear-gradient("+hair_colors+");order:"+hair.order+"' >"+"</span>"); //linear-gradient("+shade+");background-blend-mode: multiply
+				$("#hairSwatches").append("<span data-set='"+hair.set+"' alt='"+hair.name+"'  title='"+hair.name+"' data-name='"+hair.name+"' data-crtt='linear-gradient("+hair_colors+")' data-cid='linear-gradient("+shade+")' style='background:linear-gradient("+hair_colors+");order:"+hair.order+"' >"+"</span>"); //linear-gradient("+shade+");background-blend-mode: multiply
 			});
 		}
 	}
@@ -327,7 +313,6 @@ $(function(){
       })
   })
 
-  var shiftSpeedup = false;
   var indexLayerContextual = null; //variable index for the copied Data
   var dataContextual = {};
   var newMBlendMan = {packageName:"",files:[]};
@@ -369,7 +354,6 @@ $(function(){
     .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g))
     .reduce((cur,key) => { return Object.assign(cur,{[key]:ml_libraries[key]}) },{} );
 
-  $('[data-toggle="tooltip"]').tooltip(); //force tooltip to build up
 	//not sure about this
 	function slideMaterials(index,speed = 700){
 		if (index/4>1){
@@ -399,7 +383,6 @@ $(function(){
   }
   /*
 	var matChooser = document.getElementById('materialChoser')
-	var tooltipMat = new bootstrap.Tooltip(matChooser,{placement:'left'})
   */
 
   $(document).on('keydown', function(e) {
@@ -519,8 +502,6 @@ $(function(){
 	$('#bkgshades').on('change',function(){
 		$('#sp-gradients div').css('background-color',$('#bkgshades').val());
 	});
-
-  //$(document).on('keyup', function(e) { if (e.shiftKey == false) { shiftSpeedup = false; $("#AimV, #AimU, #AimMTile").prop("step",'0.001');} });
 
 	$("#legacyMatSector").click(function(ev){
 		//console.log($("#legacyMatSector").prop('open'))
@@ -966,6 +947,17 @@ $("#resetShades span.choose").click(function(){
     },
     buttons: [
       {
+        extend: 'selected',
+        text:'Export',
+        className:'btn btn-sm btn-primary my-1',
+        action:function(dt){
+          notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel} with materials`);
+          thePIT.UnCookSingle(MLSB.TreeD.lastModel.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\").replaceAll("\\ep1\\","ep1\\"));
+          taskProcessBar();
+          CPModels.rows().deselect();
+        }
+      },
+      {
         extend:'searchBuilder',
         className:'btn btn-sm btn-secondary my-1',
         config: {
@@ -1081,7 +1073,6 @@ $("#resetShades span.choose").click(function(){
   })
   .on('select', function(e, dt, type, indexes ) {
     var data = CPModels.row({selected:true}).data();
-
     MLSB.TreeD.lastModel = data.file;
     localStorage.setItem(`lastModelOpened`,data.file);
     $("#masksTemplate").val(data.mask!=null?maskList[data.mask].mask.replace('{format}',textureformat):'');
@@ -1337,7 +1328,7 @@ $("#resetShades span.choose").click(function(){
 					toodarkClass='bg-light';
 				}
 				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" data-toggle="tooltip" title="'+value.n+'" >&nbsp;</span>');
+				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" title="'+value.n+'" alt="'+value.n+'" >&nbsp;</span>');
 			});
 
 			//build up the lists of data loaded from the material chosen
@@ -1933,6 +1924,8 @@ $("#TheMagicIsHere").click(function(){
       });
     }
     var nomefile  = $("#importTech").val()=="" ? $('#nametoexport').val() : $("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1);
+    //change the name on file imported
+    document.title = document.title.split('[')[0]+" ["+nomefile+"]";
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
 
@@ -1940,7 +1933,6 @@ $("#TheMagicIsHere").click(function(){
     $('#nametoexport').val(nomefile);
     $("#importTech").val("");
     $("#layeringsystem li.active").click();
-
     return
 
 	});
