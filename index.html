@@ -89,7 +89,7 @@
       <div class="d-none">
       <!--<div class="input-group input-group-sm"> 1.6.6-->
         <input type="file" accept=".json" placeholder="Load JSON mlsetup"  id="importTech" />
-        <!--<button class="btn btn-Prim" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>-->
+        <!--<button class="btn btn-Prim" type="button" id="TheMagicIsHere"   data-bs-placement="right" title="Import a json file"><i class="fas fa-file-upload"></i></button>-->
         <textarea id="passaggio" class="d-none"></textarea>
         <input type="text" id="materialJson" class="d-none" />
       </div>
@@ -152,7 +152,7 @@
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="d-grid py-1">
-    <button class="btn btn-Prim rounded-0" type="button" id="TheMagicIsHere" data-toggle="tooltip" data-bs-placement="bottom" title="Import a json file">Import the MuLtilayer Setup <i class="fa-solid fa-angles-right"></i></button>
+    <button class="btn btn-Prim rounded-0" type="button" id="TheMagicIsHere"   data-bs-placement="bottom" title="Import a json file">Import the MuLtilayer Setup <i class="fa-solid fa-angles-right"></i></button>
   </div>
   <div class="offcanvas-body">
     <div class="mlpreviewBody" ></div>
@@ -224,16 +224,16 @@
           <label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
         <input type="checkbox" class="d-none" id="prefloaded" disabled />
         <input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
-        <input type="checkbox" data-toggle="tooltip" title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off">
+        <input type="checkbox"   title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off">
           <label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
-        <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipMask" autocomplete="off">
+        <input type="checkbox"   class="btn-check" id="flipMask" autocomplete="off">
           <label class="btn btn-outline-warning" for="flipMask"><i class="fa-solid fa-rotate fa-rotate-90"></i></label>
-        <input type="checkbox" data-toggle="tooltip" class="btn-check" id="flipNorm" autocomplete="off">
+        <input type="checkbox"   class="btn-check" id="flipNorm" autocomplete="off">
           <label class="btn btn-outline-normal" for="flipNorm"><i class="icon-normals"></i></label>
       </div>
       <div class="btn-group btn-group-sm ms-2 me-1" role="group" aria-label="model loading">
-        <button type="button" id="btnModPaths" data-toggle="tooltip" title="Setup a mod path to take assets from" class="btn btn-outline-info"><i class="fa-solid fa-folder-tree"></i></button>
-        <button type="button" id="btnMdlLoader" data-toggle="tooltip" title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
+        <button type="button" id="btnModPaths"   title="Setup a mod path to take assets from" class="btn btn-outline-info"><i class="fa-solid fa-folder-tree"></i></button>
+        <button type="button" id="btnMdlLoader"   title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
       </div>
       <div v class="btn-group" role="group" aria-label="model info">
         <span id="withbones" class="text-layer2"><i class="fa-solid fa-bone fa-2x"></i> <i class="icon-normals fa-2x"></i></span>
@@ -289,7 +289,7 @@
       </ul>
     </div>
   <span class="badge w-100 rounded-0 ">Layers</span>
-  <div class="d-grid"><button class="btn btn-out-Prim btn-sm rounded-0" id="applytoMyLayer" type="button" data-toggle="tooltip" data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
+  <div class="d-grid"><button class="btn btn-out-Prim btn-sm rounded-0" id="applytoMyLayer" type="button"   data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
   <ul id="layeringsystem" class="layer-2 controLayers" tabindex="1">
     <li  data-labels="(null_null) unused"  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >0</li>
       <li  data-labels="(null_null) unused"   data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >1</li>
@@ -312,7 +312,7 @@
       <li  data-labels="(null_null) unused"   data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >18</li>
       <li  data-labels="(null_null) unused"   data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >19</li>
   </ul>
-  <div class="d-grid"><button class="btn btn-sm btn-outline-warning rounded-0" type="button" id="actlast-Layer" data-toggle="tooltip" data-bs-placement="bottom" title="Activate the last unactive layer (max 0-19)"><i class="fas fa-plug"></i> add layer</button></div>
+  <div class="d-grid"><button class="btn btn-sm btn-outline-warning rounded-0" type="button" id="actlast-Layer"   data-bs-placement="bottom" title="Activate the last unactive layer (max 0-19)"><i class="fas fa-plug"></i> add layer</button></div>
   <div class="text-center bg-layer2 m-2 p-1 rounded">
     <input id="layerRandomCfg" class="form-control form-control-sm rounded-0 border border-warning bg-layer0" type="search" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
     <div class="btn-toolbar justify-content-between mt-2" role="toolbar" aria-label="Toolbar actions for layers">
@@ -321,7 +321,7 @@
          <button type="button" class="btn btn-outline-primary" id="wash-layers"><i class="fas fa-soap"></i> clean</a></button>
        </div>
        <div class="btn-group btn-group-sm btn-tiny" role="group" aria-label="Randomizer tools">
-         <button type="button" class="btn btn-outline-warning" id="layerRandomizer" data-toggle="tooltip" title="Randomize layers"><i class="fas fa-random"></i> random</button>
+         <button type="button" class="btn btn-outline-warning" id="layerRandomizer"   title="Randomize layers"><i class="fas fa-random"></i> random</button>
          <div class="btn-group dropend" role="group">
            <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
              <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu bg-layer1 border border-warning p-2" style="width:22rem;">
@@ -341,7 +341,7 @@
   </div>
   <div class="twoColGrid">
     <div class="layer-2 m-2"><span class="badge w-100 rounded-0 "> Ratio </span>
-      <input type="number" class="form-control rounded-0" data-toggle="tooltip" title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
+      <input type="number" class="form-control rounded-0"   title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
     </div>
     <div class="layer-2 m-2"><span class="badge w-100 rounded-0 "> Normal </span>
       <div class="form-check form-switch d-flex justify-content-center">
@@ -418,7 +418,7 @@
     <details id="legacyMatSector"><summary id="materialSummary" >unused</summary>
     <div class="input-group layer-4">
       <input id="legacyMatFinder" class="form-control" type="search" placeholder="Filter the materials" aria-label="material searcher">
-   <!--    <button type="button" id="legacyMatFinderCleared"  data-toggle="tooltip" title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button> -->
+   <!--    <button type="button" id="legacyMatFinderCleared"    title="Clear the search field" class="btn text-warning"><i class="fa fa-times"></i> </button> -->
     </div>
     <div id="legacyMaterial" >
       <ul class="p-0" id="materiaList">
@@ -447,12 +447,12 @@
     <div class="input-group input-group-sm">
       <span class="input-group-text">Color filter</span>
       <input type="text" class="form-control" aria-label="Sizing example input" id="colorLbFinder" placeholder="write a label to find the color">
-      <button type="button" id="colorCleaner" data-toggle="tooltip" title="" class="btn text-warning" data-bs-original-title="Clear the search field"><i class="fa fa-times"></i></button>
+      <button type="button" id="colorCleaner"   title="" class="btn text-warning" data-bs-original-title="Clear the search field"><i class="fa fa-times"></i></button>
       <input type="checkbox" class="btn-check" id="colororder" checked autocomplete="off">
-      <label class="btn btn-outline-warning btn-sm" for="colororder" data-toggle="tooltip" data-bs-original-title="Change the visual Order of the swatches" ><i class="fa-solid fa-sort"></i></label>
+      <label class="btn btn-outline-warning btn-sm" for="colororder"   data-bs-original-title="Change the visual Order of the swatches" ><i class="fa-solid fa-sort"></i></label>
       <input type="checkbox" class="btn-check" id="BWAdd" autocomplete="off">
-      <label class="btn btn-outline-warning btn-sm" for="BWAdd" data-toggle="tooltip" data-bs-original-title="Add Black and white, but you need to install a mod with them (Multilayer Material Xtender has them)"><i class="fa-solid fa-swatchbook"></i></label>
-      <button type="button" id="colorReset" data-toggle="tooltip" title="" class="btn btn-outline-info" data-bs-original-title="Choose the basic override null_null"><i class="fa-solid fa-eraser"></i></button>
+      <label class="btn btn-outline-warning btn-sm" for="BWAdd"   data-bs-original-title="Add Black and white, but you need to install a mod with them (Multilayer Material Xtender has them)"><i class="fa-solid fa-swatchbook"></i></label>
+      <button type="button" id="colorReset"   title="" class="btn btn-outline-info" data-bs-original-title="Choose the basic override null_null"><i class="fa-solid fa-eraser"></i></button>
     </div>
     <div id="colordisplay" class="layer-2">
       <div id="cagecolors">
@@ -492,7 +492,7 @@
           </div>
           <div class="input-group input-group-sm layer-2">
             <div class="badge my-auto">contrast</div>
-            <input type="number" class="form-control rounded-0" id="mbCont" value="0.0" step="0.01"  data-toggle="tooltip" title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
+            <input type="number" class="form-control rounded-0" id="mbCont" value="0.0" step="0.01"    title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbCont" value="0.0" step="0.01"  min="0.0" max="1.0">
           </div>
           <div class="input-group input-group-sm layer-2 ">
@@ -529,7 +529,7 @@
           <span class="w-100 rounded-0 p-2" >&micro;blend preview tool</span>
           <div class='row gx-0'>
             <div class="col-6 m-0">
-              <input id="bg-changer" type="color" value="#000000" data-toggle="tooltip" title="Background color check for microblend">
+              <input id="bg-changer" type="color" value="#000000"   title="Background color check for microblend">
             </div>
             <div class="col-6 m-0">
               <div class="btn-group btn-group-sm w-100" role="group" aria-label="microblend fx">
@@ -681,23 +681,28 @@
   <input type="number" class="d-none" id="maskLayer" value="0" min="0" max="20"  />
   <input type="number" class="d-none" id="maxLayers" value="19" min="0" max="19"  />
   <div class="input-group input-group-sm mb-2">
+    <span class="input-group-text bg-info text-dark border-0" ><i class="fa-solid fa-layer-group"></i></span>
+    <input type="text" class="form-control" id="materialTarget" placeholder="path to the material" readonly />
+    <button data-target="#materialTarget" type="button" class="btn btn-outline-info copyinfo" alt="Copy the path"><i class="fas fa-copy"></i></button>
+  </div>
+  <div class="input-group input-group-sm mb-2">
     <span class="input-group-text bg-dark text-info border-info" ><i class="fas fa-cube"></i></span>
     <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
-    <button id="modelCopyPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
-    <button id="modelOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
-    <button id="modelCustomPath" type="button" class="btn btn-outline-primary" data-toggle="tooltip" title="Load a model"><i class="fas fa-box-open"></i> Custom</button>
+    <button type="button" class="btn btn-outline-info copyinfo"  data-target="#modelTarget" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
+    <button id="modelOpenPath" type="button" class="btn btn-outline-info "   title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
+    <button id="modelCustomPath" type="button" class="btn btn-outline-primary"   title="Load a model"><i class="fas fa-box-open"></i> Custom</button>
   </div>
   <div class="input-group input-group-sm border-secondary mb-2">
     <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-mask"></i></span>
     <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" >
-    <button id="modelTexPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
-    <button id="masksOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
+    <button data-target="#masksTemplate" type="button" class="btn btn-outline-info copyinfo"   title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
+    <button id="masksOpenPath" type="button" class="btn btn-outline-info "   title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
   </div>
   <div class="input-group input-group-sm border-secondary">
     <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-compress-alt"></i></span>
     <input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
-    <button id="modelNorPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
-    <button id="NormOpenPath" type="button" class="btn btn-outline-info " data-toggle="tooltip" title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
+    <button data-target="#normTemplate" type="button" class="btn btn-outline-info copyinfo"   title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
+    <button id="NormOpenPath" type="button" class="btn btn-outline-info "   title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
   </div>
 </form>
 <!--Model table-->
