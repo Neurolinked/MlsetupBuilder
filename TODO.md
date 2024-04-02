@@ -11,9 +11,9 @@
   - [x] Row grouping by type : vanilla, custom
   - [x] Tag addition and complex filtering on
     - [ ] default tag filter configuration
-- [ ] Replacing DAT.gui with Tweakpane library
+- [x] Replacing DAT.gui with Tweakpane library
   - [x] Light configuration addition 
-- [ ] Three.js library Update
+- [x] Three.js library Update
   - [ ] Rewriting the 3d management code to be more maintainable
   - [ ] Add fx support
 - [x] New shaders management based on .Material.json file
