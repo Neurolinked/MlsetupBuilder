@@ -212,12 +212,29 @@ class MaterialBuffer {
 	}
 	
 	/* Searching and sorting */
-	find(nameToFind,type='material'){
+	findIndex(nameToFind,type='material'){
 		if (type=='material'){
 			return this.Materials.findIndex(mat => mat.Name==nameToFind)
 		}else if(type=='template'){
 			return this.MaterialTemplates.findIndex(mat => mat.Name==nameToFind)
 		}
+		return false
+	}
+
+	find(nameToFind,type='material'){
+		var indice
+		if (type=='material'){
+			indice = this.findIndex(nameToFind)
+			if (indice >=0 ){
+				return this.Materials[indice]
+			}
+		}else if(type=='template'){
+			indice = this.findIndex(nameToFind,'template')
+			if (indice >=0 ){
+				return this.MaterialTemplates[indice]
+			}
+		}
+		return false
 	}
 	
 	remove(index=NaN){
@@ -261,7 +278,7 @@ class MaterialBuffer {
 	}
 	
 	codeMaterial(index=NaN,template=''){
-		let codeMaterial = ''
+		let code = ''
 		if (template==''){
 			//setting up the default template
 			template=`<div class="mat_instance mb-1" >
@@ -278,21 +295,21 @@ class MaterialBuffer {
 
 		if (Number.isNaN(index)){
 			for (const [key, material] of Object.entries(this.Materials)) {
-				codeMaterial += template.replaceAll("$_BASEMATERIAL",material.BaseMaterial)
+				code += template.replaceAll("$_BASEMATERIAL",material.BaseMaterial)
 								.replaceAll("$_MATERIALSHORTNAME",material.Name.replace(new RegExp(/^ml_/),'').replace("masksset",''))
 								.replaceAll("$_MATERIALNAME",material.Name.replaceAll("_"," "))
 								.replaceAll("$_MATERIALTEMPLATE",material.MaterialTemplate)
 								.replaceAll("$_MATERIALID",key);
 			}
 		}else{
-			codeMaterial = template.replaceAll("$_BASEMATERIAL",this.Materials[index].BaseMaterial)
+			code = template.replaceAll("$_BASEMATERIAL",this.Materials[index].BaseMaterial)
 							.replaceAll("$_MATERIALSHORTNAME",this.Materials[index].Name.replace(new RegExp(/^ml_/),'').replace("_masksset",'').replaceAll("_"," ") )
 							.replaceAll("$_MATERIALNAME",this.Materials[index].Name.replaceAll("_"," "))
 							.replaceAll("$_MATERIALTEMPLATE",this.Materials[index].MaterialTemplate)
 							.replaceAll("$_MATERIALID",index);
 		}
 		this.#UpdateTextures()
-		return codeMaterial;
+		return code;
 	}
 	
 	codeTextures(){
