@@ -97,6 +97,7 @@ const lightpane = TDtabManager.pages[0].addFolder({
   expanded:false
 });
 
+//Think of removing Ambient lights
 const alight = lightpane.addFolder({
   title:'Ambient'
 })
@@ -110,7 +111,7 @@ alight.addBinding(PARAMS,'A_light_color',{label:'Color',view:'color'}).on('chang
 const plight1 = lightpane.addFolder({
   title:'Point light 1'
 })
-plight1.addBinding(PARAMS,'p_light1_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+plight1.addBinding(PARAMS,'p_light1_pow',{label:'Power',min:0.1,max:20}).on('change', (ev) => {
   $("#thacanvas").trigger('newlights',1);
 });;
 plight1.addBinding(PARAMS,'p_light1_col',{label:'Color',view:'color'}).on('change', (ev) => {
@@ -123,7 +124,7 @@ plight1.addBinding(PARAMS,'l1_pos',{label:'Position',x:{min:-10,max:10},y:{min:-
 const plight2 = lightpane.addFolder({
   title:'Point light 2'
 })
-plight2.addBinding(PARAMS,'p_light2_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+plight2.addBinding(PARAMS,'p_light2_pow',{label:'Power',min:0.1,max:20}).on('change', (ev) => {
   $("#thacanvas").trigger('newlights',2);
 });;
 plight2.addBinding(PARAMS,'p_light2_col',{label:'Color',view:'color'}).on('change', (ev) => {
@@ -136,7 +137,7 @@ plight2.addBinding(PARAMS,'l2_pos',{label:'Position',x:{min:-10,max:10},y:{min:-
 const plight3 = lightpane.addFolder({
   title:'Point light 3'
 })
-plight3.addBinding(PARAMS,'p_light3_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+plight3.addBinding(PARAMS,'p_light3_pow',{label:'Power',min:0.1,max:20}).on('change', (ev) => {
   $("#thacanvas").trigger('newlights',3);
 });;
 plight3.addBinding(PARAMS,'p_light3_col',{label:'Color',view:'color'}).on('change', (ev) => {
@@ -150,7 +151,7 @@ plight3.addBinding(PARAMS,'l3_pos',{label:'Position',x:{min:-10,max:10},y:{min:-
 const plight4 = lightpane.addFolder({
   title:'Point light 4'
 })
-plight4.addBinding(PARAMS,'p_light4_pow',{label:'Power',min:0.1,max:15}).on('change', (ev) => {
+plight4.addBinding(PARAMS,'p_light4_pow',{label:'Power',min:0.1,max:20}).on('change', (ev) => {
   $("#thacanvas").trigger('newlights',4);
 });
 plight4.addBinding(PARAMS,'p_light4_col',{label:'Color',view:'color'}).on('change', (ev) => {
