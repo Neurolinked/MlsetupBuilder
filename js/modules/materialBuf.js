@@ -298,6 +298,7 @@ class MaterialBuffer {
 				code += template.replaceAll("$_BASEMATERIAL",material.BaseMaterial)
 								.replaceAll("$_MATERIALSHORTNAME",material.Name.replace(new RegExp(/^ml_/),'').replace("masksset",''))
 								.replaceAll("$_MATERIALNAME",material.Name.replaceAll("_"," "))
+								.replaceAll("$_MATERIALFULLNAME",material.Name)
 								.replaceAll("$_MATERIALTEMPLATE",material.MaterialTemplate)
 								.replaceAll("$_MATERIALID",key);
 			}
@@ -305,6 +306,7 @@ class MaterialBuffer {
 			code = template.replaceAll("$_BASEMATERIAL",this.Materials[index].BaseMaterial)
 							.replaceAll("$_MATERIALSHORTNAME",this.Materials[index].Name.replace(new RegExp(/^ml_/),'').replace("_masksset",'').replaceAll("_"," ") )
 							.replaceAll("$_MATERIALNAME",this.Materials[index].Name.replaceAll("_"," "))
+							.replaceAll("$_MATERIALFULLNAME",this.Materials[index].Name)
 							.replaceAll("$_MATERIALTEMPLATE",this.Materials[index].MaterialTemplate)
 							.replaceAll("$_MATERIALID",index);
 		}
