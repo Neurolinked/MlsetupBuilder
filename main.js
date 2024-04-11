@@ -1,8 +1,10 @@
 // main.js
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, globalShortcut, screen, Notification, ipcMain, nativeTheme, dialog, Menu } = require('electron')
+
 var child = require('child_process').execFile;
 var spawner = require('child_process').spawn;
+const Log = require('electron-log');
 const path = require('path')
 const fs = require('fs')
 const fse = require('fs-extra')
@@ -10,9 +12,16 @@ const store = require('electron-store'); //https://github.com/sindresorhus/elect
 const sharp = require('sharp');
 const dree = require('dree');
 const outside = require('electron').shell;
+//
+const crypto = require('crypto');
 //app.commandLine.appendSwitch('enable-unsafe-webgpu') //enable access to the WebGPU interface adapter
 app.commandLine.appendSwitch('enable-gpu') //enable acceleration
 app.commandLine.appendSwitch('disable-features', 'WidgetLayering'); //minor fixes for console layering not working as intended
+const hash = crypto.createHash('sha256');
+//hash.digest('base64');
+//Log setups
+Log.transports.file.level = 'info' 
+Log.transports.console.level = 'info'
 
 var subproc
 
@@ -110,6 +119,9 @@ const schema = {
 const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit/config.json');
 
 const preferences = new store({schema,
+	beforeEachMigration: (store, context) => {
+		Log.info(`[main-config] migrate from ${context.fromVersion} → ${context.toVersion}`)
+	},
 	migrations: {
 		'<=1.6.2': store => {
 			if (store.has('unbundle') && (!store.has('pathfix'))){
@@ -161,7 +173,6 @@ const preferences = new store({schema,
 					}
 				}
 			})
-			
 			var fixGamePath = store.get('game');
 			if (fixGamePath!=''){
 				fixGamePath = fixGamePath.replace("\\archive\\pc\\content","")
@@ -178,6 +189,9 @@ const preferences = new store({schema,
 			store.delete("game")
 			store.delete("unbundle")
 			store.delete("wcli")
+		},
+		'1.6.8-beta3': store=>{
+
 		}
 	}
 });
@@ -228,6 +242,21 @@ function MuWriting(contenuto){
 					}
 					resolve(true)
 				})
+			}
+		})
+	})
+}
+
+//simple promise to read files
+function fileOpener(target=''){
+	return new Promise((resolve,reject)=>{
+		fs.readFile(target,(err,filecontent) =>{
+			if (err) {
+				mainWindow.webContents.send('preload:logEntry',`Error when trying to read ${target} file`,true);
+				reject()
+			}else{
+				mainWindow.webContents.send('preload:logEntry',`File ${target} opened`,false);
+				resolve(filecontent)
 			}
 		})
 	})
@@ -405,7 +434,8 @@ const template = [
 			label: 'Mlsetup',
 			submenu: [
 					{label: 'Import',accelerator: 'Ctrl+i', click: () =>{
-						mainWindow.webContents.send('preload:activate','#importTech')
+						mainWindow.webContents.send('preload:trigEvent',{target:"#importLink", trigger:'click'})
+						//mainWindow.webContents.send('preload:activate','#importLink')
 					}},
 					{label: 'Export',accelerator: 'Ctrl+e', click: () =>{
 						mainWindow.webContents.send('preload:activate','#exportversions')
@@ -512,6 +542,7 @@ function createWindow (width,height) {
     width: width,
     height: height,
     webPreferences: {
+	  additionalArguments: [`--nonce=${hash.digest('base64')}`],
       preload: path.join(__dirname, 'preload.js'),
       webgl:true,
     }
@@ -604,22 +635,39 @@ ipcMain.on('main:giveModels',(event) => {
 
 //read file on disk
 ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
+	var modPath = preferences.get('paths.lastmod')
+	var hasDepot
+	if ((modPath!==undefined) && (modPath!='')){
+		var hasDepot = preferences.get('paths.lastmod')!=preferences.get('paths.depot') ? true : false
+	}else{
+		hasDepot = false;
+	}
+	
 	var whereLoadFrom
-	//If there is no repo, it's a custom loading
-	if (no_repo){
+
+	if (/^[\w|\W]:\\.+/.test(percorso) || no_repo){
+		//custom loading
 		whereLoadFrom = path.normalize(percorso)
 	}else{
+		if (preferences.get('paths.depot')==''){
+			Log.warn(`The Depot preference isn't configured`)
+			event.reply('preload:logEntry', `No Depot setup, go to Preferences window and fix it`);
+			event.returnValue = '';
+			return
+		}
 		whereLoadFrom = path.join(preferences.get('paths.depot'),percorso)
 	}
 
 	var a3dMatModel = whereLoadFrom.search(/^.+\.glb$/g)>-1 ? whereLoadFrom: ``; //path of the hypotethical material file
-	var hasDepot = preferences.get('paths.lastmod')!=preferences.get('paths.depot') ? true : false
+	
   	fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
     	if (err) {
       		if (err.code=='ENOENT'){
 				if (hasDepot){
 
-					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom} - trying in the last Mod Folder`)
+					event.reply('preload:logEntry', `Missing file - ${whereLoadFrom}`,true);
+					event.reply('preload:logEntry',`Trying in the last Mod Folder`);
+
 					whereLoadFrom = path.join(preferences.get('paths.lastmod'),percorso)
 
 					fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
@@ -652,20 +700,22 @@ ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 					contenutofile = ""
-					if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
+					if (whereLoadFrom.match(new RegExp(/.+\.glb$/)) || whereLoadFrom.match(new RegExp(/.+\.Material\.json$/)) ){
 						mainWindow.webContents.send('preload:request_uncook')
 					}
 				}
 			}else{
-				dialog.showErrorBox("File opening error",err.message)
+				event.reply('preload:logEntry', `File opening error ${err.message}`)
 				a3dMatModel="";
 			}
 			contenutofile=""
+		}else{
+			event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
 		}
-		event.reply('preload:logEntry', `File loaded: ${whereLoadFrom}`)
 		event.returnValue = contenutofile
   	})
 })
+
 //restored arguments reading
 ipcMain.on('main:handle_args', (event, payload) => {
   if (mljson!=""){
@@ -791,7 +841,7 @@ ipcMain.on('main:pickWkitPorject',(ev)=>{
 ipcMain.on('main:pickMlmask',(event, arg) => {
 	const result = dialog.showOpenDialog({
 		  title:'Choose a mask file',
-		  filters:[ { name: 'Mulitlayer Mask List', extensions: ['mlmask'] }],
+		  filters:[ { name: 'Multilayer Mask List', extensions: ['mlmask'] }],
 		  defaultPath:arg
 	  }).then(result => {
 	  if (!result.canceled){
