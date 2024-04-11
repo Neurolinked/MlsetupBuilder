@@ -327,7 +327,7 @@ ipcRenderer.on("preload:upd_config",(event,data)=>{
 })
 
 ipcRenderer.on("preload:activate",(event,target)=>{
-  let objtarget = document.querySelector(target)
+  var objtarget = document.querySelector(target)
 	objtarget.click()
 });
 
