@@ -5,19 +5,6 @@ var uncookMyFile = false;
 var MLSBConfig = thePIT.RConfig();
 var textureformat = ''
 
-      
-function notifyMe(message, warning = true){
-  let Data = new Date(Date.now());
-  if (warning){
-    $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
-    notifications++
-    $("#notyCounter span").text(notifications);
-  }else{
-    $("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br>");
-  }
-  $("#foot-message").text(`${message}`);
-}
-
 
 //Broadcasting manager section
 const bc = new BroadcastChannel("streaming"); //communication between opened interafce windows
@@ -31,7 +18,6 @@ var layerSwapstart = null;
 
 var modelType = 'default';
 var mlSetupContent = '';
-
 
 function checkOnSettings(){
   var checkDepot = thePIT.RConfig('paths.depot');
@@ -204,7 +190,7 @@ $(function(){
       $("#mb-preview").appendTo("#SettingsSummary");
       $("#SettingsSummary").append("<div class='cube tint'> </div>");
       $("body #cagecolors span.active").click();
-      $("#Mlswitcher").attr('open','');
+      $("#Mlswitcher").parent().attr('open','');
     }else{
       $("div.cube.tint").remove()
       $("#layer_settings").insertAfter($("#MlEditor"));
@@ -213,7 +199,7 @@ $(function(){
       $("#mb-preview").insertAfter("#MicroblendsLibrary");
       $("#Settings").appendTo("#modelsNavbar");
       $("#MatSelector").insertBefore("#appearanceSwitcher");
-      $("#Mlswitcher").removeAttr('open');
+      $("#Mlswitcher").parent().removeAttr('open');
     }
   }
 
@@ -299,6 +285,7 @@ $(function(){
     $(this).closest(".card").addClass('active');
     $(`body #appearanceSwitcher li a[data-name='${setAppearance}']`).click();
   });
+  
 
   var mls_Offcanvas = document.getElementById('off_MLSetups')
   var off_MLSetup = new bootstrap.Offcanvas(mls_Offcanvas)
@@ -534,12 +521,14 @@ $("#masksPanel li").click(function(){
 });
 
 $("#resetShades span.choose").click(function(){
-  let theshade = $(this).data("color").substring(0,2);
+  let theshade = $(this).data("color");
   $("#slidemask").val(parseInt(theshade,16)).change();
-  $("#maskoolor").data("color",theshade+'0000');
-  $("#maskoolor").attr("data-color",theshade+'0000');
-  $("#maskoolor").css("background-color","#"+theshade+'0000');
+
+  $("#maskoolor").data("color",theshade);
+  $("#maskoolor").attr("data-color",theshade);
+  $("#maskoolor").css("background-color","#"+theshade);
 });
+
 //Change in layer displayer
 	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(){
 		if (
@@ -1078,10 +1067,15 @@ $("#resetShades span.choose").click(function(){
     localStorage.setItem(`lastModelOpened`,data.file);
     $("#masksTemplate").val(data.mask!=null?maskList[data.mask].mask.replace('{format}',textureformat):'');
     $("#normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
+
+    $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb/,'.Material.json'));
     $("#modelTarget").val(MLSB.TreeD.lastModel);
-    $('#btnMdlLoader').click();
-    $("#thacanvas").trigger("loadScene");
+    $("#thacanvas").trigger("loadScene"); //start loading the scene
   });
+  
+  $('#btnMdlLoader').click(function(){
+    $("#thacanvas").trigger("loadScene"); //start loading the scene
+  })
 
   CPModels.select.selector( 'td:not(:first-child)' ); //
 
@@ -1492,12 +1486,18 @@ $("#resetShades span.choose").click(function(){
   })
 
 	$("body").on('click','#cagecolors span',function(){
-		/* retarget the colors chosen*/
+    if ($("#layeringsystem li.active").length!=1){
+      //window.alert("first select a layer, then operate");
+      alertMe("Select a Layer before trying to change colors");
+    }
+    /* retarget the colors chosen*/
+
 		$("#cagecolors span").removeClass('active');
 		$(this).addClass('active');
 
 		let colorchanger = $(this).attr("title");
     let colorSwatchValue = $(this).css("background-color")
+    $("#thacanvas").trigger('changeColor', [colorSwatchValue] ); //will trigger the color change for the selected material
     $(".tint").prop('style','background-color:'+colorSwatchValue+"!important;");
 	  let choosed_color = tinycolor(colorSwatchValue);
     if ($(".cube.tint")){
@@ -1723,7 +1723,12 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
  /*------------------------------------------------------------------------------------
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
-$("#importLink").click(function(){  $("#importTech").click(); })
+$("#importLink").click(
+  function(ev){
+    console.log(ev);
+    $("#importTech").click();
+  }
+);
 
 //----File Auto Loader
 $("#importTech").change(function(){
@@ -2601,4 +2606,44 @@ unCooKonfirm.addEventListener("click", (event) => {
     notifyMe("Log reset",false);
   })
 
+  $("#copyNotyLog").click(function(){
+    navigator.clipboard.writeText($("#NotificationCenter .offcanvas-body").text());
+  });
+
+  $("body").on("click","#sbmeshEN li, #sbmeshEN li input,#sbmeshEN li label",function(ev){
+    ev.stopPropagation();
+    var nome, value
+    switch ($(this)[0].nodeName) {
+      case "LI":
+        nome = $(this).text();
+        var elm = $($(this).find('input')[0]);
+        elm.prop("checked",!elm.is(':checked'));
+         value = elm.is(":checked");
+        $("#thacanvas").trigger("toggleMesh",[nome,value]);
+        //targetVisible(nome,$($(this).find('input')[0]).is(":checked"));	
+        break;
+      case "INPUT":
+        nome = $(this).parent().text();
+         value = $(this).is(":checked");
+        $("#thacanvas").trigger("toggleMesh",[nome,value]);
+        //targetVisible(nome,value);	
+        break;
+      case "LABEL":
+        nome = $(this).parent().text();
+        var elm = $($(this).next('input')[0]);
+        elm.prop("checked",!elm.is(':checked'));
+         value = elm.is(":checked");
+        $("#thacanvas").trigger("toggleMesh",[nome,value]);
+        //targetVisible(nome,value);	
+        break;
+      default:
+        break;
+    }
+    //targetVisible(nome,$(this).find("input").is(":checked"));
+  });
+
+  $(".controLayers li:not([disabled])").click(function(ev){
+    ev.preventDefault();
+    $("#thacanvas").trigger("switchLayer",$(this).index());
+  })
 });

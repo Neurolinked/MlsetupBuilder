@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>MlsetupBuilder </title>
   <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src * 'unsafe-inline'; script-src *; img-src * data: 'unsafe-inline' blob:; connect-src 'self'; worker-src * blob:;" >
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src * 'unsafe-inline'; script-src * 'nonce-Meow'; img-src * data: 'unsafe-inline' blob:; connect-src 'self'; worker-src * blob:;" >
   <meta name="author" content="Neurolinked">
   <meta name="date" content="September 2021">
 	<!-- Intro.js -->
@@ -39,6 +39,22 @@
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
   <!--hardcoded microblends default //--><script type="text/javascript" src="./jsons/mbcore.json" ></script><!--hardcoded microblend DB//-->
 	<!--hardcoded material default //--><script type="text/javascript" src="./js/materialcore.js" ></script><!--hardcoded material DB//-->
+  <script type="importmap" nonce="Meow">
+    {
+      "imports": {
+        "three": "./public/three/build/three.module.min.js",
+        "orbit": "./public/three/examples/jsm/controls/OrbitControls.js",
+        "fog": "./public/three/src/scenes/Fog.js",
+        "color": "./public/three/src/math/Color.js",
+        "mathutils": "./public/three/src/math/MathUtils.js",
+        "gltf": "./public/three/examples/jsm/loaders/GLTFLoader.js"
+      }
+    }
+  </script>
+  <!-- "composer" : "./public/three/examples/jsm/postprocessing/EffectComposer.js",
+  "renderpass" : "./public/three/examples/jsm/postprocessing/RenderPass.js",
+  "bloom" : "./public/three/examples/jsm/postprocessing/BloomPass.js",
+  "stats": "./public/three/examples/jsm/utils/GPUStatsPanel.js" -->
   <script type='module' src='./js/modules/mlsetup.js'></script>
   <script type="text/javascript" src='./public/cryptojs/cryptojs.min.js'></script>
   <script type="text/javascript" src='./js/interface.js'></script>
@@ -94,25 +110,18 @@
         <input type="text" id="materialJson" class="d-none" />
       </div>
     </div>
-<!--     <div id="dat-container"></div> -->
     <div id="tweakContainer"></div>
-  <script src='./js/threejs/build/three.min.js'></script>
-  <script src='./js/threejs/examples/js/controls/OrbitControls.js'></script>
-  <script type='module' src='./js/threejs/src/math/MathUtils.js'></script>
-  <script type='module' src='./js/threejs/src/math/Color.js'></script>
-  <script type='module' src='./js/threejs/src/scene/Fog.js'></script>
-  <script src='./js/threejs/examples/js/loaders/GLTFLoader.js'></script>
-  <script src='./js/threejs/examples/js/libs/dat.gui.min.js'></script>
 <!--Notification Area -->
 <div class="offcanvas offcanvas-bottom bg-dark bg-gradient text-light" tabindex="-1" id="NotificationCenter" aria-labelledby="NCLabel">
   <div class="offcanvas-header bg-layer0">
     <h5 class="offcanvas-title " id="NCLabel">Notification center</h5>
     <div class="btn-group">
+      <button type="button" class="btn btn-tiny btn-dark" aria-label="Copy" id="copyNotyLog"><i class="fa-solid fa-copy"></i></button>
       <button type="button" class="btn btn-tiny btn-dark" aria-label="Clean" id="emptyNotyLog"><i class="fa-solid fa-broom"></i></button>
       <button type="button" class="btn btn-close my-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
   </div>
-  <div class="offcanvas-body m-2 p-2"></div>
+  <div class="offcanvas-body m-2 p-2" id="theTextLog"></div>
 </div>
 <!--  -->
 <div class="offcanvas offcanvas-end offcanvas-hair bg-dark bg-gradient text-light coverFullEditor" data-bs-backdrop="false" id="HairTool" aria-labelledby="HTLabel" >
@@ -275,8 +284,9 @@
           <summary>Submesh Toggler</summary>
           <ul></ul>
         </details>
-        <details open id="Mlswitcher" class="" title="">
+        <details open class="" title="">
           <summary>ML mat. selector (working soon)</summary>
+          <section id="Mlswitcher"></section>
         </details>
       </div>      
 <div id="MlEditor" class="text-white layer-1 rounded">
@@ -582,7 +592,7 @@
       </ul>
       <div class="tab-content" id="OffcanvasInfo">
         <div class="tab-pane fade" id="normtab" role="tabpanel" aria-labelledby="norm-tab">
-          <canvas id="normalMe" class="my-1" ></canvas>
+          <canvas id="normalMe" class="my-1" height="768" width="768" ></canvas>
         </div>
         <div class="tab-pane fade show active " id="maskstab" role="tabpanel" aria-labelledby="masks-tab">
           <div class="row no-gutters">
@@ -613,10 +623,18 @@
                 </ul>
                 <div class="text-center my-1 py-1 layer-2 rounded svgBtn">
                   <span class="d-block badge rounded-0 txt-secondary">Tools</span>
+                  <span class="dropdown">
+                    <button class="btn btn-sm text-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa-solid fa-layer-group fa-2x"></i>
+                    </button>
+                    <ul class="dropdown-menu bg-secondary p-0" id="mLayerOperator">
+                    </ul>
+                  </span>
+                  
                   <span id="wipeMsk" class="btn btn-sm text-secondary" title="Revert to the last loaded"><i class="fas fa-eraser fa-2x"></i></span>
                   <span id="fillMsk" class="btn btn-sm text-secondary" title="Revert to the last loaded"><i class="fa-solid fa-fill-drip fa-2x"></i></span>
                   <span id="stepbackMsk" class="btn btn-sm text-secondary" title="Back one snapshot" ><i class="fa-solid fa-clock-rotate-left fa-2x"></i></span>
-                  <hr class="dropdown-divider">
+                  <hr class="dropdown-divider pb-2">
                   <span id="snapsMsk" class="btn btn-sm text-secondary" title="Take a snapshot"><i class="fa-solid fa-camera-retro fa-2x"></i></span>
                   <a href="#" id="expMsk" class="btn btn-sm text-secondary" title="Export the current image"><i class="fas fa-file-export fa-2x"></i></a>
                 </div>
@@ -633,7 +651,7 @@
                 </div>
                 <div id="resetShades" class="d-flex justify-content-center my-1 py-1 layer-2 rounded">
                   <span class="choose" data-color="000000" style="background-color:#000000"> </span>
-                  <span class="choose" data-color="FF0000" style="background-color:#FFFFFF"> </span>
+                  <span class="choose" data-color="FFFFFF" style="background-color:#FFFFFF"> </span>
                 </div>
                 <div class="my-1 py-1 layer-2 rounded">
                   <span id="maskoolor" class="choose mx-auto d-block" data-color="808080" style="background-color:#808080"> </span>
@@ -1030,7 +1048,8 @@ THE SOFTWARE.</p>
 <!--Insertin the TweakPane before the 3d viewport manager to call functions-->
   <script type="module" src="./js/modules/mainTweakpane.js" ></script>
 <!--Insertin the TweakPane before the 3d viewport manager to call functions-->
-  <script defer src='./js/3dIF.js'></script>
+  <!--<script defer src='./js/3dIF.js'></script>-->
+  <script defer src='./js/_ThreeDIF.js' type="module"></script>
   <script src="./renderer.js"></script>
 	<script type="text/javascript" src="./public/introjs/intro.min.js" ></script>
 
@@ -1084,6 +1103,13 @@ THE SOFTWARE.</p>
         </div>
       </form>
     </div>
+  </dialog>
+  <dialog id="alertMessages">
+    <header></header>
+    <p></p>
+    <form method="dialog">
+      <button>Close</button>
+    </form>
   </dialog>
   </body>
 </html>
