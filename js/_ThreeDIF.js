@@ -33,7 +33,6 @@ const normalMapInfo = {
 
 var materialStack = new Array();
 var materialSet = new Set();
-var multilayerStack = new Set();
 var textureStack = new Array();
 
 const materialTypeCheck = {
@@ -101,15 +100,19 @@ var TDengine = {
 
 const MDLloader = new GLTFLoader(); //Loading .glb files
 
-var mlMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide}); //TODO remove this old shit
-var materialDecal = new THREE.MeshLambertMaterial({color:0xFFFFFF,transparent:true, side:THREE.DoubleSide,depthWrite :false});
-var materialBASE = new THREE.MeshBasicMaterial({color:0x0000FF,transparent:true, side:THREE.DoubleSide,depthWrite :false});
-var materialHair = new THREE.MeshStandardMaterial({color:0xBB000B,opacity:.9,side:THREE.DoubleSide,depthTest:true});
-var materialSkin = new THREE.MeshLambertMaterial({color:0xFFDABE});
-var materialFX = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 var materialGlass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
-var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
+
+var stdMaterial = new THREE.MeshStandardMaterial(); //this will substitute the problematic single multilayer material
+
+var mlMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide}); //TODO remove this old shit
+
+var materialHair = new THREE.MeshStandardMaterial({color:0xBB000B,opacity:.9,side:THREE.DoubleSide,depthTest:true});
+var materialBASE = new THREE.MeshBasicMaterial({color:0x0000FF,transparent:true, side:THREE.DoubleSide,depthWrite :false});
+
+var lambertType = new THREE.MeshLambertMaterial();
 var materialNoneToCode = new THREE.MeshLambertMaterial({color:0x808080,emissive:0xFFFF00,emissiveIntensity:.2});
+
+var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 
 function string2arraybuffer(str) {
 	var buf = new ArrayBuffer(str.length); // 2 bytes for each char
@@ -241,8 +244,6 @@ function cleanScene(){
 		materialStack.forEach((material) => { material.dispose() });
 		materialStack=[];
 
-		multilayerStack.clear();
-
 		textureStack.forEach((element) => {element.dispose()});
 		textureStack=[];
 
@@ -331,17 +332,25 @@ $("#thacanvas").on('loadScene',function(event){
 }).on('switchLayer',function(ev,layer=0){
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
-		let multilayerActive = $("#Mlswitcher input").index(document.querySelector("#Mlswitcher input:checked"));
-		var mlActual = Array.from(multilayerStack);
-		/* console.log(`${mlActual[multilayerActive].mask}, layer ${MLSB.Editor.layerSelected}`); */
-		var LAYER = getTexture(mlActual[multilayerActive].mask);
+		let selectedOne = document.querySelector("#Mlswitcher input:checked")
+		let multilayerActive = $("#Mlswitcher input").index(selectedOne);
+		var multilayerSelect = $("#Mlswitcher input").eq(multilayerActive).attr("data-material")
+		
+		var LAYER = getTexture(mlMaterial.mask);
+
+/* 		materialStack[multilayerSelect].setValues({
+			alphaMap:LAYER,
+			map:LAYER,
+			opacity: parseFloat($("#layerOpacity").val())
+		})
+		materialStack[multilayerSelect].map.needsUpdate = true; */
+
 		mlMaterial.setValues({
 			alphaMap:LAYER,
 			map:LAYER,
 			opacity: parseFloat($("#layerOpacity").val())
 		})
 		mlMaterial.map.needsUpdate = true;
-		//mlMaterial.needsUpdate = true;
 	}
 }).on('fogNew',function(ev){
 	try{
@@ -842,12 +851,13 @@ function getTexture(filename){
 }
 
 function codeMaterials(materialEntry){
-	console.log(materialEntry);
+	
 	if (materialEntry.hasOwnProperty('MaterialTemplate')){
 		//switching the code based on the type of the material
 		if (materialTypeCheck.decals.includes(materialEntry.MaterialTemplate)){
-			var Rdecal = materialDecal.clone();
-			var decalConfig = {}
+			
+			var Rdecal = lambertType.clone();
+			var decalConfig = {color:0xFFFFFF,transparent:true, side:THREE.DoubleSide,depthWrite :false}
 
 			//Decal Textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseTexture')){
@@ -920,17 +930,15 @@ function codeMaterials(materialEntry){
 			return Rbase
 		}
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
-			//var Mlayer = mlMaterial.clone();
-			console.log(materialEntry);
-			var mlConfig = {};
+			var Mlayer = stdMaterial.clone();
+			//Mlayer.name = materialEntry.name;
 
 			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
 				
 				//name of the Actual layer textures to be loaded will be stored
 				mlMaterial.map = getTexture(materialEntry.Data.MultilayerMask)
 				mlMaterial.map.needsUpdate = true;
-				mlConfig.mask = materialEntry.Data.MultilayerMask
-				mlConfig.alphaMap = mlMaterial.map;
+				mlMaterial.mask = materialEntry.Data.MultilayerMask;
 			}
 
 			if (materialEntry?.Data.hasOwnProperty('GlobalNormal')){
@@ -948,15 +956,16 @@ function codeMaterials(materialEntry){
 				mlMaterial.normalMap.needsUpdate = true;
 			}
 
-			multilayerStack.add(mlConfig)
 			//mlMaterial.setValues(mlConfig);
 			mlMaterial.needsUpdate = true;
 			return mlMaterial
 		}
 
 		if (materialTypeCheck.fx.includes(materialEntry.MaterialTemplate)){
-			let fxConfig = {};
-			let actualMaterial = materialFX.clone();
+
+			let actualMaterial = lambertType.clone();
+			let fxConfig = {color:0xFFFFFF};
+
 			if (materialEntry?.Data.hasOwnProperty('Emissive')){
 				fxConfig.emissiveIntensity = parseFloat(materialEntry?.Data.Emissive);
 			}
@@ -1001,34 +1010,40 @@ function codeMaterials(materialEntry){
 			return actualMaterial;
 		}
 		if (materialTypeCheck.skin.includes(materialEntry.MaterialTemplate)){
-			console.log(materialEntry);
+
+			var skin = lambertType.clone();
+			var skinConfig = {color:0xFFDABE};
+
 			if (materialEntry?.Data.hasOwnProperty('TintColor')){
-				materialSkin.color = new THREE.Color(`rgb(${materialEntry.Data.TintColor.Red},${materialEntry.Data.TintColor.Green},${materialEntry.Data.TintColor.Blue})`);
-				materialSkin.opacity = parseFloat(materialEntry.Data.TintColor.Alpha/255);
+				skinConfig.color = new THREE.Color(`rgb(${materialEntry.Data.TintColor.Red},${materialEntry.Data.TintColor.Green},${materialEntry.Data.TintColor.Blue})`);
+				skinConfig.opacity = parseFloat(materialEntry.Data.TintColor.Alpha/255);
 			}
 			if (materialEntry?.Data.hasOwnProperty('Albedo')){
 				let albedoMD5Code = CryptoJS.MD5(materialEntry.Data.Albedo)
 
 				if (textureStack[albedoMD5Code]===undefined){
 					textureStack[albedoMD5Code] = getTexture(materialEntry.Data.Albedo)
-					materialSkin.map = textureStack[albedoMD5Code];
-					materialSkin.map.needsUpdate = true;
+					skinConfig.map = textureStack[albedoMD5Code];
+					skinConfig.map.needsUpdate = true;
 				}else{
-					materialSkin.map = textureStack[albedoMD5Code];
-					materialSkin.map.needsUpdate = true;
+					skinConfig.map = textureStack[albedoMD5Code];
+					skinConfig.map.needsUpdate = true;
 				}
 
 			}
-			return materialSkin
+			skin.setValues(skinConfig);
+			return skin;
 		}
 
 		if (materialTypeCheck.glass.includes(materialEntry.MaterialTemplate)){
 			return materialGlass
 		}
+
 		console.warn(materialEntry);
+
 		return materialNoneToCode;
 	}else{
-		console.log(materialEntry);
+		
 		return materialNone;
 	}
 }
