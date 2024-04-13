@@ -2646,4 +2646,12 @@ unCooKonfirm.addEventListener("click", (event) => {
     ev.preventDefault();
     $("#thacanvas").trigger("switchLayer",$(this).index());
   })
+  $("#flipMask").change(function(ev){
+    ev.preventDefault();
+    $("#thacanvas").trigger("flipMask");
+  });
+  $("#flipNorm").change(function(ev){
+    ev.preventDefault();
+    $("#thacanvas").trigger("flipNorm");
+  });
 });
