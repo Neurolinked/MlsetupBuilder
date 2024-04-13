@@ -21,8 +21,10 @@ if (window.Worker) {
   
     imgWorker.onmessage = (event) =>{
 	  paintDatas(event.data[0],event.data[1],event.data[2],'normalMe',THREE.RGBAFormat);
-	  mlMaterial.normalMap = new THREE.DataTexture(event.data[0],event.data[1],event.data[2]);
-      mlMaterial.normalMap.needsUpdate = true
+
+	  let selected = activeMLayer();	
+	  materialStack[selected].normalMap = new THREE.DataTexture(event.data[0],event.data[1],event.data[2]);
+      materialStack[selected].normalMap.needsUpdate = true
     }
 }
 
@@ -102,7 +104,7 @@ const MDLloader = new GLTFLoader(); //Loading .glb files
 
 var materialGlass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
 
-var stdMaterial = new THREE.MeshStandardMaterial(); //this will substitute the problematic single multilayer material
+var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide}); //this will substitute the problematic single multilayer material
 
 var mlMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide}); //TODO remove this old shit
 
@@ -121,6 +123,13 @@ function string2arraybuffer(str) {
 		bufView[i] = str.charCodeAt(i);
 	}
 	return buf;
+}
+
+function activeMLayer(){
+	let selectedOne = document.querySelector("#Mlswitcher input:checked")
+	let multilayerActive = $("#Mlswitcher input").index(selectedOne);
+	var multilayerSelect = $("#Mlswitcher input").eq(multilayerActive).attr("data-material")
+	return multilayerSelect;
 }
 
 function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
@@ -150,7 +159,9 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm"){
 			return FlatNORM;
 			break;
 		default:
-			console.log(`Not matched filename ${mapName}`);
+			if (mapName!="engine\\textures\\editor\\grey.xbm"){
+				console.log(`Not matched filename ${mapName}`);
+			}
 			return GRAY;
 	}
 }
@@ -332,25 +343,16 @@ $("#thacanvas").on('loadScene',function(event){
 }).on('switchLayer',function(ev,layer=0){
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
-		let selectedOne = document.querySelector("#Mlswitcher input:checked")
-		let multilayerActive = $("#Mlswitcher input").index(selectedOne);
-		var multilayerSelect = $("#Mlswitcher input").eq(multilayerActive).attr("data-material")
+		let selected = activeMLayer();
 		
-		var LAYER = getTexture(mlMaterial.mask);
+		var LAYER = getTexture(materialStack[selected].mask);
 
-/* 		materialStack[multilayerSelect].setValues({
+ 		materialStack[selected].setValues({
 			alphaMap:LAYER,
 			map:LAYER,
 			opacity: parseFloat($("#layerOpacity").val())
 		})
-		materialStack[multilayerSelect].map.needsUpdate = true; */
-
-		mlMaterial.setValues({
-			alphaMap:LAYER,
-			map:LAYER,
-			opacity: parseFloat($("#layerOpacity").val())
-		})
-		mlMaterial.map.needsUpdate = true;
+		materialStack[selected].map.needsUpdate = true;
 	}
 }).on('fogNew',function(ev){
 	try{
@@ -416,6 +418,14 @@ $("#thacanvas").on('loadScene',function(event){
 	//change the color ONLY if a layer is selected
 	mlMaterial.color = new THREE.Color(color);
 	mlMaterial.needsUpdate;
+}).on('flipMask',function(event){
+	let selected = activeMLayer();
+	materialStack[selected].map.flipY= !materialStack[selected].map.flipY;
+	materialStack[selected].map.needsUpdate = true;
+}).on('flipNorm',function(event){
+	let selected = activeMLayer();
+	materialStack[selected].normalMap.flipY = !materialStack[selected].normalMap.flipY;
+	materialStack[selected].normalMap.needsUpdate = true;
 }).on('mousedown',function(event){
     //stop painting on the interface
 	event.preventDefault();
@@ -930,35 +940,34 @@ function codeMaterials(materialEntry){
 			return Rbase
 		}
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
+			console.log(materialEntry.Data);
 			var Mlayer = stdMaterial.clone();
 			//Mlayer.name = materialEntry.name;
 
 			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
 				
 				//name of the Actual layer textures to be loaded will be stored
-				mlMaterial.map = getTexture(materialEntry.Data.MultilayerMask)
-				mlMaterial.map.needsUpdate = true;
-				mlMaterial.mask = materialEntry.Data.MultilayerMask;
+				Mlayer.map = getTexture(materialEntry.Data.MultilayerMask)
+				Mlayer.map.needsUpdate = true;
+				Mlayer.mask = materialEntry.Data.MultilayerMask;
 			}
 
 			if (materialEntry?.Data.hasOwnProperty('GlobalNormal')){
 				var normMD5Code = CryptoJS.MD5(materialEntry.Data.GlobalNormal)
 				if (textureStack[normMD5Code]===undefined){
 					textureStack[normMD5Code] = getTexture(materialEntry.Data.GlobalNormal)
-					mlMaterial.normalMap = textureStack[normMD5Code];
-					mlMaterial.normalMap.needsUpdate = true;
+					Mlayer.normalMap = textureStack[normMD5Code];
+					Mlayer.normalMap.needsUpdate = true;
 				}else{
-					mlMaterial.normalMap = textureStack[normMD5Code];
-					mlMaterial.normalMap.needsUpdate = true;
+					Mlayer.normalMap = textureStack[normMD5Code];
+					Mlayer.normalMap.needsUpdate = true;
 				}
 			}else{
-				mlMaterial.normalMap = FlatNORM;
-				mlMaterial.normalMap.needsUpdate = true;
+				Mlayer.normalMap = FlatNORM;
+				Mlayer.normalMap.needsUpdate = true;
 			}
-
-			//mlMaterial.setValues(mlConfig);
-			mlMaterial.needsUpdate = true;
-			return mlMaterial
+			Mlayer.needsUpdate = true;
+			return Mlayer
 		}
 
 		if (materialTypeCheck.fx.includes(materialEntry.MaterialTemplate)){
@@ -1189,7 +1198,7 @@ function LoadModel(path){
 			})		
 		}else{
 			notifyMe(`${path} empty file ??? No model to display i guess`);
-			reject()
+			reject();
 		}
 	});
 }
