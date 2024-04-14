@@ -23,13 +23,14 @@ function clamp( value, min, max ) {
 the red green normal maps to sull rgb */
 function nMapFix(normaldatas,width,height){
   //Took the arraybuffer color change the clue channel
-  var red = 0
-  var green = 0;
+  var red,green,blue,alpha;
   for (let i = 0, l = normaldatas.length; i < l; i += 4) {
-   // Modify pixel data
-   red = (normaldatas[i]/255);
-   green = (normaldatas[i + 1]/255);
-   normaldatas[i + 2] = parseInt(Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2) ) * 255);
+    // Modify pixel data
+    red = (normaldatas[i]/255);
+    green = (normaldatas[i + 1]/255);
+    blue = parseInt(Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2) ) * 255); //recalculated
+    //blue = 255 // old concept, not recalculated
+    normaldatas[i + 2] = blue;
   }
   self.postMessage(['paint',normaldatas,width,height])
 }
