@@ -20,11 +20,28 @@ if (window.Worker) {
     imgWorker = new Worker('js/workers/imgWork.js');
   
     imgWorker.onmessage = (event) =>{
-	  paintDatas(event.data[0],event.data[1],event.data[2],'normalMe',THREE.RGBAFormat);
 
-	  let selected = activeMLayer();	
-	  materialStack[selected].normalMap = new THREE.DataTexture(event.data[0],event.data[1],event.data[2]);
-      materialStack[selected].normalMap.needsUpdate = true
+		var command, datas
+		[command, ...datas] = event.data;
+		//console.log(command,datas);
+		
+		switch (command){
+			case 'alphaFix':
+				console.log(alphaFix);
+				break;
+			case 'paint':
+				paintDatas(datas[0],datas[1],datas[2],'normalMe',THREE.RGBAFormat);
+				let selected = activeMLayer();
+				materialStack[selected].normalMap = new THREE.DataTexture(datas[0],datas[1],datas[2]);
+				materialStack[selected].normalMap.needsUpdate = true
+				break
+			case 'log':
+				console.log(datas);
+				break;
+			default:
+				console.log(command)
+				break;
+		}
     }
 }
 
@@ -402,22 +419,31 @@ $("#thacanvas").on('loadScene',function(event){
 	}
 }).on('sided',function(event){
     //single or doublesided
+	let selected = activeMLayer();
+
 	if (PARAMS.oneside){
-        mlMaterial.side=THREE.FrontSide;
+		materialStack[selected].side=THREE.FrontSide;
     }else{
-        mlMaterial.side=THREE.DoubleSide;
+        materialStack[selected].side=THREE.DoubleSide;
     }
 
 }).on('maskAlpha',function(event){
     //masking the alpha
-	mlMaterial.alphaTest = PARAMS.maskChannel;
+	let selected = activeMLayer();
+
+	materialStack[selected].setValues({alphaTest:PARAMS.maskChannel});
+
 }).on("theWire",function(event){
     //changinf the wireframe value
-	mlMaterial.wireframe = PARAMS.wireframes;
+	let selected = activeMLayer();
+
+	materialStack[selected].setValues({wireframe:PARAMS.wireframes});
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
-	mlMaterial.color = new THREE.Color(color);
-	mlMaterial.needsUpdate;
+	let selected = activeMLayer();
+
+	materialStack[selected].setValues({color:new THREE.Color(color)});
+	materialStack[selected].needsUpdate;
 }).on('flipMask',function(event){
 	let selected = activeMLayer();
 	materialStack[selected].map.flipY= !materialStack[selected].map.flipY;
@@ -580,6 +606,7 @@ function getImageSize(binaryData){
 		const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
 		let height = spaceData[3];
 		let width = spaceData[4];
+		let bytes = 8;
 		//console.log(`texture ${width}x${height}px`);
 		//let size = height * width * channels;
 		const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
@@ -587,18 +614,22 @@ function getImageSize(binaryData){
 		var imageDatas
 
 		switch (dx10Data[0]){
+			case 11:
+				//DXGI_FORMAT_R16G16B16A16_UNORM
+				bytes=16;
+				break;
 			case 29:
 			case 28:
 				break;
 			case 61:
-				channels=1;
+				channels = 1;
 				break;
 			default:
 				console.error(`Unknown value ${dx10Data[0]}`);
 				break;
 		}
 
-		return {width:height,height:width,format:'DDS',size:(height * width * channels)}
+		return {width:width,height:height,format:'DDS',size:(height * width * channels),bytes:bytes}
 
 	}else if ((headerData[0]==0x89) && (headerData[1]==0x50) && (headerData[2]==0x4e) && (headerData[3]==0x47)	&& (headerData[4]==0x0d) && (headerData[5]==0x0a) && (headerData[6]==0x1a) && (headerData[7]==0x0a) ){
 		//PNG case
@@ -651,8 +682,7 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
 	const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
 
 	if (imageINFO?.format=='DDS'){
-		
-
+		console.log(imageINFO);
 	}else if (imageINFO?.format=='PNG'){
 
 	}else{
@@ -671,20 +701,37 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
 			let width = spaceData[4];
 			//console.log(`texture ${width}x${height}px`);
 			let size = height * width * channels;
-
+			console.log(height,width,size)
 			const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
+			console.log(dx10Data);
 
 			var imageDatas
 			if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
 				//console.log(`DDS ${format}`);
 				if (format == THREE.RGBAFormat){
-					imageDatas = new Uint32Array( bufferData, 148, size );
-				}else{
 					imageDatas = new Uint8Array( bufferData, 148, size );
+				}else{
+					switch (imageINFO.bytes) {
+						case 16:
+							imageDatas = new Uint16Array( bufferData, 148, size );
+							break;
+					
+						default:
+							imageDatas = new Uint8Array( bufferData, 148, size );
+							break;
+					}
 				}
 			}else{
 				//or legacy RGBA Unorm
-				imageDatas = new Uint8Array( bufferData, 148, size );
+				switch (imageINFO.bytes) {
+					case 16:
+						imageDatas = new Uint16Array( bufferData, 148, size );
+						break;
+				
+					default:
+						imageDatas = new Uint8Array( bufferData, 148, size );
+						break;
+				}
 			}
 			
 			var resultTex
@@ -698,9 +745,14 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
 					if (imageDatas.isTexture){
 						paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
 					}else{
-						imgWorker.postMessage([imageDatas,width,height]);
+						if (imageINFO.bytes==8){
+							imgWorker.postMessage(['normalFix',imageDatas,width,height]);
+						}else if (imageINFO.bytes==16){
+
+						}else{
+							return FlatNORM;
+						}
 					}
-					return FlatNORM;
 					break;
 				default:
 					break;
@@ -710,8 +762,12 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
 			if (format == THREE.LuminanceFormat){
 				imageDatas = rebuildText(imageDatas,width,height);
 			}
+			if (imageINFO.bytes==16){
+				resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBAFormat, RGBA16UI);
+			}else{
+				resultTex = new THREE.DataTexture(imageDatas,width,height);
+			}
 
-			resultTex = new THREE.DataTexture(imageDatas,width,height);
 			resultTex.wrapS = THREE.RepeatWrapping;
 			resultTex.wrapT = THREE.RepeatWrapping;
 			return resultTex;
@@ -788,7 +844,7 @@ function getTexture(filename){
 	if (filename.match(/\.mlmask$/)){
 		//multilayer mask texture to be taken
 		temporaryTexture = thePIT.ApriStream((filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`),'binary');
-
+		console.log(filename);
 		if ((typeof(temporaryTexture)!="object") && (temporaryTexture!="") ){
 			return dataToTeX(temporaryTexture,1,THREE.LuminanceFormat,'M');
 		}else{
@@ -812,6 +868,7 @@ function getTexture(filename){
 		switch (type[1]){
 			case "n":
 				//normal map, use the workers
+				console.log(filename);
 				return dataToTeX(temporaryTexture,4,THREE.RGBAFormat,'N');
 				break;
 			case "d":
@@ -966,6 +1023,7 @@ function codeMaterials(materialEntry){
 				Mlayer.normalMap = FlatNORM;
 				Mlayer.normalMap.needsUpdate = true;
 			}
+
 			Mlayer.needsUpdate = true;
 			return Mlayer
 		}

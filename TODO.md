@@ -14,7 +14,7 @@
 - [x] Replacing DAT.gui with Tweakpane library
   - [x] Light configuration addition 
 - [x] Three.js library Update
-  - [ ] Rewriting the 3d management code to be more maintainable
+  - [x] Rewriting the 3d management code to be more maintainable
   - [ ] Add fx support
 - [x] New shaders management based on .Material.json file
   - [x] Assign shaders as from appearances
