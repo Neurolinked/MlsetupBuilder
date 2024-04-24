@@ -634,11 +634,12 @@ function getImageSize(binaryData){
 	}else if ((headerData[0]==0x89) && (headerData[1]==0x50) && (headerData[2]==0x4e) && (headerData[3]==0x47)	&& (headerData[4]==0x0d) && (headerData[5]==0x0a) && (headerData[6]==0x1a) && (headerData[7]==0x0a) ){
 		//PNG case
 		var chunkslenght, chunkstype
-		var pngWidth = pngHeight = 0;
+		var pngWidth, pngHeight;
+		pngWidth=pngHeight=0;
 		var imgByteLenght = bufferData.byteLength
 		var filePointer = 8; /*after the header */
 		//Search for the chunks with the Size of the texture
-		while ((pngWidth==0) && (pngWidth==0) && (filePointer<imgByteLenght)) {
+		while ((pngWidth==0) && (pngHeight==0) && (filePointer<imgByteLenght)) {
 			chunkslenght = parseInt(new DataView(bufferData,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
 			chunkstype = new Uint8Array(bufferData,filePointer+4,4);
 			filePointer+=8;
@@ -655,7 +656,7 @@ function getImageSize(binaryData){
 		return {width:pngWidth,height:pngHeight,format:'PNG'}
 	}else{
 		console.warn(`${binaryData.slice(0,4)} format`)
-		return {width:0,height:0}
+		return {width:0,height:0,format:'Unknown'};
 	}
 }
 
@@ -684,7 +685,63 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
 	if (imageINFO?.format=='DDS'){
 		console.log(imageINFO);
 	}else if (imageINFO?.format=='PNG'){
+		//console.log(imageINFO,'PNG');
+		try{
+			if ((imageINFO.width > 0) && (imageINFO.height > 0)){
+				
+				//var texture = new THREE.Texture();
+				var encodedData = btoa(binaryData);
+				var dataURI = "data:image/png;base64," + encodedData;
+				var texture
+				return texture = new THREE.TextureLoader().load(dataURI, function(pngMap){
+					pngMap.flipY=true;
+					return pngMap;
+				},
+				undefined,
+				function ( err ) {
+					notifyMe(err);
+				}
+				);
+				/* pngMap.onload = function(){
+					texture.image = pngMap;
+					texture.wrapS=THREE.RepeatWrapping;
+					texture.wrapT=THREE.RepeatWrapping;
+					texture.needsUpdate = true;
+					return texture;
+				};
+				pngMap.src = dataURI; */
+				switch (type) {
+					case 'M':
+						//masks
+						//paintDatas(texture,imageINFO.width,imageINFO.height,'maskPainter',format);
+						break;
+					case 'N':
+						//normals
+						if (texture.isTexture){
+							paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
+						}else{
+							if (imageINFO.bytes==8){
+								imgWorker.postMessage(['normalFix',texture.data,imageINFO.width,imageINFO.height]);
+							}else if (imageINFO.bytes==16){
+	
+							}else{
+								return FlatNORM;
+							}
+						}
+						break;
+					default:
+						break;
+				}
 
+				return texture
+			}else{
+				console.error('Texture of size 0');
+				return ERROR;
+			}
+		}catch(error){
+			console.error(error);
+			return WHITE;
+		}
 	}else{
 		notifyMe('Format not recognized, returned WHITE');
 		return WHITE;
@@ -738,7 +795,7 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
 			switch (type) {
 				case 'M':
 					//masks
-					paintDatas(imageDatas,width,height,'maskPainter',format);
+					paintDatas(imageDatas,imageINFO.width,imageINFO.height,'maskPainter',format);
 					break;
 				case 'N':
 					//normals
@@ -775,61 +832,6 @@ function dataToTeX(binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
 			notifyMe(error);
 			return BLACK;
 		}
-	}else if (
-		(headerData[0]==0x89)
-		&& (headerData[1]==0x50)
-		&& (headerData[2]==0x4e)
-		&& (headerData[3]==0x47)
-		&& (headerData[4]==0x0d)
-		&& (headerData[5]==0x0a)
-		&& (headerData[6]==0x1a)
-		&& (headerData[7]==0x0a) ){
-
-		try {
-			//PNG Case
-			var chunkslenght, chunkstype
-			var pngWidth = pngHeight = 0;
-			var imgByteLenght = bufferData.byteLength
-			var filePointer = 8; /*after the header */
-			//Search for the chunks with the Size of the texture
-			while ((pngWidth==0) && (pngWidth==0) && (filePointer<imgByteLenght)) {
-				chunkslenght = parseInt(new DataView(bufferData,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
-				chunkstype = new Uint8Array(bufferData,filePointer+4,4);
-				filePointer+=8;
-				if ( (chunkstype[0]==0x49)
-					&&(chunkstype[1]==0x48)
-					&&(chunkstype[2]==0x44)
-					&&(chunkstype[3]==0x52) ){
-					//go for the read of the length
-					pngWidth=parseInt(new DataView(bufferData,filePointer,4).getUint32());
-					pngHeight=parseInt(new DataView(bufferData,filePointer+4,4).getUint32());
-				}
-				filePointer+=chunkslenght+4; //last 4 byte are for the checksum
-			}
-			// Connect the image to the Texture
-			var texture = new THREE.Texture();
-			if (pngWidth>0){
-				// Connect the image to the Texture
-				var texture = new THREE.Texture();
-				var encodedData = btoa(bufferData);
-				var dataURI = "data:image/png;base64," + encodedData;
-				var pngMap = new Image();
-				pngMap.onload = function () {
-					texture.image = image;
-					texture.wrapS=THREE.RepeatWrapping;
-					texture.wrapT=THREE.RepeatWrapping;
-					texture.needsUpdate = true;
-					return texture;
-				};
-				pngMap.src = dataURI;
-			}else{
-				notifyMe('Got Black one',false);
-				return BLACK;
-			}
-		}catch(error){
-			notifyMe(error,false);
-			return BLACK;
-		}
 	}else{
 		notifyMe('Got Black one',false);
 		return BLACK;
@@ -844,7 +846,7 @@ function getTexture(filename){
 	if (filename.match(/\.mlmask$/)){
 		//multilayer mask texture to be taken
 		temporaryTexture = thePIT.ApriStream((filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`),'binary');
-		console.log(filename);
+
 		if ((typeof(temporaryTexture)!="object") && (temporaryTexture!="") ){
 			return dataToTeX(temporaryTexture,1,THREE.LuminanceFormat,'M');
 		}else{
@@ -895,13 +897,6 @@ function getTexture(filename){
 				return dataToTeX(temporaryTexture,4,THREE.RGBAFormat,'');
 				break;
 		}
-/* 	}else if (type=filename.match(/.+_decal\.(xbm)$/) ){
-		temporaryTexture = thePIT.ApriStream((filename).replace('.xbm',`.${textureformat}`),'binary');
-		
-		if ((temporaryTexture=="") || (typeof(temporaryTexture)===undefined)){
-			return ERROR;
-		}
-		return dataToTeX(temporaryTexture,4,THREE.RGBAFormat,''); */
 	}else{
 		if (checkMaps(filename)>0){
 			return retDefTexture(filename);
