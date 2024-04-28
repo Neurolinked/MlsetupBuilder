@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld(
 				ipcRenderer.send('main:handle_args', {}) //load arguments and source json files
 			},
       ApriStream : (path,streamcode,no_repo = false) =>{
-        var filecontent = ipcRenderer.sendSync('main:readSyncFile', path, streamcode, no_repo);
+        var filecontent = ipcRenderer.sendSync('main:asyncReadFile', path, streamcode, no_repo);
         return filecontent
       },
       /*

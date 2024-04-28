@@ -634,7 +634,7 @@ ipcMain.on('main:giveModels',(event) => {
 })
 
 //read file on disk
-ipcMain.on('main:readSyncFile',(event,percorso,flags,no_repo)=>{
+ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 	var modPath = preferences.get('paths.lastmod')
 	var hasDepot
 	if ((modPath!==undefined) && (modPath!='')){
