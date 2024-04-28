@@ -633,6 +633,22 @@ ipcMain.on('main:giveModels',(event) => {
 	})
 })
 
+async function fileReading(path,flags){
+	fs.readFile(path,flags,(err,contentStream) =>{
+    	if (err) {
+			if (err.code=='ENOENT'){
+				mainWindow.webContents.send('preload:logEntry', `Missing file - ${path}`,true);
+			}else{
+				mainWindow.webContents.send('preload:logEntry', `${path} ${err.path} - ${err.code} - ${err.message}`,true);
+			}
+			return false;
+		}else{
+			mainWindow.webContents.send('preload:logEntry', `File loaded: ${path}`)
+			return contentStream;
+		}
+	})
+}
+
 //read file on disk
 ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 	var modPath = preferences.get('paths.lastmod')
