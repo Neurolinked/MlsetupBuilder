@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 })
 
+const canvasIncrements = 128;
 const MLSB = new MLSBEditor;
 
 const PARAMS = {
@@ -69,11 +70,34 @@ function alertMe(message="",title="Advice"){
 }
 
 //generic Canvas Cleaning function
-function clearCanvas(target,fillStyle='', squareSize = 0){
-	let t_canvas = target.getContext('2d');
-	t_canvas.clearRect(0,0,squareSize,squareSize)
+function clearCanvas(target,fillStyle=''){
+	let domMe = document.getElementById(target);
+	let t_canvas = domMe.getContext('2d');
+	t_canvas.reset();
+
+/* 	let domMe = document.getElementById(target);
+	let t_canvas = domMe.getContext('2d');
+	var width,height
+
+	if ((domMe.getAttribute('width')==undefined) && (domMe.getAttribute('height')==undefined)){
+		width=height=128
+	}else{
+		//FIX : need to read the Zoom level
+		width=domMe.getAttribute('width')
+		height=domMe.getAttribute('height')
+	}
+
+	t_canvas.clearRect(0,0,width,height)
 	if (fillStyle!=''){
 		t_canvas.fillStyle = fillStyle;
-		t_canvas.fillRect(0,0,squareSize,squareSize)
-	}
+		t_canvas.fillRect(0,0,width,height)
+	} */
+}
+
+function clearTexturePanel(){
+    $("#listTextures").html("");
+}
+
+function pushTexturetoPanel(filename){
+	$("#listTextures").append(`<canvas width="128" height="128" id="${filename}"></canvas>`);
 }
