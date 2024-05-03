@@ -921,6 +921,9 @@ ipcMain.on('main:saveStore',(event, arg) => {
 		Arguments.forEach((setting)=>{
 			if (preferences.has(setting)){
 				preferences.set(setting, arg[setting]);
+				if (setting == 'maskformat'){
+					mainWindow.webContents.send('preload:trigEvent',{target:"#thacanvas", trigger:'changeFormat'})
+				}
 			}
 		});
 	}
