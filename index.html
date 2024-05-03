@@ -47,7 +47,8 @@
         "fog": "./public/three/src/scenes/Fog.js",
         "color": "./public/three/src/math/Color.js",
         "mathutils": "./public/three/src/math/MathUtils.js",
-        "gltf": "./public/three/examples/jsm/loaders/GLTFLoader.js"
+        "gltf": "./public/three/examples/jsm/loaders/GLTFLoader.js",
+        "stats": "./public/three/examples/jsm/utils/GPUStatsPanel.js"
       }
     }
   </script>
@@ -589,6 +590,9 @@
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="uvmap-tab" data-bs-toggle="tab" data-bs-target="#uvmaptab" type="button" role="tab" aria-controls="uvmap map" aria-selected="true">UV map</button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="texturegrp-tab" data-bs-toggle="tab" data-bs-target="#textureGroup" type="button" role="tab" aria-controls="Texture Group" aria-selected="true">Textures</button>
+        </li>
       </ul>
       <div class="tab-content" id="OffcanvasInfo">
         <div class="tab-pane fade" id="normtab" role="tabpanel" aria-labelledby="norm-tab">
@@ -687,6 +691,12 @@
               <div class="col-10">
                 <canvas id="UVMapMe" class="my-1 experimental" width="768" height="768"></canvas>
               </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="textureGroup" role="tabpanel" aria-labelledby="texturegrp-tab">
+          <div class="row p-0 m-0">
+            <div class="col-2 py-2" id="listTextures" ></div>
+            <div class="col-10" ><canvas id="texturePlayer"></canvas></div>
           </div>
         </div>
       </div>
