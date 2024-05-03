@@ -659,3 +659,17 @@ table.dataTable tr:hover td:not([colspan]){
     }
   }
 }
+
+#listTextures{
+  max-height:calc(100vh - (4rem + 75px));
+  overflow-y: auto;
+  > canvas{
+    border:1px solid var(--bs-secondary);
+    display:block;
+    margin-bottom:.5rem;
+  }
+}
+
+#texturePlayer{
+  margin:3px;
+}
