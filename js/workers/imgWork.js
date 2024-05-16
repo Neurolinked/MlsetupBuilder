@@ -4,11 +4,11 @@ onmessage = function(event){
   [command, ...datas] = event.data;
   switch (command){
     case 'alphaApply':
-      var workerResult = textAlphaFix(datas[0],datas[1],datas[2]);
+      var workerResult = textAlphaFix(datas[0],datas[1],datas[2],datas[3]);
       break;
     case 'normalFix':
     default:
-      var workerResult = nMapFix(datas[0],datas[1],datas[2]);
+      var workerResult = nMapFix(datas[0],datas[1],datas[2],datas[3]);
       break;
   }
 }
@@ -21,7 +21,7 @@ function clamp( value, min, max ) {
 
 /* This function will write the blue channel of the image as full blue, to trasform
 the red green normal maps to sull rgb */
-function nMapFix(normaldatas,width,height){
+function nMapFix(normaldatas,width,height,fileNAME){
   //Took the arraybuffer color change the clue channel
   var red,green,blue,alpha;
   for (let i = 0, l = normaldatas.length; i < l; i += 4) {
@@ -32,10 +32,10 @@ function nMapFix(normaldatas,width,height){
     //blue = 255 // old concept, not recalculated
     normaldatas[i + 2] = blue;
   }
-  self.postMessage(['paint',normaldatas,width,height])
+  self.postMessage(['paint',normaldatas,width,height,fileNAME])
 }
 
-function textAlphaFix(texturedatas,width,height,alphaValue=1){
+function textAlphaFix(texturedatas,width,height,fileNAME,alphaValue=1){
   if ((0<= alphaValue <=255) && (alphaValue.isInteger())) {
     //greyscale int value from 0 to 255
   }else if  (0 <= alphaValue <= 1){
@@ -51,5 +51,5 @@ function textAlphaFix(texturedatas,width,height,alphaValue=1){
     // Modify pixel data
     texturedatas.data[i + 3] = alphaValue;  // Alpha value
    }
-   self.postMessage(['alphaFix',texturedatas,width,height]);
+   self.postMessage(['alphaFix',texturedatas,width,height,fileNAME]);
 }
