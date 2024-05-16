@@ -4,6 +4,7 @@ var notifications = 0;
 var uncookMyFile = false;
 var MLSBConfig = thePIT.RConfig();
 var textureformat = ''
+var maxTexturePlayer = 0;
 
 
 //Broadcasting manager section
@@ -402,7 +403,8 @@ $(function(){
 
 	$(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover
-    $("#DataModelsLibrary").DataTable().draw()
+    $("#DataModelsLibrary").DataTable().draw();
+    adaptTexturePlayer();
 	});
 
   const mbDropZone = document.getElementById('dropzone');
@@ -2514,6 +2516,7 @@ unCooKonfirm.addEventListener("click", (event) => {
                     }else{
                       $("#flipMask").prop("checked","");
                     }
+                    console.log(valore);
                   }).catch((error)=>{
                     notifyMe(error);
                   });
@@ -2654,4 +2657,31 @@ unCooKonfirm.addEventListener("click", (event) => {
     ev.preventDefault();
     $("#thacanvas").trigger("flipNorm");
   });
+
+  function adaptTexturePlayer(){
+    let domReference = $("#nav-tabMLSB");
+    let dummy = domReference.height() < domReference.width() ? domReference.height(): domReference.width();
+    
+    maxTexturePlayer = (Math.floor((dummy-25)/canvasIncrements) * canvasIncrements);
+    if (($("#texturePlayer").attr('width')!=maxTexturePlayer) && ($("#texturePlayer").attr('height')!=maxTexturePlayer)){
+      $("#texturePlayer").attr({width:maxTexturePlayer,height:maxTexturePlayer});
+      $("body #listTextures canvas.border-active").trigger('click');
+    }
+  }
+
+  //resize the Window
+  $(`button[data-bs-toggle="tab"]`).on("shown.bs.tab",function(ev){
+    if ($(this).attr("data-bs-target")=='#textureGroup'){
+      adaptTexturePlayer()
+    }
+  })
+
+  $("body").on('click','#listTextures canvas',function(ev){
+    ev.preventDefault();
+    adaptTexturePlayer();
+    $("#listTextures canvas").removeClass("border-active");
+    $(this).addClass("border-active");
+    $("#thacanvas").trigger('playTexture',$(this).attr("id"));
+  })
+
 });
