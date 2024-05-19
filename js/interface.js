@@ -2660,7 +2660,7 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   function adaptTexturePlayer(){
     let domReference = $("#nav-tabMLSB");
-    let dummy = domReference.height() < domReference.width() ? domReference.height(): domReference.width();
+    let dummy = domReference.height() <= domReference.width() ? domReference.height(): domReference.width();
     
     maxTexturePlayer = (Math.floor((dummy-25)/canvasIncrements) * canvasIncrements);
     if (($("#texturePlayer").attr('width')!=maxTexturePlayer) && ($("#texturePlayer").attr('height')!=maxTexturePlayer)){

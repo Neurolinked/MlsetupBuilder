@@ -31,6 +31,7 @@ if (window.Worker) {
 		datas[1] width
 		datas[2] height
 		datas[3] filename
+		datas[4] materialName
 		 */
 		switch (command){
 			case 'alphaFix':
@@ -39,12 +40,12 @@ if (window.Worker) {
 			case 'paint':
 				//paintDatas(datas[0],datas[1],datas[2],'normalMe',THREE.RGBAFormat);
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
-				console.log(datas[3]);
 				let selected = activeMLayer();
 				let textureMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
 				textureStack[textureMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
 				textureStack[textureMD5Code].needsUpdate = true
-
+				materialStack[datas[4]].normalMap = textureStack[textureMD5Code];
+				materialStack[datas[4]].normalMap.needsUpdate = true;
 				break
 			case 'log':
 				console.log(datas);
@@ -239,7 +240,14 @@ function paintDatas(textureData,w,h,target,format){
 	}
 
 	octx.putImageData(imageData,0,0,0,0,w,h);
-	opCanvas.context.scale(opCanvas.width/w,opCanvas.height/h)
+	console.log(w,h,opCanvas.width, opCanvas.height);
+	if (w==h){
+		opCanvas.context.scale(opCanvas.width/w,opCanvas.height/h)
+	}else if (w>h){
+		opCanvas.context.scale(opCanvas.width/w,opCanvas.width/w)
+	}else if (h>w){
+		opCanvas.context.scale(opCanvas.height/h,opCanvas.height/h)
+	}
 	opCanvas.context.drawImage(oc,0,0,w,h);
 
 	oc.remove();
@@ -717,13 +725,13 @@ function rebuildText(textureData,width,height){
 }
 
 
-function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,type = ''){
+function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,type = '',_materialName=""){
 	var imageINFO = getImageInfo(binaryData);
 	var bufferData = str2ab(binaryData);
 	//const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
 
 	if (type!='M'){
-		pushTexturetoPanel(fileNAME);
+		pushTexturetoPanel(fileNAME,imageINFO.width,imageINFO.height);
 	}
 
 	if (imageINFO?.format=='DDS'){
@@ -779,7 +787,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 							paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
 						}else{
 							if (imageINFO.bytes==8){
-								imgWorker.postMessage(['normalFix',imageDatas, width, height, fileNAME]);
+								imgWorker.postMessage(['normalFix',imageDatas, width, height, fileNAME,_materialName]);
 							}else if (imageINFO.bytes==16){
 	
 							}else{
@@ -871,7 +879,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 }
 
 //Get Textures data
-function getTexture(filename,kind=null){
+function getTexture(filename,kind=null,_materialName){
 	var temporaryTexture = null;
 	var type = "";
 	//
@@ -904,7 +912,7 @@ function getTexture(filename,kind=null){
 		switch (type[1]){
 			case "n":
 				//normal map, use the workers
-				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N');
+				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N',_materialName);
 				break;
 			case "d":
 				//diffuse
@@ -940,17 +948,17 @@ function getTexture(filename,kind=null){
 		}
 
 		if (kind!=null){
-			return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N');
+			return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N',_materialName);
 		}else{	
 			if ((temporaryTexture=="") || (typeof(temporaryTexture)===undefined)){
 				return ERROR;
 			}
-			return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'');	
+			return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'');
 		}
 	}
 }
 
-function codeMaterials(materialEntry){
+function codeMaterials(materialEntry,_materialName){
 	
 	if (materialEntry.hasOwnProperty('MaterialTemplate')){
 		//switching the code based on the type of the material
@@ -979,7 +987,7 @@ function codeMaterials(materialEntry){
 					decalConfig.alphaTest = 0.02;
 					let naMD5Code = CryptoJS.MD5(materialEntry.Data.NormalAlphaTex)
 					if (textureStack[naMD5Code]===undefined){
-						textureStack[naMD5Code]=getTexture(materialEntry.Data.NormalAlphaTex,NORMAL);
+						textureStack[naMD5Code]=getTexture(materialEntry.Data.NormalAlphaTex,NORMAL,_materialName);
 						textureStack[naMD5Code].needsUpdate=true;
 						decalConfig.alphaMap = textureStack[naMD5Code];
 					}else{
@@ -991,7 +999,7 @@ function codeMaterials(materialEntry){
 			if (materialEntry?.Data.hasOwnProperty('NormalTexture')){
 				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.NormalTexture)
 				if (textureStack[nmMD5Code]===undefined){
-					textureStack[nmMD5Code]=getTexture(materialEntry.Data.NormalTexture,NORMAL);
+					textureStack[nmMD5Code]=getTexture(materialEntry.Data.NormalTexture,NORMAL,_materialName);
 					decalConfig.normalMap = textureStack[nmMD5Code]
 				}else{
 					decalConfig.normalMap = textureStack[nmMD5Code]
@@ -1033,7 +1041,7 @@ function codeMaterials(materialEntry){
 			if (materialEntry.Data.hasOwnProperty('Normal')){
 				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
 				if (textureStack[nmMD5Code]===undefined){
-					textureStack[nmMD5Code]=getTexture(materialEntry.Data.Normal,NORMAL);
+					textureStack[nmMD5Code]=getTexture(materialEntry.Data.Normal,NORMAL,_materialName);
 					rbaseConfig.normalMap = textureStack[nmMD5Code]
 				}else{
 					rbaseConfig.normalMap = textureStack[nmMD5Code]
@@ -1063,7 +1071,7 @@ function codeMaterials(materialEntry){
 			if (materialEntry?.Data.hasOwnProperty('GlobalNormal')){
 				var normMD5Code = CryptoJS.MD5(materialEntry.Data.GlobalNormal)
 				if (textureStack[normMD5Code]===undefined){
-					textureStack[normMD5Code] = getTexture(materialEntry.Data.GlobalNormal,NORMAL)
+					textureStack[normMD5Code] = getTexture(materialEntry.Data.GlobalNormal,NORMAL,_materialName)
 					Mlayer.normalMap = textureStack[normMD5Code];
 					Mlayer.normalMap.needsUpdate = true;
 				}else{
@@ -1197,7 +1205,7 @@ function LoadMaterials(path){
 				var multilayerMaskMenu = "";
 				//Build every unique material entry to be applyed to
 				materialSet.forEach((material)=>{
-					materialStack[material] = codeMaterials(materialJSON.Materials.filter(el => el.Name == material)[0]);
+					materialStack[material] = codeMaterials(materialJSON.Materials.filter(el => el.Name == material)[0],material);
 					let entry, idx
 					idx = materialJSON.findIndex(material)
 					if (entry = materialJSON.find(material)){

@@ -8,7 +8,7 @@ onmessage = function(event){
       break;
     case 'normalFix':
     default:
-      var workerResult = nMapFix(datas[0],datas[1],datas[2],datas[3]);
+      var workerResult = nMapFix(datas[0],datas[1],datas[2],datas[3],datas[4]);
       break;
   }
 }
@@ -21,18 +21,19 @@ function clamp( value, min, max ) {
 
 /* This function will write the blue channel of the image as full blue, to trasform
 the red green normal maps to sull rgb */
-function nMapFix(normaldatas,width,height,fileNAME){
+function nMapFix(normaldatas,width,height,fileNAME,material){
   //Took the arraybuffer color change the clue channel
   var red,green,blue,alpha;
   for (let i = 0, l = normaldatas.length; i < l; i += 4) {
     // Modify pixel data
     red = (normaldatas[i]/255);
     green = (normaldatas[i + 1]/255);
-    blue = parseInt(Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2) ) * 255); //recalculated
-    //blue = 255 // old concept, not recalculated
+    //blue = parseInt(Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2) ) * 255); //recalculated
+    blue = 255 // old concept, not recalculated
     normaldatas[i + 2] = blue;
   }
-  self.postMessage(['paint',normaldatas,width,height,fileNAME])
+
+  self.postMessage(['paint',normaldatas,width,height,fileNAME,material])
 }
 
 function textAlphaFix(texturedatas,width,height,fileNAME,alphaValue=1){
