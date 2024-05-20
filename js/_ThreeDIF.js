@@ -47,6 +47,14 @@ if (window.Worker) {
 				materialStack[datas[4]].normalMap = textureStack[textureMD5Code];
 				materialStack[datas[4]].normalMap.needsUpdate = true;
 				break
+			case 'rough':
+				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
+				let roughMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
+				textureStack[roughMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
+				textureStack[roughMD5Code].needsUpdate = true
+				materialStack[datas[4]].roughnessMap = textureStack[roughMD5Code];
+				materialStack[datas[4]].roughnessMap.needsUpdate = true;
+				break;
 			case 'log':
 				console.log(datas);
 				break;
@@ -240,7 +248,6 @@ function paintDatas(textureData,w,h,target,format){
 	}
 
 	octx.putImageData(imageData,0,0,0,0,w,h);
-	console.log(w,h,opCanvas.width, opCanvas.height);
 	if (w==h){
 		opCanvas.context.scale(opCanvas.width/w,opCanvas.height/h)
 	}else if (w>h){
@@ -745,7 +752,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				let size = height * width * channels;
 
 				const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
-				console.log(dx10Data);
+
 				var imageDatas
 				if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
 					//console.log(`DDS ${format}`);
@@ -780,6 +787,9 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 					case 'M':
 						//masks
 						paintDatas(imageDatas,imageINFO.width,imageINFO.height,'maskPainter',format);
+						break;
+					case 'RM':
+						imgWorker.postMessage(['roughnessSwap',imageDatas, width, height, fileNAME,_materialName]);
 						break;
 					case 'N':
 						//normals
@@ -900,7 +910,7 @@ function getTexture(filename,kind=null,_materialName){
 			return ERROR;
 		}
 	
-	}else if (type=filename.match(/.+(\w)\d{2}\.(xbm)$/) ){
+	}else if (type=filename.match(/.+_(\w)\d{2}\.(xbm)$/) ){
 		//normal format checking on type of texture:
 		//
 		var realTexturePath = (filename).replace('.xbm',`.${textureformat}`)
@@ -939,6 +949,12 @@ function getTexture(filename,kind=null,_materialName){
 				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'');
 				break;
 		}
+	}else if (type=filename.match(/.+_rm\d{2}\.(xbm)$/) ){
+		//roughness metalness
+		var realTexturePath = (filename).replace('.xbm',`.${textureformat}`)
+		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
+
+		return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'RM',_materialName);
 	}else{
 		var realTexturePath = (filename).replace('.xbm',`.${textureformat}`)
 		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
@@ -1012,6 +1028,19 @@ function codeMaterials(materialEntry,_materialName){
 				decalConfig.color = new THREE.Color(`rgb(${materialEntry.Data.DiffuseColor.Red},${materialEntry.Data.DiffuseColor.Green},${materialEntry.Data.DiffuseColor.Blue})`);
 				decalConfig.opacity = (materialEntry.Data.DiffuseColor.Alpha/255)
 			}
+			//Not in Lambert Material
+/* 			if (materialEntry.Data.hasOwnProperty('RoughnessTexture')){
+				let rMD5Code = CryptoJS.MD5(materialEntry.Data.RoughnessTexture)
+				if (textureStack[rMD5Code]===undefined){
+					textureStack[rMD5Code]=getTexture(materialEntry.Data.RoughnessTexture);
+					decalConfig.roughnessMap = textureStack[rMD5Code]
+				}else{
+					decalConfig.roughnessMap = textureStack[rMD5Code]
+				}
+				textureStack[rMD5Code].needsUpdate=true;
+			} */
+			
+
 			Rdecal.setValues(decalConfig);
 			return Rdecal
 		}
@@ -1019,7 +1048,6 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.metal_base.includes(materialEntry.MaterialTemplate)){
 			var Rbase = materialBASE.clone();
 			var rbaseConfig = {}
-			console.log(materialEntry);
 
 			if (materialEntry.Data.hasOwnProperty('AlphaThreshold')){
 				rbaseConfig.opacity = materialEntry.Data.AlphaThreshold;
@@ -1047,6 +1075,18 @@ function codeMaterials(materialEntry,_materialName){
 					rbaseConfig.normalMap = textureStack[nmMD5Code]
 				}
 				textureStack[nmMD5Code].needsUpdate=true;
+			}
+
+			if (materialEntry.Data.hasOwnProperty('Roughness')){
+				let rMD5Code = CryptoJS.MD5(materialEntry.Data.Roughness)
+				if (textureStack[rMD5Code]===undefined){
+					textureStack[rMD5Code]=getTexture(materialEntry.Data.Roughness,null,_materialName);
+					rbaseConfig.roughnessMap = textureStack[rMD5Code]
+				}else{
+					rbaseConfig.roughnessMap = textureStack[rMD5Code]
+				}
+				textureStack[rMD5Code].needsUpdate=true;
+				rbaseConfig.roughness = materialEntry.Data.RoughnessScale
 			}
 			
 			Rbase.setValues(rbaseConfig);
@@ -1139,8 +1179,10 @@ function codeMaterials(materialEntry,_materialName){
 
 		if (materialTypeCheck.skin.includes(materialEntry.MaterialTemplate)){
 
-			var skin = lambertType.clone();
+			var skin = stdMaterial.clone();
 			var skinConfig = {color:0xFFDABE};
+
+			console.warn('skin',materialEntry,'skin');
 
 			if (materialEntry?.Data.hasOwnProperty('TintColor')){
 				skinConfig.color = new THREE.Color(`rgb(${materialEntry.Data.TintColor.Red},${materialEntry.Data.TintColor.Green},${materialEntry.Data.TintColor.Blue})`);
@@ -1160,6 +1202,20 @@ function codeMaterials(materialEntry,_materialName){
 				}
 
 			}
+
+			if (materialEntry.Data.hasOwnProperty('Roughness')){
+				let rMD5Code = CryptoJS.MD5(materialEntry.Data.Roughness)
+				if (textureStack[rMD5Code]===undefined){
+					textureStack[rMD5Code]=getTexture(materialEntry.Data.Roughness,null,_materialName);
+					skinConfig.roughnessMap = textureStack[rMD5Code]
+					skinConfig.metalnessMap = textureStack[rMD5Code]
+				}else{
+					skinConfig.roughnessMap = textureStack[rMD5Code]
+					skinConfig.metalnessMap = textureStack[rMD5Code]
+				}
+				textureStack[rMD5Code].needsUpdate=true;
+			}
+
 			skin.setValues(skinConfig);
 			return skin;
 		}
