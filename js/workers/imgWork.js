@@ -6,6 +6,9 @@ onmessage = function(event){
     case 'alphaApply':
       var workerResult = textAlphaFix(datas[0],datas[1],datas[2],datas[3]);
       break;
+    case 'roughnessSwap':
+      var workerResult = roughnessFix(datas[0],datas[1],datas[2],datas[3],datas[4]);
+      break;
     case 'normalFix':
     default:
       var workerResult = nMapFix(datas[0],datas[1],datas[2],datas[3],datas[4]);
@@ -23,17 +26,29 @@ function clamp( value, min, max ) {
 the red green normal maps to sull rgb */
 function nMapFix(normaldatas,width,height,fileNAME,material){
   //Took the arraybuffer color change the clue channel
-  var red,green,blue,alpha;
+  var red,green,blueVal,blue,alpha;
   for (let i = 0, l = normaldatas.length; i < l; i += 4) {
     // Modify pixel data
-    red = (normaldatas[i]/255);
-    green = (normaldatas[i + 1]/255);
-    //blue = parseInt(Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2) ) * 255); //recalculated
-    blue = 255 // old concept, not recalculated
+    red = (normaldatas[i]/255)* 2 - 1;
+    green = -1 * (((normaldatas[i + 1])/255)* 2 - 1);
+    blueVal = clamp(Math.sqrt(1 - (Math.pow(red,2)+ Math.pow(green,2))) , 0 , 1) ; //recalculated floating point
+    blue = parseInt(((blueVal + 1 ) / 2 ) * 255)
+    //blue = 255 // old concept, not recalculated
     normaldatas[i + 2] = blue;
   }
 
   self.postMessage(['paint',normaldatas,width,height,fileNAME,material])
+}
+
+function roughnessFix(roughnessdatas,width,height,fileNAME,material){
+  //Took the arraybuffer color change the clue channel
+  var red,green,blue,alpha;
+  for (let i = 0, l = roughnessdatas.length; i < l; i += 4) {
+    // Modify pixel data
+    roughnessdatas[i+1]=roughnessdatas[i];
+  }
+
+  self.postMessage(['rough',roughnessdatas,width,height,fileNAME,material])
 }
 
 function textAlphaFix(texturedatas,width,height,fileNAME,alphaValue=1){
