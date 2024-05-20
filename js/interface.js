@@ -1684,6 +1684,10 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
       $("#layeringsystem li[disabled]").eq(0).removeAttr('disabled');
     }
   });
+  $("#actAll-Layer").click(function(){
+    $("#layeringsystem li[disabled]").removeAttr('disabled');
+  });
+  
 
   //Erase layers but let opacity at 1.0
   $("#wipe-layer").click(function(){
@@ -2668,6 +2672,17 @@ unCooKonfirm.addEventListener("click", (event) => {
       $("body #listTextures canvas.border-active").trigger('click');
     }
   }
+
+  $("#texturePlayer").on("dblclick",function(ev){
+    ev.preventDefault();
+    //texture export on DblClick
+    let a = document.createElement('a');
+    let texturePlayercanvas = document.getElementById('texturePlayer');
+		var texturecontent = texturePlayercanvas.toDataURL('image/png');
+		a.href = texturecontent;
+    a.download = `texture_export_${ new Date().valueOf()}.png`;
+    a.click();
+  });
 
   //resize the Window
   $(`button[data-bs-toggle="tab"]`).on("shown.bs.tab",function(ev){
