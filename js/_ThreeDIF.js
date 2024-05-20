@@ -429,9 +429,9 @@ $("#thacanvas").on('loadScene',function(event){
 }).on('newlights',function(event,index){
 	switch (index) {
 		case 0:
-			TDengine.lights.ambient.color = new THREE.Color(PARAMS.A_light_color);
+/* 			TDengine.lights.ambient.color = new THREE.Color(PARAMS.A_light_color);
 			TDengine.lights.ambient.intensity = PARAMS.A_light_pow;
-			break;
+			break; */
 		case 1:
 			TDengine.lights.point[0].color = new THREE.Color(PARAMS.p_light1_col);
 			TDengine.lights.point[0].intensity = PARAMS.p_light1_pow;
@@ -561,7 +561,7 @@ function init() {
     TDengine.control.target.set(0.01,0.7,0.07);
     
     //lights declaration
-    TDengine.lights.ambient = new THREE.AmbientLight( PARAMS.A_light_color,PARAMS.A_light_pow ); // soft white light ambientlight.intensity=1;
+    //TDengine.lights.ambient = new THREE.AmbientLight( PARAMS.A_light_color,PARAMS.A_light_pow ); // soft white light ambientlight.intensity=1;
     TDengine.lights.point[0] = new THREE.PointLight(PARAMS.p_light1_col,PARAMS.p_light1_pow); //6C5624
     TDengine.lights.point[1] = new THREE.PointLight(PARAMS.p_light2_col,PARAMS.p_light2_pow);
     TDengine.lights.point[2] = new THREE.PointLight(PARAMS.p_light3_col,PARAMS.p_light3_pow);
@@ -587,7 +587,7 @@ function init() {
 	gridHelper.position.x = 0;
 	TDengine.scene.add( gridHelper ) */
 
-    TDengine.scene.add( TDengine.lights.ambient );
+    //TDengine.scene.add( TDengine.lights.ambient );
     TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
 
 

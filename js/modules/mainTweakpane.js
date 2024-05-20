@@ -98,7 +98,7 @@ const lightpane = TDtabManager.pages[0].addFolder({
 });
 
 //Think of removing Ambient lights
-const alight = lightpane.addFolder({
+/* const alight = lightpane.addFolder({
   title:'Ambient'
 })
 alight.addBinding(PARAMS,'A_light_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {
@@ -106,7 +106,7 @@ alight.addBinding(PARAMS,'A_light_pow',{label:'Power',min:0.1,max:200}).on('chan
 });
 alight.addBinding(PARAMS,'A_light_color',{label:'Color',view:'color'}).on('change', (ev) => {
   $("#thacanvas").trigger('newlights',0);
-});
+}); */
 
 const plight1 = lightpane.addFolder({
   title:'Point light 1'
