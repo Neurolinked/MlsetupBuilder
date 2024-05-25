@@ -1095,7 +1095,7 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 			}else{
 				event.reply('preload:logEntry',`Searching for the file in the whole archive, be patient`,true);
 				if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
-					uncookRun(true,["uncook", "-p", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit,"-gp", contentpath ],false,'#NotificationCenter .offcanvas-body')
+					uncookRun(true,["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit ],false,'#NotificationCenter .offcanvas-body')
 					.then(()=>{
 						event.reply('preload:logEntry',"Export of the model Done, reload");
 						mainWindow.webContents.send('preload:noBar','');
