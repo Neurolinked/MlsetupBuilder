@@ -31,8 +31,8 @@ function nMapFix(normaldatas,width,height,fileNAME,material){
     // Modify pixel data
     red = (normaldatas[i]/255)* 2 - 1;
     green = -1 * (((normaldatas[i + 1])/255)* 2 - 1);
-    blueVal = clamp(Math.sqrt(1 - (Math.pow(red,2)+ Math.pow(green,2))) , 0 , 1) ; //recalculated floating point
-    blue = parseInt(((blueVal + 1 ) / 2 ) * 255)
+    blueVal = Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2)); //recalculated floating point
+    blue = parseInt((( blueVal + 1 ) / 2 ) * 255)
     //blue = 255 // old concept, not recalculated
     normaldatas[i + 2] = blue;
   }
@@ -45,7 +45,11 @@ function roughnessFix(roughnessdatas,width,height,fileNAME,material){
   var red,green,blue,alpha;
   for (let i = 0, l = roughnessdatas.length; i < l; i += 4) {
     // Modify pixel data
-    roughnessdatas[i+1]=roughnessdatas[i];
+    red = roughnessdatas[i];
+    green = roughnessdatas[i+1];
+    blue = roughnessdatas[i+2];
+    //roughnessdatas[i]=green;
+    roughnessdatas[i+1]=red;
   }
 
   self.postMessage(['rough',roughnessdatas,width,height,fileNAME,material])
