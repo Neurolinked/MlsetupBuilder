@@ -55,6 +55,9 @@ if (window.Worker) {
 				materialStack[datas[4]].roughnessMap = textureStack[roughMD5Code];
 				materialStack[datas[4]].roughnessMap.needsUpdate = true;
 				break;
+			case 'interface':
+				//here will display some messages on the interface
+				notifyMe(datas[0],false);
 			case 'log':
 				console.log(datas);
 				break;
@@ -412,6 +415,12 @@ $("#thacanvas").on('loadScene',function(event){
 		materialStack[selected].map.flipY = flippingdipping;
 		materialStack[selected].map.needsUpdate = true;
 	}
+}).on('updCamera',function(ev){
+	if (PARAMS.cameraNear > PARAMS.cameraFar){
+		PARAMS.cameraFar = PARAMS.cameraNear+1;
+	}
+	TDengine.camera.near = PARAMS.cameraNear;
+	TDengine.camera.far = PARAMS.cameraFar;
 }).on('fogNew',function(ev){
 	try{
 		TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
@@ -549,7 +558,7 @@ function init() {
 	TDengine.renderer.setPixelRatio( window.devicePixelRatio );
     //TDengine.renderer.setClearColor(0x000000, 1.0);
 
-    TDengine.camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),0.01,200);
+    TDengine.camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),PARAMS.cameraNear,PARAMS.cameraFar);
     TDengine.camera.position.set(0.0,-0.4,-8);
 	TDengine.camera.updateProjectionMatrix();
 
@@ -659,10 +668,10 @@ function getImageInfo(binaryData){
 	//DDS Case
 	if ((headerData[0]==0x44) && (headerData[1]==0x44) && (headerData[2]==0x53) ){
 		const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
+		let headSize = spaceData[1];
 		let height = spaceData[3];
 		let width = spaceData[4];
 		let bytes = 8;
-		//console.log(`texture ${width}x${height}px`);
 		//let size = height * width * channels;
 		const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
 		var channels = 4;
@@ -676,6 +685,10 @@ function getImageInfo(binaryData){
 			case 29:
 			case 28:
 				break;
+			case 49:
+				//DXGI_FORMAT_R8G8_UNORM = 49
+				channels = 2;
+				break
 			case 61:
 				channels = 1;
 				break;
@@ -715,7 +728,7 @@ function getImageInfo(binaryData){
 	}
 }
 
-function rebuildText(textureData,width,height){
+function rebuildText(textureData, width, height){
 	var defSize = (width*height)*4;
 	var imageData = new Uint8Array(defSize);
 	var k=0;
@@ -750,7 +763,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				let width = spaceData[4];
 				//console.log(`texture ${width}x${height}px`);
 				let size = height * width * channels;
-
+				console.log(size);
 				const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
 
 				var imageDatas
@@ -941,6 +954,9 @@ function getTexture(filename,kind=null,_materialName){
 		}
 
 		switch (type[2]){
+			case 'n':
+				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N',_materialName);
+				break;
 			case 'r':
 				//roughness
 			case 'd':
@@ -1088,7 +1104,20 @@ function codeMaterials(materialEntry,_materialName){
 				textureStack[rMD5Code].needsUpdate=true;
 				rbaseConfig.roughness = materialEntry.Data.RoughnessScale
 			}
+
+			if (materialEntry.Data.hasOwnProperty('Metalness')){
+				let mMD5Code = CryptoJS.MD5(materialEntry.Data.Metalness)
+				if (textureStack[mMD5Code]===undefined){
+					textureStack[mMD5Code]=getTexture(materialEntry.Data.Metalness,null,_materialName);
+					rbaseConfig.metalnessMap = textureStack[mMD5Code]
+				}else{
+					rbaseConfig.metalnessMap = textureStack[mMD5Code]
+				}
+				textureStack[mMD5Code].needsUpdate=true;
+				rbaseConfig.metalness = materialEntry.Data.MetalnessScale
+			}
 			
+
 			Rbase.setValues(rbaseConfig);
 			Rbase.normalMap.needsUpdate = true;
 			return Rbase
@@ -1201,6 +1230,18 @@ function codeMaterials(materialEntry,_materialName){
 					skinConfig.map.needsUpdate = true;
 				}
 
+			}
+
+			if (materialEntry.Data.hasOwnProperty('Normal')){
+				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
+				if (textureStack[nmMD5Code]===undefined){
+					textureStack[nmMD5Code]=getTexture(materialEntry.Data.Normal,NORMAL,_materialName);
+					skinConfig.normalMap = textureStack[nmMD5Code]
+				}else{
+					skinConfig.normalMap = textureStack[nmMD5Code]
+				}
+				skinConfig.normalScale= new THREE.Vector2(0,materialEntry.Data.DetailNormalInfluence);
+				textureStack[nmMD5Code].needsUpdate=true;
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Roughness')){
