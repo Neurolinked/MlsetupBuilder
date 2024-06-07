@@ -38,7 +38,6 @@ if (window.Worker) {
 				console.log(alphaFix);
 				break;
 			case 'paint':
-				//paintDatas(datas[0],datas[1],datas[2],'normalMe',THREE.RGBAFormat);
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
 				let selected = activeMLayer();
 				let textureMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
@@ -146,8 +145,6 @@ const MDLloader = new GLTFLoader(); //Loading .glb files
 var materialGlass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
 
 var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide}); //this will substitute the problematic single multilayer material
-
-var mlMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide}); //TODO remove this old shit
 
 var materialHair = new THREE.MeshStandardMaterial({color:0xBB000B,opacity:.9,side:THREE.DoubleSide,depthTest:true});
 var materialBASE = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true, side:THREE.DoubleSide,depthWrite :false});
@@ -315,10 +312,7 @@ function cleanScene(){
 		materialStack=[];
 
 		textureStack.forEach((element) => {element.dispose()});
-		textureStack=[];
-		
-
-		paintDatas(FlatNORM.source.data.data,4,4,'normalMe',THREE.RGBAFormat);
+		textureStack=[];		
 
 		TDengine.scene.traverse(oggetti=>{
 			if (oggetti.isMesh){
@@ -808,7 +802,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 					case 'N':
 						//normals
 						if (imageDatas.isTexture){
-							paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
+							//paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
 						}else{
 							if (imageINFO.bytes==8){
 								imgWorker.postMessage(['normalFix',imageDatas, width, height, fileNAME,_materialName]);
@@ -869,7 +863,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 								break;
 							case 'N':
 								if (texture.isTexture){
-									paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
+									//paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
 								}else{
 									if (imageINFO.bytes==8){
 										imgWorker.postMessage(['normalFix',texture.data,imageINFO.width,imageINFO.height, fileNAME]);
@@ -1293,7 +1287,6 @@ function LoadMaterials(path){
 				materialJSON.Appearances[0].Materials.forEach((material)=>{
 					materialSet.add(material);
 				})
-				paintDatas(FlatNORM,4,4,'normalMe',THREE.RGBAFormat)
 
 				//Reset multilayer list for appearances
 				$("#Mlswitcher").html("");
