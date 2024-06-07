@@ -421,6 +421,7 @@ $("#thacanvas").on('loadScene',function(event){
 	}
 	TDengine.camera.near = PARAMS.cameraNear;
 	TDengine.camera.far = PARAMS.cameraFar;
+	TDengine.camera.updateProjectionMatrix();
 }).on('fogNew',function(ev){
 	try{
 		TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
