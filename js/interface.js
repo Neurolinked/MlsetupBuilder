@@ -1030,7 +1030,8 @@ $("#resetShades span.choose").click(function(){
     scroller: true,
     scrollY: (window.innerHeight-350),
     search:{
-      "regex": true
+      regex: true,
+      return:true
     },
     select: {
       style:'single',
@@ -1094,6 +1095,7 @@ $("#resetShades span.choose").click(function(){
     }
   });
 
+  //
   $('#DataModelsLibrary_filter input[type=search]').each(function () {
     $(this).attr("placeholder", "Search...");
   });
