@@ -520,7 +520,7 @@ const template = [
 		{	label:'Download Wolvenkit.CLI',
 			click:()=>{
 				//Download the stable version
-				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit-nightly-releases/releases/download/8.12.3-nightly.2024-02-17/WolvenKit.Console-8.12.3-nightly.2024-02-17.zip`);
+				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit/releases/download/8.14.0/WolvenKit.Console-8.14.0.zip`);
 			}
 		},
 		{	label:'License',click: () =>{
