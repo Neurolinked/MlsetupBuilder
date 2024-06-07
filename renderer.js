@@ -20,6 +20,8 @@ const canvasIncrements = 128;
 const MLSB = new MLSBEditor;
 
 const PARAMS = {
+	cameraNear : 0.01,
+	cameraFar : 2000,
 	rotation: false,
 	speed: 6.0,
 	wireframes: false,
