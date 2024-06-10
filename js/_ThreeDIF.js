@@ -508,10 +508,16 @@ $("#thacanvas").on('loadScene',function(event){
 	materialStack[selected].setValues({wireframe:PARAMS.wireframes});
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
-	let selected = activeMLayer();
-
-	materialStack[selected].setValues({color:new THREE.Color(color)});
-	materialStack[selected].needsUpdate;
+	if (materialStack.length>0){
+		try{
+			let selected = activeMLayer();
+		
+			materialStack[selected].setValues({color:new THREE.Color(color)});
+			materialStack[selected].needsUpdate;
+		}catch(error){
+			notifyMe(error);
+		}
+	}
 }).on('flipMask',function(event){
 	let selected = activeMLayer();
 	flippingdipping = flipcheck.checked;
