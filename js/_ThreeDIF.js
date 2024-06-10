@@ -409,6 +409,21 @@ $("#thacanvas").on('loadScene',function(event){
 		materialStack[selected].map.flipY = flippingdipping;
 		materialStack[selected].map.needsUpdate = true;
 	}
+}).on('switchAppearance',function(ev, appearance='default'){
+
+	try{
+		let tempID = materialJSON.Appearances.map(el=>el.Name).indexOf(appearance)
+		if (tempID  >=0 ){ 
+			materialJSON.Appearances[tempID].Materials.forEach((material)=>{
+				materialSet.add(material);
+			})
+			
+		}
+
+	}catch(wrong){
+		notifyMe(wrong);
+	}
+
 }).on('updCamera',function(ev){
 	if (PARAMS.cameraNear > PARAMS.cameraFar){
 		PARAMS.cameraFar = PARAMS.cameraNear+1;
@@ -758,7 +773,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				let width = spaceData[4];
 				//console.log(`texture ${width}x${height}px`);
 				let size = height * width * channels;
-				console.log(size);
+				//console.log(size);
 				const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
 
 				var imageDatas

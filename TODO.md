@@ -11,8 +11,10 @@
   - [x] Row grouping by type : vanilla, custom
   - [x] Tag addition and complex filtering on
     - [ ] default tag filter configuration
+  - [x] Search in the library on filter enter press
 - [x] Replacing DAT.gui with Tweakpane library
   - [x] Light configuration addition 
+  - [x] Camera far/near distance configurable
 - [x] Three.js library Update
   - [x] Rewriting the 3d management code to be more maintainable
   - [ ] Add fx support
@@ -20,7 +22,7 @@
   - [x] Assign shaders as from appearances
   - [x] masks loading from material configuration
   - [ ] multilayer.mt conversion to three.js format
-  - [ ] metal_base.remt conversion to three.js format
+  - [x] metal_base.remt conversion to three.js format
   - [x] mesh_decal.mt conversion to three.js format
 - [x] Custom models Material.json search and usage
   - [x] Override masks selection from legacy list

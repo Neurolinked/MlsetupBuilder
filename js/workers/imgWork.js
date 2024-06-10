@@ -44,7 +44,6 @@ function levelling(data,lvl1=0,lvl2=1){
 /* This function will write the blue channel of the image as full blue, to trasform
 the red green normal maps to sull rgb */
 function nMapFix(normaldatas,width,height,fileNAME,material,channels){
-  console.log(normaldatas);
   //Took the arraybuffer color change the clue channel
   var red,green,blueVal,blue,alpha;
   var newTextureData = new Uint8Array(width*height*4);

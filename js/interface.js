@@ -2562,15 +2562,13 @@ unCooKonfirm.addEventListener("click", (event) => {
       
       $(`#nav-appearance div.card`).removeClass('active');
       $(`#nav-appearance div.card button[data-appearance='${$(this).attr('data-name')}']`).closest('.card').addClass('active');
+      $("#thacanvas").trigger('switchAppearance',[$(this).data("name")]);
       /* Read the configuration of materials */
-
-      console.log(materialJSON);
       
       /*
       scene.children.at(-1).children.forEach((element,index) => {
         if (element.hasOwnProperty(`type`)){
           if (element.type=='SkinnedMesh'){
-
             console.log(
               materialJSON.Materials.filter(el => el.Name == element.userData.materialNames[$("#appearanceSwitcher ul.dropdown-menu li a").index($(this))])
             );
