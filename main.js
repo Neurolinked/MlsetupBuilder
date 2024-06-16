@@ -190,7 +190,7 @@ const preferences = new store({schema,
 			store.delete("unbundle")
 			store.delete("wcli")
 		},
-		'1.6.8-beta4': store=>{
+		'1.6.8-beta5': store=>{
 
 		}
 	}

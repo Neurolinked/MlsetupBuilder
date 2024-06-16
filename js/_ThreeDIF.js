@@ -768,6 +768,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 
 	if (type!='M'){
 		pushTexturetoPanel(fileNAME,imageINFO.width,imageINFO.height);
+		console.log(fileNAME,imageINFO.width,imageINFO.height);
 	}
 
 	if (imageINFO?.format=='DDS'){
@@ -870,7 +871,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				var dataURI = "data:image/png;base64," + encodedData;
 				//var texture = new THREE.Texture();
 				var texture = new THREE.TextureLoader().load(dataURI, function(pngMap){
-
+						console.log(pngMap);
 						if (type=='M'){
 							pngMap.flipY=flippingdipping;
 						}
@@ -883,11 +884,11 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 								//paintDatas(pngMap,imageINFO.width,imageINFO.height,'maskPainter',format);
 								break;
 							case 'N':
-								if (texture.isTexture){
+								if (pngMap.isTexture){
 									//paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
 								}else{
 									if (imageINFO.bytes==8){
-										imgWorker.postMessage(['normalFix',texture.data,imageINFO.width,imageINFO.height, fileNAME]);
+										imgWorker.postMessage(['normalFix',pngMap.data,imageINFO.width,imageINFO.height, fileNAME]);
 									}else if (imageINFO.bytes==16){
 										console.log(imageINFO);
 									}else{
@@ -902,7 +903,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 					function ( err ) {
 						notifyMe(err);
 					});
-				return texture
+				return texture;
 			}else{
 				console.error('Texture of size 0');
 				return ERROR;
