@@ -76,6 +76,7 @@ const NORMAL = 'normalMap';
 var materialStack = new Array();
 var materialSet = new Set();
 var textureStack = new Array();
+var textureDock = new Array();
 
 const materialTypeCheck = {
 	decals: [
@@ -198,7 +199,7 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm"){
 			break;
 		default:
 			if (mapName!="engine\\textures\\editor\\grey.xbm"){
-				console.log(`Not matched filename ${mapName}`);
+				textureDock.push(mapName);
 			}
 			return GRAY;
 	}
@@ -381,6 +382,12 @@ $("#thacanvas").on('loadScene',function(event){
 				$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
 
 				LoadModel($("#modelTarget").val())
+				.then((ev)=>{
+					//load deferred textures in the textureDock
+					
+				}).catch((error)=>{
+
+				})
 			}).catch((error)=>{
 				notifyMe(error);
 			})
@@ -719,9 +726,14 @@ function getImageInfo(binaryData){
 		//PNG case
 		var chunkslenght, chunkstype
 		var pngWidth, pngHeight;
+		var pngBit, pngColorType, pngCompression, pngInterlaced, pngFilter;
+
 		pngWidth=pngHeight=0;
 		var imgByteLenght = bufferData.byteLength
 		var filePointer = 8; /*after the header */
+		
+		
+
 		//Search for the chunks with the Size of the texture
 		while ((pngWidth==0) && (pngHeight==0) && (filePointer<imgByteLenght)) {
 			chunkslenght = parseInt(new DataView(bufferData,filePointer,4).getInt32(),16); //from hexa I'll take the size of the chunks
@@ -734,10 +746,36 @@ function getImageInfo(binaryData){
 				//go for the read of the length
 				pngWidth=parseInt(new DataView(bufferData,filePointer,4).getUint32());
 				pngHeight=parseInt(new DataView(bufferData,filePointer+4,4).getUint32());
+				pngBit= parseInt(new DataView(bufferData,filePointer+8,1).getUint8());
+				pngColorType = parseInt(new DataView(bufferData,filePointer+9,1).getUint8());
+				pngCompression = parseInt(new DataView(bufferData,filePointer+10,1).getUint8());
+				pngFilter = parseInt(new DataView(bufferData,filePointer+11,1).getUint8());
+				pngInterlaced = parseInt(new DataView(bufferData,filePointer+12,1).getUint8());
 			}
 			filePointer+=chunkslenght+4; //last 4 byte are for the checksum
 		}
-		return {width:pngWidth,height:pngHeight,format:'PNG'}
+		switch (pngColorType) {
+			case 0:
+				console.log(`Grayscale sample`);
+				break;
+			case 2:
+				console.log(`RGB triple`);
+				break;
+			case 3:
+				console.log(`PLTE palette index`)
+				break;
+			case 4:
+				console.log(`grayscale sample, followed by an alpha sample`)
+				break;
+			case 6:
+				console.log(`R,G,B triple, followed by an alpha sample`)
+				break;
+			default:
+				notifyMe("This is an unknown PNG format !!");
+				break;
+		}
+
+		return {width:pngWidth,height:pngHeight,format:'PNG', colorType:pngColorType,bytes:pngBit,compress:pngCompression,filter:pngFilter,Ilaced:pngInterlaced}
 	}else{
 		console.warn(`${binaryData.slice(0,4)} format`)
 		return {width:0,height:0,format:'Unknown'};
@@ -768,7 +806,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 
 	if (type!='M'){
 		pushTexturetoPanel(fileNAME,imageINFO.width,imageINFO.height);
-		console.log(fileNAME,imageINFO.width,imageINFO.height);
+		console.log(fileNAME,imageINFO);
 	}
 
 	if (imageINFO?.format=='DDS'){
@@ -869,12 +907,22 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				
 				var encodedData = btoa(binaryData);
 				var dataURI = "data:image/png;base64," + encodedData;
+				/* 
+				let offcanvas = new OffscreenCanvas(imageINFO.width,imageINFO.height);
+				let gl = offcanvas.getContext("2d");
+				var img = new Image;
+				img.onload = function(){
+					gl.drawImage(img,0,0); // Or at whatever offset you like
+					//console.log(gl.getImageData(0,0,imageINFO.width,imageINFO.height))
+					return new THREE.DataTexture(gl.getImageData(0,0,imageINFO.width,imageINFO.height),imageINFO.width,imageINFO.height,THREE.RGBAFormat)
+				};
+				img.src = dataURI; */
 				//var texture = new THREE.Texture();
 				var texture = new THREE.TextureLoader().load(dataURI, function(pngMap){
-						console.log(pngMap);
-						if (type=='M'){
-							pngMap.flipY=flippingdipping;
-						}
+						
+						//if (type=='M'){
+						pngMap.flipY=flippingdipping;
+						//}
 						pngMap.wrapS=THREE.RepeatWrapping;
 						pngMap.wrapT=THREE.RepeatWrapping;
 
@@ -922,8 +970,16 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 function getTexture(filename,kind=null,_materialName){
 	var temporaryTexture = null;
 	var type = "";
+	//return retDefTexture(filename);
 	//
 	if (filename.match(/\.mlmask$/)){
+		// with the CLI 8.14 the path are created under a subfolder named as the masksset file plus _layers
+		let basePaths = filename.split("\\").slice(0,-1);
+		let maskFilename = filename.split("\\").pop().toString();
+		let subfolder = maskFilename.split(".")[0]+"_layers"
+		basePaths.push(subfolder,maskFilename);
+		filename = basePaths.join("\\");
+
 		//multilayer mask texture to be taken
 		var realTexturePath = (filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`)
 		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
@@ -1228,7 +1284,7 @@ function codeMaterials(materialEntry,_materialName){
 			var skin = stdMaterial.clone();
 			var skinConfig = {color:0xFFDABE};
 
-			console.warn('skin',materialEntry,'skin');
+			//console.warn('skin',materialEntry,'skin');
 
 			if (materialEntry?.Data.hasOwnProperty('TintColor')){
 				skinConfig.color = new THREE.Color(`rgb(${materialEntry.Data.TintColor.Red},${materialEntry.Data.TintColor.Green},${materialEntry.Data.TintColor.Blue})`);
@@ -1319,8 +1375,10 @@ function LoadMaterials(path){
 				//Build every unique material entry to be applyed to
 				materialSet.forEach((material)=>{
 					materialStack[material] = codeMaterials(materialJSON.Materials.filter(el => el.Name == material)[0],material);
+
 					let entry, idx
 					idx = materialJSON.findIndex(material)
+					
 					if (entry = materialJSON.find(material)){
 						if (materialTypeCheck.multilayer.includes(entry.MaterialTemplate)){
 							multilayerSwitch+= materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
@@ -1329,6 +1387,8 @@ function LoadMaterials(path){
 						}
 					}	
 				});
+
+				// Defer textureDock;
 
 				$("#Mlswitcher").html(multilayerSwitch);
 				$("#mLayerOperator").html(multilayerMaskMenu);
