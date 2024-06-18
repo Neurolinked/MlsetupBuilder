@@ -210,15 +210,6 @@ ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
   }
 })
 
-/*
-ipcRenderer.on('preload:scanReply',(event,result)=>{
-  if (isValidJSON(result)){
-    let passDatas = document.querySelector("#txtFolderScanner");
-    passDatas.value = result;
-    passDatas.dispatchEvent(new Event("change"));
-  }
-})
-*/
 ipcRenderer.on('preload:enable',(event,target) => {
 		let obj = document.querySelector(target)
 		obj.disabled = false

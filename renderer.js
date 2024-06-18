@@ -13,11 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	)
 
 	const alertMessages = document.getElementById("alertMessages");
-
 })
+
+
 
 const canvasIncrements = 128;
 const MLSB = new MLSBEditor;
+var closeModal
 
 const PARAMS = {
 	cameraNear : 0.01,
@@ -65,10 +67,17 @@ function notifyMe(message, warning = true){
 	$("#foot-message").text(`${message}`);
   }
 
-function alertMe(message="",title="Advice"){
+function alertMe(message="",title="Advice",seconds=null){
 	$("#alertMessages > header").html(title);
 	$("#alertMessages > p").html(message);
 	alertMessages.showModal();
+
+	if ((seconds!=null) && (parseInt(seconds)>200)){
+		seconds = parseInt(seconds);
+		closeModal = setTimeout(function(ev){
+			alertMessages.close();
+		},seconds);
+	}
 }
 
 //generic Canvas Cleaning function

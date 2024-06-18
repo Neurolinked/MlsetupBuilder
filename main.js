@@ -128,6 +128,9 @@ const preferences = new store({schema,
 				let fixstring = store.get('unbundle')
 				store.set('unbundle',fixstring.replace(/\\base$/,''))
 				store.set('pathfix','1')
+			}else{
+				store.set('unbundle','');
+				store.set('pathfix','0');
 			}
 		},
 		'1.6.3': store =>{
@@ -710,9 +713,11 @@ ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 						event.reply('preload:logEntry', 'File not found in : '+whereLoadFrom,true)
 					}else{
 						a3dMatModel="";
+
 						if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
 							dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
 						}
+						
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 					contenutofile = ""
