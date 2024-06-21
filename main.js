@@ -823,6 +823,9 @@ ipcMain.on('main:getversion',(event, arg) =>{
 				}
 			}
 		})
+	}else{
+		preferences.set('paths.depot','');
+		event.reply('preload:logEntry',`Depot not setup`,true);
 	}
 })
 
