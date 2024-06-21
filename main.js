@@ -134,7 +134,9 @@ const preferences = new store({schema,
 			}
 		},
 		'1.6.3': store =>{
-			store.delete('pathfix')
+			if (store.has("pathfix")){
+				store.delete('pathfix')
+			}
 			store.set('legacymaterial',false)
 		},
 		'1.6.6': store =>{
@@ -144,8 +146,10 @@ const preferences = new store({schema,
 		'1.6.7': store =>{
 			if (store.get('depot')==''){
 				//preparing for the switch from the unbundle folder, to the depot one
-				let fixVal = store.get('unbundle')
-				store.set('depot', fixVal)
+				if (store.has("unbundle")){
+					let fixVal = store.get('unbundle')
+					store.set('depot', fixVal)
+				}
 			}
 			store.set('flipmasks',false)
 			store.set('flipnorm',false)
@@ -188,10 +192,18 @@ const preferences = new store({schema,
 						wcli: store.get('wcli')
 					}
 				})
-			store.delete("depot")
-			store.delete("game")
-			store.delete("unbundle")
-			store.delete("wcli")
+			if (store.has("depot")){
+				store.delete("depot");
+			}
+			if (store.has("game")){
+				store.delete("game")
+			}
+			if (store.has("unbundle")){
+				store.delete("unbundle")
+			}
+			if (store.has("wcli")){
+				store.delete("wcli")
+			}
 		},
 		'1.6.8-beta5': store=>{
 
