@@ -944,6 +944,7 @@ $("#resetShades span.choose").click(function(){
         className:'btn btn-sm btn-primary my-1',
         action:function(dt){
           notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel} with materials`);
+          $("#layeringsystem li[disabled]").removeAttr('disabled'); //re-enable all the layers
           thePIT.UnCookSingle(MLSB.TreeD.lastModel.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\").replaceAll("\\ep1\\","ep1\\"));
           taskProcessBar();
           CPModels.rows().deselect();
