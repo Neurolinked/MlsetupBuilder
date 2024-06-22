@@ -825,19 +825,16 @@ ipcMain.on('main:getversion',(event, arg) =>{
 				try {
 					var WolvenkitConfig = JSON.parse(wolvenkitConfigHandle)
 					if (WolvenkitConfig.hasOwnProperty('MaterialRepositoryPath')){
-						preferences.set(`depot`,WolvenkitConfig.MaterialRepositoryPath);
+						preferences.set(`paths.depot`,WolvenkitConfig.MaterialRepositoryPath);
 					}
-					if ((WolvenkitConfig.hasOwnProperty('CP77ExecutablePath')) && (preferences.get(`game`)=='')) {
-						preferences.set(`game`,WolvenkitConfig.CP77ExecutablePath.replace("\\bin\\x64\\Cyberpunk2077.exe","\\archive\\pc\\content"))
+					if ((WolvenkitConfig.hasOwnProperty('CP77ExecutablePath')) && (preferences.get(`paths.game`)=='')) {
+						preferences.set(`paths.game`,WolvenkitConfig.CP77ExecutablePath.replace("\\bin\\x64\\Cyberpunk2077.exe","\\archive\\pc\\content"))
 					}
 				} catch (error) {
 					event.reply('preload:logEntry',`The file is there, but i got an error:${error}`,false);
 				}
 			}
 		})
-	}else{
-		preferences.set('paths.depot','');
-		event.reply('preload:logEntry',`Depot not setup`,true);
 	}
 })
 
