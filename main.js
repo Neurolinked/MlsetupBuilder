@@ -1325,6 +1325,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 
 function microBuilder(contentdir){
 	contentpath = path.join(contentdir,spotfolder.base)
+	
 	return new Promise((resolve,reject) =>{
 
 			let unbundlefoWkit = preferences.get('paths.depot') //String(preferences.get('unbundle')).replace(/base$/,'')
@@ -1334,9 +1335,9 @@ function microBuilder(contentdir){
 			if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 				mainWindow.webContents.send('preload:uncookLogClean','#microLogger div')
 
-				uncookRun(true,["uncook", "-gp", contentpath, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div')
-					.then(()=> 	uncookRun(true,["uncook", "-gp", contentpath, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger div'))
-					.then(()=> 	uncookRun(true,["uncook", "-gp", contentpath, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger div'))
+				uncookRun(true,["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div')
+					/* .then(()=> 	uncookRun(true,["uncook", "-gp", contentpath, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger div'))
+					.then(()=> 	uncookRun(true,["uncook", "-gp", contentpath, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger div')) */
 					.then(()=> {
 						return new Promise((resolve,reject) =>{
 							fs.readdir(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/'),(err,files)=>{
