@@ -67,10 +67,6 @@ if (window.Worker) {
     }
 }
 
-const normalMapInfo = {
-  width : 768,
-  height : 768
-}
 const NORMAL = 'normalMap';
 
 var materialStack = new Array();
@@ -185,7 +181,10 @@ function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
 	return -1.0;
 }
 
-function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm"){
+function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="default",type="diffuse"){
+	// kind of listed maps
+	type = ((type=="diffuse") || (type=="normal") || (type=="metal") || (type=="rough") || (type=="alpha")  || (type=="emissive") ) ? type : "diffuse";
+
 	switch (mapName){
 		case "engine\\textures\\editor\\black.xbm":
 			return BLACK;
@@ -199,7 +198,7 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm"){
 			break;
 		default:
 			if (mapName!="engine\\textures\\editor\\grey.xbm"){
-				textureDock.push(mapName);
+				textureDock.push({file:mapName,shader:material,map:type});
 			}
 			return GRAY;
 	}
@@ -968,9 +967,11 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 
 //Get Textures data
 function getTexture(filename,kind=null,_materialName){
+	
+	//return retDefTexture(filename,_materialName,kind);
+
 	var temporaryTexture = null;
 	var type = "";
-	//return retDefTexture(filename);
 	//
 	if (filename.match(/\.mlmask$/)){
 		// with the CLI 8.14 the path are created under a subfolder named as the masksset file plus _layers
@@ -1117,17 +1118,6 @@ function codeMaterials(materialEntry,_materialName){
 				decalConfig.color = new THREE.Color(`rgb(${materialEntry.Data.DiffuseColor.Red},${materialEntry.Data.DiffuseColor.Green},${materialEntry.Data.DiffuseColor.Blue})`);
 				decalConfig.opacity = (materialEntry.Data.DiffuseColor.Alpha/255)
 			}
-			//Not in Lambert Material
-/* 			if (materialEntry.Data.hasOwnProperty('RoughnessTexture')){
-				let rMD5Code = CryptoJS.MD5(materialEntry.Data.RoughnessTexture)
-				if (textureStack[rMD5Code]===undefined){
-					textureStack[rMD5Code]=getTexture(materialEntry.Data.RoughnessTexture);
-					decalConfig.roughnessMap = textureStack[rMD5Code]
-				}else{
-					decalConfig.roughnessMap = textureStack[rMD5Code]
-				}
-				textureStack[rMD5Code].needsUpdate=true;
-			} */
 			
 
 			Rdecal.setValues(decalConfig);
@@ -1387,7 +1377,7 @@ function LoadMaterials(path){
 						}
 					}	
 				});
-
+				
 				// Defer textureDock;
 
 				$("#Mlswitcher").html(multilayerSwitch);
@@ -1400,7 +1390,7 @@ function LoadMaterials(path){
 				$("#appearanceSwitcher ul").html(materialJSON.codeAppearances(`<li><a class="dropdown-item" data-name='$APPEARANCE$'>$APPEARANCE$</a></li>`));
 
 			}else{
-
+				//TODO create the basic material
 				console.info("No Material file present, build a basic Multilayer one");
 			}
 			resolve();
