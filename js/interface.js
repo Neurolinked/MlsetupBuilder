@@ -1732,12 +1732,9 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
  /*------------------------------------------------------------------------------------
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
-$("#importLink").click(
-  function(ev){
-    console.log(ev);
+$("#importLink").click(function(ev){
     $("#importTech").click();
-  }
-);
+});
 
 //----File Auto Loader
 $("#importTech").change(function(){
@@ -1745,12 +1742,12 @@ $("#importTech").change(function(){
 	fr.onload=function(){
     mlSetupContent = fr.result;
     passTheMlsetup(fr.result);
-    /*$("#passaggio").val(fr.result);
-    $("#passaggio").change();*/
-  } //get the result of the reading to the textarea
+  }
+
   if ($("#importTech")[0].files[0]){
     fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
   }
+  
 });
 
 $("#importFromWkit").click(function(){
@@ -1771,6 +1768,8 @@ function passTheMlsetup(textContent=""){
       notifyMe(`Error: ${error}`)
     }
     off_MLSetup.show();
+    // focus on the exit button of the offcanvas
+    $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
   }
 }
 

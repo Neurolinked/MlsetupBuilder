@@ -448,9 +448,8 @@ const template = [
 			{
 			label: 'Mlsetup',
 			submenu: [
-					{label: 'Import',accelerator: 'Ctrl+i', click: () =>{
-						mainWindow.webContents.send('preload:trigEvent',{target:"#importLink", trigger:'click'})
-						//mainWindow.webContents.send('preload:activate','#importLink')
+					{label: 'Import', accelerator:'Ctrl+i', click: () =>{
+						mainWindow.webContents.send('preload:activate',"#importLink")
 					}},
 					{label: 'Export',accelerator: 'Ctrl+e', click: () =>{
 						mainWindow.webContents.send('preload:activate','#exportversions')
@@ -600,6 +599,7 @@ app.on('window-all-closed', function () {
 
 
 app.on('browser-window-focus', () => {
+
 	globalShortcut.register("CommandOrControl+W", () => {
 	//stuff here
 	})
