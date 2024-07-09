@@ -739,7 +739,8 @@ $("#resetShades span.choose").click(function(){
   const lastModelOpened = localStorage.getItem('lastModelOpened');
   const lastLuminosity = localStorage.getItem('luminosity');
 
-  MLSB.TreeD.lastModel = lastModelOpened;
+  MLSB.TreeD.lastModel = lastModelOpened ?? ''; //coalescing null values with empty string
+
   $("#modelTarget").val(MLSB.TreeD.lastModel);
   $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb$/,".Material.json"));
   
