@@ -1309,7 +1309,6 @@ $("#resetShades span.choose").click(function(){
 			$("#Metal_Out_values").html('');
 			$("#Rough_In_values").html('');
 			$("#Norm_Pow_values").html('');
-			$("#materialcolors").html('');
 			$("#cagecolors").html('');
 
 			let toodarkClass;
@@ -1321,6 +1320,7 @@ $("#resetShades span.choose").click(function(){
         }
       }
 
+      let cageColorHtml = '';
 			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
 				toodarkClass='';
 				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
@@ -1328,9 +1328,9 @@ $("#resetShades span.choose").click(function(){
 				if (!tinycolor.isReadable(colorchecking,"#3c454d")){
 					toodarkClass='bg-light';
 				}
-				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" title="'+value.n+'" alt="'+value.n+'" >&nbsp;</span>');
+        cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${value.n}" alt="${value.n}" >&nbsp;</span>`;
 			});
+      $("#cagecolors").append(cageColorHtml);
 
 			//build up the lists of data loaded from the material chosen
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
@@ -1349,10 +1349,8 @@ $("#resetShades span.choose").click(function(){
 				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
 			});
 
-			//$("#materialChoser").attr('src','./images/material/'+materialtoload+'.jpg');
 		}else{
 			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
-			$("#materialcolors").html("");
 		}
 
     if ($("#colororder").is(":checked")){
