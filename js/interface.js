@@ -2326,7 +2326,7 @@ $("#unCookModal .modal-body .form-check-input").click(function(){
 	}
 })
 
-$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_FNT4, #ep1_WE, #ep1_VE, #ep1_ME, #ep1_EN").change(function(){
+$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_EN, #ep1_WE, #ep1_VE, #ep1_ME, #ep1_EN").change(function(){
 	//console.log($(this))
 	if ($(this).is(':checked')){
 		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');
