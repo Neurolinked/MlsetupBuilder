@@ -198,7 +198,7 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="de
 			break;
 		default:
 			if (mapName!="engine\\textures\\editor\\grey.xbm"){
-				textureDock.push({file:mapName,shader:material,map:type});
+				textureDock.push({file:mapName,maptype:type,shader:material});
 			}
 			return GRAY;
 	}
@@ -383,9 +383,9 @@ $("#thacanvas").on('loadScene',function(event){
 				LoadModel($("#modelTarget").val())
 				.then((ev)=>{
 					//load deferred textures in the textureDock
-					
+					LoadStackTextures();
 				}).catch((error)=>{
-
+					notifyMe(error);
 				})
 			}).catch((error)=>{
 				notifyMe(error);
@@ -394,6 +394,11 @@ $("#thacanvas").on('loadScene',function(event){
 			notifyMe(error);
 		});
 	});
+}).on('loadMaterials',function(ev){
+	/*
+	Check if there is loaded a model, otherwize
+	Load the Materials
+	*/
 }).on('toggleMesh',function(ev,name,toggle){
 	TDengine.scene.traverse(oggetti=>{
 		if (oggetti.name==name.trim()){
@@ -404,16 +409,17 @@ $("#thacanvas").on('loadScene',function(event){
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
-		
-		var LAYER = getTexture(materialStack[selected].mask);
+		if (materialStack[selected].hasOwnProperty("mask")){	
+			var LAYER = getTexture(materialStack[selected].mask);
 
- 		materialStack[selected].setValues({
-			alphaMap:LAYER,
-			map:LAYER,
-			opacity: parseFloat($("#layerOpacity").val())
-		})
-		materialStack[selected].map.flipY = flippingdipping;
-		materialStack[selected].map.needsUpdate = true;
+			materialStack[selected].setValues({
+				alphaMap:LAYER,
+				map:LAYER,
+				opacity: parseFloat($("#layerOpacity").val())
+			})
+			materialStack[selected].map.flipY = flippingdipping;
+			materialStack[selected].map.needsUpdate = true;
+		}
 	}
 }).on('switchAppearance',function(ev, appearance='default'){
 
@@ -719,7 +725,7 @@ function getImageInfo(binaryData){
 				break;
 		}
 
-		return {width:width,height:height,format:'DDS',size:(height * width * channels),bytes:bytes}
+		return {width:width,height:height,format:'DDS',size:(height * width * channels),bytes:bytes,channels:channels}
 
 	}else if ((headerData[0]==0x89) && (headerData[1]==0x50) && (headerData[2]==0x4e) && (headerData[3]==0x47)	&& (headerData[4]==0x0d) && (headerData[5]==0x0a) && (headerData[6]==0x1a) && (headerData[7]==0x0a) ){
 		//PNG case
@@ -805,7 +811,6 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 
 	if (type!='M'){
 		pushTexturetoPanel(fileNAME,imageINFO.width,imageINFO.height);
-		console.log(fileNAME,imageINFO);
 	}
 
 	if (imageINFO?.format=='DDS'){
@@ -863,6 +868,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 						if (imageDatas.isTexture){
 							//paintDatas(FlatNORM.source.data.data,4,4,'normalMe',format);
 						}else{
+							resultTex = FlatNORM;
 							if (imageINFO.bytes==8){
 								imgWorker.postMessage(['normalFix',imageDatas, width, height, fileNAME,_materialName]);
 							}else if (imageINFO.bytes==16){
@@ -879,12 +885,26 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				//rebuild the colors
 				if (format == THREE.LuminanceFormat){
 					imageDatas = rebuildText(imageDatas,width,height);
+					imageINFO.channels = 4;
 				}
 
 				if (imageINFO.bytes==16){
 					resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBAFormat, RGBA16UI);
 				}else{
-					resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBAFormat);
+					switch (imageINFO.channels) {
+						case 1:
+							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RedFormat);
+							break;
+						case 2:
+							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGFormat);
+							break;
+						case 3:
+							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBFormat);
+							break;
+						default:
+							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBAFormat);
+							break;
+					}
 				}
 
 				resultTex.wrapS = THREE.RepeatWrapping;
@@ -1064,6 +1084,63 @@ function getTexture(filename,kind=null,_materialName){
 	}
 }
 
+/*
+This function will load NON default textures from the textureDock
+and set them to a shader to the correct map
+*/
+function LoadStackTextures(){
+	var textureMD5Code
+	textureDock.forEach((textureObj)=>{
+		textureMD5Code = ""
+		console.info(`getting ${textureObj.shader} - ${textureObj.maptype}`)
+		if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype")){
+			textureMD5Code = CryptoJS.MD5(textureObj.file);
+			if (textureStack[textureMD5Code]===undefined){
+				if (textureObj.maptype=="normal"){
+					textureStack[textureMD5Code] = getTexture(textureObj.file,NORMAL,textureObj.shader);
+				}else{
+					textureStack[textureMD5Code] = getTexture(textureObj.file);
+				}
+				textureStack[textureMD5Code].needsUpdate = true;
+			}
+			switch (textureObj.maptype) {
+				case "diffuse":
+					materialStack[textureObj.shader].map = textureStack[textureMD5Code]
+					materialStack[textureObj.shader].map.needsUpdate = true;
+					break;
+				case "normal":
+					materialStack[textureObj.shader].normalMap = textureStack[textureMD5Code]
+					materialStack[textureObj.shader].normalMap.needsUpdate = true;
+					break;
+				case "roughness":
+					materialStack[textureObj.shader].roughnessMap = textureStack[textureMD5Code]
+					materialStack[textureObj.shader].roughnessMap.needsUpdate = true;
+					break;
+				case "metalness":
+					materialStack[textureObj.shader].metalnessMap = textureStack[textureMD5Code]
+					materialStack[textureObj.shader].metalnessMap.needsUpdate = true;
+					break;
+				case "emissive":
+					materialStack[textureObj.shader].emissiveMap = textureStack[textureMD5Code]
+					materialStack[textureObj.shader].emissiveMap.needsUpdate = true;
+					break;
+				case "ao":
+					materialStack[textureObj.shader].aoMap = textureStack[textureMD5Code]
+					materialStack[textureObj.shader].aoMap.needsUpdate = true;
+					break;
+				case "alpha":
+					materialStack[textureObj.shader].alphaMap = textureStack[textureMD5Code]
+					materialStack[textureObj.shader].alphaMap.needsUpdate = true;
+					break;
+			}
+		}
+	})
+	materialStack.forEach((shader)=>{
+		shader.needsUpdate = true;
+	});
+	textureDock = [];
+}
+
 function codeMaterials(materialEntry,_materialName){
 	
 	if (materialEntry.hasOwnProperty('MaterialTemplate')){
@@ -1076,22 +1153,14 @@ function codeMaterials(materialEntry,_materialName){
 			//Decal Textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseTexture')){
 				//MD5 the name of the file to load or import it
-				let textureMD5Code = CryptoJS.MD5(materialEntry.Data.DiffuseTexture)
-				if (textureStack[textureMD5Code]===undefined){
-					//the texture has to be loaded in the texture stack
-					textureStack[textureMD5Code]=getTexture(materialEntry.Data.DiffuseTexture);
-					textureStack[textureMD5Code].needsUpdate=true;
-					decalConfig.map = textureStack[textureMD5Code];
-				}else{
-					//assign the texture
-					decalConfig.map = textureStack[textureMD5Code];
-				}
+				decalConfig.map = retDefTexture(materialEntry.Data.DiffuseTexture,_materialName,"diffuse");
 			}
 
 			if ('UseNormalAlphaTex' in materialEntry?.Data){
 				if (materialEntry.Data.UseNormalAlphaTex > 0 ){
 					decalConfig.alphaTest = 0.02;
-					let naMD5Code = CryptoJS.MD5(materialEntry.Data.NormalAlphaTex)
+					decalConfig.alphaMap = retDefTexture(materialEntry.Data.NormalAlphaTex,_materialName,"normal");
+/* 					let naMD5Code = CryptoJS.MD5(materialEntry.Data.NormalAlphaTex)
 					if (textureStack[naMD5Code]===undefined){
 						textureStack[naMD5Code]=getTexture(materialEntry.Data.NormalAlphaTex,NORMAL,_materialName);
 						textureStack[naMD5Code].needsUpdate=true;
@@ -1099,19 +1168,21 @@ function codeMaterials(materialEntry,_materialName){
 					}else{
 						decalConfig.alphaMap = textureStack[naMD5Code];
 
-					}
+					} */
+
 				}
 			}
 			if (materialEntry?.Data.hasOwnProperty('NormalTexture')){
 				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.NormalTexture)
-				if (textureStack[nmMD5Code]===undefined){
+				decalConfig.normalMap = retDefTexture(materialEntry.Data.NormalTexture,_materialName,"normal");
+				/* if (textureStack[nmMD5Code]===undefined){
 					textureStack[nmMD5Code]=getTexture(materialEntry.Data.NormalTexture,NORMAL,_materialName);
 					decalConfig.normalMap = textureStack[nmMD5Code]
 				}else{
 					decalConfig.normalMap = textureStack[nmMD5Code]
 				}
 				decalConfig.normalMap.needsUpdate =true;
-				textureStack[nmMD5Code].needsUpdate=true;
+				textureStack[nmMD5Code].needsUpdate=true; */
 			}
 			//Color over textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseColor')){
@@ -1133,12 +1204,13 @@ function codeMaterials(materialEntry,_materialName){
 			}
 			//Texture information
 			if (materialEntry.Data.hasOwnProperty('BaseColor')){
-				let textureMD5Code = CryptoJS.MD5(materialEntry.Data.BaseColor)
+				rbaseConfig.map = retDefTexture(materialEntry.Data.BaseColor,_materialName,"diffuse");
+				/* let textureMD5Code = CryptoJS.MD5(materialEntry.Data.BaseColor)
 				if (textureStack[textureMD5Code]===undefined){
 					textureStack[textureMD5Code]=getTexture(materialEntry.Data.BaseColor);
 					textureStack[textureMD5Code].needsUpdate=true;
 				}
-				rbaseConfig.map=textureStack[textureMD5Code];
+				rbaseConfig.map=textureStack[textureMD5Code]; */
 			}
 			//Color applyed over textures
 			if (materialEntry.Data.hasOwnProperty('BaseColorScale')){
@@ -1146,29 +1218,34 @@ function codeMaterials(materialEntry,_materialName){
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Normal')){
-				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
+				rbaseConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
+				/* let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
 				if (textureStack[nmMD5Code]===undefined){
 					textureStack[nmMD5Code]=getTexture(materialEntry.Data.Normal,NORMAL,_materialName);
 					rbaseConfig.normalMap = textureStack[nmMD5Code]
 				}else{
 					rbaseConfig.normalMap = textureStack[nmMD5Code]
 				}
-				textureStack[nmMD5Code].needsUpdate=true;
+				textureStack[nmMD5Code].needsUpdate=true; */
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Roughness')){
-				let rMD5Code = CryptoJS.MD5(materialEntry.Data.Roughness)
+				rbaseConfig.roughnessMap = retDefTexture(materialEntry.Data.Roughness,_materialName,"roughness");
+
+				/* let rMD5Code = CryptoJS.MD5(materialEntry.Data.Roughness)
 				if (textureStack[rMD5Code]===undefined){
 					textureStack[rMD5Code]=getTexture(materialEntry.Data.Roughness,null,_materialName);
 					rbaseConfig.roughnessMap = textureStack[rMD5Code]
 				}else{
 					rbaseConfig.roughnessMap = textureStack[rMD5Code]
 				}
-				textureStack[rMD5Code].needsUpdate=true;
+				textureStack[rMD5Code].needsUpdate=true; */
 				rbaseConfig.roughness = materialEntry.Data.RoughnessScale
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Metalness')){
+				rbaseConfig.metalnessMap =retDefTexture(materialEntry.Data.Metalness,_materialName,"metalness");
+				/* 
 				let mMD5Code = CryptoJS.MD5(materialEntry.Data.Metalness)
 				if (textureStack[mMD5Code]===undefined){
 					textureStack[mMD5Code]=getTexture(materialEntry.Data.Metalness,null,_materialName);
@@ -1176,7 +1253,7 @@ function codeMaterials(materialEntry,_materialName){
 				}else{
 					rbaseConfig.metalnessMap = textureStack[mMD5Code]
 				}
-				textureStack[mMD5Code].needsUpdate=true;
+				textureStack[mMD5Code].needsUpdate=true; */
 				rbaseConfig.metalness = materialEntry.Data.MetalnessScale
 			}
 			
@@ -1240,27 +1317,31 @@ function codeMaterials(materialEntry,_materialName){
 			
 
 			if (materialEntry?.Data.hasOwnProperty('Strand_Gradient')){
-				let colMD5Code = CryptoJS.MD5(materialEntry.Data.Strand_Gradient);
+				configHair.map = retDefTexture(materialEntry.Data.Strand_Gradient,_materialName,"diffuse");
+
+				/* let colMD5Code = CryptoJS.MD5(materialEntry.Data.Strand_Gradient);
 
 				if (textureStack[colMD5Code]===undefined){
 					textureStack[colMD5Code] = getTexture(materialEntry.Data.Strand_Gradient)
 					configHair.map = textureStack[colMD5Code];
 				}else{
 					configHair.map = textureStack[colMD5Code];
-				}
+				} */
 				configHair.map.needsUpdate = true;
 			}
 
  			if (materialEntry?.Data.hasOwnProperty('Strand_Alpha')){
-				
+				configHair.alphaMap = retDefTexture(materialEntry.Data.Strand_Alpha,_materialName,"alpha");
+				configHair.alphaTest = 0.03;
+				/* 
 				let colMD5Code = CryptoJS.MD5(materialEntry.Data.Strand_Alpha);
-				configHair.alphaTest=0.03;
+
 				if (textureStack[colMD5Code]===undefined){
 					textureStack[colMD5Code] = getTexture(materialEntry.Data.Strand_Alpha)
 					configHair.alphaMap = textureStack[colMD5Code];
 				}else{
 					configHair.alphaMap = textureStack[colMD5Code];
-				}
+				} */
 				configHair.alphaMap.needsUpdate = true;
 			}
 			
@@ -1282,6 +1363,9 @@ function codeMaterials(materialEntry,_materialName){
 			}
 			
 			if (materialEntry?.Data.hasOwnProperty('Albedo')){
+				skinConfig.map = retDefTexture(materialEntry.Data.Albedo,_materialName,"diffuse");
+				skinConfig.map.needsUpdate = true;
+				/* 
 				let albedoMD5Code = CryptoJS.MD5(materialEntry.Data.Albedo)
 
 				if (textureStack[albedoMD5Code]===undefined){
@@ -1291,23 +1375,30 @@ function codeMaterials(materialEntry,_materialName){
 				}else{
 					skinConfig.map = textureStack[albedoMD5Code];
 					skinConfig.map.needsUpdate = true;
-				}
-
+				} */
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Normal')){
-				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
+				skinConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
+				skinConfig.normalScale= new THREE.Vector2(0,materialEntry.Data.DetailNormalInfluence);
+				skinConfig.normalMap.needsUpdate = true
+
+				/* let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
 				if (textureStack[nmMD5Code]===undefined){
 					textureStack[nmMD5Code]=getTexture(materialEntry.Data.Normal,NORMAL,_materialName);
 					skinConfig.normalMap = textureStack[nmMD5Code]
 				}else{
 					skinConfig.normalMap = textureStack[nmMD5Code]
 				}
-				skinConfig.normalScale= new THREE.Vector2(0,materialEntry.Data.DetailNormalInfluence);
-				textureStack[nmMD5Code].needsUpdate=true;
+				textureStack[nmMD5Code].needsUpdate=true; */
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Roughness')){
+
+				skinConfig.roughnessMap = retDefTexture(materialEntry.Data.roughnessMap,_materialName,"roughness");
+				skinConfig.roughnessMap.needsUpdate =true;
+				skinConfig.metalnessMap = skinConfig.roughnessMap;
+				/* 
 				let rMD5Code = CryptoJS.MD5(materialEntry.Data.Roughness)
 				if (textureStack[rMD5Code]===undefined){
 					textureStack[rMD5Code]=getTexture(materialEntry.Data.Roughness,null,_materialName);
@@ -1317,7 +1408,7 @@ function codeMaterials(materialEntry,_materialName){
 					skinConfig.roughnessMap = textureStack[rMD5Code]
 					skinConfig.metalnessMap = textureStack[rMD5Code]
 				}
-				textureStack[rMD5Code].needsUpdate=true;
+				textureStack[rMD5Code].needsUpdate=true; */
 			}
 
 			skin.setValues(skinConfig);
@@ -1350,45 +1441,52 @@ function LoadMaterials(path){
 	
 		try {
 			if (tempMaterial!=''){
-				materialJSON.import(tempMaterial);
-				//retrieve for the first appearance the materials
-				materialJSON.Appearances[0].Materials.forEach((material)=>{
-					materialSet.add(material);
-				})
-
 				//Reset multilayer list for appearances
 				$("#Mlswitcher").html("");
 				$("#mLayerOperator").html("");
-
+				
 				var multilayerSwitch ="";
 				var multilayerMaskMenu = "";
-				//Build every unique material entry to be applyed to
-				materialSet.forEach((material)=>{
-					materialStack[material] = codeMaterials(materialJSON.Materials.filter(el => el.Name == material)[0],material);
+				var materialLoaded = false;
 
-					let entry, idx
-					idx = materialJSON.findIndex(material)
-					
-					if (entry = materialJSON.find(material)){
-						if (materialTypeCheck.multilayer.includes(entry.MaterialTemplate)){
-							multilayerSwitch+= materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
+				if (materialLoaded = materialJSON.import(tempMaterial)){
+					//retrieve for the first appearance the materials
+					materialJSON.Appearances[0].Materials.forEach((material)=>{
+						materialSet.add(material);
+					})
+					//Build every unique material entry to be applyed to
+					materialSet.forEach((material)=>{
+						materialStack[material] = codeMaterials(materialJSON.Materials.filter(el => el.Name == material)[0],material);
 
-							multilayerMaskMenu += materialJSON.codeMaterial(idx,`<li><a class="dropdown-item" href="#" data-multilayer="${idx}" >$_MATERIALFULLNAME</a></li>`);
+						let entry, idx
+						idx = materialJSON.findIndex(material)
+						
+						if (entry = materialJSON.find(material)){
+							if (materialTypeCheck.multilayer.includes(entry.MaterialTemplate)){
+								multilayerSwitch+= materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
+
+								multilayerMaskMenu += materialJSON.codeMaterial(idx,`<li><a class="dropdown-item" href="#" data-multilayer="${idx}" >$_MATERIALFULLNAME</a></li>`);
+							}
 						}
-					}	
-				});
-				
+					});
+				}
+
 				// Defer textureDock;
-
-				$("#Mlswitcher").html(multilayerSwitch);
-				$("#mLayerOperator").html(multilayerMaskMenu);
-				$("#mLayerOperator li:nth-child(1)").addClass("active");
-				$("#Mlswitcher div:nth-child(1) input[type='radio']").prop("checked",true);
-
-				//Appearances building
-				$("#appeInfo").html(materialJSON.codeAppearances());
-				$("#appearanceSwitcher ul").html(materialJSON.codeAppearances(`<li><a class="dropdown-item" data-name='$APPEARANCE$'>$APPEARANCE$</a></li>`));
-
+				if (materialLoaded){
+					$("#Mlswitcher").html(multilayerSwitch);
+					$("#mLayerOperator").html(multilayerMaskMenu);
+					$("#mLayerOperator li:nth-child(1)").addClass("active");
+					$("#Mlswitcher div:nth-child(1) input[type='radio']").prop("checked",true);
+	
+					//Appearances building
+					$("#appeInfo").html(materialJSON.codeAppearances());
+					$("#appearanceSwitcher ul").html(materialJSON.codeAppearances(`<li><a class="dropdown-item" data-name='$APPEARANCE$'>$APPEARANCE$</a></li>`));
+				}else{
+					//Appearances building
+					$("#appeInfo").html("");
+					$("#appearanceSwitcher ul").html("");
+					throw new Error("Failed the Material Import");
+				}
 			}else{
 				//TODO create the basic material
 				console.info("No Material file present, build a basic Multilayer one");
@@ -1447,7 +1545,7 @@ function LoadModel(path){
 							child.material.needsUpdate=true;
 						}else{
 							//If isn't coded it apply a default lambertMaterial
-							child.material = new THREE.MeshLambertMaterial({color:0xFF0000});
+							child.material = materialNone;
 						}
 						//set to display the submesh
 						child.visible = true;
