@@ -54,7 +54,11 @@ const PARAMS = {
 };
 
 var materialJSON = new MaterialBuffer();
-
+/**
+ * Write a message in the UI log space
+ * @param {String} message Text message to be sent
+ * @param {Boolean} warning default true, it will be displayed in the log as a warning message
+ */
 function notifyMe(message, warning = true){
 	let Data = new Date(Date.now());
 	if (warning){
