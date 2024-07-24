@@ -675,9 +675,6 @@ function animate() {
 
 	requestAnimationFrame(animate);
 	
-/* 	TDengine.time.getDelta();
-	materialNoneToCode.emissiveIntensity = Math.abs(Math.sin(TDengine.time.elapsedTime));
-	materialNoneToCode.needsUpdate */
 }
 
 //String to bufferArray
@@ -759,34 +756,46 @@ function getImageInfo(binaryData){
 			}
 			filePointer+=chunkslenght+4; //last 4 byte are for the checksum
 		}
+		var pngchannels=3;
 		switch (pngColorType) {
 			case 0:
 				console.log(`Grayscale sample`);
+				pngchannels=1;
 				break;
 			case 2:
 				console.log(`RGB triple`);
 				break;
 			case 3:
 				console.log(`PLTE palette index`)
+				pngchannels=0;
 				break;
 			case 4:
 				console.log(`grayscale sample, followed by an alpha sample`)
+				pngchannels=2;
 				break;
 			case 6:
 				console.log(`R,G,B triple, followed by an alpha sample`)
 				break;
 			default:
 				notifyMe("This is an unknown PNG format !!");
+				pngchannels=-1;
 				break;
 		}
 
-		return {width:pngWidth,height:pngHeight,format:'PNG', colorType:pngColorType,bytes:pngBit,compress:pngCompression,filter:pngFilter,Ilaced:pngInterlaced}
+		return {width:pngWidth,height:pngHeight,format:'PNG', colorType:pngColorType,bytes:pngBit,compress:pngCompression,filter:pngFilter,Ilaced:pngInterlaced,channels:pngchannels}
 	}else{
 		console.warn(`${binaryData.slice(0,4)} format`)
 		return {width:0,height:0,format:'Unknown'};
 	}
 }
 
+/**
+ * Load an image from a given URL
+ * @param {ArrayBuffer} textureData dataview of the image datas
+ * @param {Number} width size in pixel of the image width
+ * @param {Number} height size in pixel of the image height
+ * @returns {Uint8Array} RGBA channels ArrayBuffer of the texture
+ */
 function rebuildText(textureData, width, height){
 	var defSize = (width*height)*4;
 	var imageData = new Uint8Array(defSize);
@@ -799,8 +808,26 @@ function rebuildText(textureData, width, height){
 		imageData[i + 3] = 255;  // A value
 		k++;
 	}
-	//paintMask(imageData,width,height);
 	return imageData;
+}
+
+/**
+ * Load an image from a given URL
+ * @param {String} dataURI The URL of the image resource
+ * @param {Object} info contains the datas of the encoding of the image
+ * @returns {Promise<Image>} The loaded image
+ */
+function pngResolve(dataURI,info){
+	return new Promise(resolve=>{
+		let offcanvas = new OffscreenCanvas(info.width,info.height);
+		let gl = offcanvas.getContext("2d");
+		var img = new Image;
+		img.onload = function(){
+			gl.drawImage(img,0,0); // Or at whatever offset you like
+			resolve (new THREE.DataTexture(gl.getImageData(0,0,info.width,info.height),info.width,info.height,THREE.RGBAFormat));
+		};
+		img.src = dataURI;
+	});
 }
 
 
@@ -926,17 +953,27 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				
 				var encodedData = btoa(binaryData);
 				var dataURI = "data:image/png;base64," + encodedData;
+
 				/* 
 				let offcanvas = new OffscreenCanvas(imageINFO.width,imageINFO.height);
 				let gl = offcanvas.getContext("2d");
 				var img = new Image;
 				img.onload = function(){
 					gl.drawImage(img,0,0); // Or at whatever offset you like
-					//console.log(gl.getImageData(0,0,imageINFO.width,imageINFO.height))
 					return new THREE.DataTexture(gl.getImageData(0,0,imageINFO.width,imageINFO.height),imageINFO.width,imageINFO.height,THREE.RGBAFormat)
 				};
+
 				img.src = dataURI; */
+
 				//var texture = new THREE.Texture();
+				/* pngResolve(dataURI,imageINFO).then(
+					img=>{
+					img.needsUpdate=true;
+					return img;
+				}).catch(error=>{
+					notifyMe(error);
+				}) */
+
 				var texture = new THREE.TextureLoader().load(dataURI, function(pngMap){
 						
 						//if (type=='M'){
@@ -970,6 +1007,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 					function ( err ) {
 						notifyMe(err);
 					});
+					
 				return texture;
 			}else{
 				console.error('Texture of size 0');
@@ -987,9 +1025,6 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 
 //Get Textures data
 function getTexture(filename,kind=null,_materialName){
-	
-	//return retDefTexture(filename,_materialName,kind);
-
 	var temporaryTexture = null;
 	var type = "";
 	//
@@ -1084,56 +1119,133 @@ function getTexture(filename,kind=null,_materialName){
 	}
 }
 
+
+/**
+ * Load an image from a given URL
+ * @param {Object} textureObj contain datas from the textureDoc array
+ * the object has this property structure {file,maptype,shader});
+ * @returns {Promise<Image>} return a promise with the datas of the image
+ */
+function ProcessTexture(textureObj){
+	return new Promise((resolve, reject) => {
+		try {
+			var textureMD5Code;
+			if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype")){
+				textureMD5Code = CryptoJS.MD5(textureObj.file);
+				if (textureStack[textureMD5Code]===undefined){
+					if (textureObj.maptype=="normal"){
+						textureStack[textureMD5Code] = getTexture(textureObj.file,NORMAL,textureObj.shader);
+					}else{
+						textureStack[textureMD5Code] = getTexture(textureObj.file);
+					}
+					textureStack[textureMD5Code].needsUpdate = true;
+				}
+				switch (textureObj.maptype) {
+					case "diffuse":
+						materialStack[textureObj.shader].map = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].map.needsUpdate = true;
+						break;
+					case "normal":
+						materialStack[textureObj.shader].normalMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].normalMap.needsUpdate = true;
+						break;
+					case "roughness":
+						materialStack[textureObj.shader].roughnessMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].roughnessMap.needsUpdate = true;
+						break;
+					case "metalness":
+						materialStack[textureObj.shader].metalnessMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].metalnessMap.needsUpdate = true;
+						break;
+					case "emissive":
+						materialStack[textureObj.shader].emissiveMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].emissiveMap.needsUpdate = true;
+						break;
+					case "ao":
+						materialStack[textureObj.shader].aoMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].aoMap.needsUpdate = true;
+						break;
+					case "alpha":
+						materialStack[textureObj.shader].alphaMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].alphaMap.needsUpdate = true;
+						break;
+				}
+				resolve();
+			}
+		}catch(error){
+			notifyMe(`${error} when processing ${textureObj.file} for the material ${shader}`);
+		}
+	});
+}
+
+/**
+ * Async function that process every texture in the Stack
+ * It takes elements from the Texture Doc and than apply
+ * to the right shader
+ */
+async function ProcessStackTextures(){
+	textureDock.forEach((textureObj)=>{
+		ProcessTexture(textureObj);
+	});
+	notifyMe(`All textures in the stack have been processed`, false);
+}	
 /*
 This function will load NON default textures from the textureDock
 and set them to a shader to the correct map
 */
-function LoadStackTextures(){
-	var textureMD5Code
+async function LoadStackTextures(){
+	var textureMD5Code;
+	const workdone = await ProcessStackTextures();
+	return workdone;
+
 	textureDock.forEach((textureObj)=>{
-		textureMD5Code = ""
-		console.info(`getting ${textureObj.shader} - ${textureObj.maptype}`)
-		if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype")){
-			textureMD5Code = CryptoJS.MD5(textureObj.file);
-			if (textureStack[textureMD5Code]===undefined){
-				if (textureObj.maptype=="normal"){
-					textureStack[textureMD5Code] = getTexture(textureObj.file,NORMAL,textureObj.shader);
-				}else{
-					textureStack[textureMD5Code] = getTexture(textureObj.file);
+		try {
+			if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype")){
+				textureMD5Code = CryptoJS.MD5(textureObj.file);
+				if (textureStack[textureMD5Code]===undefined){
+					if (textureObj.maptype=="normal"){
+						textureStack[textureMD5Code] = getTexture(textureObj.file,NORMAL,textureObj.shader);
+					}else{
+						textureStack[textureMD5Code] = getTexture(textureObj.file);
+					}
+					textureStack[textureMD5Code].needsUpdate = true;
 				}
-				textureStack[textureMD5Code].needsUpdate = true;
+				switch (textureObj.maptype) {
+					case "diffuse":
+						materialStack[textureObj.shader].map = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].map.needsUpdate = true;
+						break;
+					case "normal":
+						materialStack[textureObj.shader].normalMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].normalMap.needsUpdate = true;
+						break;
+					case "roughness":
+						materialStack[textureObj.shader].roughnessMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].roughnessMap.needsUpdate = true;
+						break;
+					case "metalness":
+						materialStack[textureObj.shader].metalnessMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].metalnessMap.needsUpdate = true;
+						break;
+					case "emissive":
+						materialStack[textureObj.shader].emissiveMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].emissiveMap.needsUpdate = true;
+						break;
+					case "ao":
+						materialStack[textureObj.shader].aoMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].aoMap.needsUpdate = true;
+						break;
+					case "alpha":
+						materialStack[textureObj.shader].alphaMap = textureStack[textureMD5Code]
+						materialStack[textureObj.shader].alphaMap.needsUpdate = true;
+						break;
+				}
 			}
-			switch (textureObj.maptype) {
-				case "diffuse":
-					materialStack[textureObj.shader].map = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].map.needsUpdate = true;
-					break;
-				case "normal":
-					materialStack[textureObj.shader].normalMap = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].normalMap.needsUpdate = true;
-					break;
-				case "roughness":
-					materialStack[textureObj.shader].roughnessMap = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].roughnessMap.needsUpdate = true;
-					break;
-				case "metalness":
-					materialStack[textureObj.shader].metalnessMap = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].metalnessMap.needsUpdate = true;
-					break;
-				case "emissive":
-					materialStack[textureObj.shader].emissiveMap = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].emissiveMap.needsUpdate = true;
-					break;
-				case "ao":
-					materialStack[textureObj.shader].aoMap = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].aoMap.needsUpdate = true;
-					break;
-				case "alpha":
-					materialStack[textureObj.shader].alphaMap = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].alphaMap.needsUpdate = true;
-					break;
-			}
+		} catch (error) {
+			console.info(`${error}.
+				getting ${textureObj.shader} - ${textureObj.maptype}`)
 		}
+		textureMD5Code = ""
 	})
 	materialStack.forEach((shader)=>{
 		shader.needsUpdate = true;
@@ -1265,7 +1377,6 @@ function codeMaterials(materialEntry,_materialName){
 
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
-			console.log(materialEntry.Data);
 			var Mlayer = stdMaterial.clone();
 			//Mlayer.name = materialEntry.name;
 
