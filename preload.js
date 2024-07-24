@@ -11,10 +11,6 @@ contextBridge.exposeInMainWorld(
         var filecontent = ipcRenderer.sendSync('main:asyncReadFile', path, streamcode, no_repo);
         return filecontent
       },
-      /*
-      OpenStream : async (path,streamcode,no_repo = false) =>{
-        return await ipcRenderer.invoke('main:readFile', {stream:path, streamCode:streamcode, noRepo:no_repo});
-      },*/
       clickTheMenuVoice:(voice) => {
         ipcRenderer.send('main:clickMenu',voice);
       },
