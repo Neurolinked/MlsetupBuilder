@@ -633,8 +633,6 @@ ipcMain.on('main:giveModels',(event) => {
 	//read custom models json file and try to inject it in the main body
 	fs.readFile(path.join(app.getPath('userData'),'customModels.json'),(err,contenutofile) =>{
 		if (err) {
-			//maybethere is only no file to read
-			//mainWindow.webContents.send('preload:logEntry', err)
 			event.returnValue = []
 		}else{
 			try{
@@ -648,21 +646,78 @@ ipcMain.on('main:giveModels',(event) => {
 	})
 })
 
-async function fileReading(path,flags){
-	fs.readFile(path,flags,(err,contentStream) =>{
-    	if (err) {
-			if (err.code=='ENOENT'){
-				mainWindow.webContents.send('preload:logEntry', `Missing file - ${path}`,true);
-			}else{
-				mainWindow.webContents.send('preload:logEntry', `${path} ${err.path} - ${err.code} - ${err.message}`,true);
-			}
-			return false;
+
+async function AfileRead(userpath,flags,noRepo){
+	return new Promise((resolve, reject) => {
+		var modPath = preferences.get('paths.lastmod')
+		var hasDepot
+		if ((modPath!==undefined) && (modPath!='')){
+			var hasDepot = preferences.get('paths.lastmod')!=preferences.get('paths.depot') ? true : false
 		}else{
-			mainWindow.webContents.send('preload:logEntry', `File loaded: ${path}`)
-			return contentStream;
+			hasDepot = false;
 		}
+		var whereLoadFrom
+
+		if (/^[\w|\W]:\\.+/.test(userpath) || noRepo){
+			//custom loading
+			whereLoadFrom = path.normalize(userpath)
+		}else{
+			if (preferences.get('paths.depot')==''){
+				Log.warn(`The Depot preference isn't configured`)
+				mainWindow.webContents.send('preload:logEntry', `No Depot setup, go to Preferences window and fix it`);
+				reject('No Depot');
+			}
+			whereLoadFrom = path.join(preferences.get('paths.depot'),userpath)
+		}
+
+		fs.readFile(whereLoadFrom,flags,(err,contentfile) =>{
+			if (err) {
+				if (err.code=='ENOENT'){
+					if (hasDepot){
+						mainWindow.webContents.send('preload:logEntry', `Missing file - ${whereLoadFrom}`,true);
+						mainWindow.webContents.send('preload:logEntry',`Trying in the last Mod Folder`);
+
+						fs.readFile(whereLoadFrom,flags,(err,contenutofile) =>{
+							if (err){
+								if (err.code=='ENOENT'){
+									if (whereLoadFrom){
+										mainWindow.webContents.send('preload:logEntry', `File not found in: ${whereLoadFrom}`,true)
+									}else{
+										mainWindow.webContents.send('preload:logEntry', `The searched file does not exists also in the Mod Path ${whereLoadFrom}`,true)
+									}
+								}
+								
+								if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
+									mainWindow.webContents.send('preload:request_uncook')
+								}
+								reject(err);
+							}else{
+								mainWindow.webContents.send('preload:logEntry', 'File found in the Last Mod Folder, Yay!')
+								resolve(contenutofile)
+							}
+						})
+
+					}else{
+						//Extract the needed files
+						if (whereLoadFrom.match(new RegExp(/.+\.glb$/)) || whereLoadFrom.match(new RegExp(/.+\.Material\.json$/)) ){
+							mainWindow.webContents.send('preload:request_uncook')
+						}
+						reject(err);
+					}
+				}
+				reject(err);
+				mainWindow.webContents.send('preload:logEntry', `File opening error ${err.message}`)
+			}
+			mainWindow.webContents.send('preload:logEntry', `File loaded: ${whereLoadFrom}`);
+			resolve(contentfile);
+		})
 	})
 }
+
+ipcMain.handle('main:fileReading',async(event,path,flags,noRepo)=>{
+	const result = await AfileRead(path,flags,noRepo);
+	return result;
+});
 
 //read file on disk
 ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
