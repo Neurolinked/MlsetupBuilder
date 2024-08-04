@@ -57,6 +57,7 @@ if (window.Worker) {
 			case 'interface':
 				//here will display some messages on the interface
 				notifyMe(datas[0],false);
+				break;
 			case 'log':
 				console.log(datas);
 				break;
@@ -821,10 +822,11 @@ function pngResolve(dataURI,info){
 	return new Promise(resolve=>{
 		let offcanvas = new OffscreenCanvas(info.width,info.height);
 		let gl = offcanvas.getContext("2d");
-		var img = new Image;
+		var img = new Image(info.width,info.height);
 		img.onload = function(){
-			gl.drawImage(img,0,0); // Or at whatever offset you like
-			resolve (new THREE.DataTexture(gl.getImageData(0,0,info.width,info.height),info.width,info.height,THREE.RGBAFormat));
+			gl.drawImage(img,0,0,info.width,info.height); // Or at whatever offset you like
+			var imageData = gl.getImageData(0, 0, info.width,info.height)
+			resolve (new THREE.DataTexture(imageData,info.width,info.height,THREE.RGBAFormat));
 		};
 		img.src = dataURI;
 	});
@@ -954,26 +956,26 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 				var encodedData = btoa(binaryData);
 				var dataURI = "data:image/png;base64," + encodedData;
 
-				/* 
+				
 				let offcanvas = new OffscreenCanvas(imageINFO.width,imageINFO.height);
 				let gl = offcanvas.getContext("2d");
-				var img = new Image;
+				var img = new Image(imageINFO.width,imageINFO.height);
 				img.onload = function(){
-					gl.drawImage(img,0,0); // Or at whatever offset you like
-					return new THREE.DataTexture(gl.getImageData(0,0,imageINFO.width,imageINFO.height),imageINFO.width,imageINFO.height,THREE.RGBAFormat)
+					gl.drawImage(img,0,0,imageINFO.width,imageINFO.height); // Or at whatever offset you like
+					var imageData = gl.getImageData(0, 0, imageINFO.width,imageINFO.height)
+					return new THREE.DataTexture(imageData.data,imageINFO.width,imageINFO.height,THREE.RGBAFormat)
 				};
 
-				img.src = dataURI; */
-
+				img.src = dataURI;
 				//var texture = new THREE.Texture();
-				/* pngResolve(dataURI,imageINFO).then(
+/* 				pngResolve(dataURI,imageINFO).then(
 					img=>{
 					img.needsUpdate=true;
 					return img;
 				}).catch(error=>{
 					notifyMe(error);
 				}) */
-
+/* 
 				var texture = new THREE.TextureLoader().load(dataURI, function(pngMap){
 						
 						//if (type=='M'){
@@ -1008,7 +1010,7 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 						notifyMe(err);
 					});
 					
-				return texture;
+				return texture; */
 			}else{
 				console.error('Texture of size 0');
 				return ERROR;
@@ -1138,7 +1140,6 @@ function ProcessTexture(textureObj){
 					}else{
 						textureStack[textureMD5Code] = getTexture(textureObj.file);
 					}
-					textureStack[textureMD5Code].needsUpdate = true;
 				}
 				switch (textureObj.maptype) {
 					case "diffuse":
@@ -1185,7 +1186,9 @@ function ProcessTexture(textureObj){
  */
 async function ProcessStackTextures(){
 	textureDock.forEach((textureObj)=>{
-		ProcessTexture(textureObj);
+		let dummy = ProcessTexture(textureObj);
+		dummy.then(result=>{
+		});
 	});
 	notifyMe(`All textures in the stack have been processed`, false);
 }	
@@ -1194,63 +1197,8 @@ This function will load NON default textures from the textureDock
 and set them to a shader to the correct map
 */
 async function LoadStackTextures(){
-	var textureMD5Code;
 	const workdone = await ProcessStackTextures();
 	return workdone;
-
-	textureDock.forEach((textureObj)=>{
-		try {
-			if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype")){
-				textureMD5Code = CryptoJS.MD5(textureObj.file);
-				if (textureStack[textureMD5Code]===undefined){
-					if (textureObj.maptype=="normal"){
-						textureStack[textureMD5Code] = getTexture(textureObj.file,NORMAL,textureObj.shader);
-					}else{
-						textureStack[textureMD5Code] = getTexture(textureObj.file);
-					}
-					textureStack[textureMD5Code].needsUpdate = true;
-				}
-				switch (textureObj.maptype) {
-					case "diffuse":
-						materialStack[textureObj.shader].map = textureStack[textureMD5Code]
-						materialStack[textureObj.shader].map.needsUpdate = true;
-						break;
-					case "normal":
-						materialStack[textureObj.shader].normalMap = textureStack[textureMD5Code]
-						materialStack[textureObj.shader].normalMap.needsUpdate = true;
-						break;
-					case "roughness":
-						materialStack[textureObj.shader].roughnessMap = textureStack[textureMD5Code]
-						materialStack[textureObj.shader].roughnessMap.needsUpdate = true;
-						break;
-					case "metalness":
-						materialStack[textureObj.shader].metalnessMap = textureStack[textureMD5Code]
-						materialStack[textureObj.shader].metalnessMap.needsUpdate = true;
-						break;
-					case "emissive":
-						materialStack[textureObj.shader].emissiveMap = textureStack[textureMD5Code]
-						materialStack[textureObj.shader].emissiveMap.needsUpdate = true;
-						break;
-					case "ao":
-						materialStack[textureObj.shader].aoMap = textureStack[textureMD5Code]
-						materialStack[textureObj.shader].aoMap.needsUpdate = true;
-						break;
-					case "alpha":
-						materialStack[textureObj.shader].alphaMap = textureStack[textureMD5Code]
-						materialStack[textureObj.shader].alphaMap.needsUpdate = true;
-						break;
-				}
-			}
-		} catch (error) {
-			console.info(`${error}.
-				getting ${textureObj.shader} - ${textureObj.maptype}`)
-		}
-		textureMD5Code = ""
-	})
-	materialStack.forEach((shader)=>{
-		shader.needsUpdate = true;
-	});
-	textureDock = [];
 }
 
 function codeMaterials(materialEntry,_materialName){
@@ -1272,29 +1220,11 @@ function codeMaterials(materialEntry,_materialName){
 				if (materialEntry.Data.UseNormalAlphaTex > 0 ){
 					decalConfig.alphaTest = 0.02;
 					decalConfig.alphaMap = retDefTexture(materialEntry.Data.NormalAlphaTex,_materialName,"normal");
-/* 					let naMD5Code = CryptoJS.MD5(materialEntry.Data.NormalAlphaTex)
-					if (textureStack[naMD5Code]===undefined){
-						textureStack[naMD5Code]=getTexture(materialEntry.Data.NormalAlphaTex,NORMAL,_materialName);
-						textureStack[naMD5Code].needsUpdate=true;
-						decalConfig.alphaMap = textureStack[naMD5Code];
-					}else{
-						decalConfig.alphaMap = textureStack[naMD5Code];
-
-					} */
-
 				}
 			}
 			if (materialEntry?.Data.hasOwnProperty('NormalTexture')){
 				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.NormalTexture)
 				decalConfig.normalMap = retDefTexture(materialEntry.Data.NormalTexture,_materialName,"normal");
-				/* if (textureStack[nmMD5Code]===undefined){
-					textureStack[nmMD5Code]=getTexture(materialEntry.Data.NormalTexture,NORMAL,_materialName);
-					decalConfig.normalMap = textureStack[nmMD5Code]
-				}else{
-					decalConfig.normalMap = textureStack[nmMD5Code]
-				}
-				decalConfig.normalMap.needsUpdate =true;
-				textureStack[nmMD5Code].needsUpdate=true; */
 			}
 			//Color over textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseColor')){
@@ -1317,12 +1247,6 @@ function codeMaterials(materialEntry,_materialName){
 			//Texture information
 			if (materialEntry.Data.hasOwnProperty('BaseColor')){
 				rbaseConfig.map = retDefTexture(materialEntry.Data.BaseColor,_materialName,"diffuse");
-				/* let textureMD5Code = CryptoJS.MD5(materialEntry.Data.BaseColor)
-				if (textureStack[textureMD5Code]===undefined){
-					textureStack[textureMD5Code]=getTexture(materialEntry.Data.BaseColor);
-					textureStack[textureMD5Code].needsUpdate=true;
-				}
-				rbaseConfig.map=textureStack[textureMD5Code]; */
 			}
 			//Color applyed over textures
 			if (materialEntry.Data.hasOwnProperty('BaseColorScale')){
@@ -1331,41 +1255,15 @@ function codeMaterials(materialEntry,_materialName){
 
 			if (materialEntry.Data.hasOwnProperty('Normal')){
 				rbaseConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
-				/* let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
-				if (textureStack[nmMD5Code]===undefined){
-					textureStack[nmMD5Code]=getTexture(materialEntry.Data.Normal,NORMAL,_materialName);
-					rbaseConfig.normalMap = textureStack[nmMD5Code]
-				}else{
-					rbaseConfig.normalMap = textureStack[nmMD5Code]
-				}
-				textureStack[nmMD5Code].needsUpdate=true; */
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Roughness')){
 				rbaseConfig.roughnessMap = retDefTexture(materialEntry.Data.Roughness,_materialName,"roughness");
-
-				/* let rMD5Code = CryptoJS.MD5(materialEntry.Data.Roughness)
-				if (textureStack[rMD5Code]===undefined){
-					textureStack[rMD5Code]=getTexture(materialEntry.Data.Roughness,null,_materialName);
-					rbaseConfig.roughnessMap = textureStack[rMD5Code]
-				}else{
-					rbaseConfig.roughnessMap = textureStack[rMD5Code]
-				}
-				textureStack[rMD5Code].needsUpdate=true; */
 				rbaseConfig.roughness = materialEntry.Data.RoughnessScale
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Metalness')){
 				rbaseConfig.metalnessMap =retDefTexture(materialEntry.Data.Metalness,_materialName,"metalness");
-				/* 
-				let mMD5Code = CryptoJS.MD5(materialEntry.Data.Metalness)
-				if (textureStack[mMD5Code]===undefined){
-					textureStack[mMD5Code]=getTexture(materialEntry.Data.Metalness,null,_materialName);
-					rbaseConfig.metalnessMap = textureStack[mMD5Code]
-				}else{
-					rbaseConfig.metalnessMap = textureStack[mMD5Code]
-				}
-				textureStack[mMD5Code].needsUpdate=true; */
 				rbaseConfig.metalness = materialEntry.Data.MetalnessScale
 			}
 			
@@ -1429,30 +1327,12 @@ function codeMaterials(materialEntry,_materialName){
 
 			if (materialEntry?.Data.hasOwnProperty('Strand_Gradient')){
 				configHair.map = retDefTexture(materialEntry.Data.Strand_Gradient,_materialName,"diffuse");
-
-				/* let colMD5Code = CryptoJS.MD5(materialEntry.Data.Strand_Gradient);
-
-				if (textureStack[colMD5Code]===undefined){
-					textureStack[colMD5Code] = getTexture(materialEntry.Data.Strand_Gradient)
-					configHair.map = textureStack[colMD5Code];
-				}else{
-					configHair.map = textureStack[colMD5Code];
-				} */
 				configHair.map.needsUpdate = true;
 			}
 
  			if (materialEntry?.Data.hasOwnProperty('Strand_Alpha')){
 				configHair.alphaMap = retDefTexture(materialEntry.Data.Strand_Alpha,_materialName,"alpha");
 				configHair.alphaTest = 0.03;
-				/* 
-				let colMD5Code = CryptoJS.MD5(materialEntry.Data.Strand_Alpha);
-
-				if (textureStack[colMD5Code]===undefined){
-					textureStack[colMD5Code] = getTexture(materialEntry.Data.Strand_Alpha)
-					configHair.alphaMap = textureStack[colMD5Code];
-				}else{
-					configHair.alphaMap = textureStack[colMD5Code];
-				} */
 				configHair.alphaMap.needsUpdate = true;
 			}
 			
@@ -1476,32 +1356,12 @@ function codeMaterials(materialEntry,_materialName){
 			if (materialEntry?.Data.hasOwnProperty('Albedo')){
 				skinConfig.map = retDefTexture(materialEntry.Data.Albedo,_materialName,"diffuse");
 				skinConfig.map.needsUpdate = true;
-				/* 
-				let albedoMD5Code = CryptoJS.MD5(materialEntry.Data.Albedo)
-
-				if (textureStack[albedoMD5Code]===undefined){
-					textureStack[albedoMD5Code] = getTexture(materialEntry.Data.Albedo)
-					skinConfig.map = textureStack[albedoMD5Code];
-					skinConfig.map.needsUpdate = true;
-				}else{
-					skinConfig.map = textureStack[albedoMD5Code];
-					skinConfig.map.needsUpdate = true;
-				} */
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Normal')){
 				skinConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
 				skinConfig.normalScale= new THREE.Vector2(0,materialEntry.Data.DetailNormalInfluence);
 				skinConfig.normalMap.needsUpdate = true
-
-				/* let nmMD5Code = CryptoJS.MD5(materialEntry.Data.Normal)
-				if (textureStack[nmMD5Code]===undefined){
-					textureStack[nmMD5Code]=getTexture(materialEntry.Data.Normal,NORMAL,_materialName);
-					skinConfig.normalMap = textureStack[nmMD5Code]
-				}else{
-					skinConfig.normalMap = textureStack[nmMD5Code]
-				}
-				textureStack[nmMD5Code].needsUpdate=true; */
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Roughness')){
@@ -1509,17 +1369,6 @@ function codeMaterials(materialEntry,_materialName){
 				skinConfig.roughnessMap = retDefTexture(materialEntry.Data.roughnessMap,_materialName,"roughness");
 				skinConfig.roughnessMap.needsUpdate =true;
 				skinConfig.metalnessMap = skinConfig.roughnessMap;
-				/* 
-				let rMD5Code = CryptoJS.MD5(materialEntry.Data.Roughness)
-				if (textureStack[rMD5Code]===undefined){
-					textureStack[rMD5Code]=getTexture(materialEntry.Data.Roughness,null,_materialName);
-					skinConfig.roughnessMap = textureStack[rMD5Code]
-					skinConfig.metalnessMap = textureStack[rMD5Code]
-				}else{
-					skinConfig.roughnessMap = textureStack[rMD5Code]
-					skinConfig.metalnessMap = textureStack[rMD5Code]
-				}
-				textureStack[rMD5Code].needsUpdate=true; */
 			}
 
 			skin.setValues(skinConfig);
@@ -1529,8 +1378,6 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.glass.includes(materialEntry.MaterialTemplate)){
 			return materialGlass
 		}
-
-		console.warn(materialEntry);
 
 		return materialNoneToCode;
 	}else{
