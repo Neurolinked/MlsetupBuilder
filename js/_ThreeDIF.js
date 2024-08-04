@@ -451,19 +451,15 @@ $("#thacanvas").on('loadScene',function(event){
 		notifyMe(error);
 	}
 }).on('changeFormat',function(ev){
+	/*Update the texture format on preferences change */
 	let trigMe = thePIT.RConfig('maskformat');
 	trigMe.then((newformat)=>{
-		console.log(newformat);
 		textureformat = newformat;
 	}).catch((error)=>{
 		notifyMe(error);
 	})
 }).on('newlights',function(event,index){
 	switch (index) {
-		case 0:
-/* 			TDengine.lights.ambient.color = new THREE.Color(PARAMS.A_light_color);
-			TDengine.lights.ambient.intensity = PARAMS.A_light_pow;
-			break; */
 		case 1:
 			TDengine.lights.point[0].color = new THREE.Color(PARAMS.p_light1_col);
 			TDengine.lights.point[0].intensity = PARAMS.p_light1_pow;
