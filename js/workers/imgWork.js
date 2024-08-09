@@ -53,7 +53,7 @@ function nMapFix(normaldatas,width,height,fileNAME,material,channels){
       var kcounter = 0;
       for (let i = 0, l = normaldatas.length; i < l; i += 2) {
         // Modify pixel data
-        red = (normaldatas[i]/255)* 2 - 1;
+        red = (normaldatas[i]/255) * 2 - 1;
         green = -1 * (((normaldatas[i + 1])/255)* 2 - 1);
         blueVal = Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2)); //recalculated floating point
         blue = parseInt((( blueVal + 1 ) / 2 ) * 255)
@@ -70,14 +70,14 @@ function nMapFix(normaldatas,width,height,fileNAME,material,channels){
     default:
       for (let i = 0, l = normaldatas.length; i < l; i += 4) {
         // Modify pixel data
-        red = (normaldatas[i]/255)* 2 - 1;
+        red = (normaldatas[i]/255) * 2 - 1;
         green = -1 * (((normaldatas[i + 1])/255)* 2 - 1);
         blueVal = Math.sqrt(1 - Math.pow(red,2) - Math.pow(green,2)); //recalculated floating point
         blue = parseInt((( blueVal + 1 ) / 2 ) * 255)
         //blue = 255 // old concept, not recalculated
         newTextureData[i]=normaldatas[i];
         newTextureData[i+1]=normaldatas[i+1];
-        newTextureData[i+2]=blue;
+        newTextureData[i+2]= blue;
         newTextureData[i+3]=normaldatas[i+3];
       }
       self.postMessage(['interface','rebuilding blue channel normal map']);
