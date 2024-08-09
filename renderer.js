@@ -114,14 +114,16 @@ function clearTexturePanel(){
 }
 
 function pushTexturetoPanel(filename, width, height){
-	if (width == height){
-		$("#listTextures").append(`<canvas width="128" height="128" id="${filename}"></canvas>`);
-	}else{
-		if(width > height){
-
-			$("#listTextures").append(`<canvas width="128" height="${128/(width/height)}" id="${filename}"></canvas>`);
+	if (!document.getElementById(filename)){
+		if (width == height){
+			$("#listTextures").append(`<canvas width="128" height="128" title="${filename}" id="${filename}"></canvas>`);
 		}else{
-			$("#listTextures").append(`<canvas width="${128/(height/width)}" height="128" id="${filename}"></canvas>`);
+			if(width > height){
+	
+				$("#listTextures").append(`<canvas width="128" height="${128/(width/height)}" title="${filename}" id="${filename}"></canvas>`);
+			}else{
+				$("#listTextures").append(`<canvas width="${128/(height/width)}" height="128" title="${filename}" id="${filename}"></canvas>`);
+			}
 		}
 	}
 }
