@@ -13,13 +13,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	)
 
 	const alertMessages = document.getElementById("alertMessages");
-
 })
+
+
 
 const canvasIncrements = 128;
 const MLSB = new MLSBEditor;
+var closeModal
 
 const PARAMS = {
+	cameraNear : 0.01,
+	cameraFar : 2000,
 	rotation: false,
 	speed: 6.0,
 	wireframes: false,
@@ -50,7 +54,11 @@ const PARAMS = {
 };
 
 var materialJSON = new MaterialBuffer();
-
+/**
+ * Write a message in the UI log space
+ * @param {String} message Text message to be sent
+ * @param {Boolean} warning default true, it will be displayed in the log as a warning message
+ */
 function notifyMe(message, warning = true){
 	let Data = new Date(Date.now());
 	if (warning){
@@ -63,10 +71,17 @@ function notifyMe(message, warning = true){
 	$("#foot-message").text(`${message}`);
   }
 
-function alertMe(message="",title="Advice"){
+function alertMe(message="",title="Advice",seconds=null){
 	$("#alertMessages > header").html(title);
 	$("#alertMessages > p").html(message);
 	alertMessages.showModal();
+
+	if ((seconds!=null) && (parseInt(seconds)>200)){
+		seconds = parseInt(seconds);
+		closeModal = setTimeout(function(ev){
+			alertMessages.close();
+		},seconds);
+	}
 }
 
 //generic Canvas Cleaning function
@@ -99,14 +114,16 @@ function clearTexturePanel(){
 }
 
 function pushTexturetoPanel(filename, width, height){
-	if (width == height){
-		$("#listTextures").append(`<canvas width="128" height="128" id="${filename}"></canvas>`);
-	}else{
-		if(width > height){
-
-			$("#listTextures").append(`<canvas width="128" height="${128/(width/height)}" id="${filename}"></canvas>`);
+	if (!document.getElementById(filename)){
+		if (width == height){
+			$("#listTextures").append(`<canvas width="128" height="128" title="${filename}" id="${filename}"></canvas>`);
 		}else{
-			$("#listTextures").append(`<canvas width="${128/(height/width)}" height="128" id="${filename}"></canvas>`);
+			if(width > height){
+	
+				$("#listTextures").append(`<canvas width="128" height="${128/(width/height)}" title="${filename}" id="${filename}"></canvas>`);
+			}else{
+				$("#listTextures").append(`<canvas width="${128/(height/width)}" height="128" title="${filename}" id="${filename}"></canvas>`);
+			}
 		}
 	}
 }

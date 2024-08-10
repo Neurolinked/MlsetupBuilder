@@ -156,7 +156,7 @@
 	</div>
 </div>
 <!--Offcanvas Import previewer -->
-<div class="offcanvas offcanvas-start bg-dark text-light" id="off_MLSetups" aria-labelledby="lblmlsetupseP" data-bs-backdrop="false">
+<div class="offcanvas offcanvas-start bg-dark text-light" id="off_MLSetups" aria-labelledby="lblmlsetupseP" data-bs-keyboard="true" data-bs-backdrop="false" >
   <div class="offcanvas-header border border-dark p-1">
     <h5 class="offcanvas-title text-dark" id="lblmlsetupseP"><i class="fa-solid fa-vest"></i> MLsetup Preview</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -264,6 +264,9 @@
   <li class="nav-item" role="presentation">
     <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0 " type="button" id="nav-modDatlib-tab" data-bs-toggle="tab" data-bs-target="#nav-modDatlib"  role="tab" aria-controls="nav-modDatlib" aria-selected="false">
       <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Models library</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0" data-bs-toggle="pill" type="button" role="tab" aria-selected="false"> Materials</button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0" id="pills-appearance-tab" data-bs-toggle="pill" data-bs-target="#nav-appearance" type="button" role="tab" aria-controls="pills-appearance" aria-selected="true">
@@ -587,9 +590,10 @@
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="masks-tab" data-bs-toggle="tab" data-bs-target="#maskstab" type="button" role="tab" aria-controls="maskstab" aria-selected="false">Masks</button>
         </li>
+        <!--
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="norm-tab" data-bs-toggle="tab" data-bs-target="#normtab" type="button" role="tab" aria-controls="Normal map" aria-selected="true">Normal map</button>
-        </li>
+        </li>-->
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="uvmap-tab" data-bs-toggle="tab" data-bs-target="#uvmaptab" type="button" role="tab" aria-controls="uvmap map" aria-selected="true">UV map</button>
         </li>
@@ -598,9 +602,8 @@
         </li>
       </ul>
       <div class="tab-content" id="OffcanvasInfo">
-        <div class="tab-pane fade" id="normtab" role="tabpanel" aria-labelledby="norm-tab">
-          <canvas id="normalMe" class="my-1" height="768" width="768" ></canvas>
-        </div>
+        <!--<div class="tab-pane fade" id="normtab" role="tabpanel" aria-labelledby="norm-tab">
+        </div>-->
         <div class="tab-pane fade show active " id="maskstab" role="tabpanel" aria-labelledby="masks-tab">
           <div class="row no-gutters">
             <div class="col-2" id="panelPain">
@@ -779,29 +782,29 @@
             <details open class="pb-1" ><summary class="mb-2">Base Game</summary>
               <div class="form-check form-switch mx-3">
                 <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_NC3" checked>
-                <span class="badge bg-warning text-dark">basegame_3_nightcity.archive</span>
+                <span class="badge bg-warning text-dark">Characters</span>
               </div>
               <div class="progress border border-dark  my-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step1" class=" bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
                 <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_AP4" checked>
-                <span class="badge bg-warning text-dark">basegame_4_appearance.archive</span>
+                <span class="badge bg-warning text-dark">Weapons</span>
               </div>
               <div class="progress border border-dark  my-1 bg-layer0  mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step3" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <div class="form-check form-switch mx-3">
                 <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_GA4" checked>
-                <span class="badge bg-warning text-dark">basegame_4_gamedata.archive</span>
+                <span class="badge bg-warning text-dark">Vehicles & mechanicles</span>
               </div>
               <div class="progress border border-dark  my-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step5" class="progress-bar bg-warning progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
               </div>
               <!-- TODO to this code-->
               <div class="form-check form-switch mx-3">
-                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_FNT4" checked>
-                <span class="badge bg-warning text-dark">Fonts</span>
+                <input class="form-check-input rounded-pill" type="checkbox" role="switch" id="arc_EN" checked>
+                <span class="badge bg-warning text-dark">Environments</span>
               </div>
               <div class="progress border border-dark  mt-1 bg-layer0 mx-3" style="height: 1.5rem;" >
                 <div id="uncook_step9" class="border-start border-dark progress-bar bg-success progress-bar-striped progress-bar-animated text-dark" style="width:0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>

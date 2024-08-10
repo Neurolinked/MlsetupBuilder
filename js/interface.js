@@ -739,7 +739,8 @@ $("#resetShades span.choose").click(function(){
   const lastModelOpened = localStorage.getItem('lastModelOpened');
   const lastLuminosity = localStorage.getItem('luminosity');
 
-  MLSB.TreeD.lastModel = lastModelOpened;
+  MLSB.TreeD.lastModel = lastModelOpened ?? ''; //coalescing null values with empty string
+
   $("#modelTarget").val(MLSB.TreeD.lastModel);
   $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb$/,".Material.json"));
   
@@ -944,6 +945,7 @@ $("#resetShades span.choose").click(function(){
         className:'btn btn-sm btn-primary my-1',
         action:function(dt){
           notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel} with materials`);
+          $("#layeringsystem li[disabled]").removeAttr('disabled'); //re-enable all the layers
           thePIT.UnCookSingle(MLSB.TreeD.lastModel.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\").replaceAll("\\ep1\\","ep1\\"));
           taskProcessBar();
           CPModels.rows().deselect();
@@ -1030,7 +1032,8 @@ $("#resetShades span.choose").click(function(){
     scroller: true,
     scrollY: (window.innerHeight-350),
     search:{
-      "regex": true
+      regex: true,
+      return:true
     },
     select: {
       style:'single',
@@ -1094,6 +1097,7 @@ $("#resetShades span.choose").click(function(){
     }
   });
 
+  //
   $('#DataModelsLibrary_filter input[type=search]').each(function () {
     $(this).attr("placeholder", "Search...");
   });
@@ -1305,7 +1309,6 @@ $("#resetShades span.choose").click(function(){
 			$("#Metal_Out_values").html('');
 			$("#Rough_In_values").html('');
 			$("#Norm_Pow_values").html('');
-			$("#materialcolors").html('');
 			$("#cagecolors").html('');
 
 			let toodarkClass;
@@ -1317,6 +1320,7 @@ $("#resetShades span.choose").click(function(){
         }
       }
 
+      let cageColorHtml = '';
 			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
 				toodarkClass='';
 				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
@@ -1324,9 +1328,9 @@ $("#resetShades span.choose").click(function(){
 				if (!tinycolor.isReadable(colorchecking,"#3c454d")){
 					toodarkClass='bg-light';
 				}
-				$("#materialcolors").append('<option class="'+toodarkClass+'" style="color:rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);" value="rgb('+Math.floor(value.v[0]*100)+'%,'+Math.floor(value.v[1]*100)+'%,'+Math.floor(value.v[2]*100)+'%);">'+value.n+' &#9632;</option>');
-				$("#cagecolors").append('<span style="background-color:'+colorchecking.toRgbString()+';" data-lum="'+colorchecking.getLuminance()+'" data-order="'+key+'" title="'+value.n+'" alt="'+value.n+'" >&nbsp;</span>');
+        cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${value.n}" alt="${value.n}" >&nbsp;</span>`;
 			});
+      $("#cagecolors").append(cageColorHtml);
 
 			//build up the lists of data loaded from the material chosen
 			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
@@ -1345,10 +1349,8 @@ $("#resetShades span.choose").click(function(){
 				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
 			});
 
-			//$("#materialChoser").attr('src','./images/material/'+materialtoload+'.jpg');
 		}else{
 			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
-			$("#materialcolors").html("");
 		}
 
     if ($("#colororder").is(":checked")){
@@ -1729,12 +1731,9 @@ scrollCustMBContainer.addEventListener("wheel", (evt) => {
  /*------------------------------------------------------------------------------------
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
-$("#importLink").click(
-  function(ev){
-    console.log(ev);
+$("#importLink").click(function(ev){
     $("#importTech").click();
-  }
-);
+});
 
 //----File Auto Loader
 $("#importTech").change(function(){
@@ -1742,12 +1741,12 @@ $("#importTech").change(function(){
 	fr.onload=function(){
     mlSetupContent = fr.result;
     passTheMlsetup(fr.result);
-    /*$("#passaggio").val(fr.result);
-    $("#passaggio").change();*/
-  } //get the result of the reading to the textarea
+  }
+
   if ($("#importTech")[0].files[0]){
     fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
   }
+  
 });
 
 $("#importFromWkit").click(function(){
@@ -1768,6 +1767,8 @@ function passTheMlsetup(textContent=""){
       notifyMe(`Error: ${error}`)
     }
     off_MLSetup.show();
+    // focus on the exit button of the offcanvas
+    $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
   }
 }
 
@@ -2325,7 +2326,7 @@ $("#unCookModal .modal-body .form-check-input").click(function(){
 	}
 })
 
-$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_FNT4, #ep1_WE, #ep1_VE, #ep1_ME, #ep1_EN").change(function(){
+$("#arc_GA4, #arc_AP4, #arc_NC3, #arc_EN, #ep1_WE, #ep1_VE, #ep1_ME, #ep1_EN").change(function(){
 	//console.log($(this))
 	if ($(this).is(':checked')){
 		$(this).next('span.badge').addClass('bg-warning text-dark').removeClass('bg-dark text-muted');
@@ -2560,15 +2561,13 @@ unCooKonfirm.addEventListener("click", (event) => {
       
       $(`#nav-appearance div.card`).removeClass('active');
       $(`#nav-appearance div.card button[data-appearance='${$(this).attr('data-name')}']`).closest('.card').addClass('active');
+      $("#thacanvas").trigger('switchAppearance',[$(this).data("name")]);
       /* Read the configuration of materials */
-
-      console.log(materialJSON);
       
       /*
       scene.children.at(-1).children.forEach((element,index) => {
         if (element.hasOwnProperty(`type`)){
           if (element.type=='SkinnedMesh'){
-
             console.log(
               materialJSON.Materials.filter(el => el.Name == element.userData.materialNames[$("#appearanceSwitcher ul.dropdown-menu li a").index($(this))])
             );

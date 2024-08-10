@@ -1,7 +1,7 @@
 {
   "name": "mlsetupbuilder",
   "productName": "MlsetupBuilder",
-  "version": "1.6.8-beta3",
+  "version": "1.6.8-beta5",
   "description": "MlSetupBuilder",
   "main": "main.js",
   "scripts": {
@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "dree": "^3.4.4",
-    "electron-log": "^5.1.2",
+    "dree": "^4.8.5",
+    "electron-log": "^5.1.5",
     "electron-store": "^8.1.0",
     "fs": "^0.0.1-security",
     "fs-extra": "^11.2.0",

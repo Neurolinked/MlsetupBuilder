@@ -11,10 +11,9 @@ contextBridge.exposeInMainWorld(
         var filecontent = ipcRenderer.sendSync('main:asyncReadFile', path, streamcode, no_repo);
         return filecontent
       },
-      /*
-      OpenStream : async (path,streamcode,no_repo = false) =>{
-        return await ipcRenderer.invoke('main:readFile', {stream:path, streamCode:streamcode, noRepo:no_repo});
-      },*/
+      OpenStream : async(path,streamcode,no_repo = false) =>{
+        return await ipcRenderer.invoke('main:fileReading', path, streamcode, no_repo);
+      },
       clickTheMenuVoice:(voice) => {
         ipcRenderer.send('main:clickMenu',voice);
       },
@@ -210,15 +209,6 @@ ipcRenderer.on('preload:openModal',(event, modal2bOpen) => {
   }
 })
 
-/*
-ipcRenderer.on('preload:scanReply',(event,result)=>{
-  if (isValidJSON(result)){
-    let passDatas = document.querySelector("#txtFolderScanner");
-    passDatas.value = result;
-    passDatas.dispatchEvent(new Event("change"));
-  }
-})
-*/
 ipcRenderer.on('preload:enable',(event,target) => {
 		let obj = document.querySelector(target)
 		obj.disabled = false

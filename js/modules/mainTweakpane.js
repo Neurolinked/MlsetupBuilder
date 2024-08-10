@@ -77,7 +77,12 @@ const TDtabManager = panel.addTab({
 });
 
 
-
+TDtabManager.pages[0].addBinding(PARAMS, 'cameraNear',{min:0.01,max:20,label:'Camera Near'}).on('change',(ev)=>{
+  $("#thacanvas").trigger("updCamera");
+});
+TDtabManager.pages[0].addBinding(PARAMS, 'cameraFar',{min:2000,max:20000,label:'Camera Far'}).on('change',(ev)=>{
+  $("#thacanvas").trigger("updCamera");
+});
 TDtabManager.pages[0].addBinding(PARAMS, 'rotation',{label:'3D view auto-rotation'});
 TDtabManager.pages[0].addBinding(PARAMS, 'speed',{min:0,max:20,label:'Rotation speed'})
 TDtabManager.pages[0].addBinding(PARAMS, 'wireframes',{label:'Display wireframes'}).on('change',(ev)=>{

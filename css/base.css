@@ -376,7 +376,6 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #xport_dm li a:hover{background-color:var(--active);color: white !important;}
 
 #notyCounter{min-width:5rem;}
-#normalMe{border:1px solid var(--bs-primary);}
 
 .introjs-tooltip-title{color:var(--bs-info);}
 .introjs-tooltip {background-color: var(--bs-layer2);min-width:400px;max-width:700px;padding:10px;}
