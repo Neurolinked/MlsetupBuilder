@@ -15,9 +15,13 @@
 - [x] Replacing DAT.gui with Tweakpane library
   - [x] Light configuration addition 
   - [x] Camera far/near distance configurable
+  - [x] Fog configuration addition
+  - [x] Editor configuration parameters
 - [x] Three.js library Update
   - [x] Rewriting the 3d management code to be more maintainable
   - [ ] Add fx support
+- [x] Loaded Textures panel with preview
+  - [x] Doubleclick on the Texture Preview player to export the texture in PNG format
 - [x] New shaders management based on .Material.json file
   - [x] Assign shaders as from appearances
   - [x] masks loading from material configuration
