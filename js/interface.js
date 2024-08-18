@@ -2661,6 +2661,16 @@ unCooKonfirm.addEventListener("click", (event) => {
     $("#thacanvas").trigger("flipNorm");
   });
 
+  $("#UVGen").click(function(ev){
+    ev.preventDefault();
+    $("#thacanvas").trigger("UVDisplay");
+  });
+
+  $("#UVSave").click(function(ev){
+    ev.preventDefault();
+    $("#thacanvas").trigger("UVExport");
+  });
+
   function adaptTexturePlayer(){
     let domReference = $("#nav-tabMLSB");
     let dummy = domReference.height() <= domReference.width() ? domReference.height(): domReference.width();

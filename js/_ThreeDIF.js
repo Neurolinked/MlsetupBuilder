@@ -209,6 +209,82 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="de
 	}
 }
 
+function getUVSubmeshIndex(sons){
+	var checked = [];
+	if (sons?.length>0){
+		for (let i=0,k=sons.length; i<k; i++){
+			if (sons[i].checked){
+				checked.push(i)
+			}
+		}
+	}
+	return checked;
+}
+function retUVMapData(_2dContext,selected,size){
+	return new Promise((resolve,reject)=>{
+		try {
+			var modello = TDengine.scene?.children.filter(elm=>elm.type=='Group');
+			if (!modello[0].hasOwnProperty('children')){
+				notifyMe("No Group found in the scene")
+				reject();
+			}
+			var submeshes = modello[0].children.filter(elm => elm.type=='SkinnedMesh' || elm.type=='Mesh');
+
+			var getCanvas = _2dContext.getContext("2d")
+			const lines = new THREE.Vector2();
+			const isle = new THREE.Vector2();
+			const uvs = [new THREE.Vector2(),new THREE.Vector2(),new THREE.Vector2()];
+			const face = [];
+
+			var lod
+			
+			selected.forEach((x)=>{
+				lod = submeshes[x]
+				const index = lod.geometry.index;
+				const uvAttribute = lod.geometry.attributes.uv;
+				getCanvas.strokeStyle = `#${tinycolor.fromRatio({r:(Math.random() * .7 + .3), g:(Math.random() * .6 + .4), b:(Math.random()* .4 + .6) }).toHex()}`;
+				getCanvas.lineWidth = .2;
+
+				var il
+				if (index){
+					il = index.count
+				}else{
+					il = uvAttribute.count
+				}
+
+				for(let i = 0; i < il; i=i+3 ){
+					face[0] = index.getX(i);
+					face[1] = index.getX(i+1);
+					face[2] = index.getX(i+2);
+					uvs[0].fromBufferAttribute(uvAttribute, face[0]);
+					uvs[1].fromBufferAttribute(uvAttribute, face[1]);
+					uvs[2].fromBufferAttribute(uvAttribute, face[2]);
+					getCanvas.beginPath();
+					lines.set(0,0);
+					//Draw points
+					for (let j = 0, jl=uvs.length; j<jl; j++){
+						const uv = uvs[j];
+						lines.x = uv.x;
+						lines.y = uv.y;
+						if (j===0){
+							getCanvas.moveTo(uv.x * (size - 2) + 0.5, (1 - uv.y) * (size - 2 ) + 0.5)
+						}else{
+							getCanvas.lineTo(uv.x * (size - 2) + 0.5, (1 - uv.y) * (size - 2 ) + 0.5)
+						}
+					}
+					getCanvas.closePath();
+					getCanvas.stroke();
+				}
+			})
+			resolve();
+		} catch (error) {
+			notifyMe(error);
+			reject();
+		}
+	}
+	)
+}
+
 function paintDatas(textureData,w,h,target,format){
 	var opCanvas = {
 		dom : document.getElementById(target),
@@ -605,6 +681,54 @@ $("#thacanvas").on('loadScene',function(event){
 	if (event.shiftKey &&  (event.button==0)){
 		/* paintMaskCTX.closePath(); */
 	}
+}).on('UVDisplay',function(event){
+	//generate and display the UVMap for the selected submeshes
+	let UVmapper = document.getElementById("UVMapMe")
+	let mysize = UVmapper.width;
+	clearCanvas("UVMapMe");
+
+	retUVMapData(
+		UVmapper,
+		getUVSubmeshIndex(document.querySelectorAll(`#unChecksMesh input[type="checkbox"]`)),
+		mysize)
+		.then(result=>{
+			notifyMe(`UVMap created`,false);
+		}).catch(error=>{
+			notifyMe(error);
+		});
+
+}).on('UVExport',function(){
+	/*
+	* generate and export to file the UVMap for the selected submeshes
+	* using the export size selected
+	*/
+	let mysize = parseInt($("#UVformat").val());
+	if (mysize==0){
+		mysize = document.getElementById("UVMapMe").width;
+	}
+
+	var offSCExport = new OffscreenCanvas(mysize,mysize);
+	retUVMapData(
+		offSCExport,
+		getUVSubmeshIndex(document.querySelectorAll(`#unChecksMesh input[type="checkbox"]`)),
+		mysize)
+		.then(result=>{
+			offSCExport.convertToBlob({type:'image/png'})
+				.then(blob=>{
+					
+					const url = URL.createObjectURL(blob);
+					let a = document.createElement('a');
+					a.href = url;
+					a.download = `UV_${mysize}_${String($("#modelTarget").val()).split("\/").reverse()[0].split(".")[0]}.png`;
+					a.click();
+					a.remove();
+				})
+				.catch(error=>notifyMe(error))
+
+			notifyMe(`UVMap need to be exported`,false);
+		}).catch(error=>{
+			notifyMe(error);
+		});
 })
 
 //INIT
@@ -1666,6 +1790,7 @@ function LoadMaterials(path){
 function LoadModel(path){
 	return new Promise((resolve,reject)=>{
 		var subsCheckText = '';
+		var subsCheckUVs = '';
 		path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
 		var modelfile;
 	
@@ -1702,6 +1827,8 @@ function LoadModel(path){
 
 							//Submesh Enabler UI
 							subsCheckText +=`<li class="form-check" data-material="${child.userData.materialNames[0]}"><label for="${child.name}" class="form-check-label">${child.name}</label><input name="${child.name}" type="checkbox" class="form-check-input" checked ></li>`
+							subsCheckUVs += `<input type="checkbox" class="btn-check" id="uvchk_${child.name}" checked >
+											 <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${child.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${child.name}</label>`
 							//Assign the Material
 							
 							child.material = materialStack[child.userData?.materialNames[0]];
@@ -1717,6 +1844,7 @@ function LoadModel(path){
 
 				$("#withbones svg:nth-child(1) path").attr("fill",(Boned ? 'red':'currentColor'));
 				$("#sbmeshEN > ul").html(subsCheckText);
+				$("#unChecksMesh").html(subsCheckUVs);
 
 				//Autocentering
 				var helper = new THREE.BoxHelper(glbscene.scene);
