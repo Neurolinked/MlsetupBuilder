@@ -34,6 +34,9 @@ if (window.Worker) {
 		datas[4] materialName
 		 */
 		switch (command){
+			case 'gradientApply':
+				
+				break;
 			case 'alphaFix':
 				console.log(alphaFix);
 				break;
@@ -202,6 +205,8 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="de
 			if (mapName!="engine\\textures\\editor\\grey.xbm"){
 				if (textureDock.filter(elm=>elm.file==mapName).length<=0){
 					textureDock.push({file:mapName,maptype:type,shader:material});
+				}else{
+					console.log(textureDock.filter(elm => elm.file==mapName))
 				}
 
 			}
@@ -564,7 +569,11 @@ $("#thacanvas").on('loadScene',function(event){
 	}catch(wrong){
 		notifyMe(wrong);
 	}
-
+}).on('hairColorSwitch',function(ev,profile){
+	console.log(
+		hairs.profiles.filter(el => el.name==profile)[0].colors.rootToTip
+	);
+	
 }).on('updCamera',function(ev){
 	if (PARAMS.cameraNear > PARAMS.cameraFar){
 		PARAMS.cameraFar = PARAMS.cameraNear+1;
@@ -1064,7 +1073,7 @@ async function ddsResolve(binarydata, info){
 }
 
 
-function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,type = '',_materialName=""){
+/* function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,type = '',_materialName=""){
 	var imageINFO = getImageInfo(binaryData);
 	var bufferData = str2ab(binaryData);
 	//const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
@@ -1209,10 +1218,10 @@ function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,t
 		notifyMe('Format not recognized, returned WHITE');
 		return WHITE;
 	}
-}
+} */
 
 //Get Textures data
-function getTexture(filename,kind=null,_materialName){
+/* function getTexture(filename,kind=null,_materialName){
 	var temporaryTexture = null;
 	var type = "";
 	//
@@ -1304,7 +1313,7 @@ function getTexture(filename,kind=null,_materialName){
 			return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'');
 		}
 	}
-}
+} */
 
 //Get texture file content to be processed
 async function _getFileContent(textureObj){
@@ -1513,6 +1522,10 @@ async function ProcessStackTextures(){
 					MapTextures(textureDock[index])
 					break;
 			}
+			console.log(textureDock[index].shader)
+		/* 	if (textureDock[index].shader.userData?.type=='hair'){
+				console.log(`Bisogna snegrare`);
+			} */
 		})
 	}).catch((error)=>{
 		notifyMe(`ProcessStackTextures ${error}`);
@@ -1528,13 +1541,12 @@ async function LoadStackTextures(){
 }
 
 function codeMaterials(materialEntry,_materialName){
-	
 	if (materialEntry.hasOwnProperty('MaterialTemplate')){
 		//switching the code based on the type of the material
 		if (materialTypeCheck.decals.includes(materialEntry.MaterialTemplate)){
 
 			var Rdecal = lambertType.clone();
-			var decalConfig = {color:0xFFFFFF,transparent:true, side:THREE.DoubleSide,depthWrite :false}
+			var decalConfig = {userData:{type:'decal'},color:0xFFFFFF,transparent:true, side:THREE.DoubleSide,depthWrite :false}
 
 			//Decal Textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseTexture')){
@@ -1565,7 +1577,7 @@ function codeMaterials(materialEntry,_materialName){
 
 		if (materialTypeCheck.metal_base.includes(materialEntry.MaterialTemplate)){
 			var Rbase = materialBASE.clone();
-			var rbaseConfig = {}
+			var rbaseConfig = {userData:{type:'metal'}}
 
 			if (materialEntry.Data.hasOwnProperty('AlphaThreshold')){
 				rbaseConfig.opacity = materialEntry.Data.AlphaThreshold;
@@ -1602,6 +1614,7 @@ function codeMaterials(materialEntry,_materialName){
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone();
+			Mlayer.userData={type:'decal'};
 			//Mlayer.name = materialEntry.name;
 
 			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
@@ -1639,7 +1652,7 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.fx.includes(materialEntry.MaterialTemplate)){
 
 			let actualMaterial = lambertType.clone();
-			let fxConfig = {color:0xFFFFFF};
+			let fxConfig = {userData:{type:'fx'},color:0xFFFFFF};
 
 			if (materialEntry?.Data.hasOwnProperty('Emissive')){
 				fxConfig.emissiveIntensity = parseFloat(materialEntry?.Data.Emissive);
@@ -1666,7 +1679,13 @@ function codeMaterials(materialEntry,_materialName){
 				configHair.alphaTest = 0.03;
 				configHair.alphaMap.needsUpdate = true;
 			}
+
+			if (materialEntry?.Data.hasOwnProperty('Strand_ID')){
+
+			}
 			
+			//console.log(configHair);
+
 			actualMaterial.setValues(configHair);
 			return actualMaterial;
 		}
@@ -1675,7 +1694,7 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.skin.includes(materialEntry.MaterialTemplate)){
 
 			var skin = stdMaterial.clone();
-			var skinConfig = {color:0xFFDABE};
+			var skinConfig = {userData:{type:'skin'},color:0xFFDABE};
 
 			//console.warn('skin',materialEntry,'skin');
 
@@ -1744,7 +1763,6 @@ function LoadMaterials(path){
 					//Build every unique material entry to be applyed to
 					materialSet.forEach((material)=>{
 						materialStack[material] = codeMaterials(materialJSON.Materials.filter(el => el.Name == material)[0],material);
-
 						let entry, idx
 						idx = materialJSON.findIndex(material)
 						

@@ -482,8 +482,12 @@ $(function(){
 		$('#sp-gradients div:nth-child(2)').attr('style',"background:"+$(this).data('cid')+", "+$('#bkgshades').val()+";");
 		$('#hRootToTip').attr('style',"background:"+$(this).data('crtt').replace("linear-gradient(","linear-gradient( 90deg,")+", "+$('#bkgshades').val()+";");
 		$('#hID').attr('style',"background:"+$(this).data('cid').replace("linear-gradient(","linear-gradient( 90deg,")+", "+$('#bkgshades').val()+";");
-		HairTexture(hairs.profiles.filter(el => el.name==$(this).data('name'))[0].colors.rootToTip);
-		hair_card.map.needsUpdate = true;
+    let Actual_hair_Profile = hairs.profiles.filter(el => el.name==$(this).data('name'))
+    
+    if (Actual_hair_Profile?.length>0){
+      $("#thacanvas").trigger("hairColorSwitch",$(this).data('name'))
+    }
+		//hair_card.map.needsUpdate = true;
 	});
 
 	$('#bkgshades').val(window.getComputedStyle(document.body).getPropertyValue('--eq-lay1'))
