@@ -131,28 +131,27 @@
     <button type="button" class="btn text-reset text-light" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="offcanvas-body m-2 p-2">
-		<span class='experimental'>
-		<div class="row gx-0 ">
-			 <div class="col-11">
-				<div id="hairSwatches" class=''></div>
-				<div id="hairprofileBuilder" class="layer-2 rounded-0 "><!-- maximum shades will be 5 at the start-->
-						<span class="badge bg-layer0 w-100 rounded-0">Shades planner</span>
-						<div class="p-2">
-							<div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">RootToTip</span><div class="col-10 grad" id="hRootToTip"> </div></div>
-							<div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">ID</span><div class="col-10 grad" id="hID" > </div></div>
-						</div>
-				</div>
-			</div>
-			<div class="col-1 d-flex justify-content-center flex-wrap" id="sp-gradients">
-				<div></div>
-				<div></div>
-				<input type="color" class="d-block m-auto" id="bkgshades">
-			</div>
-		</div>
-		<div class="row gx-0 ">
-			<canvas class="m-1" style="max-width:256px;max-height:256px;border: 1px solid var(--layer-9);" height="256" width="256" id="hairTex" ></canvas>
-		</div>
-		</span>
+		
+      <div class="row gx-0 ">
+        <div class="col-11">
+          <div id="hairSwatches" class=''></div>
+          <div id="hairprofileBuilder" class="layer-2 rounded-0 "><!-- maximum shades will be 5 at the start-->
+              <span class="badge bg-layer0 w-100 rounded-0">Shades planner</span>
+              <div class="p-2">
+                <div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">RootToTip</span><div class="col-10 grad" id="hRootToTip"> </div></div>
+                <div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">ID</span><div class="col-10 grad" id="hID" > </div></div>
+              </div>
+          </div>
+        </div>
+        <div class="col-1 d-flex justify-content-center flex-wrap" id="sp-gradients">
+          <div></div>
+          <div></div>
+          <input type="color" class="d-none m-auto" id="bkgshades">
+        </div>
+      </div>
+<!--       <div class="row gx-0 ">
+        <canvas class="m-1" style="max-width:256px;max-height:256px;border: 1px solid var(--layer-9);" height="256" width="256" id="hairTex" ></canvas>
+      </div> -->
 	</div>
 </div>
 <!--Offcanvas Import previewer -->
