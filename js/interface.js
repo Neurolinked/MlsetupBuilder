@@ -110,6 +110,43 @@ async function abuildMaterial(materialArray){
 	}
 }
 
+async function uiBuildHairs(hairDB){
+  if (hairDB.hasOwnProperty("Profiles")){
+    notifyMe(`Hair Db game version :${hairDB?.GameVersion}`,false)
+    var hair_colors = shade = ''
+    var k=0;
+    hairDB.Profiles.forEach((hair)=>{
+      hair_colors = '';
+      shade = ''
+      if (hair.hasOwnProperty('RootToTip')){
+        if (hair.RootToTip?.length >0){
+          let closeGrad = "%, ";
+          hair.RootToTip.forEach((item, key, arr) => {
+            if (Object.is(arr.length - 1, key)) {
+              closeGrad = "% ";
+            }
+            hair_colors +=` rgba(${item.color.Red},${item.color.Green},${item.color.Blue},${item.color.Alpha}) ${parseInt(item.value*100)}${closeGrad}`;
+          })
+        }
+      }
+      if (hair.hasOwnProperty('ID')){
+        if (hair.ID?.length >0){
+          let closeGrad = "%, ";
+          hair.ID.forEach((item, key, arr) => {
+            if (Object.is(arr.length - 1, key)) {
+              closeGrad = "% ";
+            }
+            shade +=` rgba(${item.color.Red},${item.color.Green},${item.color.Blue},${item.color.Alpha}) ${parseInt(item.value*100)}${closeGrad} `;
+          })
+        }
+      }
+
+      $("#hairSwatches").append("<span data-set='"+hair.set+"' alt='"+hair.name+"'  title='"+hair.name+"' data-name='"+hair.name+"' data-crtt='linear-gradient("+hair_colors+")' data-cid='linear-gradient("+shade+")' style='background:linear-gradient("+hair_colors+");order:"+k+";' >"+"</span>");
+      k++
+    });
+  }
+}
+
 async function abuildHairs(aHairs){
 	if (typeof(aHairs)=="object"){
 		if (aHairs.hasOwnProperty('profiles')){
@@ -139,6 +176,7 @@ async function abuildHairs(aHairs){
 				    });
 					}
 				}
+
 				//console.log(hair_colors)
 				$("#hairSwatches").append("<span data-set='"+hair.set+"' alt='"+hair.name+"'  title='"+hair.name+"' data-name='"+hair.name+"' data-crtt='linear-gradient("+hair_colors+")' data-cid='linear-gradient("+shade+")' style='background:linear-gradient("+hair_colors+");order:"+hair.order+"' >"+"</span>"); //linear-gradient("+shade+");background-blend-mode: multiply
 			});
@@ -158,7 +196,10 @@ $(window).on("load", function (e) {
 
 $(function(){
   var setupModPath = document.getElementById('setupModPath');
-  let buildmyHairs = abuildHairs(hairs);
+  $.getJSON( "./jsons/hairDB.json", function( hairProfiles ) {
+    hairDB = hairProfiles
+    uiBuildHairs(hairDB)
+  })
   
   var Workspaces = {
     index: 0,
@@ -477,17 +518,18 @@ $(function(){
     }
   });
 
-	$("#hairSwatches span").click(function(){
+	$("body").on("click", "#hairSwatches span",function(el){
+    
 		$('#sp-gradients div:nth-child(1)').attr('style',"background:"+$(this).data('crtt')+", "+$('#bkgshades').val()+";");
 		$('#sp-gradients div:nth-child(2)').attr('style',"background:"+$(this).data('cid')+", "+$('#bkgshades').val()+";");
 		$('#hRootToTip').attr('style',"background:"+$(this).data('crtt').replace("linear-gradient(","linear-gradient( 90deg,")+", "+$('#bkgshades').val()+";");
 		$('#hID').attr('style',"background:"+$(this).data('cid').replace("linear-gradient(","linear-gradient( 90deg,")+", "+$('#bkgshades').val()+";");
-    let Actual_hair_Profile = hairs.profiles.filter(el => el.name==$(this).data('name'))
     
+    let Actual_hair_Profile = hairDB.Profiles.filter(el => el.name==$(this).data('name'))
     if (Actual_hair_Profile?.length>0){
-      $("#thacanvas").trigger("hairColorSwitch",$(this).data('name'))
+      $("#thacanvas").trigger("hairColorSwitch",{'root':Actual_hair_Profile[0].RootToTip,'id':Actual_hair_Profile[0].ID})
     }
-		//hair_card.map.needsUpdate = true;
+		
 	});
 
 	$('#bkgshades').val(window.getComputedStyle(document.body).getPropertyValue('--eq-lay1'))

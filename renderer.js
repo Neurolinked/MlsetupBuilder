@@ -52,7 +52,7 @@ const PARAMS = {
 	l3_pos:{x:0,y:0.5,z:-3},
 	l4_pos:{x:0,y:3,z:3},
 };
-
+var hairDB = {}
 var materialJSON = new MaterialBuffer();
 /**
  * Write a message in the UI log space
@@ -89,24 +89,6 @@ function clearCanvas(target,fillStyle=''){
 	let domMe = document.getElementById(target);
 	let t_canvas = domMe.getContext('2d');
 	t_canvas.reset();
-
-/* 	let domMe = document.getElementById(target);
-	let t_canvas = domMe.getContext('2d');
-	var width,height
-
-	if ((domMe.getAttribute('width')==undefined) && (domMe.getAttribute('height')==undefined)){
-		width=height=128
-	}else{
-		//FIX : need to read the Zoom level
-		width=domMe.getAttribute('width')
-		height=domMe.getAttribute('height')
-	}
-
-	t_canvas.clearRect(0,0,width,height)
-	if (fillStyle!=''){
-		t_canvas.fillStyle = fillStyle;
-		t_canvas.fillRect(0,0,width,height)
-	} */
 }
 
 function clearTexturePanel(){

@@ -570,9 +570,7 @@ $("#thacanvas").on('loadScene',function(event){
 		notifyMe(wrong);
 	}
 }).on('hairColorSwitch',function(ev,profile){
-	console.log(
-		hairs.profiles.filter(el => el.name==profile)[0].colors.rootToTip
-	);
+	console.log(profile)
 	
 }).on('updCamera',function(ev){
 	if (PARAMS.cameraNear > PARAMS.cameraFar){
