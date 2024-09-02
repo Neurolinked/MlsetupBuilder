@@ -26,34 +26,36 @@ let defPromise = thePIT.RConfig('editorCfg');
 var tw_Defaults = {}
 
 /* const PARAMS = {
+	maskblur: 0,
+	cameraNear : 0.01,
+	cameraFar : 2000,
 	rotation: false,
 	speed: 6.0,
-  wireframes: false,
-  oneside:false,
-  lightPower: 0.0,
-  maskChannel: 0.0,
-  fogcolor:'#9b9d3f',
-  fognear:10,
-  fogfar:105,
-  EDLayerMaxTiles:150,
-  EDMblendMaxTiles:150,
-  EDMaxContrast:1,
-  EDMaxNormal:2,
-  ForceZeroOpacity:true,
-  A_light_pow:2,
-  A_light_color:0x606060,
-  p_light1_pow:0.5,
-  p_light2_pow:0.5,
-  p_light3_pow:0.5,
-  p_light4_pow:0.5,
-  p_light1_col:0x75cb04,
-  p_light2_col:0xf5f503,
-  p_light3_col:0x6078F5,
-  p_light4_col:0x6078F5,
-  l1_pos:{x:5,y:0,z:5},
-  l2_pos:{x:-5,y:0,z:-5},
-  l3_pos:{x:0,y:0.5,z:-3},
-  l4_pos:{x:0,y:3,z:3},
+	wireframes: false,
+	oneside:false,
+	maskChannel: 0.0,
+	fogcolor:0x9b9d3f,
+	fognear:10,
+	fogfar:105,
+	EDLayerMaxTiles:150,
+	EDMblendMaxTiles:150,
+	EDMaxContrast:1,
+	EDMaxNormal:2,
+	ForceZeroOpacity:true,
+	A_light_pow:0,
+	A_light_color:0x606060,
+	p_light1_pow:30,
+	p_light2_pow:30,
+	p_light3_pow:20,
+	p_light4_pow:30,
+	p_light1_col:0xffffff,
+	p_light2_col:0xffffff,
+	p_light3_col:0xffffff,
+	p_light4_col:0xffffff,
+	l1_pos:{x:3,y:0,z:3},
+	l2_pos:{x:-3,y:0,z:-3},
+	l3_pos:{x:0,y:0.5,z:-3},
+	l4_pos:{x:0,y:3,z:3},
 }; */
 
 const submeshInfo = 1;
@@ -102,16 +104,6 @@ const lightpane = TDtabManager.pages[0].addFolder({
   expanded:false
 });
 
-//Think of removing Ambient lights
-/* const alight = lightpane.addFolder({
-  title:'Ambient'
-})
-alight.addBinding(PARAMS,'A_light_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',0);
-});
-alight.addBinding(PARAMS,'A_light_color',{label:'Color',view:'color'}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',0);
-}); */
 
 const plight1 = lightpane.addFolder({
   title:'Point light 1'
@@ -219,6 +211,10 @@ const EDAdvSetup = TDtabManager.pages[2].addFolder({
 });
 EDAdvSetup.addBinding(PARAMS,'ForceZeroOpacity',{label:'Force Layer 0 opacity to 1'}).on('change', (ev) => {
   //Change the values in the interface
+});
+
+EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {
+  $("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);
 });
 
 TDtabManager.pages[2].addBlade({
