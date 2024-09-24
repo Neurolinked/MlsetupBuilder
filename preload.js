@@ -59,6 +59,9 @@ Scan a folder searching for GLB files
         ipcRenderer.send('main:scanFolder');
       },
       */
+      mapMasks : async (pathTemplate)=>{
+         return await ipcRenderer.invoke('main:findMasks',pathTemplate);
+      },
       Foldering : (path) =>{
         //It will display the path folder chosen
         ipcRenderer.send('main:openFolder',path);

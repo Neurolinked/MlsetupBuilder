@@ -1599,6 +1599,30 @@ ipcMain.on('main:scanFolder',()=>{
 		});
 })
 
+ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
+	return new Promise((resolve,reject)=>{
+		var customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
+		var fileTemplate = maskTemplate.split("\\").pop().toString();
+		let ext = preferences.get("maskformat");
+		fileTemplate = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
+		//var newpath = String(maskTemplate).replace(".mlmask","_layers\\");
+		var test = path.join(preferences.get('paths.depot'),customPath)
+
+		fs.readdir(test,{recursive:false},(err,files)=>{
+			if (!err){
+				let res = files.filter((el) =>{
+					console.log(el,fileTemplate)
+					 return el.match(fileTemplate)
+					})
+				resolve(res.length)
+			}else{
+				console.log(err)
+				reject(false)
+			}
+		})
+	})
+});
+
 ipcMain.on('main:openFolder',(event,folder)=>{
 	outside.showItemInFolder(path.normalize(folder));
 })

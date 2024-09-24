@@ -195,6 +195,7 @@ $(window).on("load", function (e) {
 })
 
 $(function(){
+
   var setupModPath = document.getElementById('setupModPath');
   $.getJSON( "./jsons/hairDB.json", function( hairProfiles ) {
     hairDB = hairProfiles
@@ -248,6 +249,10 @@ $(function(){
   MLSBConfig.then((config)=>{
     if (config.hasOwnProperty('paths')){
       materialJSON = new MaterialBuffer(config.paths.depot);
+      $("dialog#setupModPath input").val(config.paths.lastmod);
+      if ((config.paths?.game).match(new RegExp(/.+(archive\\pc\\content)$/))){
+        alertMe('In your preferences you have to setup THE GAME folder, NOT the subfolder "archive\\pc\\content" ')
+      }
     }
     if (config.hasOwnProperty('maskformat')){
       textureformat = config.maskformat
@@ -257,9 +262,6 @@ $(function(){
       movecontent();
     }
 
-    if (config.hasOwnProperty('paths')){
-      $("dialog#setupModPath input").val(config.paths.lastmod);
-    }
   }).catch((error)=>{
     notifyMe(error);
   });
@@ -2567,7 +2569,6 @@ unCooKonfirm.addEventListener("click", (event) => {
                     }else{
                       $("#flipMask").prop("checked","");
                     }
-                    console.log(valore);
                   }).catch((error)=>{
                     notifyMe(error);
                   });

@@ -42,13 +42,12 @@ if (window.Worker) {
 				break;
 			case 'paint':
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
-				let selected = activeMLayer();
 				let textureMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
 				textureStack[textureMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
 				textureStack[textureMD5Code].needsUpdate = true
 				materialStack[datas[4]].normalMap = textureStack[textureMD5Code];
 				materialStack[datas[4]].normalMap.needsUpdate = true;
-				break
+				break;
 			case 'rough':
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
 				let roughMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
@@ -204,11 +203,11 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="de
 		default:
 			if (mapName!="engine\\textures\\editor\\grey.xbm"){
 				if (textureDock.filter(elm=>elm.file==mapName).length<=0){
-					textureDock.push({file:mapName,maptype:type,shader:material});
+					textureDock.push({file:mapName,maptype:type,shader:material,entries:[{maptype:type,shader:material}]})
 				}else{
-					console.log(textureDock.filter(elm => elm.file==mapName))
+					let tInd = textureDock.findIndex((elm) => elm.file==mapName)
+					textureDock[tInd].entries.push({maptype:type,shader:material});
 				}
-
 			}
 			return GRAY;
 	}
@@ -332,7 +331,6 @@ function paintDatas(textureData,w,h,target,format){
 			}
 			break;
 		case THREE.RGFormat:
-			console.log("2 channels")
 			for (let i = 0; i < imageData.data.length; i += 4) {
 				// Modify pixel data
 				imageData.data[i] = textureData[k];  // R value
@@ -343,7 +341,6 @@ function paintDatas(textureData,w,h,target,format){
 			}
 			break;
 		case THREE.RGBFormat:
-			console.log("3 channels")
 			for (let i = 0; i < imageData.data.length; i += 4) {
 				// Modify pixel data
 				imageData.data[i] = textureData[k];  // R value
@@ -354,7 +351,6 @@ function paintDatas(textureData,w,h,target,format){
 			}
 			break;
 		case THREE.RGBAFormat:
-			console.log("4 channels")
 			for (let i = 0; i < imageData.data.length; i++) {
 				// Modify pixel data
 				imageData.data[i] = textureData[i]; // every value
@@ -524,13 +520,10 @@ $("#thacanvas").on('loadScene',function(event){
 		}
 	})
 }).on('switchLayer',function(ev,layer=0){
-	console.log(MLSB.Editor.layerSelected);
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
-
 		if (materialStack[selected].hasOwnProperty("mask")){
-
 			test = _getFileContent({file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
 				.then((result)=>{
 					var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
@@ -563,7 +556,6 @@ $("#thacanvas").on('loadScene',function(event){
 			materialJSON.Appearances[tempID].Materials.forEach((material)=>{
 				materialSet.add(material);
 			})
-			
 		}
 
 	}catch(wrong){
@@ -585,6 +577,8 @@ $("#thacanvas").on('loadScene',function(event){
 	}catch(error){
 		notifyMe(error);
 	}
+}).on('blurMask',function(ev){
+	console.log(ev);
 }).on('changeFormat',function(ev){
 	/*Update the texture format on preferences change */
 	let trigMe = thePIT.RConfig('maskformat');
@@ -788,6 +782,7 @@ function init() {
     TDengine.lights.point[1].position.set(PARAMS.l2_pos.x,PARAMS.l2_pos.y,PARAMS.l2_pos.z);
     TDengine.lights.point[2].position.set(PARAMS.l3_pos.x,PARAMS.l3_pos.y,PARAMS.l3_pos.z);
     TDengine.lights.point[3].position.set(PARAMS.l4_pos.x,PARAMS.l4_pos.y,PARAMS.l4_pos.z);
+	
     //instanciate
     TDengine.lights.point.forEach((light)=>{
         TDengine.scene.add(light);
@@ -1218,101 +1213,6 @@ async function ddsResolve(binarydata, info){
 	}
 } */
 
-//Get Textures data
-/* function getTexture(filename,kind=null,_materialName){
-	var temporaryTexture = null;
-	var type = "";
-	//
-	if (filename.match(/\.mlmask$/)){
-		// with the CLI 8.14 the path are created under a subfolder named as the masksset file plus _layers
-		let basePaths = filename.split("\\").slice(0,-1);
-		let maskFilename = filename.split("\\").pop().toString();
-		let subfolder = maskFilename.split(".")[0]+"_layers"
-		basePaths.push(subfolder,maskFilename);
-		filename = basePaths.join("\\");
-
-		//multilayer mask texture to be taken
-		var realTexturePath = (filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`)
-		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
-
-		if ((typeof(temporaryTexture)!="object") && (temporaryTexture!="") ){
-			return dataToTeX(realTexturePath,temporaryTexture,1,THREE.LuminanceFormat,'M');
-		}else{
-			for (var i=$("#layeringsystem li.active").index();i<=19;i++){
-				$("#layeringsystem li").eq(i).attr('disabled','disabled');
-				$("#masksPanel li").eq(i).attr('disabled','disabled');
-			}
-			$(".controLayers li").removeClass("active");
-			MLSB.Editor.layerSelected = 0;
-			return ERROR;
-		}
-	
-	}else if (type=filename.match(/.+_(\w)\d{2}\.(xbm)$/) ){
-		//normal format checking on type of texture:
-		//
-		var realTexturePath = (filename).replace('.xbm',`.${textureformat}`)
-		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
-
-		if ((temporaryTexture=="") || (typeof(temporaryTexture)===undefined)){
-			return ERROR;
-		}
-		switch (type[1]){
-			case "n":
-				//normal map, use the workers
-				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N',_materialName);
-				break;
-			case "d":
-				//diffuse
-				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'');
-				break;
-			default:
-				return dataToTeX(realTexturePath,temporaryTexture);
-				break;
-		}
-	}else if (type=filename.match(/.+\d{2}_(\w)\.(xbm)$/) ){
-		var realTexturePath = (filename).replace('.xbm',`.${textureformat}`)
-		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
-		
-		if ((temporaryTexture=="") || (typeof(temporaryTexture)===undefined)){
-			return ERROR;
-		}
-
-		switch (type[2]){
-			case 'n':
-				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N',_materialName);
-				break;
-			case 'r':
-				//roughness
-			case 'd':
-				//diffuse
-			default:
-				return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'');
-				break;
-		}
-	}else if (type=filename.match(/.+_rm\d{2}\.(xbm)$/) ){
-		//roughness metalness
-		var realTexturePath = (filename).replace('.xbm',`.${textureformat}`)
-		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
-
-		return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'RM',_materialName);
-	}else{
-		if (checkMaps(filename)>0){
-			return retDefTexture(filename);
-		}
-		var realTexturePath = (filename).replace('.xbm',`.${textureformat}`)
-		temporaryTexture = thePIT.ApriStream(realTexturePath,'binary');
-
-		if (kind!=null){
-			return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'N',_materialName);
-		}else{	
-			if ((temporaryTexture=="") || (typeof(temporaryTexture)===undefined)){
-				return ERROR;
-			}
-			return dataToTeX(realTexturePath,temporaryTexture,4,THREE.RGBAFormat,'');
-		}
-	}
-} */
-
 //Get texture file content to be processed
 async function _getFileContent(textureObj){
 	return new Promise((resolve, reject)=>{
@@ -1325,13 +1225,22 @@ async function _getFileContent(textureObj){
 			let basePaths = textureObj.file.split("\\").slice(0,-1);
 			let maskFilename = textureObj.file.split("\\").pop().toString();
 			let subfolder = maskFilename.split(".")[0]+"_layers"
+			
+			
 			basePaths.push(subfolder,maskFilename);
 			var filename = basePaths.join("\\");
+			//TODO Optimize the number of searches of the same file in a Directory
+			//Number of textures in the mlmask file
+			var maxMasksPR = thePIT.mapMasks(filename); //check the numbers of masks layers in the subfolder
+			maxMasksPR.then((result)=>{
+				textureObj.layers = result
+			}).catch((error)=>{
+				console.log(error)
+				textureObj.layers=0;
+			});
 
 			//multilayer mask texture to be taken
 			realTexturePath = (filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`)
-			var searchFolder = basePaths.slice(0,-1);
-			//console.log(searchFolder.join("\\")); //folder of the masks
 		}else{
 			realTexturePath = (textureObj.file).replace('.xbm',`.${textureformat}`)
 		}
@@ -1344,7 +1253,7 @@ async function _getFileContent(textureObj){
 			}
 			
 			if (textureObj.maptype!='mlmask'){
-				pushTexturetoPanel(realTexturePath,textureObj.info.width,textureObj.info.height);
+				pushTexturetoPanel(realTexturePath, textureObj.info.width, textureObj.info.height);
 			}
 			
 
@@ -1357,7 +1266,9 @@ async function _getFileContent(textureObj){
 								notifyMe(`theTextureContent ${textureformat} ${error}`)
 								reject(false)
 							});
+
 			}else if (textureObj.info?.format=='PNG'){
+
 				var encodedData = btoa(textureResult);
 				var dataURI = "data:image/png;base64," + encodedData;
 				var test = pngResolve(dataURI,textureObj)
@@ -1384,37 +1295,40 @@ async function _getFileContent(textureObj){
  */
 function MapTextures(textureObj){
 	try {
-		if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype")){
+		if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype") && textureObj.hasOwnProperty("entries")){
 			var textureMD5Code = CryptoJS.MD5(textureObj.file);
 			var returntexture = textureStack[textureMD5Code]===undefined ? ERROR : textureStack[textureMD5Code];
-			switch (textureObj.maptype) {
-				case "mlmask":
-					materialStack[textureObj.shader].map = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].alphaMap = textureStack[textureMD5Code]
-					materialStack[textureObj.shader].map.needsUpdate = true;
-					materialStack[textureObj.shader].alphaMap.needsUpdate = true;
-					break;
-				case "diffuse":
-					materialStack[textureObj.shader].map = returntexture
-					materialStack[textureObj.shader].map.needsUpdate = true;
-					break;
-				case "metalness":
-					materialStack[textureObj.shader].metalnessMap = returntexture
-					materialStack[textureObj.shader].metalnessMap.needsUpdate = true;
-					break;
-				case "emissive":
-					materialStack[textureObj.shader].emissiveMap = returntexture
-					materialStack[textureObj.shader].emissiveMap.needsUpdate = true;
-					break;
-				case "ao":
-					materialStack[textureObj.shader].aoMap = returntexture
-					materialStack[textureObj.shader].aoMap.needsUpdate = true;
-					break;
-				case "alpha":
-					materialStack[textureObj.shader].alphaMap = returntexture
-					materialStack[textureObj.shader].alphaMap.needsUpdate = true;
-					break;
-			}
+			textureObj.entries.forEach((toMap)=>{
+				switch (toMap.maptype) {
+					case "mlmask":
+						materialStack[toMap.shader].map = textureStack[textureMD5Code]
+						materialStack[toMap.shader].alphaMap = textureStack[textureMD5Code]
+						materialStack[toMap.shader].map.needsUpdate = true;
+						materialStack[toMap.shader].alphaMap.needsUpdate = true;
+						console.log(textureObj)
+						break;
+					case "diffuse":
+						materialStack[toMap.shader].map = returntexture
+						materialStack[toMap.shader].map.needsUpdate = true;
+						break;
+					case "metalness":
+						materialStack[toMap.shader].metalnessMap = returntexture
+						materialStack[toMap.shader].metalnessMap.needsUpdate = true;
+						break;
+					case "emissive":
+						materialStack[toMap.shader].emissiveMap = returntexture
+						materialStack[toMap.shader].emissiveMap.needsUpdate = true;
+						break;
+					case "ao":
+						materialStack[toMap.shader].aoMap = returntexture
+						materialStack[toMap.shader].aoMap.needsUpdate = true;
+						break;
+					case "alpha":
+						materialStack[toMap.shader].alphaMap = returntexture
+						materialStack[toMap.shader].alphaMap.needsUpdate = true;
+						break;
+				}
+			})
 		}else{
 			throw new Error('The texture object lack information');
 		}
@@ -1442,7 +1356,6 @@ async function ProcessStackTextures(){
 			let textureIndex = CryptoJS.MD5(textureDock[index].file)
 
 			var THREEFormat = THREE.RGBAFormat //Default format for PNGs
-
 			if (textureDock[index].info.format=='DDS'){
 				if (textureDock[index].info.bytes==16){
 					textureStack[textureIndex] = new THREE.DataTexture(elm.value,
@@ -1470,12 +1383,12 @@ async function ProcessStackTextures(){
 						THREEFormat);
 				}
 
-				paintDatas(elm.value,
+/* 				paintDatas(elm.value,
 					textureDock[index].info.width,
 					textureDock[index].info.height,
 					target,
 					THREEFormat
-				)
+				) */
 
 			}else if (textureDock[index].info.format=='PNG'){
 				textureStack[textureIndex] = new THREE.DataTexture(elm.value,
@@ -1484,7 +1397,6 @@ async function ProcessStackTextures(){
 					THREEFormat,
 				);
 			}
-				
 			textureStack[textureIndex].wrapS = THREE.RepeatWrapping;
 			textureStack[textureIndex].wrapT = THREE.RepeatWrapping;
 
@@ -1496,6 +1408,9 @@ async function ProcessStackTextures(){
 			)
 
 			switch (textureDock[index].maptype) {
+				case 'mask':
+					//Blur here ?
+					break;
 				case 'normal':
 					imgWorker.postMessage([
 						'normalFix',
@@ -1520,12 +1435,11 @@ async function ProcessStackTextures(){
 					MapTextures(textureDock[index])
 					break;
 			}
-			console.log(textureDock[index].shader)
 		/* 	if (textureDock[index].shader.userData?.type=='hair'){
 				console.log(`Bisogna snegrare`);
 			} */
-		})
-	}).catch((error)=>{
+	})
+}).catch((error)=>{
 		notifyMe(`ProcessStackTextures ${error}`);
 	})
 }
@@ -1613,13 +1527,11 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone();
 			Mlayer.userData={type:'decal'};
-			//Mlayer.name = materialEntry.name;
 
 			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
 				
 				//name of the Actual layer textures to be loaded will be stored
 				Mlayer.map = retDefTexture(materialEntry.Data.MultilayerMask,_materialName,"mlmask");
-				//Mlayer.map = getTexture(materialEntry.Data.MultilayerMask)
 				Mlayer.map.needsUpdate = true;
 				Mlayer.mask = materialEntry.Data.MultilayerMask;
 			}
