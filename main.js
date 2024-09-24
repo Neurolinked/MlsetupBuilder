@@ -1611,12 +1611,11 @@ ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 		fs.readdir(test,{recursive:false},(err,files)=>{
 			if (!err){
 				let res = files.filter((el) =>{
-					console.log(el,fileTemplate)
 					 return el.match(fileTemplate)
 					})
 				resolve(res.length)
 			}else{
-				console.log(err)
+				mainWindow.webContents.send('preload:logEntry',`${err}`,true)
 				reject(false)
 			}
 		})
