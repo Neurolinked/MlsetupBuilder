@@ -2655,6 +2655,8 @@ unCooKonfirm.addEventListener("click", (event) => {
   });
   
   $("#emptyNotyLog").click(function(){
+    notifications = 0
+
     $("#NotificationCenter .offcanvas-body").html("");
     notifyMe("Log reset",false);
   })

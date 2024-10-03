@@ -65,12 +65,13 @@ function notifyMe(message, warning = true){
 	if (warning){
 	  $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
 	  notifications++
-	  $("#notyCounter span").text(notifications);
 	}else{
-	  $("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br>");
+		$("#NotificationCenter .offcanvas-body").prepend('[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"<br>");
 	}
+	$("#notyCounter span").text(notifications==0 ? "":notifications);
 	$("#foot-message").text(`${message}`);
   }
+
 
 function alertMe(message="",title="Advice",seconds=null){
 	$("#alertMessages > header").html(title);
