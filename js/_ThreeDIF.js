@@ -1217,6 +1217,7 @@ async function ddsResolve(binarydata, info){
 //Get texture file content to be processed
 async function _getFileContent(textureObj){
 	return new Promise((resolve, reject)=>{
+
 		if (!textureObj.hasOwnProperty("file") && !textureObj.hasOwnProperty("maptype")){
 			reject({error:true,log:"invalid Texture"});
 		}
@@ -1227,24 +1228,25 @@ async function _getFileContent(textureObj){
 			let maskFilename = textureObj.file.split("\\").pop().toString();
 			let subfolder = maskFilename.split(".")[0]+"_layers"
 			
-			
 			basePaths.push(subfolder,maskFilename);
 			var filename = basePaths.join("\\");
 			//TODO Optimize the number of searches of the same file in a Directory
 			//Number of textures in the mlmask file
-			var maxMasksPR = thePIT.mapMasks(filename); //check the numbers of masks layers in the subfolder
-			maxMasksPR.then((result)=>{
-				textureObj.layers = result
-			}).catch((error)=>{
-				console.log(error)
-				textureObj.layers=0;
-			}).finally((e)=>{
-				$(window).trigger("limitLayers",textureObj.layers);
-			})
+			if ((PARAMS.obFoldercheck) || (!materialStack[textureObj.shader].userData.hasOwnProperty("layers")) || (materialStack[textureObj.shader].userData?.layers < 0) ){
+				var maxMasksPR = thePIT.mapMasks(filename); //check the numbers of masks layers in the subfolder
+				maxMasksPR.then((result)=>{
+					materialStack[textureObj.shader].userData.layers = result
+					console.log(result)
+				}).catch((error)=>{
+					console.log(error)
+					materialStack[textureObj.shader].userData.layers = 0
+				}).finally((e)=>{
+					$(window).trigger("limitLayers",materialStack[textureObj.shader].userData.layers);
+				})
+			}
 			//TODO make the loading of the masks in promise after 
 			//the first calculation of the number of the masks
 			realTexturePath = (filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`)
-
 			//multilayer mask texture to be taken
 		}else{
 			realTexturePath = (textureObj.file).replace('.xbm',`.${textureformat}`)
@@ -1310,7 +1312,6 @@ function MapTextures(textureObj){
 						materialStack[toMap.shader].alphaMap = textureStack[textureMD5Code]
 						materialStack[toMap.shader].map.needsUpdate = true;
 						materialStack[toMap.shader].alphaMap.needsUpdate = true;
-						console.log(textureObj)
 						break;
 					case "diffuse":
 						materialStack[toMap.shader].map = returntexture
@@ -1533,7 +1534,7 @@ function codeMaterials(materialEntry,_materialName){
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone();
-			Mlayer.userData={type:'decal'};
+			Mlayer.userData={type:'multilayer'};
 
 			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
 				
