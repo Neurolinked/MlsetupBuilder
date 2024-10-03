@@ -544,7 +544,7 @@ $("#thacanvas").on('loadScene',function(event){
 						materialStack[selected].map.needsUpdate = true;
 					}
 				}).catch((error)=>{
-					notifyMe(`switchLayer ${error}`)
+					notifyMe(`switchLayer ${error.stack.split("\n")}`)
 				});
 			
 		}
@@ -1354,6 +1354,8 @@ async function ProcessStackTextures(){
 	Promise.allSettled(texturePromise).then((res)=>{
 		
 		res.forEach((elm,index)=>{
+			if (elm.status=='rejected'){return}
+
 			let target  = (textureDock[index].file).replace('.xbm',`.${textureformat}`)
 
 			if (textureDock[index].file.match(/\.mlmask$/)){ target='maskPainter' } //change the default Canvas target
