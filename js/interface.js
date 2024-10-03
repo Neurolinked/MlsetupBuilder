@@ -2695,10 +2695,13 @@ unCooKonfirm.addEventListener("click", (event) => {
     //targetVisible(nome,$(this).find("input").is(":checked"));
   });
 
-  $(".controLayers li:not([disabled])").click(function(ev){
+  $(".controLayers li").click(function(ev){
     ev.preventDefault();
-    $("#thacanvas").trigger("switchLayer",$(this).index());
+    if (($(this).attr("disabled")==undefined) || ($(this).attr("disabled")==null )){
+      $("#thacanvas").trigger("switchLayer",$(this).index());
+    }
   })
+
   $("#flipMask").change(function(ev){
     ev.preventDefault();
     $("#thacanvas").trigger("flipMask");
@@ -2753,6 +2756,25 @@ unCooKonfirm.addEventListener("click", (event) => {
     $("#listTextures canvas").removeClass("border-active");
     $(this).addClass("border-active");
     $("#thacanvas").trigger('playTexture',$(this).attr("id"));
+  })
+
+  $(window).on('limitLayers',function(ev,index){
+    //limit the number of active layers in the interface
+    ev.preventDefault();
+    $(`.controLayers li`).removeAttr("disabled");
+    if (index > 0){
+      $(`.controLayers`).each((idx,elm)=>{
+        $(elm).find(`li:gt(${index-1})`).attr("disabled","disabled")
+        if (index < MLSB.Editor.layerSelected){
+          $(`.controLayers li`).removeClass("active")
+        }
+      })
+    }else{
+      $(`.controLayers`).each((idx,elm)=>{
+        $(elm).find(`li:gt(0)`).attr("disabled","disabled")
+        $(`.controLayers li`).removeClass("active")
+      })
+    }
   })
 
 });

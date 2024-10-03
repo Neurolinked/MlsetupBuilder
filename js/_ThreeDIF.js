@@ -523,6 +523,7 @@ $("#thacanvas").on('loadScene',function(event){
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
+
 		if (materialStack[selected].hasOwnProperty("mask")){
 			test = _getFileContent({file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
 				.then((result)=>{
@@ -1237,10 +1238,14 @@ async function _getFileContent(textureObj){
 			}).catch((error)=>{
 				console.log(error)
 				textureObj.layers=0;
-			});
+			}).finally((e)=>{
+				$(window).trigger("limitLayers",textureObj.layers);
+			})
+			//TODO make the loading of the masks in promise after 
+			//the first calculation of the number of the masks
+			realTexturePath = (filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`)
 
 			//multilayer mask texture to be taken
-			realTexturePath = (filename).replace('.mlmask',`_${MLSB.Editor.layerSelected}.${textureformat}`)
 		}else{
 			realTexturePath = (textureObj.file).replace('.xbm',`.${textureformat}`)
 		}
