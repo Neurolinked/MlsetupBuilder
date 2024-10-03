@@ -22,6 +22,7 @@ const MLSB = new MLSBEditor;
 var closeModal
 
 const PARAMS = {
+	obFoldercheck: false, //obsessive mask folder check
 	maskBlur: 0,
 	cameraNear : 0.01,
 	cameraFar : 2000,
