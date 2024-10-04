@@ -306,7 +306,7 @@ function paintDatas(textureData,w,h,target,format){
 
 	opCanvas.width = opCanvas.dom.getAttribute("width");
 	opCanvas.height = opCanvas.dom.getAttribute("height");
-	opCanvas.context = opCanvas.dom.getContext('2d');
+	opCanvas.context = opCanvas.dom.getContext('2d',{ willReadFrequently: true });
 	opCanvas.context.reset();
 	opCanvas.context.setTransform(1, 0, 0, 1, 0, 0);
 
