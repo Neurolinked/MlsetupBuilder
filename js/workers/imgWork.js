@@ -1,16 +1,27 @@
+const RGBAchannels = "RGBA";
 onmessage = function(event){
   //Hi, I'm Grunt the image weightlifter
   var command, datas
+  /* datas order by index
+   * 0 - imageDatas
+   * 1 - width
+   * 2 - height
+   * 3 - fileNAME
+   * 4 - _materialName
+  */
   [command, ...datas] = event.data;
 
   var recalcChannels = 4;
   if (datas[0].length!=(datas[1]*datas[2]*4)){
-    recalcChannels = datas[0].length/(datas[1]*datas[2]);
+    recalcChannels = calcChannels(datas[0].length,datas[1],datas[2]);
   }
 
   switch (command){
     case 'alphaApply':
       var workerResult = textAlphaFix(datas[0],datas[1],datas[2],datas[3]);
+      break;
+    case 'blurApply':
+      var workerResult = textBlurApply(datas[0],datas[1],datas[2],datas[3],datas[4],recalcChannels);
       break;
     case 'roughnessSwap':
       var workerResult = roughnessFix(datas[0],datas[1],datas[2],datas[3],datas[4]);
@@ -49,6 +60,10 @@ function levelling(data,lvl1=0,lvl2=1){
   data = data > levelWhite ? levelWhite : data;
   data = 255 * ( (data - levelBlack) /(levelWhite - levelBlack));
   return parseInt(data);
+}
+
+function calcChannels(blocksize,width,height){
+  return (blocksize/(width*height))
 }
 
 /* This function will write the blue channel of the image as full blue, to trasform
@@ -132,7 +147,10 @@ function textAlphaFix(texturedatas,width,height,fileNAME,alphaValue=1){
    self.postMessage(['alphaFix',texturedatas,width,height,fileNAME]);
 }
 
-
+function textBlurApply(texturedatas,width,height,fileNAME,material,channelsTarget){
+  const offScreenMe = new OffscreenCanvas(width, height);
+  const gl = offScreenMe.getContext("2d");
+}
 
 function gradientApply(textureDatas,width,height,fileNAME,material,channels,gradientSteps){
   //
@@ -152,4 +170,24 @@ function gradientApply(textureDatas,width,height,fileNAME,material,channels,grad
   }
 
   //self.postMessage(['hairProfile',newTextureData,width,height,fileNAME,material]);
+}
+
+function fromRGBatoG(textureDatas,width,height,channelsInput=1){
+  if ((channelsInput>=1) && (channelsInput<=4)){
+    let realChannels = calcChannels(textureDatas.length,width,height)
+    if (channelsInput < realChannels){
+      var newTextureDatas = new Uint8Array(width*height);
+      var k = 0
+      for (let i = 0, l = textureDatas.length; i < l; i += channels) {
+        newTextureDatas[k] = textureDatas[i];
+        k++;
+      }
+      self.postMessage(['interface',`Convert image from ${RGBAchannels.substring(channelsInput-1,1)} channel to grayscale`]);
+      return newTextureDatas
+    }else{
+      return textureDatas
+    }
+  }else{
+    return textureDatas
+  }
 }
