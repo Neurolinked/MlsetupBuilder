@@ -1,4 +1,8 @@
 window.$ = window.jQuery;
+/* CouchDB initialization */
+const mlsbDB = new PouchDB('Docs');
+const remoteCouch = false
+/* End */
 var notifications = 0;
 //var materialJSON = new MaterialBuffer();
 var uncookMyFile = false;
@@ -8,10 +12,8 @@ var maxTexturePlayer = 0;
 
 
 //Broadcasting manager section
-const bc = new BroadcastChannel("streaming"); //communication between opened interafce windows
-bc.onmessage = (event)=>{
-  console.log(event.data);
-};
+const bc = new BroadcastChannel("streaming"); //communication between opened interface windows
+bc.onmessage = (event)=>{ console.log(event.data); }
 
 var mLsetup = new Mlsetup();
 
@@ -2448,11 +2450,6 @@ $("#lblmasktoAdd").bind("update",function(){
   console.log($(this).attr("value"));
 })
 
-
-$("#modelCustomPath").click(function(e){
-  customLoad();
-});
-
 $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
   let percorso = $(this).parent().children("input[type='text']").val();
   if (percorso!=""){
@@ -2471,39 +2468,12 @@ $(".copyinfo").click(function(ev){
     navigator.clipboard.writeText($("#prefxunbundle").val()+$(theTarget).val().replaceAll(/\//g,'\\'));
   }
 });
-/* //use the copy function for paths
- $("#modelCopyPath").click(function(){
-    navigator.clipboard.writeText($("#prefxunbundle").val()+$("#modelTarget").val().replaceAll(/\//g,'\\'));
-  });
- $("#modelTexPath").click(function(){
-   navigator.clipboard.writeText($("#prefxunbundle").val()+$("#masksTemplate").val().replaceAll(/\//g,'\\'));
-  });
-	$("#modelNorPath").click(function(){
-    navigator.clipboard.writeText($("#prefxunbundle").val()+$("#normTemplate").val().replaceAll(/\//g,'\\'));
-   }); */
+
 
 	var legacyMatOpen = thePIT.RConfig('legacymaterial')
 	legacyMatOpen.then((isopen)=>{
 		$('#legacyMatSector').attr('open',isopen);
 	});
-
-/*
-https://thewebdev.info/2021/09/05/how-to-flatten-javascript-object-keys-and-values-to-a-single-depth-object/#:~:text=Single%20Depth%20Object-,To%20flatten%20JavaScript%20object%20keys%20and%20values%20to%20a%20single,the%20object%20we're%20flattening.&text=to%20create%20the%20obj%20object,%2C%20parent%20%2C%20and%20res%20objects.
-  const flattenObj = (obj, parent, res = {}) => {
-    for (const key of Object.keys(obj)) {
-      const propName = parent ? parent + '.' + key : key;
-      if (key=='childrens'){
-        flattenObj(obj[key], parent.hash, res);
-      }
-      if (typeof obj[key] === 'object') {
-        flattenObj(obj[key], propName, res);
-      } else {
-        res[propName] = obj[key];
-      }
-    }
-    return res;
-  }
-  */
 
   const prepTheList = (obj, parent) =>{
     if (obj!==null && obj!==undefined){
