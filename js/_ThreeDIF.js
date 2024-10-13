@@ -1484,6 +1484,17 @@ function codeMaterials(materialEntry,_materialName){
 				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.NormalTexture)
 				decalConfig.normalMap = retDefTexture(materialEntry.Data.NormalTexture,_materialName,"normal");
 			}
+
+			if (materialEntry?.Data.hasOwnProperty('MetalnessTexture')){
+				decalConfig.metalnessMap =retDefTexture(materialEntry.Data.MetalnessTexture,_materialName,"metalness");
+				decalConfig.metalness = materialEntry.Data.MetalnessScale
+			}
+
+			if (materialEntry?.Data.hasOwnProperty('RoughnessTexture')){
+				decalConfig.roughnessMap =retDefTexture(materialEntry.Data.RoughnessTexture,_materialName,"roughness");
+				decalConfig.roughness = materialEntry.Data.RoughnessScale
+			}
+			
 			//Color over textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseColor')){
 				decalConfig.color = new THREE.Color(`rgb(${materialEntry.Data.DiffuseColor.Red},${materialEntry.Data.DiffuseColor.Green},${materialEntry.Data.DiffuseColor.Blue})`);
