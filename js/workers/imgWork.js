@@ -150,6 +150,25 @@ function textAlphaFix(texturedatas,width,height,fileNAME,alphaValue=1){
 function textBlurApply(texturedatas,width,height,fileNAME,material,channelsTarget){
   const offScreenMe = new OffscreenCanvas(width, height);
   const gl = offScreenMe.getContext("2d");
+  const offScreenBlur = new OffscreenCanvas(width,height);
+  const glBlur =offScreenBlur.getContext("2d");
+
+  var newTextureData = new Uint8Array(width*height*4);
+
+  for (let i = 0, l = textureDatas.length; i < l; i += channelsTarget) {
+    newTextureData[i]=texturedatas[i]
+    newTextureData[i+1]=texturedatas[i]
+    newTextureData[i+2]=texturedatas[i]
+    newTextureData[i+3]=texturedatas[i]
+  }
+  gl.putImageData(newTextureData,0,0,0,0,width,height);
+
+  glBlur.filter = 'blur(2px)';
+  glBlur.drawImage(gl);
+
+  var blurredTextureData = glBlur.getImageData(0,0,width,height);
+  self.postMessage(['blurApply',blurredTextureData,width,height,fileNAME,material]);
+  
 }
 
 function gradientApply(textureDatas,width,height,fileNAME,material,channels,gradientSteps){
