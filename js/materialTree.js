@@ -200,7 +200,7 @@ var materialJson=[
 	{"id":"1205","parent":"13","text":"dust_light"},
 	{"id":"1206","parent":"1205","text":"dust_light_01_50","type":"materials","a_attr":{"data-val":"base\\surfaces\\materials\\grunge\\dust_light\\dust_light_01_50.mltemplate"}},
 	{"id":"96","parent":"13","text":"blood"},
-	{"id":"334","parent":"96","text":"blood_smooth_01_30","type":"materials","a_attr":{"data-val":"base\\surfaces\\materials\\grunge\\blood\\blood_smooth_01_30.mltemplate"}},
+	{"id":"334","parent":"96","text":"blood_smooth_1_30","type":"materials","a_attr":{"data-val":"base\\surfaces\\materials\\grunge\\blood\\blood_smooth_1_30.mltemplate"}},
 	{"id":"97","parent":"13","text":"graffiti"},
 	{"id":"335","parent":"97","text":"graffiti_01_100","type":"materials","a_attr":{"data-val":"base\\surfaces\\materials\\grunge\\graffiti\\graffiti_01_100.mltemplate"}},
 	{"id":"98","parent":"13","text":"grime_film"},

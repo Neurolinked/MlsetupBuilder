@@ -137,7 +137,7 @@ const materialCore = [
   {"name": "soil_peat_coarse_01_100","tags": [],"path": "base\\surfaces\\materials\\ground\\soil_peat\\soil_peat_coarse_01_100.mltemplate","icon": ""},
   {"name": "soil_peat_fine_01_100","tags": [],"path": "base\\surfaces\\materials\\ground\\soil_peat\\soil_peat_fine_01_100.mltemplate","icon": ""},
   {"name": "dust_light_01_50","tags": [],"path": "base\\surfaces\\materials\\grunge\\dust_light\\dust_light_01_50.mltemplate","icon": ""},
-  {"name": "blood_smooth_01_30","tags": [],"path": "base\\surfaces\\materials\\grunge\\blood\\blood_smooth_01_30.mltemplate","icon": ""},
+  {"name": "blood_smooth_1_30","tags": [],"path": "base\\surfaces\\materials\\grunge\\blood\\blood_smooth_1_30.mltemplate","icon": ""},
   {"name": "graffiti_01_100","tags": [],"path": "base\\surfaces\\materials\\grunge\\graffiti\\graffiti_01_100.mltemplate","icon": ""},
   {"name": "grime_film_01_300","tags": [],"path": "base\\surfaces\\materials\\grunge\\grime_film\\grime_film_01_300.mltemplate","icon": ""},
   {"name": "rust_thick_flaky_01_300","tags": [],"path": "base\\surfaces\\materials\\grunge\\rust_thick\\rust_thick_flaky_01_300.mltemplate","icon": ""},
