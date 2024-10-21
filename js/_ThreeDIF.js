@@ -1422,6 +1422,18 @@ async function ProcessStackTextures(){
 			switch (textureDock[index].maptype) {
 				case 'mask':
 					//Blur here ?
+					//texturedatas,width,height,fileNAME,material,channelsTarget,pixels
+					if (PARAMS.maskBlur>0){
+						imgWorker.postMessage([
+							'blurApply',
+							elm.value, 
+							textureDock[index].info.width, 
+							textureDock[index].info.height, 
+							target,
+							textureDock[index].shader,
+							PARAMS.maskBlur
+						]);
+					}
 					break;
 				case 'normal':
 					imgWorker.postMessage([
