@@ -21,7 +21,7 @@ onmessage = function(event){
       var workerResult = textAlphaFix(datas[0],datas[1],datas[2],datas[3]);
       break;
     case 'blurApply':
-      var workerResult = textBlurApply(datas[0],datas[1],datas[2],datas[3],datas[4],recalcChannels);
+      var workerResult = textBlurApply(datas[0],datas[1],datas[2],datas[3],datas[4],recalcChannels,datas[5]);
       break;
     case 'roughnessSwap':
       var workerResult = roughnessFix(datas[0],datas[1],datas[2],datas[3],datas[4]);
@@ -147,7 +147,7 @@ function textAlphaFix(texturedatas,width,height,fileNAME,alphaValue=1){
    self.postMessage(['alphaFix',texturedatas,width,height,fileNAME]);
 }
 
-function textBlurApply(texturedatas,width,height,fileNAME,material,channelsTarget){
+function textBlurApply(texturedatas,width,height,fileNAME,material,channelsTarget,pixels=2){
   const offScreenMe = new OffscreenCanvas(width, height);
   const gl = offScreenMe.getContext("2d");
   const offScreenBlur = new OffscreenCanvas(width,height);
@@ -163,7 +163,7 @@ function textBlurApply(texturedatas,width,height,fileNAME,material,channelsTarge
   }
   gl.putImageData(newTextureData,0,0,0,0,width,height);
 
-  glBlur.filter = 'blur(2px)';
+  glBlur.filter = `blur(${pixels}px)`;
   glBlur.drawImage(gl);
 
   var blurredTextureData = glBlur.getImageData(0,0,width,height);
