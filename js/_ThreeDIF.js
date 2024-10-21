@@ -34,6 +34,10 @@ if (window.Worker) {
 		datas[4] materialName
 		 */
 		switch (command){
+			case 'blurApply':
+				//apply the blur on the masks for a better fusion with other textures
+				paintDatas(datas[0],datas[1],datas[2],'maskPainter',THREE.RGBAFormat);
+				break;
 			case 'gradientApply':
 				
 				break;
