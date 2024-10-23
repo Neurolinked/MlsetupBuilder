@@ -867,16 +867,20 @@ $("#resetShades span.choose").click(function(){
   
 
 	//activate/deactivate wireframe display
- /*  $("#wireFrame").click(function(){
-    var sideBox = $("#dat-container ul > li:first-child li:nth-child(4) input[type='checkbox']");
-    sideBox.click();//("checked",!sideBox.prop("checked"));
+ $("#wireFrame").click(function(ev){
+    ev.preventDefault();
+    PARAMS.wireframes = !PARAMS.wireframes
+    $("#thacanvas").trigger("theWire");
   });
 
   //activate and deactivate double layering
-  $("#onlyOneSide").click(function(){
-    var sideBox = $("#dat-container ul > li:first-child  li:nth-child(5) input[type='checkbox']");
-    sideBox.click();//("checked",!sideBox.prop("checked"));
-  }); */
+
+  $("#onlyOneSide").click(function(ev){
+    ev.preventDefault();
+
+    PARAMS.oneside = !PARAMS.oneside
+    $("#thacanvas").trigger("sided");
+  });
 
 	var TextureLoad = new Event('fire');
 
