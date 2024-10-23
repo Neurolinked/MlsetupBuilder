@@ -36,6 +36,7 @@ if (window.Worker) {
 		switch (command){
 			case 'blurApply':
 				//apply the blur on the masks for a better fusion with other textures
+				clearCanvas('maskPainter');
 				paintDatas(datas[0],datas[1],datas[2],'maskPainter',THREE.RGBAFormat);
 				break;
 			case 'gradientApply':
@@ -45,6 +46,7 @@ if (window.Worker) {
 				console.log(alphaFix);
 				break;
 			case 'paint':
+				clearCanvas(datas[3]);
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
 				let textureMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
 				textureStack[textureMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
@@ -1418,12 +1420,11 @@ async function ProcessStackTextures(){
 				target,
 				THREEFormat
 			)
-
 			switch (textureDock[index].maptype) {
-				case 'mask':
+				case 'mlmask':
 					//Blur here ?
 					//texturedatas,width,height,fileNAME,material,channelsTarget,pixels
-					if (PARAMS.maskBlur>0){
+					/* if (PARAMS.maskBlur>0){
 						imgWorker.postMessage([
 							'blurApply',
 							elm.value, 
@@ -1433,7 +1434,8 @@ async function ProcessStackTextures(){
 							textureDock[index].shader,
 							PARAMS.maskBlur
 						]);
-					}
+					} */
+					MapTextures(textureDock[index])
 					break;
 				case 'normal':
 					imgWorker.postMessage([
