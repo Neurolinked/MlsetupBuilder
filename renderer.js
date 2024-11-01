@@ -12,13 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	)
 
+	fetch('./jsons/materialDB.json')
+		.then(response=>response.json())
+		.then(data=>{
+			MLSB.Materials = data;
+			Object.freeze(MLSB.Materials);
+			notifyMe(`Material Database Loaded ${Object.keys(MLSB.Materials).length} vanilla materials`,false);
+			$(window).trigger("fetchMaterialsComplete");
+		}).catch(error=>notifyMe(error))
 	const alertMessages = document.getElementById("alertMessages");
 })
-
-
-
 const canvasIncrements = 128;
 const MLSB = new MLSBEditor;
+
 var closeModal
 
 const PARAMS = {

@@ -6,6 +6,7 @@
  * @property {number} Editor.layerSelected - get or set the selected mask layer
  * @property {object} Editor.Clone - information container manage cloning
  * @property {object} Editor.Clone.layerProperty - Class Layer information to clone to
+ * @property {object} Materials - content of the material DB
  * @property {object} TreeD - object that contains property about the 3d environment
  * @property {string} TreeD.lastModel - path of the latest model file requested to be loaded
  * @property {string} TreeD.appearance - the appearance the editor is working on
@@ -25,6 +26,7 @@ class MLSBEditor {
         model : {}
     }
 
+    Materials = {}
     /**
      * Reset the params to the default state
      */
