@@ -30,6 +30,7 @@
   - [x] mesh_decal.mt conversion to three.js format
 - [x] Custom models Material.json search and usage
   - [x] Override masks selection from legacy list
+- [x] Material Database and preview updated at PL last release
 - [x] UI redesign for the new materials management
 - [ ] Material Composer extension
   - [ ] Appearances Editor
