@@ -968,10 +968,7 @@ $("#resetShades span.choose").click(function(){
       $("#layerColor").val($(this).data("color"));
 			/*trigger the material change */
       $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
-			//
-      
-      let materialdummy = materialJson.filter(materiale =>(materiale.text==materialByClick)); //filter the material on the layer selected
-			
+
       //Setup the inputs
 
       if ( (($(this).data("color")=="000000_null") || ($(this).data("color")=="ffffff_null")) && (!$("#BWAdd").is(":checked")) ){
