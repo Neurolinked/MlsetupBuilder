@@ -12,11 +12,10 @@ const store = require('electron-store'); //https://github.com/sindresorhus/elect
 const sharp = require('sharp');
 const dree = require('dree');
 const outside = require('electron').shell;
-//
 const crypto = require('crypto');
-//app.commandLine.appendSwitch('enable-unsafe-webgpu') //enable access to the WebGPU interface adapter
+
 app.commandLine.appendSwitch('enable-gpu') //enable acceleration
-app.commandLine.appendSwitch('disable-features', 'WidgetLayering'); //minor fixes for console layering not working as intended
+//app.commandLine.appendSwitch('disable-features', 'WidgetLayering'); //minor fixes for console layering not working as intended
 const hash = crypto.createHash('sha256');
 //hash.digest('base64');
 //Log setups
