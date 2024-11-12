@@ -492,11 +492,7 @@ $(function(){
     `);
   }
 
-	$(window).resize(function(){
-    updPanelCovers(); //on resize will update the position of the interface to cover
-    $("#DataModelsLibrary").DataTable().draw();
-    adaptTexturePlayer();
-	});
+	
 
   const mbDropZone = document.getElementById('dropzone');
 
@@ -2824,5 +2820,12 @@ unCooKonfirm.addEventListener("click", (event) => {
     $("#thacanvas").trigger('playTexture',$(this).attr("id"));
   })
 
+  $(window).resize(function(){
+    updPanelCovers(); //on resize will update the position of the interface to cover
+    $("#DataModelsLibrary").DataTable().draw();
+    adaptTexturePlayer();
+    //adapt model table size to the window
+    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${(window.innerHeight-350)}px`);
+	});
   
 });
