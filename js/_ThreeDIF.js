@@ -475,7 +475,7 @@ $("#takeashot").click(function(ev){
 });
 
 
-$("#thacanvas").on('loadScene',function(event){
+$("#thacanvas").on('loadScene',function(event,fileModel){
 	/*
     Need a Promise and the use of then
 
@@ -486,6 +486,8 @@ $("#thacanvas").on('loadScene',function(event){
 	Load the Models and Apply Materials
 	*/
 	//cleanScene();
+
+	var materialFile = fileModel.replace(/\.glb$/,'.Material.json')
 	
 	//console.log(TDengine.scene);
 	cleanScene().
@@ -493,13 +495,13 @@ $("#thacanvas").on('loadScene',function(event){
 		MLSBConfig.then((config)=>{
 			actualExtension=config.maskformat;
 		}).then((ev)=>{
-			LoadMaterials($("#materialTarget").val())
+			LoadMaterials(materialFile)
 			.then((ev)=>{
 				firstModelLoaded=true;
 				$("#layeringsystem li").removeClass("active");
 				$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
 
-				LoadModel($("#modelTarget").val())
+				LoadModel(fileModel)
 
 				.then((ev)=>{
 					//load deferred textures in the textureDock
@@ -514,6 +516,9 @@ $("#thacanvas").on('loadScene',function(event){
 			notifyMe(`LoadScene ${error}`);
 		});
 	});
+}).on('customModel',function(ev){
+	//loading a custom model and a Material file
+	
 }).on('loadMaterials',function(ev){
 	/*
 	Check if there is loaded a model, otherwize

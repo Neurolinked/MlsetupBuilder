@@ -954,6 +954,17 @@ ipcMain.on('main:setupCR2Wr',(event, arg) => {
   })
 })
 
+ipcMain.on('main:osOpen',(event,arg)=>{
+	outside.openPath(arg)
+		.then((result)=>{
+			if (result==""){
+				event.reply('preload:logEntry', 'File Opened by the system')
+			}else{
+				event.reply('preload:logEntry', result)
+			}
+		}).catch((error)=>event.reply('preload:logEntry', error))
+});
+
 ipcMain.on('main:3dialog',(event, arg) => {
 	const result = dialog.showOpenDialog({
 		title:'Load a 3d asset',

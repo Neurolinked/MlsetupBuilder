@@ -1168,11 +1168,11 @@ $("#resetShades span.choose").click(function(){
 
     $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb/,'.Material.json'));
     $("#modelTarget").val(MLSB.TreeD.lastModel);
-    $("#thacanvas").trigger("loadScene"); //start loading the scene
+    $("#thacanvas").trigger("loadScene",[MLSB.TreeD.lastModel]); //start loading the scene
   });
   
   $('#btnMdlLoader').click(function(){
-    $("#thacanvas").trigger("loadScene"); //start loading the scene
+    $("#thacanvas").trigger("loadScene",[$("#modelTarget").val()]); //start loading the scene
   })
 
   CPModels.select.selector( 'td:not(:first-child)' ); //
@@ -2552,6 +2552,11 @@ $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
   }
 });
 
+$("#modelCustomPath").click(function(){
+  //Search for the model and the material file with an open folder
+  thePIT.ThreeDAsset();
+});
+
 $(".copyinfo").click(function(ev){
   let theTarget = $(this).data("target");
   if ($(theTarget).val()!=''){
@@ -2559,6 +2564,14 @@ $(".copyinfo").click(function(ev){
   }
 });
 
+$(".shellOpen").click(function(ev){
+  let pathCheck = $(this).parent().find("input").val();
+  if (pathCheck.match(/^[A-Za-z]:(\\|\/)/)){
+    thePIT.openOS(pathCheck);
+  }else{
+    thePIT.openOS(materialJSON.MaterialRepo+pathCheck);
+  }
+});
 
 	var legacyMatOpen = thePIT.RConfig('legacymaterial')
 	legacyMatOpen.then((isopen)=>{

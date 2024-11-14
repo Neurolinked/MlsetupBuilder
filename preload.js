@@ -62,6 +62,12 @@ Scan a folder searching for GLB files
       mapMasks : async (pathTemplate)=>{
          return await ipcRenderer.invoke('main:findMasks',pathTemplate);
       },
+      openOS : (path)=>{
+        console.log(path)
+        if (path.match(/.+\.(glb|json)$/)){
+          ipcRenderer.send('main:osOpen',path);
+        }
+      },
       Foldering : (path) =>{
         //It will display the path folder chosen
         ipcRenderer.send('main:openFolder',path);
