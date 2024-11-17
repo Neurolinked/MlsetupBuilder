@@ -2834,6 +2834,10 @@ unCooKonfirm.addEventListener("click", (event) => {
     $("#thacanvas").trigger('playTexture',$(this).attr("id"));
   })
 
+  $("body").on('click','#Mlswitcher input',function(ev){
+    $("#thacanvas").trigger("switchMlayer");
+  });
+
   $(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover
     $("#DataModelsLibrary").DataTable().draw();

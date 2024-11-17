@@ -530,6 +530,9 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 			oggetti.visible=toggle;
 		}
 	})
+}).on('switchMlayer',function(){
+	let selected = activeMLayer();
+	$(window).trigger("limitLayers",materialStack[selected].userData.layers)
 }).on('switchLayer',function(ev,layer=0){
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
@@ -1252,7 +1255,8 @@ async function _getFileContent(textureObj){
 					console.log(error)
 					materialStack[textureObj.shader].userData.layers = 0
 				}).finally((e)=>{
-					$(window).trigger("limitLayers",materialStack[textureObj.shader].userData.layers);
+					//only the selected one will decide the number of layers
+					//$(window).trigger("limitLayers",materialStack[textureObj.shader].userData.layers);
 				})
 			}
 			//TODO make the loading of the masks in promise after 
@@ -1469,8 +1473,10 @@ async function ProcessStackTextures(){
 		/* 	if (textureDock[index].shader.userData?.type=='hair'){
 				console.log(`Bisogna snegrare`);
 			} */
-	})
-}).catch((error)=>{
+		})
+	}).then(()=>{
+		$("#thacanvas").trigger("switchMlayer");
+	}).catch((error)=>{
 		notifyMe(`ProcessStackTextures ${error}`);
 	})
 }
