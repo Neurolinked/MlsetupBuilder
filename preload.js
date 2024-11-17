@@ -321,8 +321,8 @@ ipcRenderer.on('preload:setMicroCoords',(event,data)=>{
 //update the configurations in the main interface
 ipcRenderer.on("preload:upd_config",(event,data)=>{
   //console.log(data)
-  let maskTemplate = document.getElementById("masksTemplate")
-  maskTemplate.value = maskTemplate.value.replace(new RegExp(/\.(dds|png|xbm)/),"."+data.maskformat)
+  /* let maskTemplate = document.getElementById("masksTemplate")
+  maskTemplate.value = maskTemplate.value.replace(new RegExp(/\.(dds|png|xbm)/),"."+data.maskformat) */
 })
 
 ipcRenderer.on("preload:activate",(event,target)=>{

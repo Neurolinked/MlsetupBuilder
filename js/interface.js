@@ -1011,9 +1011,9 @@ $("#resetShades span.choose").click(function(){
     // `d` is the original data object for the row
     var maskString ='';
     var normString = '';
-    if (((d.mask!=null)||(d.mask!==undefined)) && parseInt(d.mask) ){
+    /* if (((d.mask!=null)||(d.mask!==undefined)) && parseInt(d.mask) ){
       maskString = `<dt class="text-primary">mask:</dt><dd class="ps-4 text-break">${maskList[d.mask].mask.replace('{format}',textureformat)}</dd>`;
-    }
+    } */
     if (((d.normal!=null)||(d.normal!==undefined)) && parseInt(d.normal)){
       normString = `<dt class="text-primary">normal:</dt><dd class="ps-4 text-break">${normList[d.normal].replace('{format}',textureformat)}</dd>`;
     }
@@ -1085,7 +1085,6 @@ $("#resetShades span.choose").click(function(){
         },
         searchable:true
       },
-      {data:'mask'},
       {data:'normal'},
       {
         data:'origin',
@@ -1142,19 +1141,21 @@ $("#resetShades span.choose").click(function(){
                 name:value.text,
                 tags:value.type,
                 file:value?.li_attr.model,
-                mask:value.li_attr?.masks != undefined ? value.li_attr?.masks : null ,
                 normal:value.li_attr?.normal != undefined ? value.li_attr?.normal : null,
                 origin:"custom"
-            });
-          }
+              });
+              //mask:value.li_attr?.masks != undefined ? value.li_attr?.masks : null ,
+            }
         }
         table.draw(true);
         $(".dt-buttons button" ).removeClass("dt-button");
       }
       var filtered = CPModels.data().flatten().filter((value,index)=>{ return value.file==MLSB.TreeD.lastModel});
+      /*
       filtered = filtered.length==1 ? filtered[0] : {};
       $("#masksTemplate").val(filtered?.mask!=null ? maskList[filtered.mask].mask.replace('{format}',textureformat) : '');
       $("normTemplate").val(filtered?.normal!=null ? normList[filtered.normal].replace('{format}',textureformat) : '');
+      */
       notifyMe("Mesh linked :"+table.data().length,false);
       document.getElementById("Loading").close();
     }
