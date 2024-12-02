@@ -6,7 +6,9 @@
   "main": "main.mjs",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev=true"
+    "dev": "electron . --dev=true",
+    "package":"electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\"",
+    "compile": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\" --prune=true  --asar.unpackDir={**/node_modules/sharp,**/node_modules/@img,**/jsons,**/images} "
   },
   "keywords": [
     "Cyberpunk2077",
@@ -24,7 +26,7 @@
     "electron-store": "^8.1.0",
     "fs-extra": "^11.2.0",
     "intro.js": "^7.2.0",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@electron/packager": "^18.3.5",

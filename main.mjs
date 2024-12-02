@@ -4,13 +4,13 @@ import {app, BrowserWindow, globalShortcut, screen, Notification, ipcMain, nativ
 import {shell as outside} from 'electron';
 import {execFile as child} from 'child_process'; //check the subroutines for execFile and spawn
 import {spawn as spawner} from 'child_process';
-import log from 'electron-log/main.mjs';
+import log from 'electron-log';
 import path from 'node:path';
 import * as fs from 'node:fs';
 import fse from 'fs-extra/esm';
 import Store from 'electron-store';
 /* import {crypto} from 'node:crypto'; */
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 import {dree} from 'dree';
 import { fileURLToPath } from 'url';
 
@@ -19,7 +19,10 @@ const crypto = await import('node:crypto');
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
-/* var child = require('child_process').execFile;
+/* 
+TODO remove this shit
+
+var child = require('child_process').execFile;
 var spawner = require('child_process').spawn; */
 
 /* const path = require('path') */
@@ -36,8 +39,8 @@ app.commandLine.appendSwitch('enable-gpu') //enable acceleration
 const hash = crypto.createHash('sha256');
 //hash.digest('base64');
 //Log setups
-/* log.transports.file.level = 'info' 
-log.transports.console.level = 'info' */
+log.transports.file.level = 'info' 
+log.transports.console.level = 'info'
 
 var subproc
 
@@ -135,7 +138,7 @@ const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit
 
 const preferences = new Store({schema,
 	beforeEachMigration: (store, context) => {
-		/* log.info(`[main-config] migrate from ${context.fromVersion} → ${context.toVersion}`) */
+		log.info(`[main-config] migrate from ${context.fromVersion} → ${context.toVersion}`)
 	},
 	migrations: {
 		'<=1.6.2': store => {
@@ -678,7 +681,7 @@ async function AfileRead(userpath,flags,noRepo){
 			whereLoadFrom = path.normalize(userpath)
 		}else{
 			if (preferences.get('paths.depot')==''){
-				/* log.warn(`The Depot preference isn't configured`) */
+				log.warn(`The Depot preference isn't configured`)
 				mainWindow.webContents.send('preload:logEntry', `No Depot setup, go to Preferences window and fix it`);
 				reject('No Depot');
 			}
@@ -751,7 +754,7 @@ ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 		whereLoadFrom = path.normalize(percorso)
 	}else{
 		if (preferences.get('paths.depot')==''){
-			/* log.warn(`The Depot preference isn't configured`) */
+			log.warn(`The Depot preference isn't configured`)
 			event.reply('preload:logEntry', `No Depot setup, go to Preferences window and fix it`);
 			event.returnValue = '';
 			return
@@ -1387,13 +1390,14 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 		}else{
 
 			var gameContentPath = preferences.get('paths.game')
+
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
 				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
 				in ${gameContentPath}`)
 				var archiveFilter = microBuilder(gameContentPath)
 			}else{
-				let archive = dialog.showOpenDialog({title:'Select the game folder with the default archives (found in Cyberpunk 2077\\archive\\pc\\content)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
+				let archive = dialog.showOpenDialog({title:'Select the game folder',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
 				.then(selection => {
 					if (!selection.canceled){
 						var archiveFilter = microBuilder(selection.filePaths[0])
@@ -1406,7 +1410,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 })
 
 function microBuilder(contentdir){
-	contentpath = path.join(contentdir,spotfolder.base)
+	//var contentpath = path.join(contentdir,spotfolder.base)
 	
 	return new Promise((resolve,reject) =>{
 
@@ -1447,7 +1451,7 @@ function microBuilder(contentdir){
 
 								sharp(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/',png))
 									.resize(256)
-									.toFile(path.join(app.getAppPath(),'images/',png), (err, info) => {
+									.toFile(path.join(app.getAppPath(),'images/',png).replace('app.asar', 'app.asar.unpacked'), (err, info) => {
 										 if(err){
 											 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 										 }else{
@@ -1455,7 +1459,7 @@ function microBuilder(contentdir){
 										 }
 										})
 										.resize(64)
-										.toFile(path.join(app.getAppPath(),'images/thumbs/',png), (err, info) => {
+										.toFile(path.join(app.getAppPath(),'images/thumbs/',png).replace('app.asar', 'app.asar.unpacked'), (err, info) => {
 											 if(err){
 												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
 											 }else{
