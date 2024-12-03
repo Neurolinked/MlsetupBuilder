@@ -376,12 +376,12 @@
           <div>
             <div class="input-group input-group-sm mb-1">
               <div class="badge my-auto">Tiles</div>
-              <input type="number" class="form-control rounded-0" id="layerTile" value="1.0" step="0.01" min="0.01" max="150.0">
+              <input type="number" class="form-control rounded-0 driven" id="layerTile" value="1.0" step="0.01" min="0.01" max="150.0">
               <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerTile" value="1.0" step="0.01"  min="0.01" max="150">
             </div>
             <div class="input-group input-group-sm my-1">
               <div class="badge my-auto">Opacity</div>
-              <input type="number" class="form-control form rounded-0" id="layerOpacity" value="1.0" step="0.01" min="0">
+              <input type="number" class="form-control form rounded-0 driven" id="layerOpacity" value="1.0" step="0.01" min="0">
               <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerOpacity" value="1.0" step="0.01"  min="0.0" max="1.0">
             </div>
           </div>
@@ -456,7 +456,7 @@
       <div>
         <div class="input-group input-group-sm mb-1">
           <div class="badge my-auto">Luminosity</div>
-            <input type="number" class="form-control rounded-0" id="colorLum" value="1.0" step="0.01" min="0.01" max="150.0">
+            <input type="number" class="form-control rounded-0 driven" id="colorLum" value="1.0" step="0.01" min="0.01" max="150.0">
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#colorLum" value="1.0" step="0.01"  min="0.01" max="10.0">
           </div>
         </div>
@@ -504,17 +504,17 @@
         </div>
         <div class="p-2">
           <div class="input-group input-group-sm layer-2 ">
-            <div class="badge my-auto">Tiles</div> <input type="number" class="form-control rounded-0 " id="mbTile" value="1.0" step="0.01"  min="0.01" max="150">
+            <div class="badge my-auto">Tiles</div> <input type="number" class="form-control rounded-0 driven" id="mbTile" value="1.0" step="0.01"  min="0.01" max="150">
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbTile" value="1.0" step="0.01"  min="0.01" max="150">
           </div>
           <div class="input-group input-group-sm layer-2">
             <div class="badge my-auto">contrast</div>
-            <input type="number" class="form-control rounded-0" id="mbCont" value="0.0" step="0.01"    title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
+            <input type="number" class="form-control rounded-0 driven" id="mbCont" value="0.0" step="0.01"    title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbCont" value="0.0" step="0.01"  min="0.0" max="1.0">
           </div>
           <div class="input-group input-group-sm layer-2 ">
               <div class="badge my-auto">normals</div>
-            <input type="number" class="form-control rounded-0" id="mbNorm" value="1.0" step="0.01">
+            <input type="number" class="form-control rounded-0 driven" id="mbNorm" value="1.0" step="0.01">
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbNorm" value="1.0" step="0.01"  min="0.0" max="2.0">
           </div>
         </div>

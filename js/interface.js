@@ -286,7 +286,7 @@ $(function(){
       $("#materialDis").appendTo("#SettingsSummary");
       $("#mb-preview").appendTo("#SettingsSummary");
       $("#SettingsSummary").append("<div class='cube tint'> </div>");
-      $("body #cagecolors span.active").click();
+      $("#cagecolors span.active").click();
       $("#Mlswitcher").parent().attr('open','');
     }else{
       $("div.cube.tint").remove()
@@ -321,17 +321,19 @@ $(function(){
   });
 
   $(".friendo").on("input",function(e){
-    $($(this).data("control")).val($(this).val());
-    $($(this).data("control")).change();
+    var friendship = $(this).data("control");
+    $(friendship).val($(this).val())
+    $(friendship).trigger("input",true);
   });
 
-  $("input").on({
+  $("input.driven").on({
       "input":function(e){
         driveRange(e);
       },
-      "change":function(e){
+      /* "change":function(e){
+        console.log(e)
         driveRange(e);
-      }
+      } */
     });
 
   function driveRange(identifier){
@@ -1489,18 +1491,21 @@ $("#resetShades span.choose").click(function(){
 		} */
 
     //reorder colors
-    if ($("#colororder").is(":checked")){
-      
+   /*  if ($("#colororder").is(":checked")){
+      $("#cagecolors").attr("data-order","lum");
       $("#cagecolors").find('span').sort(function(a, b) {
       	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
   		}).appendTo($("#cagecolors"));
 
     }else{
+      $("#cagecolors").attr("data-order","order");
+
       $("#cagecolors").find('span').sort(function(a, b) {
       	return +a.getAttribute('data-order') - +b.getAttribute('data-order');
   		}).appendTo($("#cagecolors"));
-    }
-
+    } */
+    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
+    
     let ricercacolore = $("#layerColor").val();
     $("#cagecolors span").removeClass("active");
 
@@ -1522,20 +1527,22 @@ $("#resetShades span.choose").click(function(){
       $('#colorLbFinder').addClass("filterAlert");
 		}
   });
+
   $("#colorCleaner").click(function(){$("#colorLbFinder").val("").keyup()});
 
-  $("#colororder").change(function(){
+  $("#colororder").change(function(ev){
     if ($("#colororder").is(":checked")){
-      $("#cagecolors").find('span').sort(function(a, b) {
-      	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
-  		}).appendTo($("#cagecolors"));
+      $("#cagecolors").attr("data-index","lum")
     }else{
-      $("#cagecolors").find('span').sort(function(a, b) {
-      	return +a.getAttribute('data-order') - +b.getAttribute('data-order');
-  		}).appendTo($("#cagecolors"));
+      $("#cagecolors").attr("data-index","order")
     }
+    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
   });
 
+  function sort_color(a, b,attribute = $("#cagecolors").attr("data-index")){
+    return ($(b).attr(`data-${attribute}`)) < ($(a).attr(`data-${attribute}`)) ? 1 : -1;    
+  }
+  
   //Color Luminosity
   $("#colorLum").on("change, input",function(ev){
     let illuminazione = $(this).val();
