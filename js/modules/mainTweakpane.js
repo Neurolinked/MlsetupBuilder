@@ -45,6 +45,7 @@ const TDtabManager = panel.addTab({
       ]
 });
 
+const PARAMdef = structuredClone(PARAMS);
 
 TDtabManager.pages[0].addBinding(PARAMS, 'cameraNear',{min:0.01,max:20,label:'Camera Near'}).on('change',(ev)=>{
   $("#thacanvas").trigger("updCamera");
@@ -58,12 +59,24 @@ TDtabManager.pages[0].addBinding(PARAMS, 'wireframes',{label:'Display wireframes
   $("#thacanvas").trigger("theWire");
 });
 
-TDtabManager.pages[0].addBinding(PARAMS, 'maskChannel',{min:0.0,max:1.0, step:0.01, label:'Mask layer opacity (only 3d viewport)'}).on('change',(ev)=>{
+TDtabManager.pages[0].addBinding(PARAMS, 'maskChannel',{min:0.0,max:1.0, step:0.01, label:'Mask layer opacity\n(only 3d viewport)'}).on('change',(ev)=>{
   $("#thacanvas").trigger('maskAlpha');
 });
 
 TDtabManager.pages[0].addBinding(PARAMS, 'oneside',{label:'One side rendering'}).on('change',(ev)=>{
   $("#thacanvas").trigger('sided');
+});
+
+const tweakReset = TDtabManager.pages[0].addButton({
+  title: 'Reset to Default',
+}).on('click', (ev) => {
+
+PARAMS.cameraNear = PARAMdef.cameraNear
+PARAMS.cameraFar = PARAMdef.cameraFar
+PARAMS.speed = PARAMdef.speed
+PARAMS.maskChannel = PARAMdef.maskChannel
+TDtabManager.refresh();
+
 });
 
 const lightpane = TDtabManager.pages[0].addFolder({
@@ -72,76 +85,36 @@ const lightpane = TDtabManager.pages[0].addFolder({
 });
 
 
-const plight1 = lightpane.addFolder({
-  title:'Point light 1'
-})
-plight1.addBinding(PARAMS,'p_light1_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',1);
-});;
-plight1.addBinding(PARAMS,'p_light1_col',{label:'Color',view:'color'}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',1);
-});;
-plight1.addBinding(PARAMS,'l1_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
-  $("#thacanvas").trigger('lightpos',1);
-});
+const plight1 = lightpane.addFolder({title:'Point light 1'})
+  plight1.addBinding(PARAMS,'p_light1_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {$("#thacanvas").trigger('newlights',1);});
+  plight1.addBinding(PARAMS,'p_light1_col',{label:'Color',view:'color'}).on('change', (ev) => {$("#thacanvas").trigger('newlights',1);});
+  plight1.addBinding(PARAMS,'l1_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {$("#thacanvas").trigger('lightpos',1);});
 
-const plight2 = lightpane.addFolder({
-  title:'Point light 2'
-})
-plight2.addBinding(PARAMS,'p_light2_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',2);
-});;
-plight2.addBinding(PARAMS,'p_light2_col',{label:'Color',view:'color'}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',2);
-});
-plight2.addBinding(PARAMS,'l2_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
-  $("#thacanvas").trigger('lightpos',2);
-});
+const plight2 = lightpane.addFolder({title:'Point light 2'})
+  plight2.addBinding(PARAMS,'p_light2_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {$("#thacanvas").trigger('newlights',2);});
+  plight2.addBinding(PARAMS,'p_light2_col',{label:'Color',view:'color'}).on('change', (ev) => {$("#thacanvas").trigger('newlights',2);});
+  plight2.addBinding(PARAMS,'l2_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {$("#thacanvas").trigger('lightpos',2);});
 
-const plight3 = lightpane.addFolder({
-  title:'Point light 3'
-})
-plight3.addBinding(PARAMS,'p_light3_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',3);
-});;
-plight3.addBinding(PARAMS,'p_light3_col',{label:'Color',view:'color'}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',3);
-});
-plight3.addBinding(PARAMS,'l3_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
-  $("#thacanvas").trigger('lightpos',3);
-});;
+const plight3 = lightpane.addFolder({title:'Point light 3'})
+  plight3.addBinding(PARAMS,'p_light3_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {$("#thacanvas").trigger('newlights',3);});
+  plight3.addBinding(PARAMS,'p_light3_col',{label:'Color',view:'color'}).on('change', (ev) => {$("#thacanvas").trigger('newlights',3);});
+  plight3.addBinding(PARAMS,'l3_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {$("#thacanvas").trigger('lightpos',3);});
 
 
-const plight4 = lightpane.addFolder({
-  title:'Point light 4'
-})
-plight4.addBinding(PARAMS,'p_light4_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',4);
-});
-plight4.addBinding(PARAMS,'p_light4_col',{label:'Color',view:'color'}).on('change', (ev) => {
-  $("#thacanvas").trigger('newlights',4);
-});
-plight4.addBinding(PARAMS,'l4_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {
-  $("#thacanvas").trigger('lightpos',4);
-});
+const plight4 = lightpane.addFolder({title:'Point light 4'})
+  plight4.addBinding(PARAMS,'p_light4_pow',{label:'Power',min:0.1,max:200}).on('change', (ev) => { $("#thacanvas").trigger('newlights',4);});
+  plight4.addBinding(PARAMS,'p_light4_col',{label:'Color',view:'color'}).on('change', (ev) => {$("#thacanvas").trigger('newlights',4);});
+  plight4.addBinding(PARAMS,'l4_pos',{label:'Position',x:{min:-10,max:10},y:{min:-10,max:10},y:{min:-10,max:10}}).on('change', (ev) => {$("#thacanvas").trigger('lightpos',4);});
 
 const fogpane = TDtabManager.pages[0].addFolder({
     title: 'Fog',
     expanded: false,
   });
-fogpane.addBinding(PARAMS,'fogcolor',{view: 'color',label:'Color'}).on('change', (ev) => {
- $("#thacanvas").trigger('fogNew');
-});
-fogpane.addBinding(PARAMS, 'fognear',{min:0,max:100,label:'Near'}).on('change', (ev) => {
-  $("#thacanvas").trigger('fogNew');
- });;
-fogpane.addBinding(PARAMS, 'fogfar',{min:0,max:1000,step:1,label:'Far'}).on('change', (ev) => {
-  $("#thacanvas").trigger('fogNew');
- });;
+  fogpane.addBinding(PARAMS,'fogcolor',{view: 'color',label:'Color'}).on('change', (ev) => {$("#thacanvas").trigger('fogNew');});
+  fogpane.addBinding(PARAMS, 'fognear',{min:0,max:100,label:'Near'}).on('change', (ev) => {$("#thacanvas").trigger('fogNew');});
+  fogpane.addBinding(PARAMS, 'fogfar',{min:0,max:1000,label:'Far'}).on('change', (ev) => {$("#thacanvas").trigger('fogNew');});
 
-const tweakReset = TDtabManager.pages[0].addButton({
-    title: 'Reset to Default',
-});
+
 
 const smeshtab =  TDtabManager.pages[1].addTab({
     pages: [
@@ -158,7 +131,7 @@ EDLayer.addBinding(PARAMS,'EDLayerMaxTiles',{min:0.01,max:1000,step:0.01,label:'
 });
 
 const EDMblend = TDtabManager.pages[2].addFolder({
-  title:'microblends'
+  title:'Microblends'
 });
 EDMblend.addBinding(PARAMS,'EDMblendMaxTiles',{min:0.01,max:1000,step:0.01,label:'Max Tiles'}).on('change', (ev) => {
   //Change the values in the interface
@@ -180,10 +153,14 @@ EDAdvSetup.addBinding(PARAMS,'ForceZeroOpacity',{label:'Force Layer 0 opacity to
   //Change the values in the interface
 });
 
-EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {
-  $("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);
-});
+EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {$("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);});
 EDAdvSetup.addBinding(PARAMS, 'obFoldercheck',{label:'Obsessive masks Nr check'})
+
+EDAdvSetup.addBinding(PARAMS, 'importSkip',{label:'Skip import preview'}).on('change',(ev)=>{
+  //TODO develop a logic to it  
+});
+
+
 
 TDtabManager.pages[2].addBlade({
   view: 'buttongrid',
