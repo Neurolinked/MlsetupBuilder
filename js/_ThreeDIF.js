@@ -475,277 +475,7 @@ $("#takeashot").click(function(ev){
 });
 
 
-$("#thacanvas").on('loadScene',function(event,fileModel){
-	/*
-    Need a Promise and the use of then
 
-	Load Materials
-		if there is no Material file try to export it
-	Load First Layer mask
-		if not found replace with a def. one and disable all layers except 0
-	Load the Models and Apply Materials
-	*/
-	//cleanScene();
-
-	var materialFile = fileModel.replace(/\.glb$/,'.Material.json')
-	
-	//console.log(TDengine.scene);
-	cleanScene().
-	then((ev)=>{
-		MLSBConfig.then((config)=>{
-			actualExtension=config.maskformat;
-		}).then((ev)=>{
-			LoadMaterials(materialFile)
-			.then((ev)=>{
-				firstModelLoaded=true;
-				$("#layeringsystem li").removeClass("active");
-				$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
-
-				LoadModel(fileModel)
-
-				.then((ev)=>{
-					//load deferred textures in the textureDock
-					LoadStackTextures();
-				}).catch((error)=>{
-					notifyMe(`LoadModel ${error}`);
-				})
-			}).catch((error)=>{
-				notifyMe(`LoadMaterials ${error}`);
-			})
-		}).catch((error)=>{
-			notifyMe(`LoadScene ${error}`);
-		});
-	});
-}).on('customModel',function(ev){
-	//loading a custom model and a Material file
-	
-}).on('loadMaterials',function(ev){
-	/*
-	Check if there is loaded a model, otherwize
-	Load the Materials
-	*/
-}).on('toggleMesh',function(ev,name,toggle){
-	TDengine.scene.traverse(oggetti=>{
-		if (oggetti.name==name.trim()){
-			oggetti.visible=toggle;
-		}
-	})
-}).on('switchMlayer',function(){
-	let selected = activeMLayer();
-	$(window).trigger("limitLayers",materialStack[selected].userData.layers)
-}).on('switchLayer',function(ev,layer=0){
-	if (firstModelLoaded){
-		//Used to switch the mask layer used on the multilayer material
-		let selected = activeMLayer();
-
-		if (materialStack[selected].hasOwnProperty("mask")){
-			test = _getFileContent({file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
-				.then((result)=>{
-					var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
-					if (myMask?.length==1){
-						//var LAYER = 
-						let nameMask = CryptoJS.MD5(materialStack[selected].mask).toString()
-						
-						paintDatas(result,myMask[0].info.width,myMask[0].info.height,'maskPainter',THREE.RGBAFormat)
-						textureStack[nameMask] = new THREE.DataTexture(result,myMask[0].info.width,myMask[0].info.height,THREE.RGBAFormat)
-
-						materialStack[selected].setValues({
-							alphaMap:textureStack[nameMask],
-							map:textureStack[nameMask],
-							opacity: parseFloat($("#layerOpacity").val())
-						})
-						materialStack[selected].map.flipY = flippingdipping;
-						materialStack[selected].map.needsUpdate = true;
-					}
-				}).catch((error)=>{
-					notifyMe(`switchLayer ${error.stack.split("\n")}`)
-				});
-			
-		}
-	}
-}).on('switchAppearance',function(ev, appearance='default'){
-
-	try{
-		let tempID = materialJSON.Appearances.map(el=>el.Name).indexOf(appearance)
-		if (tempID  >=0 ){ 
-			materialJSON.Appearances[tempID].Materials.forEach((material)=>{
-				materialSet.add(material);
-			})
-		}
-
-	}catch(wrong){
-		notifyMe(wrong);
-	}
-}).on('hairColorSwitch',function(ev,profile){
-	console.log(profile)
-	
-}).on('updCamera',function(ev){
-	if (PARAMS.cameraNear > PARAMS.cameraFar){
-		PARAMS.cameraFar = PARAMS.cameraNear+1;
-	}
-	TDengine.camera.near = PARAMS.cameraNear;
-	TDengine.camera.far = PARAMS.cameraFar;
-	TDengine.camera.updateProjectionMatrix();
-}).on('fogNew',function(ev){
-	try{
-		TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
-	}catch(error){
-		notifyMe(error);
-	}
-}).on('blurMask',function(ev){
-	console.log(ev);
-}).on('changeFormat',function(ev){
-	/*Update the texture format on preferences change */
-	let trigMe = thePIT.RConfig('maskformat');
-	trigMe.then((newformat)=>{
-		textureformat = newformat;
-	}).catch((error)=>{
-		notifyMe(error);
-	})
-}).on('newlights',function(event,index){
-	switch (index) {
-		case 1:
-			TDengine.lights.point[0].color = new THREE.Color(PARAMS.p_light1_col);
-			TDengine.lights.point[0].intensity = PARAMS.p_light1_pow;
-			break;
-		case 2:
-			TDengine.lights.point[1].color = new THREE.Color(PARAMS.p_light2_col);
-			TDengine.lights.point[1].intensity = PARAMS.p_light2_pow;
-            break;
-		case 3:
-			TDengine.lights.point[2].color = new THREE.Color(PARAMS.p_light3_col);
-			TDengine.lights.point[2].intensity = PARAMS.p_light3_pow;
-            break;
-		case 4:
-			TDengine.lights.point[3].color = new THREE.Color(PARAMS.p_light4_col);
-			TDengine.lights.point[3].intensity = PARAMS.p_light4_pow;
-            break;
-	}
-}).on('lightpos',function(event,index){
-	switch (index) {
-		case 1:
-			TDengine.lights.point[0].position.set(PARAMS.l1_pos.x,PARAMS.l1_pos.y,PARAMS.l1_pos.z);
-			break;
-		case 2:
-			TDengine.lights.point[1].position.set(PARAMS.l2_pos.x,PARAMS.l2_pos.y,PARAMS.l2_pos.z);
-			break;
-		case 3:
-			TDengine.lights.point[2].position.set(PARAMS.l3_pos.x,PARAMS.l3_pos.y,PARAMS.l3_pos.z);
-			break;
-		case 4:
-			TDengine.lights.point[3].position.set(PARAMS.l4_pos.x,PARAMS.l4_pos.y,PARAMS.l4_pos.z);
-			break;
-		default:
-			break;
-	}
-}).on('sided',function(event){
-    //single or doublesided
-	let selected = activeMLayer();
-
-	if (PARAMS.oneside){
-		materialStack[selected].side=THREE.FrontSide;
-    }else{
-        materialStack[selected].side=THREE.DoubleSide;
-    }
-
-}).on('maskAlpha',function(event){
-    //masking the alpha
-	let selected = activeMLayer();
-
-	materialStack[selected].setValues({alphaTest:PARAMS.maskChannel});
-
-}).on("theWire",function(event){
-    //changinf the wireframe value
-	let selected = activeMLayer();
-
-	materialStack[selected].setValues({wireframe:PARAMS.wireframes});
-}).on('changeColor',function(ev, color){
-	//change the color ONLY if a layer is selected
-	if (materialStack.length>0){
-		try{
-			let selected = activeMLayer();
-		
-			materialStack[selected].setValues({color:new THREE.Color(color)});
-			materialStack[selected].needsUpdate;
-		}catch(error){
-			notifyMe(error);
-		}
-	}
-}).on('flipMask',function(event){
-	let selected = activeMLayer();
-	flippingdipping = flipcheck.checked;
-	thePIT.savePref({flipmasks:flippingdipping});
-	materialStack[selected].map.flipY= flippingdipping;
-	materialStack[selected].map.needsUpdate = true;
-}).on('flipNorm',function(event){
-	let selected = activeMLayer();
-	materialStack[selected].normalMap.flipY = !materialStack[selected].normalMap.flipY;
-	materialStack[selected].normalMap.needsUpdate = true;
-}).on('playTexture',function(event,texture){
-	var dummyMd5 = CryptoJS.MD5(texture.replace(/\.(dds|png)$/g,".xbm"));
-	var imgDatas = textureStack[dummyMd5]
-	paintDatas(imgDatas.image.data,imgDatas.image.width,imgDatas.image.height,'texturePlayer',imgDatas.format);
-}).on('mousedown',function(event){
-    //stop painting on the interface
-	event.preventDefault();
-	if (event.shiftKey && (event.button==0)){
-		/* paintMaskCTX.beginPath(); */
-	}
-}).on('mouseup',function(event){
-    //start painting on the interface
-	event.preventDefault();
-	if (event.shiftKey &&  (event.button==0)){
-		/* paintMaskCTX.closePath(); */
-	}
-}).on('UVDisplay',function(event){
-	//generate and display the UVMap for the selected submeshes
-	let UVmapper = document.getElementById("UVMapMe")
-	let mysize = UVmapper.width;
-	clearCanvas("UVMapMe");
-
-	retUVMapData(
-		UVmapper,
-		getUVSubmeshIndex(document.querySelectorAll(`#unChecksMesh input[type="checkbox"]`)),
-		mysize)
-		.then(result=>{
-			notifyMe(`UVMap created`,false);
-		}).catch(error=>{
-			notifyMe(error);
-		});
-
-}).on('UVExport',function(){
-	/*
-	* generate and export to file the UVMap for the selected submeshes
-	* using the export size selected
-	*/
-	let mysize = parseInt($("#UVformat").val());
-	if (mysize==0){
-		mysize = document.getElementById("UVMapMe").width;
-	}
-
-	var offSCExport = new OffscreenCanvas(mysize,mysize);
-	retUVMapData(
-		offSCExport,
-		getUVSubmeshIndex(document.querySelectorAll(`#unChecksMesh input[type="checkbox"]`)),
-		mysize)
-		.then(result=>{
-			offSCExport.convertToBlob({type:'image/png'})
-				.then(blob=>{
-					
-					const url = URL.createObjectURL(blob);
-					let a = document.createElement('a');
-					a.href = url;
-					a.download = `UV_${mysize}_${String($("#modelTarget").val()).split("\/").reverse()[0].split(".")[0]}.png`;
-					a.click();
-					a.remove();
-				})
-				.catch(error=>notifyMe(error))
-
-			notifyMe(`UVMap need to be exported`,false);
-		}).catch(error=>{
-			notifyMe(error);
-		});
-})
 
 //INIT
 init();
@@ -1850,3 +1580,276 @@ function LoadModel(path){
 		}
 	});
 }
+
+
+$("#thacanvas").on('loadScene',function(event,fileModel){
+	/*
+    Need a Promise and the use of then
+
+	Load Materials
+		if there is no Material file try to export it
+	Load First Layer mask
+		if not found replace with a def. one and disable all layers except 0
+	Load the Models and Apply Materials
+	*/
+	//cleanScene();
+
+	var materialFile = fileModel.replace(/\.glb$/,'.Material.json')
+	
+	//console.log(TDengine.scene);
+	cleanScene().
+	then((ev)=>{
+		MLSBConfig.then((config)=>{
+			actualExtension=config.maskformat;
+		}).then((ev)=>{
+			LoadMaterials(materialFile)
+			.then((ev)=>{
+				firstModelLoaded=true;
+				$("#layeringsystem li").removeClass("active");
+				$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
+
+				LoadModel(fileModel)
+
+				.then((ev)=>{
+					//load deferred textures in the textureDock
+					LoadStackTextures();
+				}).catch((error)=>{
+					notifyMe(`LoadModel ${error}`);
+				})
+			}).catch((error)=>{
+				notifyMe(`LoadMaterials ${error}`);
+			})
+		}).catch((error)=>{
+			notifyMe(`LoadScene ${error}`);
+		});
+	});
+}).on('customModel',function(ev){
+	//loading a custom model and a Material file
+	
+}).on('loadMaterials',function(ev){
+	/*
+	Check if there is loaded a model, otherwize
+	Load the Materials
+	*/
+}).on('toggleMesh',function(ev,name,toggle){
+	TDengine.scene.traverse(oggetti=>{
+		if (oggetti.name==name.trim()){
+			oggetti.visible=toggle;
+		}
+	})
+}).on('switchMlayer',function(){
+	let selected = activeMLayer();
+	$(window).trigger("limitLayers",materialStack[selected].userData.layers)
+}).on('switchLayer',function(ev,layer=0){
+	if (firstModelLoaded){
+		//Used to switch the mask layer used on the multilayer material
+		let selected = activeMLayer();
+
+		if (materialStack[selected].hasOwnProperty("mask")){
+			test = _getFileContent({file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
+				.then((result)=>{
+					var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
+					if (myMask?.length==1){
+						//var LAYER = 
+						let nameMask = CryptoJS.MD5(materialStack[selected].mask).toString()
+						
+						paintDatas(result,myMask[0].info.width,myMask[0].info.height,'maskPainter',THREE.RGBAFormat)
+						textureStack[nameMask] = new THREE.DataTexture(result,myMask[0].info.width,myMask[0].info.height,THREE.RGBAFormat)
+
+						materialStack[selected].setValues({
+							alphaMap:textureStack[nameMask],
+							map:textureStack[nameMask],
+							opacity: parseFloat($("#layerOpacity").val())
+						})
+						materialStack[selected].map.flipY = flippingdipping;
+						materialStack[selected].map.needsUpdate = true;
+					}
+				}).catch((error)=>{
+					notifyMe(`switchLayer ${error.stack.split("\n")}`)
+				});
+			
+		}
+	}
+}).on('switchAppearance',function(ev, appearance='default'){
+
+	try{
+		let tempID = materialJSON.Appearances.map(el=>el.Name).indexOf(appearance)
+		if (tempID  >=0 ){ 
+			materialJSON.Appearances[tempID].Materials.forEach((material)=>{
+				materialSet.add(material);
+			})
+		}
+
+	}catch(wrong){
+		notifyMe(wrong);
+	}
+}).on('hairColorSwitch',function(ev,profile){
+	console.log(profile)
+	
+}).on('updCamera',function(ev){
+	if (PARAMS.cameraNear > PARAMS.cameraFar){
+		PARAMS.cameraFar = PARAMS.cameraNear+1;
+	}
+	TDengine.camera.near = PARAMS.cameraNear;
+	TDengine.camera.far = PARAMS.cameraFar;
+	TDengine.camera.updateProjectionMatrix();
+}).on('fogNew',function(ev){
+	try{
+		TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
+	}catch(error){
+		notifyMe(error);
+	}
+}).on('blurMask',function(ev){
+	console.log(ev);
+}).on('changeFormat',function(ev){
+	/*Update the texture format on preferences change */
+	let trigMe = thePIT.RConfig('maskformat');
+	trigMe.then((newformat)=>{
+		textureformat = newformat;
+	}).catch((error)=>{
+		notifyMe(error);
+	})
+}).on('newlights',function(event,index){
+	switch (index) {
+		case 1:
+			TDengine.lights.point[0].color = new THREE.Color(PARAMS.p_light1_col);
+			TDengine.lights.point[0].intensity = PARAMS.p_light1_pow;
+			break;
+		case 2:
+			TDengine.lights.point[1].color = new THREE.Color(PARAMS.p_light2_col);
+			TDengine.lights.point[1].intensity = PARAMS.p_light2_pow;
+            break;
+		case 3:
+			TDengine.lights.point[2].color = new THREE.Color(PARAMS.p_light3_col);
+			TDengine.lights.point[2].intensity = PARAMS.p_light3_pow;
+            break;
+		case 4:
+			TDengine.lights.point[3].color = new THREE.Color(PARAMS.p_light4_col);
+			TDengine.lights.point[3].intensity = PARAMS.p_light4_pow;
+            break;
+	}
+}).on('lightpos',function(event,index){
+	switch (index) {
+		case 1:
+			TDengine.lights.point[0].position.set(PARAMS.l1_pos.x,PARAMS.l1_pos.y,PARAMS.l1_pos.z);
+			break;
+		case 2:
+			TDengine.lights.point[1].position.set(PARAMS.l2_pos.x,PARAMS.l2_pos.y,PARAMS.l2_pos.z);
+			break;
+		case 3:
+			TDengine.lights.point[2].position.set(PARAMS.l3_pos.x,PARAMS.l3_pos.y,PARAMS.l3_pos.z);
+			break;
+		case 4:
+			TDengine.lights.point[3].position.set(PARAMS.l4_pos.x,PARAMS.l4_pos.y,PARAMS.l4_pos.z);
+			break;
+		default:
+			break;
+	}
+}).on('sided',function(event){
+    //single or doublesided
+	let selected = activeMLayer();
+
+	if (PARAMS.oneside){
+		materialStack[selected].side=THREE.FrontSide;
+    }else{
+        materialStack[selected].side=THREE.DoubleSide;
+    }
+
+}).on('maskAlpha',function(event){
+    //masking the alpha
+	let selected = activeMLayer();
+
+	materialStack[selected].setValues({alphaTest:PARAMS.maskChannel});
+
+}).on("theWire",function(event){
+    //changinf the wireframe value
+	let selected = activeMLayer();
+
+	materialStack[selected].setValues({wireframe:PARAMS.wireframes});
+}).on('changeColor',function(ev, color){
+	//change the color ONLY if a layer is selected
+	if (materialStack.length>0){
+		try{
+			let selected = activeMLayer();
+		
+			materialStack[selected].setValues({color:new THREE.Color(color)});
+			materialStack[selected].needsUpdate;
+		}catch(error){
+			notifyMe(error);
+		}
+	}
+}).on('flipMask',function(event){
+	let selected = activeMLayer();
+	flippingdipping = flipcheck.checked;
+	thePIT.savePref({flipmasks:flippingdipping});
+	materialStack[selected].map.flipY= flippingdipping;
+	materialStack[selected].map.needsUpdate = true;
+}).on('flipNorm',function(event){
+	let selected = activeMLayer();
+	materialStack[selected].normalMap.flipY = !materialStack[selected].normalMap.flipY;
+	materialStack[selected].normalMap.needsUpdate = true;
+}).on('playTexture',function(event,texture){
+	var dummyMd5 = CryptoJS.MD5(texture.replace(/\.(dds|png)$/g,".xbm"));
+	var imgDatas = textureStack[dummyMd5]
+	paintDatas(imgDatas.image.data,imgDatas.image.width,imgDatas.image.height,'texturePlayer',imgDatas.format);
+}).on('mousedown',function(event){
+    //stop painting on the interface
+	event.preventDefault();
+	if (event.shiftKey && (event.button==0)){
+		/* paintMaskCTX.beginPath(); */
+	}
+}).on('mouseup',function(event){
+    //start painting on the interface
+	event.preventDefault();
+	if (event.shiftKey &&  (event.button==0)){
+		/* paintMaskCTX.closePath(); */
+	}
+}).on('UVDisplay',function(event){
+	//generate and display the UVMap for the selected submeshes
+	let UVmapper = document.getElementById("UVMapMe")
+	let mysize = UVmapper.width;
+	clearCanvas("UVMapMe");
+
+	retUVMapData(
+		UVmapper,
+		getUVSubmeshIndex(document.querySelectorAll(`#unChecksMesh input[type="checkbox"]`)),
+		mysize)
+		.then(result=>{
+			notifyMe(`UVMap created`,false);
+		}).catch(error=>{
+			notifyMe(error);
+		});
+
+}).on('UVExport',function(){
+	/*
+	* generate and export to file the UVMap for the selected submeshes
+	* using the export size selected
+	*/
+	let mysize = parseInt($("#UVformat").val());
+	if (mysize==0){
+		mysize = document.getElementById("UVMapMe").width;
+	}
+
+	var offSCExport = new OffscreenCanvas(mysize,mysize);
+	retUVMapData(
+		offSCExport,
+		getUVSubmeshIndex(document.querySelectorAll(`#unChecksMesh input[type="checkbox"]`)),
+		mysize)
+		.then(result=>{
+			offSCExport.convertToBlob({type:'image/png'})
+				.then(blob=>{
+					
+					const url = URL.createObjectURL(blob);
+					let a = document.createElement('a');
+					a.href = url;
+					a.download = `UV_${mysize}_${String($("#modelTarget").val()).split("\/").reverse()[0].split(".")[0]}.png`;
+					a.click();
+					a.remove();
+				})
+				.catch(error=>notifyMe(error))
+
+			notifyMe(`UVMap need to be exported`,false);
+		}).catch(error=>{
+			notifyMe(error);
+		});
+});
