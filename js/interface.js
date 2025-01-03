@@ -2839,11 +2839,17 @@ unCooKonfirm.addEventListener("click", (event) => {
     $("#listTextures canvas").removeClass("border-active");
     $(this).addClass("border-active");
     $("#thacanvas").trigger('playTexture',$(this).attr("id"));
-  })
-
-  $("body").on('click','#Mlswitcher input',function(ev){
+  }).on('click','#Mlswitcher input',function(ev){
     $("#thacanvas").trigger("switchMlayer");
+  }).on('click','#MlSetupsList span',function(ev){
+    ev.preventDefault();
+    //TODO Switch setup
+
+  }).on('click',"#MlSetupsList .btn-close[data-bs-dismiss='badge']",function(ev){
+    ev.preventDefault();
+    //TODO close the file and delete the mlsetup entity
   });
+
 
   $(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover

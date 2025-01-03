@@ -671,3 +671,18 @@ table.dataTable tr:hover td:not([colspan]){
 #texturePlayer{
   margin:3px;
 }
+
+#MlSetupsList{
+  &::before{
+    --bs-badge-padding-x: 0.65em;
+    --bs-badge-padding-y: 0.35em;
+    --bs-badge-font-size: 0.75em;
+    padding: var(--bs-badge-padding-y) var(--bs-badge-padding-x);
+    content:"Mlsetups:";
+    background-color:RGBA(var(--bs-warning-rgb), var(--bs-bg-opacity, 1));
+    color:#000!important;
+    font-size: var(--bs-badge-font-size);
+    font-weight: 700;
+    display:inline-block;
+  }
+}
