@@ -100,7 +100,8 @@ const materialTypeCheck = {
 		"base\\fx\\shaders\\device_diode.mt",
 		"base\\fx\\_shaders\\holo_mask.mt",
 		"base\\fx\\shaders\\hologram.mt",
-		"base\\fx\\shaders\\emissive_basic_transparent.mt"
+		"base\\fx\\shaders\\emissive_basic_transparent.mt",
+		"base\\fx\\shaders\\metal_base_glitter.mt"
 	],
 	glass: [
 		"base\\materials\\glass.mt",
@@ -1224,7 +1225,7 @@ function codeMaterials(materialEntry,_materialName){
 		//switching the code based on the type of the material
 		if (materialTypeCheck.decals.includes(materialEntry.MaterialTemplate)){
 
-			var Rdecal = lambertType.clone();
+			var Rdecal = materialBASE.clone();
 			var decalConfig = {userData:{type:'decal'},color:0xFFFFFF,transparent:true, side:THREE.DoubleSide,depthWrite :false}
 
 			//Decal Textures
