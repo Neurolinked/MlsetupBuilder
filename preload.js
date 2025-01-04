@@ -68,6 +68,9 @@ contextBridge.exposeInMainWorld(
           ipcRenderer.send('main:osOpen',path);
         }
       },
+      chooseAFile:(file,ext)=>{
+        return ipcRenderer.invoke('main:fileCatch',{"path":file,"extension":ext});
+      },
       Foldering : (path) =>{
         //It will display the path folder chosen
         ipcRenderer.send('main:openFolder',path);

@@ -295,6 +295,23 @@ function fileOpener(target=''){
 	})
 }
 
+async function fqfnFile(event,arg){
+	//fully qualified file name resource pointer
+	if ((arg.hasOwnProperty('extension') ) && (arg.hasOwnProperty('path'))){
+		let seenPath = path.dirname(arg.path);
+		
+		const {canceled,filePaths } = await dialog.showOpenDialog({title:`Select the .${arg.extension} file`, properties: ['openFile'], defaultPath:path.join(preferences.get('paths.depot'),seenPath ), filters: [
+			{ name: 'specific type', extensions: [arg.extension] }] });
+		if (canceled){
+			return
+		}else{
+			return filePaths[0]
+		}
+	}else{
+		return
+	}
+}
+
 function JsonResourceRead(UserResource){
 	return new Promise((resolve,reject) =>{
 		let app_custom_json = path.join(app.getAppPath(),userRScheme[_jsons],`/${UserResource}.json`)/* application file  */
@@ -925,6 +942,7 @@ ipcMain.on('main:getversion',(event, arg) =>{
 	}
 })
 
+ipcMain.handle('main:fileCatch',fqfnFile)
 ipcMain.handle('main:folderSetup',dirOpen)
 //write the configuration file after the selection of the directory in the
 //preference interface window
