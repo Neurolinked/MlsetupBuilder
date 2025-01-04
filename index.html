@@ -281,10 +281,7 @@
 </ul>
 <div class="tab-content ps-1 layer1" id="nav-tabMLSB">
   <div class="tab-pane fade show active" id="nav-editor" role="tabpanel" aria-labelledby="pills-editor-tab" tabindex="-1">
-    <div id="MlSetupsList" class="">
-      <span class="badge text-bg-secondary">NoName<button type="button" class="ms-2 btn-close" data-bs-dismiss="badge" aria-label="Close"></button></span>
-      <span class="badge text-bg-dark">notSelected<button type="button" class="ms-2 btn-close" data-bs-dismiss="badge" aria-label="Close"></button></span>
-    </div>
+    <div id="MlSetupsList" class=""></div>
 <!--The New Editor-->
     <div id="editor-container">
       <div id="MatSelector">
@@ -293,7 +290,7 @@
           <ul></ul>
         </details>
         <details open class="" title="">
-          <summary>ML mat. selector (working soon)</summary>
+          <summary>ML materials</summary>
           <section id="Mlswitcher"></section>
         </details>
       </div>      
@@ -1082,6 +1079,20 @@ THE SOFTWARE.</p>
   <script defer src='./js/_ThreeDIF.js' type="module"></script>
   <script src="./renderer.js"></script>
 	<script type="text/javascript" src="./public/introjs/intro.min.js" ></script>
+  
+  <dialog id="manageModels" class="border border-primary rounded bg-layer0" style="min-width:50%;">
+    <div class="modal-header pb-3">
+      <h5 class="modal-title text-light">Add/Edit custom models entry</h5>
+    </div>
+    <form method="dialog">
+      <div class="input-group input-group-sm mb-3">
+        <span class="input-group-text">Path</span>
+        <input name="modelsName" class="form-control" readonly >
+        <button id="re-selectModel" class="btn btn-layer2" type="button"><i class="fa-regular fa-folder-open"></i></button>
+      </div>
+      <button id="" class="btn btn-primary text-black" value="true"><i class="fa-solid fa-floppy-disk pe-1"></i>Save</button>
+    </form>
+  </dialog>
 
   <dialog id="uncookfile" class="border border-primary rounded bg-layer0">
     <div class="modal-header pb-3">
