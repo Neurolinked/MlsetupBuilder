@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			$(window).trigger("fetchMaterialsComplete");
 		}).catch(error=>notifyMe(error))
 	const alertMessages = document.getElementById("alertMessages");
+	window.manageCustModels = document.getElementById("manageModels");
 })
 const canvasIncrements = 128;
 const MLSB = new MLSBEditor;
