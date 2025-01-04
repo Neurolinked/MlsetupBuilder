@@ -555,6 +555,20 @@ const template = [
 				mainWindow.webContents.downloadURL(`https://github.com/WolvenKit/WolvenKit/releases/download/8.14.0/WolvenKit.Console-8.14.0.zip`);
 			}
 		},
+		{
+			label:'Github Repository',
+			click:()=>{
+				outside.openExternal("https://github.com/Neurolinked/MlsetupBuilder");
+			}
+		},
+		{ type: 'separator' },
+		{
+			label:'Donations',
+			click:()=>{
+				outside.openExternal("https://ko-fi.com/neurolinked99888");
+			}
+		},
+		{ type: 'separator' },
 		{	label:'License',click: () =>{
 				mainWindow.webContents.send('preload:openModal','license')
 			}
