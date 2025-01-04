@@ -1,6 +1,7 @@
 window.$ = window.jQuery;
 const ml_randomized = [];
 
+
 $(window).on('limitLayers',function(ev,index){
   //limit the number of active layers in the interface
   ev.preventDefault();
@@ -1037,7 +1038,7 @@ $("#resetShades span.choose").click(function(){
       {
         extend: 'selected',
         text:'Export',
-        className:'btn btn-sm btn-primary my-1',
+        className:'btn btn-sm btn-active my-1',
         action:function(dt){
           notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel} with materials`);
           $("#layeringsystem li[disabled]").removeAttr('disabled'); //re-enable all the layers
@@ -1048,7 +1049,7 @@ $("#resetShades span.choose").click(function(){
       },
       {
         extend:'searchBuilder',
-        className:'btn btn-sm btn-secondary my-1',
+        className:'btn btn-sm btn-layer1 my-1',
         config: {
           columns: [3],
           preDefined: {
@@ -1060,7 +1061,50 @@ $("#resetShades span.choose").click(function(){
              ],logic: 'AND'
           }
         }
-      }
+      },
+      {
+        name:`plus`,
+        text:'<i class="fa-solid fa-plus"></i>',
+        className:'btn btn-sm btn-layer1 my-1',
+        action: function(e,dt,node,config){
+          $("#manageModels input[name='modelsName']").val("");
+          if (dt.row({selected:true}).data()?.tags.includes("custom")){
+            $("#manageModels input[name='modelsName']").val(dt.row({selected:true}).data().file);
+          }
+          manageCustModels.showModal();
+          $("#re-selectModel").focus();
+        }
+      },
+      {
+        name:`minus`,
+        text:'<i class="fa-solid fa-minus"></i>',
+        className:'btn btn-sm btn-danger my-1 removeCustomModel',
+        enabled: false,
+        action: function (e, dt, node, config) {
+          let myrow = dt.row({selected:true}).data()
+          if (myrow?.tags.includes("custom")){
+            mlsbDB.get(`model_${CryptoJS.MD5(myrow.file)}`)
+              .then((doc)=>{
+                return mlsbDB.remove(doc);
+              }).then((operation)=>{
+                if (operation.ok){
+                  dt.row({selected:true}).remove().draw();
+                }
+              }).catch((error)=>{
+                if (
+                  (error.hasOwnProperty(`status`)) &&
+                  (error.hasOwnProperty(`name`)) &&
+                  (error.hasOwnProperty(`message`))
+                ){
+                  notifyMe(`Status ${error.status}, ${error.name}:${error.message} from the DB`);
+                }else{
+                  notifyMe(error);
+                }
+              });
+          }
+          CPModels.rows().deselect();
+        }
+      },
     ],
     columns:[
       {
@@ -1131,12 +1175,38 @@ $("#resetShades span.choose").click(function(){
     },
     select: {
       style:'single',
-      toggleable: false
+      toggleable: true
     },
     initComplete: function(settings, json){
+
+      /*
+      PouchDB way of getting docs
+      */
+      mlsbDB.allDocs({
+        startkey: 'model_',
+        endkey:'model_\ufff0',
+        include_docs: true,
+      }).then(function(results){
+        if (results.rows.length > 0){
+          results.rows.forEach((record)=>{
+            CPModels.row.add({
+              name:record.name,
+              file:record.file,
+              tags:record.tags,
+              normal:null,
+              origin:'custom'
+            })
+          })
+          CPModels.draw(true);
+        }
+      }).catch((error)=>{
+        notifyMe(error);
+      });
+/*   
       var customRows = thePIT.getModels();
       if (typeof(customRows)=='object'){
-        var table = $('#DataModelsLibrary').DataTable();
+
+      var table = $('#DataModelsLibrary').DataTable();
         for (const [key, value] of Object.entries(customRows)) {
           if (value?.li_attr?.model!==undefined){
             table.row.add({
@@ -1150,15 +1220,16 @@ $("#resetShades span.choose").click(function(){
             }
         }
         table.draw(true);
-        $(".dt-buttons button" ).removeClass("dt-button");
+        
       }
-      var filtered = CPModels.data().flatten().filter((value,index)=>{ return value.file==MLSB.TreeD.lastModel});
+      var filtered = CPModels.data().flatten().filter((value,index)=>{ return value.file==MLSB.TreeD.lastModel}); */
       /*
       filtered = filtered.length==1 ? filtered[0] : {};
       $("#masksTemplate").val(filtered?.mask!=null ? maskList[filtered.mask].mask.replace('{format}',textureformat) : '');
       $("normTemplate").val(filtered?.normal!=null ? normList[filtered.normal].replace('{format}',textureformat) : '');
       */
-      notifyMe("Mesh linked :"+table.data().length,false);
+      notifyMe("Mesh linked :"+CPModels.data().length,false);
+      $(".dt-buttons button" ).removeClass("dt-button");
       document.getElementById("Loading").close();
     }
   })
@@ -1172,6 +1243,12 @@ $("#resetShades span.choose").click(function(){
     $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb/,'.Material.json'));
     $("#modelTarget").val(MLSB.TreeD.lastModel);
     $("#thacanvas").trigger("loadScene",[MLSB.TreeD.lastModel]); //start loading the scene
+    
+    CPModels.buttons( 'minus:name').enable(data.tags.includes("custom"));
+    CPModels.buttons( 'plus:name').text(data.tags.includes("custom") ? `<i class="fa-solid fa-edit"></i>`:`<i class="fa-solid fa-plus"></i>` );
+
+  }).on('deselect',function(e, dt, type, indexes){
+    CPModels.buttons( 'plus:name').text(`<i class="fa-solid fa-plus"></i>`);
   });
   
   $('#btnMdlLoader').click(function(){
@@ -1902,21 +1979,34 @@ $("#importFromWkit").click(function(){
 });
 
 function passTheMlsetup(textContent=""){
+  
   if (textContent!=""){
+
     $("#off_MLSetups div.offcanvas-body detail").fadeOut();
     var mls_content =" "
-    try{
-      mls_content = JSON.parse(textContent,mlsContRevive);
-      mLsetup = new Mlsetup();
-      mLsetup.import(mls_content);
-      let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
-      $(".mlpreviewBody").html(test)
-    }catch(error){
-      notifyMe(`Error: ${error}`)
+    if (PARAMS.importSkip){
+      try {
+        mls_content = JSON.parse(textContent,mlsContRevive);
+        mLsetup = new Mlsetup();
+        mLsetup.import(mls_content);
+        $("#TheMagicIsHere").click();
+      } catch (error) {
+        notifyMe(error);
+      }
+    }else{
+      try{
+        mls_content = JSON.parse(textContent,mlsContRevive);
+        mLsetup = new Mlsetup();
+        mLsetup.import(mls_content);
+        let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
+        $(".mlpreviewBody").html(test)
+      }catch(error){
+        notifyMe(`Error: ${error}`)
+      }
+      off_MLSetup.show();
+      // focus on the exit button of the offcanvas
+      $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
     }
-    off_MLSetup.show();
-    // focus on the exit button of the offcanvas
-    $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
   }
 }
 
@@ -2029,7 +2119,6 @@ function vacuumCleaner(on = true, ranges = false){
 //----Button to load
 $("#TheMagicIsHere").click(function(){
     off_MLSetup.hide();
-    console.log(mLsetup);
     //Layer Cleanup for disabled layers
     disabledLayers = 20 - mLsetup.Layers.length;
 
@@ -2089,7 +2178,7 @@ $("#TheMagicIsHere").click(function(){
     document.title = document.title.split('[')[0]+" ["+nomefile+"]";
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
-
+    $("#MlSetupsList").trigger("addBlade",nomefile);
     notifyMe(`Imported : ${nomefile}`,false);
     $('#nametoexport').val(nomefile);
     $("#importTech").val("");
@@ -2850,6 +2939,101 @@ unCooKonfirm.addEventListener("click", (event) => {
     //TODO close the file and delete the mlsetup entity
   });
 
+  $("#MlSetupsList").on("addBlade",function(ev,name){
+    if (name!=''){
+      $("#MlSetupsList").trigger("switchBlade");
+      $("#MlSetupsList").append(`<span class="badge text-bg-secondary">${name.split(".json")[0]}<button type="button" class="ms-2 btn-close" data-bs-dismiss="badge" aria-label="Close"></button></span>`);
+    }
+  }).on("switchBlade",function(ev){
+    $("body #MlSetupsList > span").each((idx,elm)=>{
+      $(elm).removeClass("text-bg-secondary");
+      $(elm).addClass("text-bg-dark");
+    })
+  });
+
+  $("#re-selectModel").click(async function(ev){
+    ev.preventDefault();
+    let getAFile = await thePIT.chooseAFile($("#manageModels input[name='modelsName']").val(),"glb").then((result)=>{
+      thePIT.RConfig('paths.depot')
+        .then((conf)=>{
+          let _custModelName = result.replace(conf,'').replaceAll(`\\`,`/`);
+          $("#manageModels input[name='modelsName']").val(_custModelName);
+        }).catch((error)=>{
+          notifyMe(error);
+        })
+    }).catch((error)=>{
+      notifyMe(error);
+    })
+  });
+
+  $("form[name='manageModels']").on("submit",function(ev){
+    ev.preventDefault();
+    var formModelData = new FormData(document.querySelector(`form[name='manageModels']`));
+    //here we need to compare if the model already exists formModelData.get('modelsName')
+    var unsureNewModel = formModelData.get('modelsName');
+
+    console.log(
+      CPModels.row((idx, data) => data['file'] === unsureNewModel).length
+    )
+
+    if (unsureNewModel==''){
+      notifyMe("Nothing to add");
+    }
+
+    var selectedRow = CPModels.row((idx, data) => data['file'] === unsureNewModel);
+
+    if (selectedRow.length==1){
+      
+      if (CPModels.row(selectedRow[0]).data().tags.includes("custom")){
+        notifyMe("Edit mode activated",false);
+      }else{
+        notifyMe("Model already present");
+      }
+
+      manageCustModels.close();
+      $(`form[name='manageModels']`)[0].reset();
+      
+      CPModels.row(selectedRow[0]).select();
+      CPModels.row(selectedRow[0]).scrollTo(false);
+
+    }else if (selectedRow.length==0){
+      manageCustModels.close();
+      $(`form[name='manageModels']`)[0].reset();
+
+      var sureNewModel = {
+        file:unsureNewModel,
+        name:unsureNewModel.split('/').reverse()[0].split('.')[0]
+      }
+      var newline = CPModels.row.add({
+        name:sureNewModel.name,
+        file:sureNewModel.file,
+        tags:['custom'],
+        normal:null,
+        origin:'custom'
+      }).draw();
+      
+      CPModels.row(newline[0]).select();
+      CPModels.row(newline[0]).scrollTo(false);
+      /*TODO add to the DB in pouchDB */
+
+      mlsbDB.put({
+        _id:`model_${CryptoJS.MD5(sureNewModel.file)}`,
+        file:sureNewModel.file,
+        name:sureNewModel.name,
+        tags:['custom'],
+        ts:Date.now()
+      }).then(function (response) {
+        // handle response
+        console.log(response);
+        notifyMe("File saved in the database", false);
+      }).catch(function (err) {
+        notifyMe(err);
+      });
+    }else{
+      notifyMe("Error, too many model with the same path");
+    }
+
+  });
 
   $(window).resize(function(){
     updPanelCovers(); //on resize will update the position of the interface to cover
