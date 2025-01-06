@@ -1188,7 +1188,9 @@ $("#resetShades span.choose").click(function(){
         include_docs: true,
       }).then(function(results){
         if (results.rows.length > 0){
-          results.rows.forEach((record)=>{
+          results.rows.forEach((row)=>{
+            let record=row.doc
+            console.log(`addition of ${JSON.stringify(record)}`);
             CPModels.row.add({
               name:record.name,
               file:record.file,
