@@ -1603,12 +1603,12 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 }).on('sided',function(event){
     //single or doublesided
 	let selected = activeMLayer();
+	//apply type of render
+	PARAMS.oneside=!PARAMS.oneside;
 
-	if (PARAMS.oneside){
-		materialStack[selected].side=THREE.FrontSide;
-    }else{
-        materialStack[selected].side=THREE.DoubleSide;
-    }
+	if(materialStack[selected]){
+		materialStack[selected].side = PARAMS.oneside ? THREE.FrontSide: THREE.DoubleSide;
+	}
 
 }).on('maskAlpha',function(event){
     //masking the alpha
