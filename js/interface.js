@@ -913,17 +913,14 @@ $("#resetShades span.choose").click(function(){
 
 	//activate/deactivate wireframe display
  $("#wireFrame").click(function(ev){
-    ev.preventDefault();
-    PARAMS.wireframes = !PARAMS.wireframes
+    PARAMS.wireframes = $(this).is(':checked');
     $("#thacanvas").trigger("theWire");
   });
 
   //activate and deactivate double layering
 
   $("#onlyOneSide").click(function(ev){
-    ev.preventDefault();
-
-    PARAMS.oneside = !PARAMS.oneside
+    PARAMS.oneside = $(this).is(':checked');
     $("#thacanvas").trigger("sided");
   });
 

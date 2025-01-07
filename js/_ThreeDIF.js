@@ -1619,8 +1619,9 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 }).on("theWire",function(event){
     //changinf the wireframe value
 	let selected = activeMLayer();
-
-	materialStack[selected].setValues({wireframe:PARAMS.wireframes});
+	if (materialStack[selected]){
+		materialStack[selected].setValues({wireframe:PARAMS.wireframes});
+	}
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
 	if (materialStack.length>0){
