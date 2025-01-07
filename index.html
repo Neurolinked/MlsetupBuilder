@@ -229,18 +229,24 @@
   <div id="withthacanvas">
     <canvas id="thacanvas"></canvas>
     <div id="modelsNavbar" class="navbar p-0 px-2 rounded layer-2 d-flex justify-content-between">
+
       <div class="btn-group btn-group-sm" role="group" aria-label="3D viewport navigation bar">
-        <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off">
-          <label class="btn btn-outline-warning" for="onlyOneSide">1-side</label>
-        <input type="checkbox" class="d-none" id="prefloaded" disabled />
         <input class="d-none" type="text" name="prefxunbundle" id="prefxunbundle" val="" />
-        <input type="checkbox"   title="display wireframe" class="btn-check" id="wireFrame" autocomplete="off">
-          <label class="btn btn-outline-warning" for="wireFrame"><i class="fas fa-border-none"></i></label>
-        <input type="checkbox"   class="btn-check" id="flipMask" autocomplete="off">
-          <label class="btn btn-outline-warning" for="flipMask"><i class="fa-solid fa-rotate fa-rotate-90"></i></label>
-        <input type="checkbox"   class="btn-check" id="flipNorm" autocomplete="off">
-          <label class="btn btn-outline-normal" for="flipNorm"><i class="icon-normals"></i></label>
+        <input type="checkbox" class="d-none" id="prefloaded" disabled />
+
+        <input type="checkbox" class="btn-check" id="onlyOneSide" autocomplete="off" />
+        <label class="btn btn-outline-warning" title="Render model onesided" for="onlyOneSide">1-side </label>
+
+        <input type="checkbox" class="btn-check" id="wireFrame" autocomplete="off" />
+        <label class="btn btn-outline-warning" title="display wireframe" for="wireFrame"><i class="fas fa-border-none"></i></label>
+
+        <input type="checkbox" class="btn-check" id="flipMask" autocomplete="off" />
+        <label class="btn btn-outline-warning" title="flip vertically masks" for="flipMask"><i class="fa-solid fa-rotate fa-rotate-90"></i></label>
+
+        <input type="checkbox" class="btn-check" id="flipNorm" autocomplete="off">
+        <label class="btn btn-outline-normal" title="flip vertically normals" for="flipNorm"><i class="icon-normals"></i></label>
       </div>
+
       <div class="btn-group btn-group-sm ms-2 me-1" role="group" aria-label="model loading">
         <button type="button" id="btnModPaths"   title="Setup a mod path to take assets from" class="btn btn-outline-info"><i class="fa-solid fa-folder-tree"></i></button>
         <button type="button" id="btnMdlLoader"   title="load or reload the last 3d model" class="btn btn-out-Prim"><i class="fas fa-redo"></i></button>
