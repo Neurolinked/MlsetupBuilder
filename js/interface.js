@@ -1533,56 +1533,7 @@ $("#resetShades span.choose").click(function(){
       notifyMe("Material Inexistent in the DB, import it");
       return;
     }
-
-		/* if (ml_libraries.hasOwnProperty($(this).data('ref'))){
-			var materialtoload = $(this).data('ref');
-      let cageColorHtml = '';
-			Object.entries(ml_libraries[materialtoload].overrides.colorScale).forEach(([key,value])=>{
-				toodarkClass='';
-				let colorchecking = tinycolor.fromRatio({r:value.v[0],g:value.v[1],b:value.v[2]});
-				//if (!(colorchecking.getBrightness()>90) && (colorchecking.getBrightness()<110)){
-				if (!tinycolor.isReadable(colorchecking,"#3c454d")){
-					toodarkClass='bg-light';
-				}
-        cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${value.n}" alt="${value.n}" >&nbsp;</span>`;
-			});
-      $("#cagecolors").append(cageColorHtml);
-
-			//build up the lists of data loaded from the material chosen
-			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsIn).forEach(([key,value])=>{
-				$("#Rough_In_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
-			});
-
-			Object.entries(ml_libraries[materialtoload].overrides.roughLevelsOut).forEach(([key,value])=>{
-				$("#Rough_out_values").append('<option value="'+value.n+'" >'+value.n+' ('+value.v.toString()+')</option>');
-			});
-
-			Object.entries(ml_libraries[materialtoload].overrides.normalStrength).forEach(([key,value])=>{
-				$("#Norm_Pow_values").append(`<option value="${value.n}" data-force='${value.v}' >${value.n} (${String(value.v)})</option>`);
-			});
-
-			Object.entries(ml_libraries[materialtoload].overrides.metalLevelsOut).forEach(([key,value])=>{
-				$("#Metal_Out_values").append('<option value="'+value.n+'" >'+value.n+' ('+String(value.v)+')</option>');
-			});
-
-		}else{
-			console.log("%cNo material override entry loaded for:  "+String($(this).data('path')).replace(/^.*[\\\/]/, '').split('.')[0], "color:blue");
-		} */
-
-    //reorder colors
-   /*  if ($("#colororder").is(":checked")){
-      $("#cagecolors").attr("data-order","lum");
-      $("#cagecolors").find('span').sort(function(a, b) {
-      	return +a.getAttribute('data-lum') - +b.getAttribute('data-lum');
-  		}).appendTo($("#cagecolors"));
-
-    }else{
-      $("#cagecolors").attr("data-order","order");
-
-      $("#cagecolors").find('span').sort(function(a, b) {
-      	return +a.getAttribute('data-order') - +b.getAttribute('data-order');
-  		}).appendTo($("#cagecolors"));
-    } */
+    
     $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
     
     let ricercacolore = $("#layerColor").val();

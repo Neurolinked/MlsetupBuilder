@@ -811,154 +811,6 @@ async function ddsResolve(binarydata, info){
 	})
 }
 
-
-/* function dataToTeX(fileNAME, binaryData, channels=4, format = THREE.RGBAFormat,type = '',_materialName=""){
-	var imageINFO = getImageInfo(binaryData);
-	var bufferData = str2ab(binaryData);
-	//const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
-
-	if (type!='M'){
-		pushTexturetoPanel(fileNAME,imageINFO.width,imageINFO.height);
-	}
-
-	if (imageINFO?.format=='DDS'){
-		
-		try {
-			//DDS Case
-				const spaceData = new Uint32Array( bufferData, 0, 5 ); //get the two dimensions data bytes
-				let height = spaceData[3];
-				let width = spaceData[4];
-				//console.log(`texture ${width}x${height}px`);
-				let size = height * width * channels;
-				//console.log(size);
-				const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
-
-				var imageDatas
-				if ((dx10Data[0]==61) && (dx10Data[1]==3)&& (dx10Data[2]==0)&& (dx10Data[3]==1)){
-					//console.log(`DDS ${format}`);
-					if (format == THREE.RGBAFormat){
-						imageDatas = new Uint8Array( bufferData, 148, imageINFO.size );
-					}else{
-						switch (imageINFO.bytes) {
-							case 16:
-								imageDatas = new Uint16Array( bufferData, 148, imageINFO.size );
-								break;
-						
-							default:
-								imageDatas = new Uint8Array( bufferData, 148, imageINFO.size );
-								break;
-						}
-					}
-				}else{
-					//or legacy RGBA Unorm
-					switch (imageINFO.bytes) {
-						case 16:
-							imageDatas = new Uint16Array( bufferData, 148, imageINFO.size );
-							break;
-					
-						default:
-							imageDatas = new Uint8Array( bufferData, 148, imageINFO.size );
-							break;
-					}
-				}
-				
-				var resultTex
-				switch (type) {
-					case 'M':
-						//masks
-						paintDatas(imageDatas,imageINFO.width,imageINFO.height,'maskPainter',format);
-						break;
-					case 'RM':
-						imgWorker.postMessage(['roughnessSwap',imageDatas, width, height, fileNAME,_materialName]);
-						break;
-					case 'N':
-						//normals
-						if (imageDatas.isTexture){
-						}else{
-							resultTex = FlatNORM;
-							if (imageINFO.bytes==8){
-								imgWorker.postMessage(['normalFix',imageDatas, width, height, fileNAME,_materialName]);
-							}else if (imageINFO.bytes==16){
-	
-							}else{
-								return FlatNORM;
-							}
-						}
-						break;
-					default:
-						break;
-				}
-	
-				//rebuild the colors
-				if (format == THREE.LuminanceFormat){
-					imageDatas = rebuildText(imageDatas,width,height);
-					imageINFO.channels = 4;
-				}
-
-				if (imageINFO.bytes==16){
-					resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBAFormat, RGBA16UI);
-				}else{
-					switch (imageINFO.channels) {
-						case 1:
-							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RedFormat);
-							break;
-						case 2:
-							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGFormat);
-							break;
-						case 3:
-							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBFormat);
-							break;
-						default:
-							resultTex = new THREE.DataTexture(imageDatas,width,height,THREE.RGBAFormat);
-							break;
-					}
-				}
-
-				resultTex.wrapS = THREE.RepeatWrapping;
-				resultTex.wrapT = THREE.RepeatWrapping;
-
-				if (type!='M'){
-					paintDatas(imageDatas,width,height,fileNAME,format)
-				}
-				
-				return resultTex;
-			}catch(error){
-				notifyMe(error);
-				return BLACK;
-			}
-	}else if (imageINFO?.format=='PNG'){
-		//console.log(imageINFO,'PNG');
-		try{
-			if ((imageINFO.width > 0) && (imageINFO.height > 0)){
-				
-				var encodedData = btoa(binaryData);
-				var dataURI = "data:image/png;base64," + encodedData;
-
-				
-				let offcanvas = new OffscreenCanvas(imageINFO.width,imageINFO.height);
-				let gl = offcanvas.getContext("2d");
-				var img = new Image(imageINFO.width,imageINFO.height);
-				img.onload = function(){
-					gl.drawImage(img,0,0,imageINFO.width,imageINFO.height); // Or at whatever offset you like
-					var imageData = gl.getImageData(0, 0, imageINFO.width,imageINFO.height)
-					return new THREE.DataTexture(imageData.data,imageINFO.width,imageINFO.height,THREE.RGBAFormat)
-				};
-
-				img.src = dataURI;
-			}else{
-				console.error('Texture of size 0');
-				return ERROR;
-			}
-		}catch(error){
-			console.error(error);
-			return WHITE;
-		}
-	}else{
-		notifyMe('Format not recognized, returned WHITE');
-		return WHITE;
-	}
-} */
-
 //Get texture file content to be processed
 async function _getFileContent(textureObj){
 	return new Promise((resolve, reject)=>{
@@ -1638,9 +1490,11 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 			oggetti.visible=toggle;
 		}
 	})
-}).on('switchMlayer',function(){
+}).on('switchMlayer',function(ev){
+	console.log(ev)
 	let selected = activeMLayer();
-	$(window).trigger("limitLayers",materialStack[selected].userData.layers)
+	$(window).trigger("limitLayers",materialStack[selected].userData.layers);
+
 }).on('switchLayer',function(ev,layer=0){
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
