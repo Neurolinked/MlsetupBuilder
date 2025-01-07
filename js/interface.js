@@ -1533,7 +1533,7 @@ $("#resetShades span.choose").click(function(){
       notifyMe("Material Inexistent in the DB, import it");
       return;
     }
-    
+
     $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
     
     let ricercacolore = $("#layerColor").val();

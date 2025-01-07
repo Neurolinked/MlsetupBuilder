@@ -156,9 +156,7 @@ EDAdvSetup.addBinding(PARAMS,'ForceZeroOpacity',{label:'Force Layer 0 opacity to
 EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {$("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);});
 EDAdvSetup.addBinding(PARAMS, 'obFoldercheck',{label:'Obsessive masks Nr check'})
 
-EDAdvSetup.addBinding(PARAMS, 'importSkip',{label:'Skip import preview'}).on('change',(ev)=>{
-  //TODO develop a logic to it  
-});
+EDAdvSetup.addBinding(PARAMS, 'importSkip',{label:'Skip import preview'}).on('change',(ev)=>{});
 
 
 
@@ -190,13 +188,14 @@ TDtabManager.pages[2].addBlade({
           normal:{
             value:PARAMS.EDMaxNormal
           }
-        }
+        },
+        skipImport:PARAMS.importSkip
       }
     });
 
     saved.then(()=>{
       TW_notify("Editor preferences saved");
-    }).catch(error=>notifyMe(error));
+    }).catch((error)=>notifyMe(error));
 
   }else if (ev.index[0]==tw_EDRestore){
     PARAMS.EDLayerMaxTiles = Number(tw_Defaults?.layer?.tiles?.default!==undefined ? tw_Defaults.layer.tiles.default:150.00);

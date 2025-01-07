@@ -62,6 +62,15 @@ const PARAMS = {
 	l3_pos:{x:0,y:0.5,z:-3},
 	l4_pos:{x:0,y:3,z:3},
 };
+
+var skip = thePIT.RConfig('editorCfg.skipImport')
+	skip.then((result)=>{
+		console.log(result)
+		PARAMS.importSkip = result;
+	}).catch((error)=>{
+		notifyMe(error);
+	});
+
 var hairDB = {}
 var materialJSON = new MaterialBuffer();
 /**

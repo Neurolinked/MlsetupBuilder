@@ -129,7 +129,8 @@ const schema = {
 					default: 2.0,
 					value: 2.0
 				}
-			}
+			},
+			skipImport:false
 		}
 	}
 };
@@ -223,8 +224,8 @@ const preferences = new Store({schema,
 				store.delete("wcli")
 			}
 		},
-		'1.6.8-beta5': store=>{
-
+		'1.6.8-beta8': store=>{
+			store.set('editorCfg.skipImport',false);
 		}
 	}
 });
@@ -1045,6 +1046,7 @@ ipcMain.on('main:saveStore',(event, arg) => {
 		preferences.set('editorCfg.mblend.tiles.value',arg.editorCfg.mblend.tiles.value);
 		preferences.set('editorCfg.mblend.contrast.value',arg.editorCfg.mblend.contrast.value);
 		preferences.set('editorCfg.mblend.normal.value',arg.editorCfg.mblend.normal.value);
+		preferences.set('editorCfg.skipImport',arg.editorCfg.skipImport);
 	}else{
 		/*
 		Get the object property and cycle them, test if they are there
