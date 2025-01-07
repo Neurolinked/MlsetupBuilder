@@ -1637,12 +1637,16 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 	let selected = activeMLayer();
 	flippingdipping = flipcheck.checked;
 	thePIT.savePref({flipmasks:flippingdipping});
-	materialStack[selected].map.flipY= flippingdipping;
-	materialStack[selected].map.needsUpdate = true;
+	if (materialStack[selected]){
+		materialStack[selected].map.flipY= flippingdipping;
+		materialStack[selected].map.needsUpdate = true;
+	}
 }).on('flipNorm',function(event){
 	let selected = activeMLayer();
-	materialStack[selected].normalMap.flipY = !materialStack[selected].normalMap.flipY;
-	materialStack[selected].normalMap.needsUpdate = true;
+	if (materialStack[selected]){
+		materialStack[selected].normalMap.flipY = !materialStack[selected].normalMap.flipY;
+		materialStack[selected].normalMap.needsUpdate = true;
+	}
 }).on('playTexture',function(event,texture){
 	var dummyMd5 = CryptoJS.MD5(texture.replace(/\.(dds|png)$/g,".xbm"));
 	var imgDatas = textureStack[dummyMd5]
