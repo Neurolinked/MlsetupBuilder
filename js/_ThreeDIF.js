@@ -855,12 +855,12 @@ async function _getFileContent(textureObj){
 			if (!textureObj.hasOwnProperty('info')){
 				try {
 					textureObj.info = getImageInfo(textureResult);
-					console.log(`Getting info data ${realTexturePath}`,textureObj.info)
+					if (PARAMS.textureDebug){
+						console.log(realTexturePath,textureObj.info);
+					}
 				} catch (error) {
 					notifyMe(error);
 				}
-			}else{
-				console.log(`Info already present for ${realTexturePath}`,textureObj.info);
 			}
 			
 			if (textureObj.maptype!='mlmask'){
@@ -1381,9 +1381,13 @@ function LoadModel(path){
 
 			MDLloader.parse( modelstring ,'', ( glbscene ) => {
 				glbscene.scene.traverse( function ( child ) {
-
+					
 					if (child.type=="Bone"){
 						Boned ||= true;
+					}
+
+					if ((child.type=="SkinnedMesh") && (PARAMS.modelDebug)) {
+						console.log(child.name,child.userData?.materialNames[0]);
 					}
 
 					if (child.isMesh){
@@ -1395,9 +1399,19 @@ function LoadModel(path){
 							subsCheckUVs += `<input type="checkbox" class="btn-check" id="uvchk_${child.name}" checked >
 											 <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${child.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${child.name}</label>`
 							//Assign the Material
-							
-							child.material = materialStack[child.userData?.materialNames[0]];
-							child.material.needsUpdate=true;
+							if (!child.userData.hasOwnProperty('materialNames')){
+								notifyMe(`Need a MaterialName for {child.name}`)
+							}else{
+								child.material = materialStack[child.userData?.materialNames[0]];
+							}
+
+							try {
+								child.material.needsUpdate=true;
+							} catch (error) {
+								notifyMe(`${error}, switching to none Material`);
+								child.material = materialNone;
+								child.material.needsUpdate=true;
+							}
 						}else{
 							//If isn't coded it apply a default lambertMaterial
 							child.material = materialNone;
