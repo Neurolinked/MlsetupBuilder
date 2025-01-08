@@ -156,7 +156,8 @@ EDAdvSetup.addBinding(PARAMS,'ForceZeroOpacity',{label:'Force Layer 0 opacity to
 EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {$("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);});
 EDAdvSetup.addBinding(PARAMS, 'obFoldercheck',{label:'Obsessive masks Nr check'})
 
-EDAdvSetup.addBinding(PARAMS, 'importSkip',{label:'Skip import preview'}).on('change',(ev)=>{});
+EDAdvSetup.addBinding(PARAMS, 'modelDebug',{label:'Model debug'}).on('change',(ev)=>{});
+EDAdvSetup.addBinding(PARAMS, 'textureDebug',{label:'Texture debug'}).on('change',(ev)=>{});
 
 
 

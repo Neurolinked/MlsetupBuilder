@@ -30,6 +30,8 @@ var closeModal
 
 const PARAMS = {
 	importSkip: false,
+	modelDebug:false,
+	textureDebug:false,
 	obFoldercheck: false, //obsessive mask folder check
 	maskBlur: 0,
 	cameraNear : 0.01,
