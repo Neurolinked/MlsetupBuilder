@@ -1698,24 +1698,30 @@ ipcMain.on('main:scanFolder',()=>{
 
 ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 	return new Promise((resolve,reject)=>{
-		var customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
-		var fileTemplate = maskTemplate.split("\\").pop().toString();
-		let ext = preferences.get("maskformat");
-		fileTemplate = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
-		//var newpath = String(maskTemplate).replace(".mlmask","_layers\\");
-		var test = path.join(preferences.get('paths.depot'),customPath)
+		try {
 
-		fs.readdir(test,{recursive:false},(err,files)=>{
-			if (!err){
-				let res = files.filter((el) =>{
-					 return el.match(fileTemplate)
-					})
-				resolve(res.length)
-			}else{
-				mainWindow.webContents.send('preload:logEntry',`${err}`,true)
-				reject(false)
-			}
-		})
+			var customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
+			var fileTemplate = maskTemplate.split("\\").pop().toString();
+			let ext = preferences.get("maskformat");
+			fileTemplate = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
+			//var newpath = String(maskTemplate).replace(".mlmask","_layers\\");
+			var test = path.join(preferences.get('paths.depot'),customPath)
+	
+			fs.readdir(test,{recursive:false},(err,files)=>{
+				if (!err){
+					let res = files.filter((el) =>{
+						 return el.match(fileTemplate)
+						})
+					resolve(res.length)
+				}else{
+					mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+					reject(false)
+				}
+			})
+		} catch (error) {
+			mainWindow.webContents.send('preload:logEntry',`${error}, '${maskTemplate}'`);
+			reject(false);
+		}
 	})
 });
 
