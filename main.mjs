@@ -638,6 +638,39 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow(width,height)
   })
+
+  const dotNetCorePath = `C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App`;
+  fs.access(dotNetCorePath,fs.constants.R_OK,(error)=>{
+	if (error){
+		setTimeout(()=>{
+			mainWindow.webContents.send('preload:logEntry', "Yo Choom upgrade your Chrome!, you don't have .Net Core Framework 8.x.x on you. You cheap newbie !! to hit The Streets you need to Chippin' In!",true);
+		},3000);
+	}else{
+		//Some .Net is installed
+		try {
+			let matchDotNet = false;
+			const files = fs.readdir(dotNetCorePath, { withFileTypes: true },(err,files)=>{
+				if (err){
+					setTimeout(()=>{
+						mainWindow.webContents.send('preload:logEntry', error,true);
+					},3000);
+				}
+				for (const file of files){
+					if ((file.name.match(/^8\.+/)) && file.isDirectory() ){
+						matchDotNet = true;
+					}
+				}
+				if (!matchDotNet){
+					setTimeout(()=>{
+						mainWindow.webContents.send('preload:logEntry', "Choom you have some Chrome but not the right retroWare for the Job, you need .Net Core Framework 8.x.x to unCook datas. Got and get it!",true);
+					},3000);
+				}
+			});
+		} catch (error) {
+			console.log(error);
+		}
+	}
+  });
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
