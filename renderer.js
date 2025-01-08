@@ -65,7 +65,6 @@ const PARAMS = {
 
 var skip = thePIT.RConfig('editorCfg.skipImport')
 	skip.then((result)=>{
-		console.log(result)
 		PARAMS.importSkip = result;
 	}).catch((error)=>{
 		notifyMe(error);

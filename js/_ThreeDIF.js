@@ -833,7 +833,6 @@ async function _getFileContent(textureObj){
 				var maxMasksPR = thePIT.mapMasks(filename); //check the numbers of masks layers in the subfolder
 				maxMasksPR.then((result)=>{
 					materialStack[textureObj.shader].userData.layers = result
-					console.log(result)
 				}).catch((error)=>{
 					console.log(error)
 					materialStack[textureObj.shader].userData.layers = 0
@@ -854,7 +853,14 @@ async function _getFileContent(textureObj){
 		theTextureContent.then((textureResult)=>{
 			//get info from the binary datas
 			if (!textureObj.hasOwnProperty('info')){
-				textureObj.info = getImageInfo(textureResult);
+				try {
+					textureObj.info = getImageInfo(textureResult);
+					console.log(`Getting info data ${realTexturePath}`,textureObj.info)
+				} catch (error) {
+					notifyMe(error);
+				}
+			}else{
+				console.log(`Info already present for ${realTexturePath}`,textureObj.info);
 			}
 			
 			if (textureObj.maptype!='mlmask'){
