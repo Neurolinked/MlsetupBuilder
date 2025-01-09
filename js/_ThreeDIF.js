@@ -1540,7 +1540,8 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 						materialStack[selected].map.needsUpdate = true;
 					}
 				}).catch((error)=>{
-					notifyMe(`switchLayer ${error.stack.split("\n")}`)
+					if (PARAMS.modelDebug){console.error(error)}
+					notifyMe(`switchLayer ${error.hasOwnProperty('stack') ? error.stack.split("\n") : error}`)
 				});
 			
 		}
