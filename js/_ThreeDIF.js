@@ -235,11 +235,17 @@ function retUVMapData(_2dContext,selected,size){
 	return new Promise((resolve,reject)=>{
 		try {
 			var modello = TDengine.scene?.children.filter(elm=>elm.type=='Group');
+			if (PARAMS.modelDebug){console.log(modello)}
 			if (!modello[0].hasOwnProperty('children')){
 				notifyMe("No Group found in the scene")
 				reject();
 			}
 			var submeshes = modello[0].children.filter(elm => elm.type=='SkinnedMesh' || elm.type=='Mesh');
+
+			if ((modello[0].children.length==1) && (modello[0].children[0].name=="Armature")){
+				submeshes = modello[0].children[0].children.filter(elm => elm.type=='SkinnedMesh' || elm.type=='Mesh');
+			}
+			if (PARAMS.modelDebug){console.log(submeshes)}
 
 			var getCanvas = _2dContext.getContext("2d")
 			const lines = new THREE.Vector2();
@@ -248,47 +254,52 @@ function retUVMapData(_2dContext,selected,size){
 			const face = [];
 
 			var lod
-			
-			selected.forEach((x)=>{
-				lod = submeshes[x]
-				const index = lod.geometry.index;
-				const uvAttribute = lod.geometry.attributes.uv;
-				getCanvas.strokeStyle = `#${tinycolor.fromRatio({r:(Math.random() * .7 + .3), g:(Math.random() * .6 + .4), b:(Math.random()* .4 + .6) }).toHex()}`;
-				getCanvas.lineWidth = .2;
+			if (submeshes.length > 0){
+				selected.forEach((x)=>{
+					lod = submeshes[x]
+					const index = lod.geometry.index;
+					const uvAttribute = lod.geometry.attributes.uv;
+					getCanvas.strokeStyle = `#${tinycolor.fromRatio({r:(Math.random() * .7 + .3), g:(Math.random() * .6 + .4), b:(Math.random()* .4 + .6) }).toHex()}`;
+					getCanvas.lineWidth = .2;
 
-				var il
-				if (index){
-					il = index.count
-				}else{
-					il = uvAttribute.count
-				}
-
-				for(let i = 0; i < il; i=i+3 ){
-					face[0] = index.getX(i);
-					face[1] = index.getX(i+1);
-					face[2] = index.getX(i+2);
-					uvs[0].fromBufferAttribute(uvAttribute, face[0]);
-					uvs[1].fromBufferAttribute(uvAttribute, face[1]);
-					uvs[2].fromBufferAttribute(uvAttribute, face[2]);
-					getCanvas.beginPath();
-					lines.set(0,0);
-					//Draw points
-					for (let j = 0, jl=uvs.length; j<jl; j++){
-						const uv = uvs[j];
-						lines.x = uv.x;
-						lines.y = uv.y;
-						if (j===0){
-							getCanvas.moveTo(uv.x * (size - 2) + 0.5, (1 - uv.y) * (size - 2 ) + 0.5)
-						}else{
-							getCanvas.lineTo(uv.x * (size - 2) + 0.5, (1 - uv.y) * (size - 2 ) + 0.5)
-						}
+					var il
+					if (index){
+						il = index.count
+					}else{
+						il = uvAttribute.count
 					}
-					getCanvas.closePath();
-					getCanvas.stroke();
-				}
-			})
+
+					for(let i = 0; i < il; i=i+3 ){
+						face[0] = index.getX(i);
+						face[1] = index.getX(i+1);
+						face[2] = index.getX(i+2);
+						uvs[0].fromBufferAttribute(uvAttribute, face[0]);
+						uvs[1].fromBufferAttribute(uvAttribute, face[1]);
+						uvs[2].fromBufferAttribute(uvAttribute, face[2]);
+						getCanvas.beginPath();
+						lines.set(0,0);
+						//Draw points
+						for (let j = 0, jl=uvs.length; j<jl; j++){
+							const uv = uvs[j];
+							lines.x = uv.x;
+							lines.y = uv.y;
+							if (j===0){
+								getCanvas.moveTo(uv.x * (size - 2) + 0.5, (1 - uv.y) * (size - 2 ) + 0.5)
+							}else{
+								getCanvas.lineTo(uv.x * (size - 2) + 0.5, (1 - uv.y) * (size - 2 ) + 0.5)
+							}
+						}
+						getCanvas.closePath();
+						getCanvas.stroke();
+					}
+				})
+			}else{
+				notifyMe("We didn't found SkinnedMeshes under the glb scene, see the dev log");
+				console.log(modello[0].children);
+			}
 			resolve();
 		} catch (error) {
+			console.log(error);
 			notifyMe(error);
 			reject();
 		}
