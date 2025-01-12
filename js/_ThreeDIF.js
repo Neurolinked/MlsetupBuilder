@@ -611,16 +611,22 @@ function animate() {
 
 //String to bufferArray
 function str2ab(str) {
-	var buf = new ArrayBuffer(str.length); // 2 bytes for each char
-	var bufView = new Uint8Array(buf);
-	for (var i=0, strLen=str.length; i < strLen; i++) {
-		bufView[i] = str.charCodeAt(i);
+	try {
+		var buf = new ArrayBuffer(str.length); // 2 bytes for each char
+		var bufView = new Uint8Array(buf);
+		for (var i=0, strLen=str.length; i < strLen; i++) {
+			bufView[i] = str.charCodeAt(i);
+		}
+	} catch (error) {
+		notifyMe(error.message)
+		return false;
 	}
 	return buf;
 }
 
 function getImageInfo(binaryData){
 	var bufferData = str2ab(binaryData);
+	if (!bufferData){console.log('Error,in the buffer Data')}
 	const headerData = new Uint8Array( bufferData, 0, 8 ); //get the two dimensions data bytes
 	//DDS Case
 	if ((headerData[0]==0x44) && (headerData[1]==0x44) && (headerData[2]==0x53) ){
@@ -701,33 +707,36 @@ function getImageInfo(binaryData){
 				pngInterlaced = parseInt(new DataView(bufferData,filePointer+12,1).getUint8());
 			}
 			filePointer+=chunkslenght+4; //last 4 byte are for the checksum
-			console.warn = parseInt(new DataView(bufferData,filePointer,4).getInt32(),16);
+			//console.warn = parseInt(new DataView(bufferData,filePointer,4).getInt32(),16);
 		}
 		var pngchannels=3;
+		let textureMessage = ''
 		switch (pngColorType) {
 			case 0:
-				console.log(`Grayscale sample`);
+				textureMessage=`Grayscale sample`;
 				pngchannels=1;
 				break;
 			case 2:
-				console.log(`RGB triple`);
+				textureMessage=`RGB triple`;
 				break;
 			case 3:
-				console.log(`PLTE palette index`)
+				textureMessage=`PLTE palette index`;
 				pngchannels=0;
 				break;
 			case 4:
-				console.log(`grayscale sample, followed by an alpha sample`)
+				textureMessage=`grayscale sample, followed by an alpha sample`;
 				pngchannels=2;
 				break;
 			case 6:
-				console.log(`R,G,B triple, followed by an alpha sample`)
+				textureMessage=`R,G,B triple, followed by an alpha sample`;
 				break;
 			default:
 				notifyMe("This is an unknown PNG format !!");
 				pngchannels=-1;
 				break;
 		}
+
+		if (PARAMS.textureDebug){console.log(textureMessage)}
 
 		return {width:pngWidth,height:pngHeight,format:'PNG', colorType:pngColorType,bytes:pngBit,compress:pngCompression,filter:pngFilter,Ilaced:pngInterlaced,channels:pngchannels}
 	}else{
@@ -869,10 +878,13 @@ async function _getFileContent(textureObj){
 					if (PARAMS.textureDebug){
 						console.log(realTexturePath,textureObj.info);
 					}
+					
 				} catch (error) {
 					notifyMe(error);
+					if (PARAMS.textureDebug){console.log("no Info Property")}
 				}
 			}
+			
 			
 			if (textureObj.maptype!='mlmask'){
 				pushTexturetoPanel(realTexturePath, textureObj.info.width, textureObj.info.height);
@@ -1492,9 +1504,7 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 				$("#layeringsystem li").removeClass("active");
 				$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
 
-				LoadModel(fileModel)
-
-				.then((ev)=>{
+				LoadModel(fileModel).then((ev)=>{
 					//load deferred textures in the textureDock
 					LoadStackTextures();
 				}).catch((error)=>{
@@ -1507,9 +1517,8 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 			notifyMe(`LoadScene ${error}`);
 		});
 	});
-}).on('customModel',function(ev){
-	//loading a custom model and a Material file
-	
+}).on('changeBg',function(ev){
+	$("#thacanvas").css("background-color",PARAMS.bkgColors);
 }).on('loadMaterials',function(ev){
 	/*
 	Check if there is loaded a model, otherwize
@@ -1522,9 +1531,47 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 		}
 	})
 }).on('switchMlayer',function(ev){
-	console.log(ev)
 	let selected = activeMLayer();
-	$(window).trigger("limitLayers",materialStack[selected].userData.layers);
+	if (materialStack[selected]?.userData.hasOwnProperty("layers")){
+		$(window).trigger("limitLayers",materialStack[selected].userData.layers);
+	}
+}).on('renderMaterial',function(ev,layerMaterial){
+	console.log(layerMaterial);
+	let selected = activeMLayer();
+	//check if the material Has a diffuse map
+	if ((layerMaterial.hasOwnProperty('diffuse')) && (layerMaterial?.diffuse?.texture!='' || layerMaterial?.diffuse?.texture!=null)){
+
+		//find is the file was already loaded somewhere and reuse-it
+		var myTex = textureDock.filter(elm=>elm.file==layerMaterial.diffuse.texture);
+		
+		if (myTex?.length==1){
+			//there was it, map it
+			materialStack[selected].map = textureStack[C_diffuse];
+			materialStack[selected].map.needsUpdate = true;
+		}else{
+			let test = retDefTexture(layerMaterial.diffuse.texture,selected,"diffuse");
+
+			var texProm = _getFileContent({file:layerMaterial.diffuse.texture,maptype:'diffuse',shader:selected})
+				.then((result)=>{
+					let C_diffuse = CryptoJS.MD5(layerMaterial.diffuse.texture).toString();
+
+				})
+
+			/* if (checkMaps(layerMaterial.diffuse.texture) < 0){
+				//Not a white, normal, gray or black default map
+				var diffuseProm= _getFileContent({file:layerMaterial.diffuse.texture,maptype:'diffuse',shader:selected})
+					.then((textureData)=>{
+						
+					})
+			}else{
+				let myTex = retDefTexture(layerMaterial.diffuse.texture);
+				if (myTex?.isDataTexture()){
+					materialStack[selected].map = myTex;
+					materialStack[selected].map.needsUpdate = true;
+				}
+			} */
+		}
+	}
 
 }).on('switchLayer',function(ev,layer=0){
 	if (firstModelLoaded){
@@ -1566,7 +1613,6 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 				materialSet.add(material);
 			})
 		}
-
 	}catch(wrong){
 		notifyMe(wrong);
 	}
@@ -1656,15 +1702,11 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 	}
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
-	if (materialStack.length>0){
-		try{
-			let selected = activeMLayer();
-		
-			materialStack[selected].setValues({color:new THREE.Color(color)});
-			materialStack[selected].needsUpdate;
-		}catch(error){
-			notifyMe(error);
-		}
+	try{
+		let selected = activeMLayer();
+		materialStack[selected].setValues({color:new THREE.Color(color)});
+	}catch(error){
+		notifyMe(error);
 	}
 }).on('flipMask',function(event){
 	let selected = activeMLayer();

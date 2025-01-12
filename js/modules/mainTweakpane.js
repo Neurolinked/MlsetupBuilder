@@ -46,7 +46,9 @@ const TDtabManager = panel.addTab({
 });
 
 const PARAMdef = structuredClone(PARAMS);
-
+TDtabManager.pages[0].addBinding(PARAMS, 'bkgColors',{label:'Background color',view:'color'}).on('change',(ev)=>{
+  $("#thacanvas").trigger("changeBg");
+});
 TDtabManager.pages[0].addBinding(PARAMS, 'cameraNear',{min:0.01,max:20,label:'Camera Near'}).on('change',(ev)=>{
   $("#thacanvas").trigger("updCamera");
 });
