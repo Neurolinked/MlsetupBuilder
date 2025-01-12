@@ -1052,8 +1052,8 @@ $("#resetShades span.choose").click(function(){
           preDefined: {
             criteria: [
                 {
-                  condition:'contains',
                   data: 'Tags',
+                  condition:'contains'
                 },
              ],logic: 'AND'
           }
@@ -1087,6 +1087,7 @@ $("#resetShades span.choose").click(function(){
                 if (operation.ok){
                   dt.row({selected:true}).remove().draw();
                 }
+                CPModels.rows().deselect();
               }).catch((error)=>{
                 if (
                   (error.hasOwnProperty(`status`)) &&
@@ -1099,7 +1100,6 @@ $("#resetShades span.choose").click(function(){
                 }
               });
           }
-          CPModels.rows().deselect();
         }
       },
     ],
@@ -1137,7 +1137,8 @@ $("#resetShades span.choose").click(function(){
     ],
     columnDefs:[
       {target:[0,1,3],visible:true},
-      {target:'_all',visible:false,searchable:false}
+      {target:'_all',visible:false,searchable:false},
+      {target:[3],searchBuilder:{defaultCondition:'contains'}}
       ],
     deferRender: true,
     dom:"<'row g-0'<'col-sm-12 col-md-7'Bf><'col-sm-12 col-md-5'il>>" +
@@ -1187,7 +1188,7 @@ $("#resetShades span.choose").click(function(){
         if (results.rows.length > 0){
           results.rows.forEach((row)=>{
             let record=row.doc
-            console.log(`addition of ${JSON.stringify(record)}`);
+            //console.log(`addition of ${JSON.stringify(record)}`);
             CPModels.row.add({
               name:record.name,
               file:record.file,
@@ -1201,35 +1202,26 @@ $("#resetShades span.choose").click(function(){
       }).catch((error)=>{
         notifyMe(error);
       });
-/*   
-      var customRows = thePIT.getModels();
-      if (typeof(customRows)=='object'){
-
-      var table = $('#DataModelsLibrary').DataTable();
-        for (const [key, value] of Object.entries(customRows)) {
-          if (value?.li_attr?.model!==undefined){
-            table.row.add({
-                name:value.text,
-                tags:value.type,
-                file:value?.li_attr.model,
-                normal:value.li_attr?.normal != undefined ? value.li_attr?.normal : null,
-                origin:"custom"
-              });
-              //mask:value.li_attr?.masks != undefined ? value.li_attr?.masks : null ,
-            }
-        }
-        table.draw(true);
-        
-      }
-      var filtered = CPModels.data().flatten().filter((value,index)=>{ return value.file==MLSB.TreeD.lastModel}); */
-      /*
-      filtered = filtered.length==1 ? filtered[0] : {};
-      $("#masksTemplate").val(filtered?.mask!=null ? maskList[filtered.mask].mask.replace('{format}',textureformat) : '');
-      $("normTemplate").val(filtered?.normal!=null ? normList[filtered.normal].replace('{format}',textureformat) : '');
-      */
       notifyMe("Mesh linked :"+CPModels.data().length,false);
       $(".dt-buttons button" ).removeClass("dt-button");
       document.getElementById("Loading").close();
+      
+      setTimeout(()=>{
+        CPModels.searchBuilder.container().find('button.dtsb-add.dtsb-button').eq(0).bind("click", function(ev){
+          setTimeout(() => {
+            let select = document.querySelectorAll('select.dtsb-data');
+            let lastSelect = select[select.length-1];
+            lastSelect.selectedIndex=1;
+            lastSelect.dispatchEvent(new Event('change'));  
+          }, 300);
+        });
+      },3000)
+      /* CPModels.searchBuilder.container().getElementsByClassName('dtsb-add')[0].addEventListener("click", function(ev){
+        let select =document.querySelector('dtsb-data')[-1];
+        console.log(select);
+        select.selectedIndex==0;
+        select.dispatchEvent(new Event('change'));
+      }); */
     }
   })
   .on('select', function(e, dt, type, indexes ) {
@@ -1245,11 +1237,10 @@ $("#resetShades span.choose").click(function(){
     
     CPModels.buttons( 'minus:name').enable(data.tags.includes("custom"));
     CPModels.buttons( 'plus:name').text(data.tags.includes("custom") ? `<i class="fa-solid fa-edit"></i>`:`<i class="fa-solid fa-plus"></i>` );
-
   }).on('deselect',function(e, dt, type, indexes){
     CPModels.buttons( 'plus:name').text(`<i class="fa-solid fa-plus"></i>`);
   });
-  
+
   $('#btnMdlLoader').click(function(){
     $("#thacanvas").trigger("loadScene",[$("#modelTarget").val()]); //start loading the scene
   })
@@ -1469,9 +1460,9 @@ $("#resetShades span.choose").click(function(){
       }
     const materialName = $(this).data('ref')
     var chosenMaterial = MLSB.Materials[materialName]
-    console.log(chosenMaterial)
     
     if (chosenMaterial!=undefined){
+      $("#thacanvas").trigger("renderMaterial",chosenMaterial);
       $("#materialSummary").html(materialName); //name of the material
       $("#matInput").val(chosenMaterial.file);  // path of the material
       $("#matInput").trigger("change"); //trigger the check on the level configuration change
@@ -1534,14 +1525,15 @@ $("#resetShades span.choose").click(function(){
     $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
     
     let ricercacolore = $("#layerColor").val();
-    $("#cagecolors span").removeClass("active");
+    //$("#cagecolors span").removeClass("active");
 
     if ($("#cagecolors span[title='"+ricercacolore+"']").length>0){
       $("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
     }else{
-      notifyMe("The color "+ricercacolore+" isn't present in the material "+materialtoload);
+      notifyMe("The color "+ricercacolore+" isn't present in the material "+chosenMaterial);
     }
     $("#colorLbFinder").keyup();
+
 	});
 
   $("#colorLbFinder").keyup(function () {
@@ -1900,7 +1892,7 @@ $("#layerRandomizer").click(function(){
       livelloeditato.data("mboffv",$("#mbOffV").val());
       semaphoreCLKmBlend=true;
     }else{
-      notifyMe("NO level selected");
+      notifyMe("NO level selected, please redo then layer Edit operation with a selected layer on");
     }
   });
  /*------------------------------------------------------------------------------------
@@ -2782,7 +2774,10 @@ unCooKonfirm.addEventListener("click", (event) => {
   })
 
   $("#copyNotyLog").click(function(){
-    navigator.clipboard.writeText($("#NotificationCenter .offcanvas-body").text());
+    var test = $("#NotificationCenter .offcanvas-body").html().replaceAll(/<br>/g,'\n');
+    let dummy = document.createElement("p");
+    dummy.innerHTML = test
+    navigator.clipboard.writeText("```\n"+dummy.innerText+"\n```");
   });
 
   $("body").on("click","#sbmeshEN li, #sbmeshEN li input,#sbmeshEN li label",function(ev){
