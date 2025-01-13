@@ -325,6 +325,9 @@ $(function(){
     var friendship = $(this).data("control");
     $(friendship).val($(this).val())
     $(friendship).trigger("input",true);
+    callOnce(()=>{
+      $("#thacanvas").trigger("texTiled",'ui');
+    },400);
   });
 
   $("input.driven").on({
@@ -332,7 +335,6 @@ $(function(){
         driveRange(e);
       },
       /* "change":function(e){
-        console.log(e)
         driveRange(e);
       } */
     });
@@ -627,7 +629,7 @@ $("#resetShades span.choose").click(function(){
 });
 
 //Change in layer displayer
-	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(){
+	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(ev){
 		if (
 			($("#matInput").val() != $("#layeringsystem li.active").data("material")) ||
 			(parseFloat($("#layerTile").val()) != parseFloat($("#layeringsystem li.active").data("mattile"))) ||
@@ -769,7 +771,6 @@ $("#resetShades span.choose").click(function(){
           if (layerSwapstart!=indexLayerContextual){
             mLsetup.swap(layerSwapstart,indexLayerContextual)
             $("#layers-contextual li").eq(7).attr("disabled",'disabled');
-            console.log(mLsetup);
           }else{
             notifyMe(`You really won't swap the layer with itself, right ?!?!??!`, true);
           }
@@ -959,8 +960,15 @@ $("#resetShades span.choose").click(function(){
       drawMaterial(materialByClick); //draw the material in the canvas
 
 			slideMaterials($("#cagemLibrary > div.active").index());
+
 			$("#materialSummary").html(materialByClick);
       /* ColorChange before the switch */
+      //if (MLSB.Materials[])
+      if (MLSB.Materials[materialByClick]){
+        if (!MLSB.Materials[materialByClick]?.colors.list[$(this).data("color")]){
+          $(this).data("color",MLSB.Materials[materialByClick]?.colors.default);
+        }
+      }
       $("#layerColor").val($(this).data("color"));
 			/*trigger the material change */
       $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
@@ -1459,19 +1467,22 @@ $("#resetShades span.choose").click(function(){
         }
       }
     const materialName = $(this).data('ref')
-    var chosenMaterial = MLSB.Materials[materialName]
+    MLSB.TreeD.lastMaterial = materialName
+    var chosenMaterial = MLSB.getMaterial();
     
     if (chosenMaterial!=undefined){
-      $("#thacanvas").trigger("renderMaterial",chosenMaterial);
+      
+      //Trigger a new texture material Loading only if the material is changed
+      if ($("#matInput").val()!=chosenMaterial.file){
+        $("#thacanvas").trigger("renderMaterial",chosenMaterial); //trigger the loading of a new Material
+      }
       $("#materialSummary").html(materialName); //name of the material
       $("#matInput").val(chosenMaterial.file);  // path of the material
       $("#matInput").trigger("change"); //trigger the check on the level configuration change
-    
+      
       //reflect on UI the material swap
       switchLegacyMat(materialName);
       drawMaterial(materialName);
-      notifyMe(`Material override loaded for ${materialName}`,false);
-      console.log(`%cMaterial override loaded for ${materialName}`, "color:green"); //"%cThis is a green text"
       //Reset fields values in the interface
       $("#Rough_out_values").html('');
 			$("#Metal_Out_values").html('');  
@@ -1524,15 +1535,19 @@ $("#resetShades span.choose").click(function(){
 
     $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
     
+    if (!chosenMaterial.colors.list[$("#layerColor").val()]){
+      $("#cagecolors span[title='"+chosenMaterial.colors.default+"']").click()
+    }
     let ricercacolore = $("#layerColor").val();
-    //$("#cagecolors span").removeClass("active");
 
+    
     if ($("#cagecolors span[title='"+ricercacolore+"']").length>0){
       $("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
     }else{
-      notifyMe("The color "+ricercacolore+" isn't present in the material "+chosenMaterial);
+      notifyMe(`The color ${ricercacolore} isn't present in the material ${materialName}`);
     }
     $("#colorLbFinder").keyup();
+
 
 	});
 
@@ -1868,6 +1883,7 @@ $("#layerRandomizer").click(function(){
   //applying data to the structure of li
   $("#applytoMyLayer").click(function(){
     if ($("#layeringsystem li.active").length==1){
+      var layerIndex = $("#layeringsystem li.active").index();
 			$("#layeringsystem li.active").removeClass("notsync");
       normalizeNumbers();
       let livelloeditato =$("#layeringsystem li.active");
@@ -1891,6 +1907,7 @@ $("#layerRandomizer").click(function(){
       livelloeditato.data("mboffu",$("#mbOffU").val());
       livelloeditato.data("mboffv",$("#mbOffV").val());
       semaphoreCLKmBlend=true;
+      mLsetup.Layers[layerIndex].tiles = parseFloat($("#layerTile").val());
     }else{
       notifyMe("NO level selected, please redo then layer Edit operation with a selected layer on");
     }
@@ -2882,6 +2899,7 @@ unCooKonfirm.addEventListener("click", (event) => {
   }).on('click',"#MlSetupsList .btn-close[data-bs-dismiss='badge']",function(ev){
     ev.preventDefault();
     //TODO close the file and delete the mlsetup entity
+    $(this).parent().remove();
   });
 
   $("#MlSetupsList").on("addBlade",function(ev,name){
@@ -2987,5 +3005,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     //adapt model table size to the window
     $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${(window.innerHeight-350)}px`);
 	});
+
+  $("#thacanvas").trigger("changeBg");
   
 });

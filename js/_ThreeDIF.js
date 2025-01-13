@@ -338,7 +338,6 @@ function paintDatas(textureData,w,h,target,format){
 	switch (format) {
 		case THREE.LuminanceFormat:
 		case THREE.RedFormat:
-			console.log("1 channel")
 			for (let i = 0; i < imageData.data.length; i += 4) {
 				// Modify pixel data
 				imageData.data[i] = textureData[k];  // R value
@@ -874,7 +873,15 @@ async function _getFileContent(textureObj){
 			//get info from the binary datas
 			if (!textureObj.hasOwnProperty('info')){
 				try {
-					textureObj.info = getImageInfo(textureResult);
+					let dummy = getImageInfo(textureResult);
+					textureObj.info = dummy
+					if (textureObj.maptype=='diffuse'){
+						let tInd = textureDock.findIndex((elm) => elm.file==filename)
+						if (tInd>0){
+							textureDock[tInd].info=dummy;
+						}
+					}
+
 					if (PARAMS.textureDebug){
 						console.log(realTexturePath,textureObj.info);
 					}
@@ -922,6 +929,83 @@ async function _getFileContent(textureObj){
 }
 
 /**
+ * Generate and assign a THREE.DataTexture based on the datas it get in
+ *  * @param {Object} TexturePromise contain datas from the textureDoc array with additional information
+ *  * @param {Number} DockTexture index TextureDock object image info
+ *  * @param {Number} TextureStackIndex index of the texture in textureStack array
+ * @returns nothing
+ */
+function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
+	return new Promise((resolve, reject)=>{
+		try {
+			var THREEFormat = THREE.RGBAFormat //Default format for PNGs
+			let target  = (DockTexture.file).replace('.xbm',`.${textureformat}`)
+			if (DockTexture.info.format=='DDS'){
+				if (DockTexture.info.bytes==16){
+					textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height, THREEFormat,	RGBA16UI);
+				}else{
+					//(Bit color texture)
+					switch (DockTexture.info.channels) {
+						case 1:
+							THREEFormat = THREE.RedFormat
+							break;
+						case 2:
+							THREEFormat = THREE.RGFormat
+							break;
+						case 3:
+							THREEFormat = THREE.RGBFormat
+							break;
+					}
+		
+					textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height, THREEFormat);
+				}
+			}else if (DockTexture.info.format=='PNG'){
+				textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height,THREEFormat);
+			}
+			textureStack[TextureStackIndex].wrapS=THREE.RepeatWrapping;
+			textureStack[TextureStackIndex].wrapT=THREE.RepeatWrapping;
+
+			paintDatas(TexturePromise,
+				DockTexture.info.width,
+				DockTexture.info.height,
+				target,
+				THREEFormat
+			)
+
+			switch (DockTexture.maptype) {
+				case 'normal':
+					imgWorker.postMessage([
+						'normalFix',
+						TexturePromise, 
+						DockTexture.info.width, 
+						DockTexture.info.height, 
+						target,
+						DockTexture.shader
+					]);
+					break;
+				case 'roughness':
+					imgWorker.postMessage([
+						'roughnessSwap',
+						TexturePromise, 
+						DockTexture.info.width, 
+						DockTexture.info.height, 
+						target,
+						DockTexture.shader
+					]);
+					break;
+				default:
+					MapTextures(DockTexture)
+					break;
+			}
+
+		} catch (error) {
+			notifyMe(`${error.message} : resetting the ${DockTexture.file} to default Gray`);
+			textureStack[TextureStackIndex]= GRAY;
+		}
+		resolve(true);
+	});
+}
+/**
  * Map an existing texture onto the right shader map slot
  *  * @param {Object} textureObj contain datas from the textureDoc array
  * the object has this property structure {file,maptype,shader});
@@ -932,12 +1016,14 @@ function MapTextures(textureObj){
 		if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype") && textureObj.hasOwnProperty("entries")){
 			var textureMD5Code = CryptoJS.MD5(textureObj.file);
 			var returntexture = textureStack[textureMD5Code]===undefined ? ERROR : textureStack[textureMD5Code];
+			if (PARAMS.textureDebug){
+				console.log(`Mapping texture`)
+				console.log(textureObj);
+			}
 			textureObj.entries.forEach((toMap)=>{
 				switch (toMap.maptype) {
 					case "mlmask":
-						materialStack[toMap.shader].map = textureStack[textureMD5Code]
 						materialStack[toMap.shader].alphaMap = textureStack[textureMD5Code]
-						materialStack[toMap.shader].map.needsUpdate = true;
 						materialStack[toMap.shader].alphaMap.needsUpdate = true;
 						break;
 					case "diffuse":
@@ -991,6 +1077,8 @@ async function ProcessStackTextures(){
 			let textureIndex = CryptoJS.MD5(textureDock[index].file)
 
 			var THREEFormat = THREE.RGBAFormat //Default format for PNGs
+
+
 			if (textureDock[index].info.format=='DDS'){
 				if (textureDock[index].info.bytes==16){
 					textureStack[textureIndex] = new THREE.DataTexture(elm.value,
@@ -1032,6 +1120,7 @@ async function ProcessStackTextures(){
 					THREEFormat,
 				);
 			}
+
 			textureStack[textureIndex].wrapS = THREE.RepeatWrapping;
 			textureStack[textureIndex].wrapT = THREE.RepeatWrapping;
 
@@ -1070,7 +1159,7 @@ async function ProcessStackTextures(){
 					break;
 				case 'roughness':
 					imgWorker.postMessage([
-						'normalFix',
+						'roughnessSwap',
 						elm.value, 
 						textureDock[index].info.width, 
 						textureDock[index].info.height, 
@@ -1102,12 +1191,13 @@ async function LoadStackTextures(){
 }
 
 function codeMaterials(materialEntry,_materialName){
+	console.log(materialEntry);
 	if (materialEntry.hasOwnProperty('MaterialTemplate')){
 		//switching the code based on the type of the material
 		if (materialTypeCheck.decals.includes(materialEntry.MaterialTemplate)){
 
 			var Rdecal = materialBASE.clone();
-			var decalConfig = {userData:{type:'decal'},color:0xFFFFFF,transparent:true, side:THREE.DoubleSide,depthWrite :false}
+			var decalConfig = {userData:{type:'decal'},color:0xFFFFFF,transparent:true, side:THREE.DoubleSide, depthWrite :false}
 
 			//Decal Textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseTexture')){
@@ -1149,7 +1239,7 @@ function codeMaterials(materialEntry,_materialName){
 
 		if (materialTypeCheck.metal_base.includes(materialEntry.MaterialTemplate)){
 			var Rbase = materialBASE.clone();
-			var rbaseConfig = {userData:{type:'metal'}}
+			var rbaseConfig = {userData:{type:'metal'},side:THREE.DoubleSide}
 
 			if (materialEntry.Data.hasOwnProperty('AlphaThreshold')){
 				rbaseConfig.opacity = materialEntry.Data.AlphaThreshold;
@@ -1187,12 +1277,12 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone();
 			Mlayer.userData={type:'multilayer'};
-
+			Mlayer.transparent=true;
 			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
 				
 				//name of the Actual layer textures to be loaded will be stored
-				Mlayer.map = retDefTexture(materialEntry.Data.MultilayerMask,_materialName,"mlmask");
-				Mlayer.map.needsUpdate = true;
+				Mlayer.alphaMap = retDefTexture(materialEntry.Data.MultilayerMask,_materialName,"mlmask");
+				Mlayer.alphaMap.needsUpdate = true;
 				Mlayer.mask = materialEntry.Data.MultilayerMask;
 			}
 
@@ -1536,43 +1626,74 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 		$(window).trigger("limitLayers",materialStack[selected].userData.layers);
 	}
 }).on('renderMaterial',function(ev,layerMaterial){
-	console.log(layerMaterial);
-	let selected = activeMLayer();
-	//check if the material Has a diffuse map
-	if ((layerMaterial.hasOwnProperty('diffuse')) && (layerMaterial?.diffuse?.texture!='' || layerMaterial?.diffuse?.texture!=null)){
+	if (firstModelLoaded){
+		let selected = activeMLayer();
+		//check if the material Has a diffuse map
+		if ((layerMaterial.hasOwnProperty('diffuse')) && (layerMaterial?.diffuse?.texture!='' || layerMaterial?.diffuse?.texture!=null)){
+			if (PARAMS.textureDebug){
+				console.log(layerMaterial)
+			}
+			//find is the file was already loaded somewhere and reuse-it
+			var myTex = textureDock.filter(elm=>elm.file==layerMaterial.diffuse.texture);
+			let C_diffuse = CryptoJS.MD5(layerMaterial.diffuse.texture).toString();
+			//Repeating of the textures
+			var repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val());
 
-		//find is the file was already loaded somewhere and reuse-it
-		var myTex = textureDock.filter(elm=>elm.file==layerMaterial.diffuse.texture);
-		
-		if (myTex?.length==1){
-			//there was it, map it
-			materialStack[selected].map = textureStack[C_diffuse];
-			materialStack[selected].map.needsUpdate = true;
-		}else{
-			let test = retDefTexture(layerMaterial.diffuse.texture,selected,"diffuse");
-
-			var texProm = _getFileContent({file:layerMaterial.diffuse.texture,maptype:'diffuse',shader:selected})
-				.then((result)=>{
-					let C_diffuse = CryptoJS.MD5(layerMaterial.diffuse.texture).toString();
-
-				})
-
-			/* if (checkMaps(layerMaterial.diffuse.texture) < 0){
-				//Not a white, normal, gray or black default map
-				var diffuseProm= _getFileContent({file:layerMaterial.diffuse.texture,maptype:'diffuse',shader:selected})
-					.then((textureData)=>{
-						
-					})
+			if (myTex?.length==1){
+				//there was it, map it
+				materialStack[selected].map = textureStack[C_diffuse];
+				materialStack[selected].map.repeat.set(repVal,repVal);
+				materialStack[selected].map.needsUpdate = true;
 			}else{
-				let myTex = retDefTexture(layerMaterial.diffuse.texture);
-				if (myTex?.isDataTexture()){
-					materialStack[selected].map = myTex;
-					materialStack[selected].map.needsUpdate = true;
-				}
-			} */
+				
+				let test = retDefTexture(layerMaterial.diffuse.texture,selected,"diffuse");
+				let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.diffuse.texture)
+
+				var texProm = _getFileContent(textureDock[tInd])
+					.then((texturePromised)=>{
+						if (texturePromised.status=='rejected'){
+							notifyMe(`There was a problem loading the texture ${layerMaterial.diffuse.texture}`)
+							return
+						}
+						genDataTexture(texturePromised,textureDock[tInd],C_diffuse).then((response)=>{
+							if (PARAMS.textureDebug){console.log(textureStack[C_diffuse])}
+							repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val())
+
+							materialStack[selected].map = textureStack[C_diffuse]
+							materialStack[selected].map.repeat.set(repVal,repVal)
+							materialStack[selected].map.needsUpdate =true
+						}).catch((error)=>{
+							notifyMe(error.message);
+						})
+						//materialStack[selected].needsUpdate = true;
+				})
+				
+			}
 		}
 	}
+}).on("texTiled",function(ev,source='layer'){
+	if (firstModelLoaded){
+		var tileValue = mLsetup.Layers[MLSB.Editor.layerSelected].tiles;
+		if (source == 'ui'){
+			tileValue = parseFloat($("#layerTile").val());
+		}
+		//Used to switch the mask layer used on the multilayer material
+		let selected = activeMLayer();
+		var actualMaterial = MLSB.getMaterial();
 
+		if (actualMaterial.hasOwnProperty("diffuse")){
+
+			let C_diffuse = CryptoJS.MD5(actualMaterial.diffuse.texture).toString();
+
+			if (textureStack[C_diffuse]!=undefined){
+				var repChange = actualMaterial.xTiles * tileValue;
+				materialStack[selected].map.repeat.set(repChange,repChange)
+				materialStack[selected].needsUpdate = true;
+			}
+		}else{
+			console.log(actualMaterial);
+		}
+	}
 }).on('switchLayer',function(ev,layer=0){
 	if (firstModelLoaded){
 		//Used to switch the mask layer used on the multilayer material
@@ -1591,11 +1712,11 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 
 						materialStack[selected].setValues({
 							alphaMap:textureStack[nameMask],
-							map:textureStack[nameMask],
 							opacity: parseFloat($("#layerOpacity").val())
 						})
-						materialStack[selected].map.flipY = flippingdipping;
-						materialStack[selected].map.needsUpdate = true;
+						materialStack[selected].alphaMap.flipY = flippingdipping;
+						materialStack[selected].alphaMap.needsUpdate = true;
+						$('#thacanvas').trigger("texTiled");
 					}
 				}).catch((error)=>{
 					if (PARAMS.modelDebug){console.error(error)}
@@ -1703,8 +1824,10 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
 	try{
-		let selected = activeMLayer();
-		materialStack[selected].setValues({color:new THREE.Color(color)});
+		if (firstModelLoaded){
+			let selected = activeMLayer();
+			materialStack[selected].setValues({color:new THREE.Color(color)});
+		}
 	}catch(error){
 		notifyMe(error);
 	}
