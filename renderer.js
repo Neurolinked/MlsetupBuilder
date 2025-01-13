@@ -63,7 +63,7 @@ const PARAMS = {
 	l2_pos:{x:-3,y:0,z:-3},
 	l3_pos:{x:0,y:0.5,z:-3},
 	l4_pos:{x:0,y:3,z:3},
-	bkgColors:'#000'
+	bkgColors:'#120202'
 };
 
 var skip = thePIT.RConfig('editorCfg.skipImport')
@@ -130,4 +130,24 @@ function pushTexturetoPanel(filename, width, height){
 			}
 		}
 	}
+}
+
+/**
+ * found here https://stackoverflow.com/questions/27787768/debounce-function-in-jquery
+ * calls the function func once within the within time window.
+ * this is a debounce function which actually calls the func as
+ * opposed to returning a function that would call func.
+ * 
+ * @param func    the function to call
+ * @param within  the time window in milliseconds, defaults to 300
+ * @param timerId an optional key, defaults to func
+ */
+function callOnce(func, within=300, timerId=null){
+    window.callOnceTimers = window.callOnceTimers || {};
+    if (timerId == null) 
+        timerId = func;
+    var timer = window.callOnceTimers[timerId];
+    clearTimeout(timer);
+    timer = setTimeout(() => func(), within);
+    window.callOnceTimers[timerId] = timer;
 }
