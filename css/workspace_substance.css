@@ -49,7 +49,7 @@
 
 #layeringsystem{
     counter-reset: layer -1;
-    max-height: 40vh;
+    max-height: 50vh;
     overflow-y: auto;
 }
 #layeringsystem li:before {
