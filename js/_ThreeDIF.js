@@ -1191,7 +1191,6 @@ async function LoadStackTextures(){
 }
 
 function codeMaterials(materialEntry,_materialName){
-	console.log(materialEntry);
 	if (materialEntry.hasOwnProperty('MaterialTemplate')){
 		//switching the code based on the type of the material
 		if (materialTypeCheck.decals.includes(materialEntry.MaterialTemplate)){
@@ -1310,7 +1309,8 @@ function codeMaterials(materialEntry,_materialName){
 		}
 
 		if (materialTypeCheck.fx.includes(materialEntry.MaterialTemplate)){
-
+			console.log(`fx`,materialEntry);
+			
 			let actualMaterial = lambertType.clone();
 			let fxConfig = {userData:{type:'fx'},color:0xFFFFFF};
 
@@ -1320,6 +1320,7 @@ function codeMaterials(materialEntry,_materialName){
 			if (materialEntry?.Data.hasOwnProperty('EmissiveColor')){
 				fxConfig.emissive = new THREE.Color(`rgb(${materialEntry.Data.EmissiveColor.Red},${materialEntry.Data.EmissiveColor.Green},${materialEntry.Data.EmissiveColor.Blue})`)
 			}
+
 			actualMaterial.setValues(fxConfig);
 			return actualMaterial;
 		}
@@ -1659,8 +1660,15 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 							if (PARAMS.textureDebug){console.log(textureStack[C_diffuse])}
 							repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val())
 
+							let h = repVal *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetU
+							let v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
+							var offset = new THREE.Vector2(h,v);
+
 							materialStack[selected].map = textureStack[C_diffuse]
+							materialStack[selected].map.flipY = flippingdipping;
 							materialStack[selected].map.repeat.set(repVal,repVal)
+							materialStack[selected].map.offset=offset;
+							console.log(materialStack[selected].map.offset)
 							materialStack[selected].map.needsUpdate =true
 						}).catch((error)=>{
 							notifyMe(error.message);
@@ -1670,6 +1678,16 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 				
 			}
 		}
+	}
+}).on("texOffset",function(ev,source='layer'){
+	var tileValue = mLsetup.Layers[MLSB.Editor.layerSelected].tiles;
+
+	if (firstModelLoaded){
+		let h = tileValue * (source =='ui' ? parseFloat($("#layerOffU").val()) : mLsetup.Layers[MLSB.Editor.layerSelected].offsetU)
+		let v = (-1 * (source =='ui' ? parseFloat($("#layerOffV").val()) : mLsetup.Layers[MLSB.Editor.layerSelected].offsetV)) * tileValue
+		var offset = new THREE.Vector2(h,v);
+		let selected = activeMLayer();
+		materialStack[selected].map.offset = offset
 	}
 }).on("texTiled",function(ev,source='layer'){
 	if (firstModelLoaded){

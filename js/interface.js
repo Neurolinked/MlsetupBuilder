@@ -649,6 +649,11 @@ $("#resetShades span.choose").click(function(){
 			(parseFloat($("#mbOffV").val()) != parseFloat($("#layeringsystem li.active").data("mboffv")))
 			){
 			$("#layeringsystem li.active").addClass("notsync");
+      if ((ev.target.id=="layerOffU") || (ev.target.id=="layerOffV")){
+        callOnce(()=>{
+          $("#thacanvas").trigger("texOffset",'ui');
+        },400);
+      }
 		}else{
 			$("#layeringsystem li.active").removeClass("notsync");
 		}
@@ -1908,6 +1913,8 @@ $("#layerRandomizer").click(function(){
       livelloeditato.data("mboffv",$("#mbOffV").val());
       semaphoreCLKmBlend=true;
       mLsetup.Layers[layerIndex].tiles = parseFloat($("#layerTile").val());
+      mLsetup.Layers[layerIndex].offsetU = parseFloat($("#layerOffU").val());
+      mLsetup.Layers[layerIndex].offsetV = parseFloat($("#layerOffV").val());
     }else{
       notifyMe("NO level selected, please redo then layer Edit operation with a selected layer on");
     }
