@@ -1276,7 +1276,18 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone();
 			Mlayer.userData={type:'multilayer'};
-			Mlayer.transparent=true;
+
+			if (PARAMS.switchTransparency){
+				//activate transparency not, maskAlpha
+				Mlayer.transparent=true
+				Mlayer.alphaTest=0.0
+			}else{
+				//go back to mask the material with alphaTest Value
+				Mlayer.transparent=false
+				Mlayer.alphaTest=PARAMS.maskChannel
+			}
+			//Mlayer.transparent=true;
+			//Mlayer.alphaTest = PARAMS.maskChannel;
 			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
 				
 				//name of the Actual layer textures to be loaded will be stored
@@ -1659,17 +1670,17 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 						genDataTexture(texturePromised,textureDock[tInd],C_diffuse).then((response)=>{
 							if (PARAMS.textureDebug){console.log(textureStack[C_diffuse])}
 							repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val())
-
+							
 							let h = repVal *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetU
 							let v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
 							var offset = new THREE.Vector2(h,v);
-
+							
 							materialStack[selected].map = textureStack[C_diffuse]
 							materialStack[selected].map.flipY = flippingdipping;
 							materialStack[selected].map.repeat.set(repVal,repVal)
 							materialStack[selected].map.offset=offset;
-							console.log(materialStack[selected].map.offset)
 							materialStack[selected].map.needsUpdate =true
+							if (PARAMS.textureDebug){console.log('RenderMaterial repeat,offset',materialStack[selected].map.repeat,materialStack[selected].map.offset)}
 						}).catch((error)=>{
 							notifyMe(error.message);
 						})
@@ -1685,7 +1696,7 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 	if (firstModelLoaded){
 		let h = tileValue * (source =='ui' ? parseFloat($("#layerOffU").val()) : mLsetup.Layers[MLSB.Editor.layerSelected].offsetU)
 		let v = (-1 * (source =='ui' ? parseFloat($("#layerOffV").val()) : mLsetup.Layers[MLSB.Editor.layerSelected].offsetV)) * tileValue
-		var offset = new THREE.Vector2(h,v);
+		var offset = new THREE.Vector2(h,(v==-0 ? 0 : v));
 		let selected = activeMLayer();
 		materialStack[selected].map.offset = offset
 	}
@@ -1826,18 +1837,35 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 	if(materialStack[selected]){
 		materialStack[selected].side = PARAMS.oneside ? THREE.FrontSide: THREE.DoubleSide;
 	}
+}).on('switchAlpha',function(event){
+	if (firstModelLoaded){
+		let selected = activeMLayer();
 
+		if (PARAMS.switchTransparency){
+			//activate transparency not, maskAlpha
+			materialStack[selected].setValues({transparent:true,alphaTest:0.0})
+		}else{
+			//go back to mask the material with alphaTest Value
+			materialStack[selected].setValues({transparent:false,alphaTest:PARAMS.maskChannel})
+		}
+		materialStack[selected].needsUpdate=true;
+	}
 }).on('maskAlpha',function(event){
-    //masking the alpha
-	let selected = activeMLayer();
+	if (firstModelLoaded){
+		//masking the alpha
+		if (!PARAMS.switchTransparency){
+			let selected = activeMLayer();
 
-	materialStack[selected].setValues({alphaTest:PARAMS.maskChannel});
-
+			materialStack[selected].setValues({alphaTest:PARAMS.maskChannel});
+		}
+	}
 }).on("theWire",function(event){
-    //changinf the wireframe value
-	let selected = activeMLayer();
-	if (materialStack[selected]){
-		materialStack[selected].setValues({wireframe:PARAMS.wireframes});
+	if (firstModelLoaded){
+		//changinf the wireframe value
+		let selected = activeMLayer();
+		if (materialStack[selected]){
+			materialStack[selected].setValues({wireframe:PARAMS.wireframes});
+		}
 	}
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
