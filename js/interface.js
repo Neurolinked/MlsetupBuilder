@@ -1,5 +1,6 @@
 window.$ = window.jQuery;
 const ml_randomized = [];
+var coreMblends = {};
 
 
 $(window).on('limitLayers',function(ev,index){
@@ -92,17 +93,19 @@ const range = (start, stop, step = 1) =>  Array(Math.ceil((stop - start) / step)
 //Build the microblends gallery and compile the microblends select options
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
-    if ((microblendObj.hasOwnProperty("microblends")) && (microblendObj.hasOwnProperty("package")) ){
-      for (k=0, j=microblendObj.microblends.length;k<j;k++){
-        //select
-        $("#mbSelect optgroup[label='core']").append("<option data-package='"+microblendObj.package+"' data-thumbnail='./images/"+microblendObj.microblends[k].name+".png' value='base\\surfaces\\microblends\\"+microblendObj.microblends[k].name+".xbm'>"+microblendObj.microblends[k].name+"</option>");
-        //microblend gallery
-        //$("#cagethemicroblends").append("<li style=\"background-image:url('./images/thumbs/"+microblendObj.microblends[k].name+".png'); '\" data-package='"+microblendObj.package+"' title='"+microblendObj.microblends[k].name+"' data-path=''> </li>");
-				$("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblendObj.microblends[k].name}.png');"  data-package='${microblendObj.package}' title='${microblendObj.microblends[k].name}' data-path='base\\surfaces\\microblends\\${microblendObj.microblends[k].name}.xbm' > </li>`);
+    if (microblendObj.hasOwnProperty("packages")){
+      for(const[package, microblends] of Object.entries(microblendObj.packages)){
+        if (package=='core'){
+          microblends.forEach((microblend)=>{
+            //Select selector
+            $('#mbSelect optgroup[label="core"]').append(`<option data-package="core" data-thumbnail="./images/${microblend.name}.png" value="base\\surfaces\\microblends\\${microblend.name}.xbm">${microblend.name}</option>`);
+            //UI visual list
+            $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblend.name}.png');"  data-package='${package}' title='${microblend.name}' data-path='base\\surfaces\\microblends\\${microblend.name}.xbm' > </li>`);
+          })
+        }
       }
     }
   }
-  return;
 }
 
 async function nubuildMB(microblendObj){
@@ -142,16 +145,6 @@ async function nubuildMB(microblendObj){
   }
   return;
 }
-
-//Build the material gallery
-/* async function abuildMaterial(materialArray){
-	if (typeof(materialArray)=="object"){
-		for (k=0, j=materialArray.length;k<j;k++){
-			$("#cagemLibrary").append("<div style=\"background:url('images/material/"+materialArray[k].name+".jpg') no-repeat;background-size:100% auto;\" data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</div>");
-			$("#materiaList").append("<li class='p-1 fs-80' data-ref='"+materialArray[k].name+"' data-path='"+materialArray[k].path+"'>"+materialArray[k].name.replaceAll("_"," ")+"</li>");
-		}
-	}
-} */
 
 async function materialTemplate(template){
   return new Promise((resolve,reject)=>{
@@ -252,9 +245,15 @@ $(window).on("load", function (e) {
 $(function(){
 
   var setupModPath = document.getElementById('setupModPath');
+  //Get the hairs profiles Json Database
   $.getJSON( "./jsons/hairDB.json", function( hairProfiles ) {
     hairDB = hairProfiles
     uiBuildHairs(hairDB)
+  })
+  //Get the microblends Json database
+  $.getJSON("./jsons/mbcore.json",function(microblendsList){
+    coreMblends = microblendsList
+    abuildMB(microblendsList)
   })
   
   var Workspaces = {
@@ -424,7 +423,7 @@ $(function(){
 	const materialsize = window.getComputedStyle(document.body).getPropertyValue('--matsizes').replace(/px/,'');
 
   //Building the list of microblends
-  let buildmyMicroblends = abuildMB(coreMblends);
+  //let buildmyMicroblends = abuildMB(coreMblends);
 
   var readCustomMicroblends = thePIT.getMuBlends();
 
@@ -1422,7 +1421,7 @@ $("#resetShades span.choose").click(function(){
       $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
       //if the microblend is custom it has to build the attribute finding the right one
 
-      if ((coreMblends.microblends.filter(el => el.name==mblendlName).length==1) || (mblendlName=='default')) {
+      if ((coreMblends.packages.core.filter(el => el.name==mblendlName).length==1) || (mblendlName=='default')) {
         $("#currentMblend").attr("src", `images/${mblendlName}.png`);
       }else{
         let dummyMblend = $("#cagetheCuMBlends").find($(`li[title='${mblendlName}']`));
