@@ -130,7 +130,8 @@ const schema = {
 					value: 2.0
 				}
 			},
-			skipImport:false
+			skipImport:false,
+			switchTransparency:true
 		}
 	}
 };
@@ -226,6 +227,9 @@ const preferences = new Store({schema,
 		},
 		'1.6.8-beta8': store=>{
 			store.set('editorCfg.skipImport',false);
+		},
+		'1.6.8-rc1': store=>{
+			store.set('editorCfg.switchTransparency',true);
 		}
 	}
 });
@@ -1080,6 +1084,7 @@ ipcMain.on('main:saveStore',(event, arg) => {
 		preferences.set('editorCfg.mblend.contrast.value',arg.editorCfg.mblend.contrast.value);
 		preferences.set('editorCfg.mblend.normal.value',arg.editorCfg.mblend.normal.value);
 		preferences.set('editorCfg.skipImport',arg.editorCfg.skipImport);
+		preferences.set('editorCfg.switchTransparency',arg.editorCfg.switchTransparency);
 	}else{
 		/*
 		Get the object property and cycle them, test if they are there

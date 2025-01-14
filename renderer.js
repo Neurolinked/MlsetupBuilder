@@ -40,7 +40,7 @@ const PARAMS = {
 	speed: 6.0,
 	wireframes: false,
 	oneside:false,
-	maskChannel: 0.0,
+	maskChannel: 0.05,
 	fogcolor:0x9b9d3f,
 	fognear:10,
 	fogfar:105,
@@ -51,10 +51,10 @@ const PARAMS = {
 	ForceZeroOpacity:true,
 	A_light_pow:0,
 	A_light_color:0x606060,
-	p_light1_pow:30,
-	p_light2_pow:30,
-	p_light3_pow:20,
-	p_light4_pow:30,
+	p_light1_pow:50,
+	p_light2_pow:50,
+	p_light3_pow:50,
+	p_light4_pow:50,
 	p_light1_col:0xffffff,
 	p_light2_col:0xffffff,
 	p_light3_col:0xffffff,
@@ -63,7 +63,8 @@ const PARAMS = {
 	l2_pos:{x:-3,y:0,z:-3},
 	l3_pos:{x:0,y:0.5,z:-3},
 	l4_pos:{x:0,y:3,z:3},
-	bkgColors:'#120202'
+	bkgColors:'#120202',
+	switchTransparency:true
 };
 
 var skip = thePIT.RConfig('editorCfg.skipImport')
@@ -72,6 +73,14 @@ var skip = thePIT.RConfig('editorCfg.skipImport')
 	}).catch((error)=>{
 		notifyMe(error);
 	});
+
+var transparency =thePIT.RConfig('editorCfg.switchTransparency')
+	transparency.then((result)=>{
+		PARAMS.switchTransparency = result;
+	}).catch((error)=>{
+		notifyMe(error);
+	});
+
 
 var hairDB = {}
 var materialJSON = new MaterialBuffer();
@@ -82,6 +91,9 @@ var materialJSON = new MaterialBuffer();
  */
 function notifyMe(message, warning = true){
 	let Data = new Date(Date.now());
+	if (typeof(message)=='object'){
+		console.log(message);
+	}
 	if (warning){
 	  $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
 	  notifications++
