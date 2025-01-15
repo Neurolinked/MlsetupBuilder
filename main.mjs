@@ -201,9 +201,6 @@ const preferences = new Store({schema,
 				}
 			})
 			var fixGamePath = store.get('game');
-			if (fixGamePath!=''){
-				fixGamePath = fixGamePath.replace("\\archive\\pc\\content","")
-			}
 			store.set({
 				paths:{
 						depot: store.get('depot'),
@@ -970,7 +967,7 @@ ipcMain.on('main:getversion',(event, arg) =>{
 						preferences.set(`paths.depot`,WolvenkitConfig.MaterialRepositoryPath);
 					}
 					if ((WolvenkitConfig.hasOwnProperty('CP77ExecutablePath')) && (preferences.get(`paths.game`)=='')) {
-						preferences.set(`paths.game`,WolvenkitConfig.CP77ExecutablePath.replace("\\bin\\x64\\Cyberpunk2077.exe","\\archive\\pc\\content"))
+						preferences.set(`paths.game`,WolvenkitConfig.CP77ExecutablePath.replace("\\bin\\x64\\Cyberpunk2077.exe",""))
 					}
 				} catch (error) {
 					event.reply('preload:logEntry',`The file is there, but i got an error:${error}`,false);
@@ -1390,7 +1387,7 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 			var gameContentPath = preferences.get('paths.game');
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
-				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
+				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game folder
 				in ${gameContentPath}`)
 				mainWindow.webContents.send('preload:logEntry',`The export will be done into ${preferences.get('paths.depot')}`)
 				var archiveFilter = repoBuilder(gameContentPath,conf)
@@ -1465,8 +1462,7 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 
 			if (gameContentPath!=''){
 				//try to use the path for the content you setup in the preferences
-				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game archive\\pc\\content folder
-				in ${gameContentPath}`)
+				mainWindow.webContents.send('preload:logEntry',`using the preference path for the game folder in ${gameContentPath}`)
 				var archiveFilter = microBuilder(gameContentPath)
 			}else{
 				let archive = dialog.showOpenDialog({title:'Select the game folder',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
