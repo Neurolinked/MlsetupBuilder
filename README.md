@@ -18,10 +18,6 @@ npm install .
 
 npx electron .
 ```
-# Wanna support ?
-If you wish to support, you can donate through Ko-fi
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D6APQ78)
 
 You are good to go. Happy Modding!
 
