@@ -1,4 +1,4 @@
-#MlsetupBuilder
+# MlsetupBuilder
 ## 1.6.9
 ### Done
 ### Todo 
@@ -20,11 +20,11 @@
   - [x] Custom model addition and remove
   - [x] Row grouping by type : vanilla, custom
   - [x] Tag addition and complex filtering on
-    - [ ] default tag filter configuration 
+    - [x] default tag filter configuration (partial)
   - [x] Search in the library on filter enter press
 - [x] new Material library
-  - [ ] Thumbnails rebuild
-- [ ] Microblends update
+  - [x] Thumbnails rebuild
+- [x] Microblends update
 - [x] Replacing DAT.gui with Tweakpane library
   - [x] Light configuration addition 
   - [x] Camera far/near distance configurable
@@ -35,13 +35,14 @@
     - [x] Textures debug option
 - [x] Three.js library Update
   - [x] Rewriting the 3d management code to be more maintainable
-  - [ ] Add fx support (partial)
+  - [x] Add fx support (partial)
 - [x] Loaded Textures panel with preview
   - [x] Doubleclick on the Texture Preview player to export the texture in PNG format
 - [x] New shaders management based on .Material.json file
   - [x] Assign shaders as from appearances
   - [x] masks loading from material configuration
   - [x] multilayer.mt conversion to three.js format (partial)
+    - [ ] One layer render at the time
   - [x] metal_base.remt conversion to three.js format
   - [x] mesh_decal.mt conversion to three.js format
 - [x] Custom models Material.json search and usage
@@ -54,6 +55,7 @@
 - [x] Mlsetup import preview skip
 - [x] PouchDB database support
   - [x] Management model addition
+- [x] Log copy syntax for Discord
 - [x] DotNet Framework check installation check
 
 ### Todo 1.6.7
