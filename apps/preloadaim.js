@@ -36,7 +36,7 @@ ipcRenderer.on('preload:configure', (event, configurations) => {
 		}, false);
 		img.src = configurations.mask // configurations.microblend.replace("./","../");
 
-		mblendVisual.style=`background-image:url("${configurations.microblend.replace("./","../")}");background-size:${microblendRatioVal}px;background-position:bottom ${(1024 - microblendRatioVal) +(microblendRatioVal* Number(fieldV.value))}px left ${-(Number(fieldH.value)*microblendRatioVal)}px;transform:scaleY(-1);`
+		mblendVisual.style=`background-image:url("${configurations.microblend.replace("./","../")}");background-size:${microblendRatioVal}px;background-position:top ${(1024 - microblendRatioVal) +(microblendRatioVal* Number(fieldV.value))}px left ${(-1 * Number(fieldH.value)) * microblendRatioVal}px;` //transform:scaleY(-1);
 		document.querySelector("#mblendImg").value = configurations.microblend.replace("./","../");
 		//Dispatching events to display the right datas
 		fieldT.dispatchEvent(new Event('input', {bubbles:true}));

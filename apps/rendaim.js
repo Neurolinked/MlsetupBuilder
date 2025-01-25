@@ -23,7 +23,7 @@ $(function(){
 		microblendRatio = Tiles
 		microblendRatioVal = (1/microblendRatio) * 1024
 		$("#theAimerOverlay").css("background-size",microblendRatioVal+"px")
-		$("#theAimerOverlay").css("background-position","bottom "+((1024 - microblendRatioVal) +(microblendRatioVal * V))+"px left "+(-(U * microblendRatioVal))+"px")
+		$("#theAimerOverlay").css("background-position","top "+((1024 - microblendRatioVal) +(microblendRatioVal * V))+"px left "+(-(U * microblendRatioVal))+"px")
 	}
 
 	thePIT.Reload();
@@ -46,7 +46,7 @@ $(function(){
 	panel.addBinding(PARAMS, 'Vertical',{min:-10, max:10,step:0.01}).on('change', (ev) => {
 		reworkMBlend(PARAMS.Tiles,PARAMS.Horizontal,PARAMS.Vertical);
 	});*/
-	panel.addBinding(PARAMS,'offset',{x:{min:-10,max:10},y:{min:-10,max:10},picker: 'inline', expanded: true,label:'U/V Offset'}).on('change',(ev)=>{
+	panel.addBinding(PARAMS,'offset',{x:{min:-2.0,max:2.0,step:0.001},y:{min:-2.0,max:2.0,step:0.001},picker: 'inline', expanded: true,label:'U/V Offset'}).on('change',(ev)=>{
 		reworkMBlend(PARAMS.Tiles,PARAMS.offset.x,PARAMS.offset.y);
 	})
 	panel.addBinding(PARAMS, 'Tiles',{min:0.05, max:200.0,step:0.01}).on('change', (ev) => {
