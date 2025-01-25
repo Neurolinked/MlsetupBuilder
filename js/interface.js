@@ -324,25 +324,29 @@ $(function(){
     var friendship = $(this).data("control");
     $(friendship).val($(this).val())
     $(friendship).trigger("input",true);
-    callOnce(()=>{
-      $("#thacanvas").trigger("texTiled",'ui');
-    },400);
   });
 
   $("input.driven").on({
       "input":function(e){
         driveRange(e);
       },
-      /* "change":function(e){
+      "change":function(e){
         driveRange(e);
-      } */
+      }
     });
 
   function driveRange(identifier){
     if ($(identifier.target.getAttribute("id"))!=undefined){
       var controller = `#${identifier.target.getAttribute("id")}`;
+
       if ($(`.friendo[data-control='${controller}']`).length > 0 ){
         $(`.friendo[data-control='${controller}']`).val( $(controller).val());
+      }
+
+      if (controller=="#layerTile"){
+        callOnce(()=>{
+          $("#thacanvas").trigger("texTiled",'ui');
+        },400);
       }
     }
   }
@@ -1479,6 +1483,7 @@ $("#resetShades span.choose").click(function(){
       //Trigger a new texture material Loading only if the material is changed
       if ($("#matInput").val()!=chosenMaterial.file){
         $("#thacanvas").trigger("renderMaterial",chosenMaterial); //trigger the loading of a new Material
+        $(".multiplier").attr("data-mul",chosenMaterial.xTiles.toFixed(2));
       }
       $("#materialSummary").html(materialName); //name of the material
       $("#matInput").val(chosenMaterial.file);  // path of the material

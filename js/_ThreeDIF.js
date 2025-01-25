@@ -59,7 +59,19 @@ if (window.Worker) {
 				let roughMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
 				textureStack[roughMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
 				textureStack[roughMD5Code].needsUpdate = true
+
+				var repVal = parseFloat($(".multiplier")[0].attr("data-mul")) * parseFloat($("#layerTile").val());
+
+				let offset_h = repVal *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetU
+				let offset_v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
+
+				var offset = new THREE.Vector2(offset_h,offset_v);
+
 				materialStack[datas[4]].roughnessMap = textureStack[roughMD5Code];
+
+				materialStack[datas[4]].roughnessMap.offset=offset;
+				materialStack[datas[4]].roughnessMap.repeat.set(repVal,repVal);
+
 				materialStack[datas[4]].roughnessMap.needsUpdate = true;
 				break;
 			case 'interface':
@@ -478,7 +490,6 @@ const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0,5 ) )
 const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
 const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
 const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
-
 //screenshotSaver
 $("#takeashot").click(function(ev){
 	getImageData = true;
@@ -984,6 +995,7 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 					]);
 					break;
 				case 'roughness':
+					console.warn(`roughness worker on`)
 					imgWorker.postMessage([
 						'roughnessSwap',
 						TexturePromise, 
@@ -1166,6 +1178,7 @@ async function ProcessStackTextures(){
 						target,
 						textureDock[index].shader
 					]);
+					console.warn(`roughness worker off`)
 					break;
 				default:
 					MapTextures(textureDock[index])
@@ -1641,6 +1654,11 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 	if (firstModelLoaded){
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
+		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
+		let offset_h = repVal *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetU
+		let offset_v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
+		var offset = new THREE.Vector2(offset_h,offset_v);
+
 		if ((layerMaterial.hasOwnProperty('diffuse')) && (layerMaterial?.diffuse?.texture!='' || layerMaterial?.diffuse?.texture!=null)){
 			if (PARAMS.textureDebug){
 				console.log(layerMaterial)
@@ -1649,7 +1667,6 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 			var myTex = textureDock.filter(elm=>elm.file==layerMaterial.diffuse.texture);
 			let C_diffuse = CryptoJS.MD5(layerMaterial.diffuse.texture).toString();
 			//Repeating of the textures
-			var repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val());
 
 			if (myTex?.length==1){
 				//there was it, map it
@@ -1669,24 +1686,115 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 						}
 						genDataTexture(texturePromised,textureDock[tInd],C_diffuse).then((response)=>{
 							if (PARAMS.textureDebug){console.log(textureStack[C_diffuse])}
-							repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val())
-							
-							let h = repVal *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetU
-							let v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
-							var offset = new THREE.Vector2(h,v);
-							
+							//repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val())
+
 							materialStack[selected].map = textureStack[C_diffuse]
 							materialStack[selected].map.flipY = flippingdipping;
 							materialStack[selected].map.repeat.set(repVal,repVal)
 							materialStack[selected].map.offset=offset;
 							materialStack[selected].map.needsUpdate =true
-							if (PARAMS.textureDebug){console.log('RenderMaterial repeat,offset',materialStack[selected].map.repeat,materialStack[selected].map.offset)}
 						}).catch((error)=>{
 							notifyMe(error.message);
+							console.error('error #%d',error)
+							console.log(layerMaterial)
 						})
 						//materialStack[selected].needsUpdate = true;
+				}).catch((err)=>{
+					notifyMe(err);
 				})
 				
+			}
+		}
+		/** roughness management */
+		if (layerMaterial.hasOwnProperty('roughness')) {
+			//it has roughness with a texture
+			let test = checkMaps(layerMaterial.roughness.texture);
+			//retDefTexture
+			if (test < 0){
+				//custom map
+				//find is the file was already loaded somewhere and reuse-it
+				var myTex = textureDock.filter(elm=>elm.file==layerMaterial.roughness.texture);
+				let C_rough = CryptoJS.MD5(layerMaterial.roughness.texture).toString();
+				
+				if (myTex?.length==1){
+					//there was it, map it
+					materialStack[selected].roughnessMap = textureStack[C_rough];
+					materialStack[selected].roughnessMap.flipY = flippingdipping;
+					materialStack[selected].roughnessMap.offset=offset;
+					materialStack[selected].roughnessMap.repeat.set(repVal,repVal);
+					materialStack[selected].roughnessMap.needsUpdate = true;
+				}else{
+					test = retDefTexture(layerMaterial.roughness.texture,selected,"rough");
+					let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.roughness.texture)
+
+					var texProm = _getFileContent(textureDock[tInd])
+						.then((texturePromised)=>{
+							genDataTexture(texturePromised,textureDock[tInd],C_rough).then((response)=>{
+								if (PARAMS.textureDebug){console.log(textureStack[C_rough])}
+								materialStack[selected].roughnessMap = textureStack[C_rough]
+								materialStack[selected].roughnessMap.offset=offset;
+								materialStack[selected].roughnessMap.repeat.set(repVal,repVal);
+								materialStack[selected].roughnessMap.needsUpdate =true
+							}).catch((err)=>{
+								notifyMe(`genDataTexture: ${error}`);
+							});
+						}).catch((error)=>{
+							notifyMe(error.message);
+							console.error('error #%d',error)
+						})
+				}
+			}else{
+				materialStack[selected].roughnessMap = retDefTexture(layerMaterial.roughness.texture);
+				materialStack[selected].roughnessMap.repeat.set(repVal,repVal);
+				materialStack[selected].roughnessMap.flipY = flippingdipping;
+				materialStack[selected].roughnessMap.offset=offset;
+				materialStack[selected].roughnessMap.needsUpdate =true
+			}
+		}
+		/**metallness management */
+		if (layerMaterial.hasOwnProperty('metal')) {
+			//it has roughness with a texture
+			let test = checkMaps(layerMaterial.metal.texture);
+			//retDefTexture
+			if (test < 0){
+				//custom map
+				//find is the file was already loaded somewhere and reuse-it
+				var myTex = textureDock.filter(elm=>elm.file==layerMaterial.metal.texture);
+				let C_metal = CryptoJS.MD5(layerMaterial.metal.texture).toString();
+				
+				if (myTex?.length==1){
+					//there was it, map it
+					materialStack[selected].metalnessMap = textureStack[C_metal];
+					materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
+					materialStack[selected].metalnessMap.flipY = flippingdipping;
+					materialStack[selected].metalnessMap.offset=offset;
+					materialStack[selected].metalnessMap.needsUpdate =true
+				}else{
+					test = retDefTexture(layerMaterial.metal.texture,selected,"metal");
+					let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.metal.texture)
+
+					var texProm = _getFileContent(textureDock[tInd])
+						.then((texturePromised)=>{
+							genDataTexture(texturePromised,textureDock[tInd],C_metal).then((response)=>{
+								if (PARAMS.textureDebug){console.log(textureStack[C_metal])}
+
+								materialStack[selected].metalnessMap = textureStack[C_metal]
+								materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
+								materialStack[selected].metalnessMap.flipY = flippingdipping;
+								materialStack[selected].metalnessMap.offset=offset;
+								materialStack[selected].metalnessMap.needsUpdate =true
+							}).catch((err)=>{
+								notifyMe(`genDataTexture: ${error}`);
+							});
+						}).catch((error)=>{
+							notifyMe(error.message);
+							console.error('error #%d',error)
+						})
+				}
+			}else{
+				materialStack[selected].metalnessMap = retDefTexture(layerMaterial.metalnessMap.texture);
+				materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
+				materialStack[selected].metalnessMap.needsUpdate =true
 			}
 		}
 	}
@@ -1706,6 +1814,7 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 		if (source == 'ui'){
 			tileValue = parseFloat($("#layerTile").val());
 		}
+		
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
 		var actualMaterial = MLSB.getMaterial();
@@ -1719,8 +1828,26 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 				materialStack[selected].map.repeat.set(repChange,repChange)
 				materialStack[selected].needsUpdate = true;
 			}
-		}else{
-			console.log(actualMaterial);
+		}
+		if (actualMaterial.hasOwnProperty("roughness")){
+
+			let C_rough = CryptoJS.MD5(actualMaterial.roughness.texture).toString();
+
+			if (textureStack[C_rough]!=undefined){
+				var repChange = actualMaterial.xTiles * tileValue;
+				materialStack[selected].roughnessMap.repeat.set(repChange,repChange)
+				materialStack[selected].roughnessMap.needsUpdate = true;
+			}
+		}
+		if (actualMaterial.hasOwnProperty("metal")){
+
+			let C_metal = CryptoJS.MD5(actualMaterial.metal.texture).toString();
+
+			if (textureStack[C_metal]!=undefined){
+				var repChange = actualMaterial.xTiles * tileValue;
+				materialStack[selected].metalnessMap.repeat.set(repChange,repChange)
+				materialStack[selected].needsUpdate = true;
+			}
 		}
 	}
 }).on('switchLayer',function(ev,layer=0){
