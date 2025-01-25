@@ -1051,7 +1051,7 @@ ipcMain.on('main:osOpen',(event,arg)=>{
 		}).catch((error)=>event.reply('preload:logEntry', error))
 });
 
-ipcMain.on('main:3dialog',(event, arg) => {
+/* ipcMain.on('main:3dialog',(event, arg) => {
 	const result = dialog.showOpenDialog({
 		title:'Load a 3d asset',
 		filters:[{ name: 'GL Transmission Format', extensions: ['glb','gltf'] }],
@@ -1070,7 +1070,7 @@ ipcMain.on('main:3dialog',(event, arg) => {
 	event.reply('preload:enable','#cstMdlLoader')
   })
   
-})
+}) */
 
 //Save the preferences
 ipcMain.on('main:saveStore',(event, arg) => {

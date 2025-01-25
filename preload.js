@@ -17,10 +17,10 @@ contextBridge.exposeInMainWorld(
       clickTheMenuVoice:(voice) => {
         ipcRenderer.send('main:clickMenu',voice);
       },
-			ThreeDAsset: () =>{
+			/* ThreeDAsset: () =>{
 				var file = ipcRenderer.send('main:3dialog');
         return file
-			},
+			}, */
       PickMask: (folder) =>{
         ipcRenderer.send('main:pickMlmask',folder)
       },

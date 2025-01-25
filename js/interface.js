@@ -2619,10 +2619,10 @@ $("#modelOpenPath, #masksOpenPath ,#NormOpenPath").click(function(){
   }
 });
 
-$("#modelCustomPath").click(function(){
+/* $("#modelCustomPath").click(function(){
   //Search for the model and the material file with an open folder
   thePIT.ThreeDAsset();
-});
+}); */
 
 $(".copyinfo").click(function(ev){
   let theTarget = $(this).data("target");
