@@ -686,3 +686,8 @@ table.dataTable tr:hover td:not([colspan]){
     display:inline-block;
   }
 }
+.multiplier:after{
+  content:  " * "attr(data-mul);
+  color: var(--bs-primary);
+  font-size: .6rem;
+}
