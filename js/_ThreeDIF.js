@@ -191,14 +191,19 @@ function activeMLayer(){
 }
 
 function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
-	if (mapName=="engine\\textures\\editor\\black.xbm"){
+	if ((mapName=="engine\\textures\\editor\\black.xbm")||
+	(mapName=="base\\surfaces\\materials\\default\\black.xbm")){
 		return 0.0;
 	}
-	if (mapName=="engine\\textures\\editor\\grey.xbm"){
+	if ((mapName=="engine\\textures\\editor\\grey.xbm") ||
+	(mapName=="base\\surfaces\\materials\\default\\gray.xbm")){
 		return 0.5;
 	}
-	if ((mapName=="engine\\textures\\editor\\white.xbm") || 
-		(mapName=="engine\\textures\\editor\\small_white.xbm")) {
+	if (
+		(mapName=="engine\\textures\\editor\\white.xbm") || 
+		(mapName=="engine\\textures\\editor\\small_white.xbm") ||
+		(mapName=="base\\surfaces\\materials\\default\\white.xbm")
+		) {
 		return 1.0;
 	}
 	return -1.0;
@@ -1763,9 +1768,12 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 				let C_metal = CryptoJS.MD5(layerMaterial.metal.texture).toString();
 				
 				if (myTex?.length==1){
+					console.log(layerMaterial.metal.texture);
 					//there was it, map it
 					materialStack[selected].metalnessMap = textureStack[C_metal];
+					
 					materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
+
 					materialStack[selected].metalnessMap.flipY = flippingdipping;
 					materialStack[selected].metalnessMap.offset=offset;
 					materialStack[selected].metalnessMap.needsUpdate =true
@@ -1787,12 +1795,13 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 								notifyMe(`genDataTexture: ${error}`);
 							});
 						}).catch((error)=>{
+							console.log(layerMaterial.metal.texture);
 							notifyMe(error.message);
 							console.error('error #%d',error)
 						})
 				}
 			}else{
-				materialStack[selected].metalnessMap = retDefTexture(layerMaterial.metalnessMap.texture);
+				materialStack[selected].metalnessMap = retDefTexture(layerMaterial.metal.texture);
 				materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
 				materialStack[selected].metalnessMap.needsUpdate =true
 			}
