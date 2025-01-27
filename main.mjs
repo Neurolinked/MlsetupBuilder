@@ -1330,25 +1330,28 @@ function uncookRun(toggle,params,stepbar,logger){
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals uncooked</span>')
 							break;
 						case 'step9':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Fonts exported</span>')
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Base Environments models exported</span>')
 							break;
 						case 'step10':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Fonts exported</span>')
-							break;
-						case 'step11':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty chars exported</span>')
 							break;
-						case 'step12':
+						case 'step11':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty weapons exported</span>')
 							break;
-						case 'step13':
+						case 'step12':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty vehicles exported</span>')
 							break;
-						case 'step14':
+						case 'step13':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty mechanical exported</span>')
 							break;
-						case 'step15':
+						case 'step14':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
+							break;
+	/* 					case 'step15':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
+							break; */
+						case 'step16':
+							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Materials Textures exported</span>')
 							break;
 						case 'micro_opt01':
 						case 'micro_opt02':
@@ -1406,8 +1409,8 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 //function to execute the series of uncook
 function repoBuilder(contentdir, conf){
 
-	vanillaContentPath = path.join(contentdir,spotfolder.base)
-	phantomLContentPath = path.join(contentdir,spotfolder.pl)
+	/* vanillaContentPath = path.join(contentdir,spotfolder.base)
+	phantomLContentPath = path.join(contentdir,spotfolder.pl) */
 
 	return new Promise((resolve,reject) =>{
 		let unbundlefoWkit = preferences.get('paths.depot')
@@ -1425,7 +1428,6 @@ function repoBuilder(contentdir, conf){
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
 					.then(()=>uncookRun(conf[3],["uncook", "-gp", contentdir, "-r","^base.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step9'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_EN")})
-					//.then(()=>{checkMakeSymlinks()})
 					.then(()=>uncookRun(conf[4],["uncook", "-gp", contentdir, "-r","^ep1.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step10'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_CH")})
 					.then(()=>uncookRun(conf[5],["uncook", "-gp", contentdir, "-r","^ep1.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step11'))
@@ -1433,9 +1435,11 @@ function repoBuilder(contentdir, conf){
 					.then(()=>uncookRun(conf[6],["uncook", "-gp", contentdir, "-r","^ep1.vehicles.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step12'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_VE")})
 					.then(()=>uncookRun(conf[7],["uncook", "-r","^ep1.mechanical.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step13'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ME")})
-					.then(()=>uncookRun(conf[7],["uncook", "-r","^ep1.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step14'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_ME")})
+					.then(()=>uncookRun(conf[8],["uncook", "-r","^ep1.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step14'))
 					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_EN")})
+					.then(()=>uncookRun(conf[9],["uncook", "-gp", contentdir, "-r","^base.surfaces.materials.+\.xbm$", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step16'))
+					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#base_MT")})
 					.catch(err => { console.log(err) })
 					.finally(() => {
 						mainWindow.webContents.send('preload:enable',"#triggerUncook")
@@ -1490,8 +1494,6 @@ function microBuilder(contentdir){
 				mainWindow.webContents.send('preload:uncookLogClean','#microLogger div')
 
 				uncookRun(true,["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div')
-					/* .then(()=> 	uncookRun(true,["uncook", "-gp", contentpath, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt02','#microLogger div'))
-					.then(()=> 	uncookRun(true,["uncook", "-gp", contentpath, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt03','#microLogger div')) */
 					.then(()=> {
 						return new Promise((resolve,reject) =>{
 							fs.readdir(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/'),(err,files)=>{
