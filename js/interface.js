@@ -243,7 +243,6 @@ $(window).on("load", function (e) {
 })
 
 $(function(){
-
   var setupModPath = document.getElementById('setupModPath');
   //Get the hairs profiles Json Database
   $.getJSON( "./jsons/hairDB.json", function( hairProfiles ) {
@@ -1118,6 +1117,19 @@ $("#resetShades span.choose").click(function(){
           }
         }
       },
+      {
+        name:`custom`,
+        text:`Custom`,
+        className:'btn btn-sm btn-layer2 my-1',
+        action:function(e, dt, node, config){
+          node.toggleClass("btn-success btn-layer2")
+          if (node.hasClass('btn-success')){
+            CPModels.column(3).search("custom").draw()
+          }else{
+            CPModels.column(3).search("").draw()
+          }
+        }
+      }
     ],
     columns:[
       {
@@ -2148,13 +2160,13 @@ $("#TheMagicIsHere").click(function(){
     document.title = document.title.split('[')[0]+" ["+nomefile+"]";
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
+    //openMlsetups.push(mLsetup);
     $("#MlSetupsList").trigger("addBlade",nomefile);
     notifyMe(`Imported : ${nomefile}`,false);
     $('#nametoexport').val(nomefile);
     $("#importTech").val("");
     $("#layeringsystem li.active").click();
-    return
-
+    //return
 	});
 
 $("select[name='exportVersion']").change(function(){
@@ -2915,6 +2927,7 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   $("#MlSetupsList").on("addBlade",function(ev,name){
     if (name!=''){
+      console.log(name);
       $("#MlSetupsList").trigger("switchBlade");
       $("#MlSetupsList").append(`<span class="badge text-bg-secondary">${name.split(".json")[0]}<button type="button" class="ms-2 btn-close" data-bs-dismiss="badge" aria-label="Close"></button></span>`);
     }
@@ -3013,10 +3026,16 @@ unCooKonfirm.addEventListener("click", (event) => {
     updPanelCovers(); //on resize will update the position of the interface to cover
     $("#DataModelsLibrary").DataTable().draw();
     adaptTexturePlayer();
+    let tblsize = window.innerHeight-350
+    if ((window.innerHeight-350)<50){
+      tblsize = 50;
+    }
     //adapt model table size to the window
-    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${(window.innerHeight-350)}px`);
+    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${tblsize}px`);
+    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("min-height",`${tblsize}px`);
 	});
 
   $("#thacanvas").trigger("changeBg");
   
+  $("#MlSetupsList").trigger("addBlade","empty.mlsetup.json");
 });
