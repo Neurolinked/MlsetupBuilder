@@ -121,12 +121,12 @@ const fogpane = TDtabManager.pages[0].addFolder({
 
 
 
-const smeshtab =  TDtabManager.pages[1].addTab({
+/* const smeshtab =  TDtabManager.pages[1].addTab({
     pages: [
         {title: 'Toggle'},
         {title: 'Info'},
       ]
-});
+}); */
 const EDLayer = TDtabManager.pages[2].addFolder({
   title:'Layer'
 });
