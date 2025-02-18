@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev=true",
-    "package":"electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\"",
+    "package": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\"",
     "compile": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\" --prune=true  --asar.unpackDir={**/node_modules/sharp,**/node_modules/@img,**/jsons,**/images} "
   },
   "keywords": [
@@ -32,7 +32,7 @@
     "@electron/packager": "^18.3.5",
     "@fortawesome/fontawesome-free": "^6.5.1",
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "electron": "^32.2.0",
+    "electron": "^34.2.0",
     "tweakpane": "^4.0.3"
   }
 }
