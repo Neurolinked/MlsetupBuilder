@@ -1498,7 +1498,7 @@ function LoadMaterials(path){
 
 function LoadModel(path){
 	return new Promise((resolve,reject)=>{
-		var subsCheckText = '';
+		//var subsCheckText = '';
 		var subsCheckUVs = '';
 		path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
 		var modelfile;
@@ -1519,7 +1519,7 @@ function LoadModel(path){
 			remove all the submesh toggle buttons
 			remove all the buttons in the uv calculator
 			*/
-			$("#sbmeshEN > ul, #unChecksMesh").html("");
+			$(window).trigger('uiResetMeshes');
 
 			var Boned=false;
 
@@ -1539,7 +1539,12 @@ function LoadModel(path){
 							//console.info(`Model info ${child.name}, material used: ${child.userData?.materialNames[0]}`);
 
 							//Submesh Enabler UI
-							subsCheckText +=`<li class="form-check" data-material="${child.userData.materialNames[0]}"><label for="${child.name}" class="form-check-label">${child.name}</label><input name="${child.name}" type="checkbox" class="form-check-input" checked ></li>`
+							let check = {
+								name:child.name,
+								material:child.userData.materialNames[0]
+							}
+							$(window).trigger('uiPushMeshes',check);
+							/* subsCheckText +=`<li class="form-check" data-material="${child.userData.materialNames[0]}"><label for="${child.name}" class="form-check-label">${child.name}</label><input name="${child.name}" type="checkbox" class="form-check-input" checked ></li>` */
 							subsCheckUVs += `<input type="checkbox" class="btn-check" id="uvchk_${child.name}" checked >
 											 <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${child.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${child.name}</label>`
 							//Assign the Material
@@ -1566,7 +1571,7 @@ function LoadModel(path){
 				})
 
 				$("#withbones svg:nth-child(1) path").attr("fill",(Boned ? 'red':'currentColor'));
-				$("#sbmeshEN > ul").html(subsCheckText);
+				//$("#sbmeshEN > ul").html(subsCheckText);
 				$("#unChecksMesh").html(subsCheckUVs);
 
 				//Autocentering
@@ -1896,15 +1901,30 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 	try{
 		if ((appearance.hasOwnProperty("name")) && 
 			(appearance.hasOwnProperty("index"))) {
+			
+			$(window).trigger(`uicleanMlmaterial`);
+
 			let new_Materials = materialJSON.Appearances[appearance.index].Materials;
 			new_Materials.forEach((mat)=>{
-				console.log(mat);
 				if (!materialSet.has(mat)){
 					materialSet.add(mat);
 					materialStack[mat] = codeMaterials(materialJSON.Materials.filter(el => el.Name == mat)[0], mat);
-					
+					if (materialStack[mat].userData.type=='multilayer'){
+						$(window).trigger(`uiPushMlmaterial`,mat);
+					}
 				}
 			})
+			
+			let k = 0;
+			TDengine.scene.traverse(oggetti=>{
+				if (oggetti.isMesh){
+					oggetti.material=materialStack[new_Materials[k]];
+					oggetti.material.needsUpdate=true;
+					k++;
+				}
+			});
+			$(window).trigger(`uiswitchMlmaterial`,1)
+			$("#thacanvas").trigger("switchLayer",MLSB.layerSelected);
 		}
 	}catch(wrong){
 		notifyMe(wrong);

@@ -39,7 +39,40 @@ $(window).on('limitLayers',function(ev,index){
     notifyMe(error)
   });
 
-})
+}).on('uiResetMeshes',function(ev){
+  //remove all the meshes ref in the UI
+  $("#sbmeshEN > ul, #unChecksMesh").html("");
+
+}).on('uiPushMeshes',function(ev,datas={}){
+  if ( (datas.hasOwnProperty("name") ) && (datas.hasOwnProperty("material") ) ){
+    $("#sbmeshEN > ul").append(`<li class="form-check" data-material="${datas.material}"><label for="${datas.name}" class="form-check-label">${datas.name}</label><input name="${datas.name}" type="checkbox" class="form-check-input" checked ></li>`);
+  }
+}).on('uiswitchMlmaterial',function(ev,index){
+  $(`#Mlswitcher div:nth-child(${index}) input[type='radio']`).prop("checked",true);
+  $(`#mLayerOperator li:nth-child(${index})`).addClass("active");
+}).on('uicleanMlmaterial',function(ev){
+  $("#Mlswitcher").html("");
+  $("#mLayerOperator").html("");
+}).on('uiPushMlmaterial',function(ev,material){
+  var idx = materialJSON.findIndex(material);
+  if (idx >=0){
+    if (entry = materialJSON.find(material)){
+      if ([
+        "engine\\materials\\multilayered.mt",
+        "base\\materials\\vehicle_destr_blendshape.mt"
+        ].includes(entry.MaterialTemplate)){
+
+        var uiMultilayerSwitch = materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
+
+        var multilayerMaskMenu = materialJSON.codeMaterial(idx,`<li><a class="dropdown-item" href="#" data-multilayer="${idx}" >$_MATERIALFULLNAME</a></li>`);
+
+        $("#Mlswitcher").append(uiMultilayerSwitch);
+        $("#mLayerOperator").append(multilayerMaskMenu);
+      }
+    }
+  }
+
+});
 
 /* CouchDB initialization */
 const mlsbDB = new PouchDB('Docs');
