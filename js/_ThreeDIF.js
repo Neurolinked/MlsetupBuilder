@@ -1249,14 +1249,14 @@ function codeMaterials(materialEntry,_materialName){
 				decalConfig.opacity = (materialEntry.Data.DiffuseColor.Alpha/255)
 			}
 			
-
+			decalConfig.name=_materialName;
 			Rdecal.setValues(decalConfig);
 			return Rdecal
 		}
 
 		if (materialTypeCheck.metal_base.includes(materialEntry.MaterialTemplate)){
 			var Rbase = materialBASE.clone();
-			var rbaseConfig = {userData:{type:'metal'},side:THREE.DoubleSide}
+			var rbaseConfig = {name:_materialName,userData:{type:'metal'},side:THREE.DoubleSide}
 
 			if (materialEntry.Data.hasOwnProperty('AlphaThreshold')){
 				rbaseConfig.opacity = materialEntry.Data.AlphaThreshold;
@@ -1293,7 +1293,7 @@ function codeMaterials(materialEntry,_materialName){
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone();
-			Mlayer.userData={type:'multilayer'};
+			Mlayer.userData={name:_materialName,type:'multilayer'};
 
 			if (PARAMS.switchTransparency){
 				//activate transparency not, maskAlpha
@@ -1338,10 +1338,9 @@ function codeMaterials(materialEntry,_materialName){
 		}
 
 		if (materialTypeCheck.fx.includes(materialEntry.MaterialTemplate)){
-			console.log(`fx`,materialEntry);
 			
 			let actualMaterial = lambertType.clone();
-			let fxConfig = {userData:{type:'fx'},color:0xFFFFFF};
+			let fxConfig = {name:_materialName,userData:{type:'fx'},color:0xFFFFFF};
 
 			if (materialEntry?.Data.hasOwnProperty('Emissive')){
 				fxConfig.emissiveIntensity = parseFloat(materialEntry?.Data.Emissive);
@@ -1355,7 +1354,7 @@ function codeMaterials(materialEntry,_materialName){
 		}
 
 		if (materialTypeCheck.hair.includes(materialEntry.MaterialTemplate)){
-			var configHair = {};
+			var configHair = {name:_materialName};
 			var actualMaterial = materialHair.clone();
 			
 
@@ -1384,7 +1383,7 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.skin.includes(materialEntry.MaterialTemplate)){
 
 			var skin = stdMaterial.clone();
-			var skinConfig = {userData:{type:'skin'},color:0xFFDABE};
+			var skinConfig = {name:_materialName,userData:{type:'skin'},color:0xFFDABE};
 
 			//console.warn('skin',materialEntry,'skin');
 
@@ -1416,7 +1415,9 @@ function codeMaterials(materialEntry,_materialName){
 		}
 
 		if (materialTypeCheck.glass.includes(materialEntry.MaterialTemplate)){
-			return materialGlass
+			var glassMe = materialGlass.clone();
+			glassMe.setValues({name:_materialName});
+			return glassMe
 		}
 
 		return materialNoneToCode;
@@ -1890,13 +1891,19 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 			
 		}
 	}
-}).on('switchAppearance',function(ev, appearance='default'){
+}).on('switchAppearance',function(ev, appearance){
 
 	try{
-		let tempID = materialJSON.Appearances.map(el=>el.Name).indexOf(appearance)
-		if (tempID  >=0 ){ 
-			materialJSON.Appearances[tempID].Materials.forEach((material)=>{
-				materialSet.add(material);
+		if ((appearance.hasOwnProperty("name")) && 
+			(appearance.hasOwnProperty("index"))) {
+			let new_Materials = materialJSON.Appearances[appearance.index].Materials;
+			new_Materials.forEach((mat)=>{
+				console.log(mat);
+				if (!materialSet.has(mat)){
+					materialSet.add(mat);
+					materialStack[mat] = codeMaterials(materialJSON.Materials.filter(el => el.Name == mat)[0], mat);
+					
+				}
 			})
 		}
 	}catch(wrong){

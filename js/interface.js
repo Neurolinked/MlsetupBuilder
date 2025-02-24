@@ -2760,9 +2760,19 @@ unCooKonfirm.addEventListener("click", (event) => {
       
       $(`#nav-appearance div.card`).removeClass('active');
       $(`#nav-appearance div.card button[data-appearance='${$(this).attr('data-name')}']`).closest('.card').addClass('active');
-      $("#thacanvas").trigger('switchAppearance',[$(this).data("name")]);
+      $("#thacanvas").trigger('switchAppearance',
+        {
+          name: $(this).data("name"),
+          index: $(this).parent().index()
+        });
       /* Read the configuration of materials */
+      let matCompile = materialJSON.Appearances[$(this).parent().index()].Materials
       
+
+      $("#nav-material ul").html("");
+      new Set(matCompile).values().forEach((el)=>{
+        $("#nav-material ul").append(`<li>${el}</li>`);
+      });
       /*
       scene.children.at(-1).children.forEach((element,index) => {
         if (element.hasOwnProperty(`type`)){
