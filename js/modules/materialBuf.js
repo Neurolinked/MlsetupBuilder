@@ -173,8 +173,14 @@ class MaterialBuffer {
 					this.Appearances = []
 					let names = Object.keys(mbDummy.Appearances);
 					
+					var times = 0;
+					while (times < (names.length/(10**times))) {
+						times=times + 1;
+					}
+					var conditionName = new RegExp(`\\d{${times}}$`)
+
 					names.forEach(name => {
-						this.pushAppearance(new Appearance(name.replace(new RegExp(/\d+$/),''),mbDummy.Appearances[name]))
+						this.pushAppearance(new Appearance(name.replace(conditionName,''),mbDummy.Appearances[name]))
 					});
 				}
 				//console.log(this.Appearances);
