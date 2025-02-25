@@ -1961,9 +1961,12 @@ $("#layerRandomizer").click(function(){
       livelloeditato.data("mboffu",$("#mbOffU").val());
       livelloeditato.data("mboffv",$("#mbOffV").val());
       semaphoreCLKmBlend=true;
+      
       mLsetup.Layers[layerIndex].tiles = parseFloat($("#layerTile").val());
       mLsetup.Layers[layerIndex].offsetU = parseFloat($("#layerOffU").val());
       mLsetup.Layers[layerIndex].offsetV = parseFloat($("#layerOffV").val());
+      mLsetup.Layers[layerIndex].microblend.offset.h = parseFloat($("#mbOffU").val());
+      mLsetup.Layers[layerIndex].microblend.offset.v = parseFloat($("#mbOffV").val());
     }else{
       notifyMe("NO level selected, please redo then layer Edit operation with a selected layer on");
     }
