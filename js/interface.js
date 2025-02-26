@@ -356,6 +356,9 @@ $(function(){
     var friendship = $(this).data("control");
     $(friendship).val($(this).val())
     $(friendship).trigger("input",true);
+    if (e.target.dataset?.control.match(/^#layerOff.+/)){
+      $("#thacanvas").trigger("texOffset",'ui');
+    }
   });
 
   $("input.driven").on({
@@ -1748,7 +1751,7 @@ $("#resetShades span.choose").click(function(){
     $("#colorManagament").html(colorchanger);
 	});
 
-  $("#cagethemicroblends li").click(function(){
+  $("body").on("click","#cagethemicroblends li",function(ev){
     var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
 
     $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
