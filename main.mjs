@@ -789,8 +789,8 @@ async function AfileRead(userpath,flags,noRepo){
 						reject(err);
 					}
 				}
+				mainWindow.webContents.send('preload:logEntry', `File ${whereLoadFrom} opening error ${err.message}`)
 				reject(err);
-				mainWindow.webContents.send('preload:logEntry', `File opening error ${err.message}`)
 			}
 			mainWindow.webContents.send('preload:logEntry', `File loaded: ${whereLoadFrom}`);
 			resolve(contentfile);
@@ -1701,22 +1701,24 @@ ipcMain.on('main:scanFolder',()=>{
 
 ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 	return new Promise((resolve,reject)=>{
+		var actualfile, fileTemplate, customPath
 		try {
-
-			var customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
-			var fileTemplate = maskTemplate.split("\\").pop().toString();
+			
+			customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
+			fileTemplate = maskTemplate.split("\\").pop().toString();
 			let ext = preferences.get("maskformat");
-			fileTemplate = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
+			actualfile = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
 			//var newpath = String(maskTemplate).replace(".mlmask","_layers\\");
 			var test = path.join(preferences.get('paths.depot'),customPath)
-	
+			
 			fs.readdir(test,{recursive:false},(err,files)=>{
 				if (!err){
 					let res = files.filter((el) =>{
-						 return el.match(fileTemplate)
-						})
+						return el.match(actualfile)
+					})
 					resolve(res.length)
 				}else{
+					log.info(`${actualfile} not found`);
 					mainWindow.webContents.send('preload:logEntry',`${err}`,true)
 					reject(false)
 				}
