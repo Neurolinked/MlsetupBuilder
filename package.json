@@ -32,7 +32,7 @@
     "@electron/packager": "^18.3.5",
     "@fortawesome/fontawesome-free": "^6.5.1",
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "electron": "^34.2.0",
+    "electron": "^35.0.0",
     "tweakpane": "^4.0.3"
   }
 }
