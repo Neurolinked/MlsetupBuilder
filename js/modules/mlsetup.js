@@ -191,7 +191,7 @@ class Mlsetup {
 					this.Layers[i].microblend.offset.v = thisLayer?.microblendOffsetV ? thisLayer.microblendOffsetV : 0
 					this.Layers[i].normal = thisLayer.normalStrength
 					this.Layers[i].offsetU = thisLayer?.offsetU!=undefined ? thisLayer.offsetU : 0
-					this.Layers[i].offsetV = thisLayer?.offsetV!=undefined ? thisLayer.offsetU : 0
+					this.Layers[i].offsetV = thisLayer?.offsetV!=undefined ? thisLayer.offsetV : 0
 					this.Layers[i].opacity = thisLayer?.opacity!=undefined ? thisLayer.opacity : 1
 					this.Layers[i].overrides = thisLayer.overrides = 0
 					this.Layers[i].roughnessIn = thisLayer.roughLevelsIn
