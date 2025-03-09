@@ -160,8 +160,8 @@
     <h5 class="offcanvas-title text-dark" id="lblmlsetupseP"><i class="fa-solid fa-vest"></i> MLsetup Preview</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
-  <div class="d-grid py-1">
-    <button class="btn btn-Prim rounded-0" type="button" id="TheMagicIsHere"   data-bs-placement="bottom" title="Import a json file">Import the MuLtilayer Setup <i class="fa-solid fa-angles-right"></i></button>
+  <div class="mx-auto py-1">
+    <button class="btn btn-secondary fs-120 rounded-0" type="button" id="TheMagicIsHere"   data-bs-placement="bottom" title="Import a json file">Import the MuLtilayer Setup <i class="fa-solid fa-angles-right"></i></button>
   </div>
   <div class="offcanvas-body">
     <div class="mlpreviewBody" ></div>
@@ -391,12 +391,19 @@
               <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerOpacity" value="1.0" step="0.01"  min="0.0" max="1.0">
             </div>
           </div>
-          <div class="">
+          <div class="border border-secondary">
+            <div class="p-1 my-auto bg-layer2">Offset</div>
             <div class="input-group input-group-sm my-1">
-                <div class="badge my-auto">Offset</div><span class="input-group-text border-0">U</span>
-              <input type="number" class="form-control rounded-0" id="layerOffU" value="0.0" step="0.01">
-              <span class="input-group-text border-0">V</span>
-                <input type="number" class="form-control rounded-0" id="layerOffV" value="0.0" step="0.01">
+              <div class="badge my-auto">Horiz.</div>
+                <!-- <span class="input-group-text border-0">H</span> -->
+              <input type="number" class="form-control rounded-0 driven" id="layerOffU" value="0.0" step="0.01">
+              <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerOffU" value="0.0" step="0.01"  min="-1.0" max="8.0">
+            </div>
+            <div class="input-group input-group-sm my-1">
+              <div class="badge my-auto">Vertical</div>
+              <!-- <span class="input-group-text border-0">V</span> -->
+                <input type="number" class="form-control rounded-0 driven" id="layerOffV" value="0.0" step="0.01">
+                <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerOffV" value="0.0" step="0.001"  min="-1.0" max="8.0">
             </div>
           </div>
           <div>
