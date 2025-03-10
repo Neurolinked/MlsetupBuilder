@@ -2812,17 +2812,6 @@ unCooKonfirm.addEventListener("click", (event) => {
       new Set(matCompile).values().forEach((el)=>{
         $("#nav-material ul").append(`<li>${el}</li>`);
       });
-      /*
-      scene.children.at(-1).children.forEach((element,index) => {
-        if (element.hasOwnProperty(`type`)){
-          if (element.type=='SkinnedMesh'){
-            console.log(
-              materialJSON.Materials.filter(el => el.Name == element.userData.materialNames[$("#appearanceSwitcher ul.dropdown-menu li a").index($(this))])
-            );
-          }
-        }
-      });
-      */
     }
   });
 
