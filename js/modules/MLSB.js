@@ -24,7 +24,9 @@ class MLSBEditor {
         lastMaterial : `unused`,
         lastModel : ``,
         appearance : ``,
-        model : {}
+        model : {
+            bones:false
+        }
     }
 
     Materials = {}
@@ -33,7 +35,7 @@ class MLSBEditor {
      */
     reset(){
         this.Editor.layerSelected = 0;
-        this.TreeD.model = {};
+        this.TreeD.model = {bones:false};
     }
     getMaterial(){
         let searchedMaterial = this.Materials[this.TreeD.lastMaterial] ? this.Materials[this.TreeD.lastMaterial] : false 
