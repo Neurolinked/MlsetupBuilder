@@ -38,6 +38,9 @@ $(window).on('limitLayers',function(ev,index){
   }).catch((error)=>{
     notifyMe(error)
   });
+}).on('uiUpdMeshes',function(ev){
+  //update the interface after the model has been loaded
+  $("#withbones svg:nth-child(1) path").attr("fill",(MLSB.TreeD.model.bones ? 'red':'currentColor'));
 
 }).on('uiResetMeshes',function(ev){
   //remove all the meshes ref in the UI
@@ -45,7 +48,17 @@ $(window).on('limitLayers',function(ev,index){
 
 }).on('uiPushMeshes',function(ev,datas={}){
   if ( (datas.hasOwnProperty("name") ) && (datas.hasOwnProperty("material") ) ){
-    $("#sbmeshEN > ul").append(`<li class="form-check" data-material="${datas.material}"><label for="${datas.name}" class="form-check-label">${datas.name}</label><input name="${datas.name}" type="checkbox" class="form-check-input" checked ></li>`);
+
+    $("#sbmeshEN > ul").append(
+      `<li class="form-check" data-material="${datas.material}">
+        <label for="${datas.name}" class="form-check-label">${datas.name}</label>
+        <input name="${datas.name}" type="checkbox" class="form-check-input" checked >
+      </li>`);
+    console.log(datas)
+    /* <input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
+											 <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${datas.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${datas.name}</label> */
+    $("#unChecksMesh").append(`<input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
+      <label class="btn btn-sm btn-outline-secondary mb-2 d-block" for="uvchk_${datas.name}" autocomplete='off' title="${datas.material}" >${datas.name}</label>`);
   }
 }).on('uiswitchMlmaterial',function(ev,index){
   $(`#Mlswitcher div:nth-child(${index}) input[type='radio']`).prop("checked",true);
@@ -59,7 +72,8 @@ $(window).on('limitLayers',function(ev,index){
     if (entry = materialJSON.find(material)){
       if ([
         "engine\\materials\\multilayered.mt",
-        "base\\materials\\vehicle_destr_blendshape.mt"
+        "base\\materials\\vehicle_destr_blendshape.mt",
+        "base\\fx\\_shaders\\sandevistan_multilayer.mt"
         ].includes(entry.MaterialTemplate)){
 
         var uiMultilayerSwitch = materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
@@ -666,6 +680,9 @@ $("#resetShades span.choose").click(function(){
   $("#maskoolor").css("background-color","#"+theshade);
 });
 
+$("#layerOpacity").on("input",function(ev){
+  $("#thacanvas").trigger("changeOpacity",$(this).val());
+});
 //Change in layer displayer
 	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(ev){
 		if (
@@ -2812,6 +2829,7 @@ unCooKonfirm.addEventListener("click", (event) => {
       new Set(matCompile).values().forEach((el)=>{
         $("#nav-material ul").append(`<li>${el}</li>`);
       });
+      
     }
   });
 
