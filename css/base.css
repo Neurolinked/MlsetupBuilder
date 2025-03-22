@@ -691,3 +691,16 @@ table.dataTable tr:hover td:not([colspan]){
   color: var(--bs-primary);
   font-size: .6rem;
 }
+
+div#unChecksMesh label {
+  
+  &:after {
+    content: attr(title);
+    display: block;
+    font-size: .75rem;
+    color: var(--primary);
+    text-align: start;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+  }
+}
