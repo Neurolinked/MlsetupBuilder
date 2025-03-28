@@ -253,7 +253,7 @@ $(function(){
 				materialBuffer.Materials.splice(indexMaterial,1,theMaterial)
 				$("#Material div").eq(indexMaterial).replaceWith(materialBuffer.codeMaterial(indexMaterial));
 			}else{
-				materialBuffer.push(theMaterial)
+				materialBuffer.pushMaterial(theMaterial)
 				$("#Material").html(materialBuffer.codeMaterial());
 			}
 			$("#TexList ul.list-group").html(materialBuffer.codeTextures());
