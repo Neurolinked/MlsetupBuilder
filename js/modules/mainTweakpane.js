@@ -121,12 +121,8 @@ const fogpane = TDtabManager.pages[0].addFolder({
 
 
 
-/* const smeshtab =  TDtabManager.pages[1].addTab({
-    pages: [
-        {title: 'Toggle'},
-        {title: 'Info'},
-      ]
-}); */
+const smeshtab =  TDtabManager.pages[1]
+
 const EDLayer = TDtabManager.pages[2].addFolder({
   title:'Layer'
 });
@@ -227,3 +223,33 @@ defPromise.then((valuesDEF)=>{
 }).catch((error)=>{
   console.error(error);
 });
+
+tweakCleanMeshes()
+console.log(smeshtab)
+
+function tweakCleanMeshes(){
+  //model submeshes
+  if (smeshtab.children.length>0){
+    smeshtab.children.forEach(element => {
+      element.dispose();
+    });
+  }
+}
+function tweakAddMeshes(name){
+  smeshtab.addBinding(PARAMS.listSubmeshes,`${name}`).on('change',(ev) => {
+
+    /* $("#thacanvas").trigger('toggleMesh',[nome,value]); */
+  });
+}
+
+document.getElementById('tweakContainer')
+  .addEventListener('cleanMeshes',function(ev){
+    //console.log(ev)
+    tweakCleanMeshes()
+})
+document.getElementById('tweakContainer')
+  .addEventListener('addMeshes',function(ev){
+    //console.log(ev);
+    tweakAddMeshes(ev.detail);
+    panel.refresh();
+})
