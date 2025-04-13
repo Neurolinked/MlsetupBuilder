@@ -48,13 +48,18 @@ $(window).on('limitLayers',function(ev,index){
 
 }).on('uiPushMeshes',function(ev,datas={}){
   if ( (datas.hasOwnProperty("name") ) && (datas.hasOwnProperty("material") ) ){
+    try {
+      document.getElementById("tweakContainer").dispatchEvent(new CustomEvent("addMeshes",{detail:datas.name}));
+    } catch (error) {
+      notifyMe("Isn't possible to add meshes controller")
+    }
+    /* $("#tweakContainer").trigger('addMeshes',datas.name); */
 
     $("#sbmeshEN > ul").append(
       `<li class="form-check" data-material="${datas.material}">
         <label for="${datas.name}" class="form-check-label">${datas.name}</label>
         <input name="${datas.name}" type="checkbox" class="form-check-input" checked >
       </li>`);
-    console.log(datas)
     /* <input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
 											 <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${datas.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${datas.name}</label> */
     $("#unChecksMesh").append(`<input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
@@ -537,7 +542,8 @@ $(function(){
     if (ctrl && shift && (key=='KeyA')){
       $("#applytoMyLayer").click();
     }
-
+    
+    MLSB.Key.shiftPress = !MLSB.Key.shiftPress;
   });
 
   function updPanelCovers(){
@@ -1480,7 +1486,7 @@ $("#layerOpacity").on("input",function(ev){
           colormaterial = {v:[0,0,0]};
           break;
         case 'ffffff_null':
-          colormaterial = { v: [1, 1, 1] };
+          colormaterial = {v:[255,255,255] };
           break;
         default:
           colormaterial = MLSB.Materials[materialName].colors.list[$(this).data('color')]
@@ -1568,7 +1574,7 @@ $("#layerOpacity").on("input",function(ev){
       if ($("#BWAdd").is(":checked")){
         if (!chosenMaterial.colors.list.hasOwnProperty("000000_null")){
           chosenMaterial.colors.list['000000_null']=[0,0,0];
-          chosenMaterial.colors.list['ffffff_null']=[0,0,0];
+          chosenMaterial.colors.list['ffffff_null']=[255,255,255];
         }
       }
       let cageColorHtml = '';
