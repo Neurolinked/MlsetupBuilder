@@ -65,7 +65,8 @@ const PARAMS = {
 	l4_pos:{x:0,y:3,z:3},
 	bkgColors:'#120202',
 	switchTransparency:true,
-	showImgOffSet:false
+	showImgOffSet:false,
+	listSubmeshes:{}
 };
 
 var skip = thePIT.RConfig('editorCfg.skipImport')
