@@ -231,11 +231,6 @@ const preferences = new Store({schema,
 	}
 });
 
-var spotfolder={
-	base: "archive/pc/content",
-	pl: "archive/pc/ep1"
-}
-
 /* var archives={
 	engine : "basegame_1_engine.archive",
 	nightcity : "basegame_3_nightcity.archive",
@@ -1127,6 +1122,9 @@ ipcMain.on('main:writefile',(event,arg) => {
 			properties: ['createDirectory']
 		}).then(salvataggio => {
 		    if (!salvataggio.canceled){
+				while (salvataggio.filePath.includes(".mlsetup.mlsetup")) {
+					salvataggio.filePath = salvataggio.filePath.replace(".mlsetup.mlsetup",".mlsetup")
+				}
 					fs.writeFile(salvataggio.filePath, arg.content,'utf8',(errw,data) =>{
 						if(errw){
 							event.reply('preload:noBar','')
@@ -1408,10 +1406,6 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 
 //function to execute the series of uncook
 function repoBuilder(contentdir, conf){
-
-	/* vanillaContentPath = path.join(contentdir,spotfolder.base)
-	phantomLContentPath = path.join(contentdir,spotfolder.pl) */
-
 	return new Promise((resolve,reject) =>{
 		let unbundlefoWkit = preferences.get('paths.depot')
 		let uncooker = preferences.get('paths.wcli')
@@ -1482,8 +1476,6 @@ ipcMain.on('main:uncookMicroblends',(event)=>{
 })
 
 function microBuilder(contentdir){
-	//var contentpath = path.join(contentdir,spotfolder.base)
-	
 	return new Promise((resolve,reject) =>{
 
 			let unbundlefoWkit = preferences.get('paths.depot') //String(preferences.get('unbundle')).replace(/base$/,'')
