@@ -11,6 +11,7 @@
  * @property {string} TreeD.lastModel - path of the latest model file requested to be loaded
  * @property {string} TreeD.appearance - the appearance the editor is working on
  * @property {object} TreeD.model - the glb scene model loader from Threejs
+ * @property {bool} Key.shiftPress - check on software keypressed for behaviours
  */
 class MLSBEditor {
     Editor = {
@@ -27,6 +28,10 @@ class MLSBEditor {
         model : {
             bones:false
         }
+    }
+
+    Key={
+        shiftPress : false
     }
 
     Materials = {}
