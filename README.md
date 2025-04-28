@@ -2,7 +2,7 @@
 Cyberpunk 2077 modding tool to build json version of .mlsetup files (electron version).
 A Compiled version is under the Release section on the right side
 
-MLSB 1.6.8 Beta 6
+MLSB 1.6.8 rc1 (release candidate)
 
 ![Shaders refactor](https://www.kientzproduction.com/gitcontent/mlsb_168_1_beta6_texture_loading.png)
 
@@ -27,7 +27,7 @@ Personal videos: https://youtu.be/vpT_crK5K1M
 How to use it with Wolvenkit: https://youtu.be/uCOHjMPvpgc
 
 # Screenshots
-1.6.8 Beta6 has a new panel with the loaded textures
+1.6.8 has a new panel with the loaded textures
 to display and export textures
 ![1.6.8 beta 6 new texture panel player](https://www.kientzproduction.com/gitcontent/mlsb_168_2_beta6_texture_player.png)
 
