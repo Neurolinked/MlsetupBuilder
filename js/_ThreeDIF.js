@@ -5,16 +5,19 @@ import { Color } from 'color';
 import { MathUtils } from 'mathutils';
 import { GLTFLoader } from 'gltf';
 
-/*Performances */
-import Stats from '../public/three/examples/jsm/libs/stats.module.js';
-import { GPUStatsPanel } from 'stats';
-
 var firstModelLoaded = false;
 var flippingdipping = thePIT.RConfig('flipmasks');
 var flipdipNorm = thePIT.RConfig('flipnorm');
 var flipcheck = document.getElementById("flipMask");
 
 var actualExtension = 'dds';
+const matrixTransform = {
+	offsetX: 0.0,
+	offsetY: 0.0,
+	repeat: 1.0,
+	centerX: 0,
+	centerY: 1
+}
 
 
 var imgWorker
@@ -129,7 +132,8 @@ const materialTypeCheck = {
 		],
 	multilayer : [
 		"engine\\materials\\multilayered.mt",
-		"base\\materials\\vehicle_destr_blendshape.mt"
+		"base\\materials\\vehicle_destr_blendshape.mt",
+		"base\\fx\\_shaders\\sandevistan_multilayer.mt"
 		],
 	skin: [
 		"base\\materials\\skin.mt",
@@ -164,15 +168,17 @@ const MDLloader = new GLTFLoader(); //Loading .glb files
 
 var materialGlass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
 
-var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide}); //this will substitute the problematic single multilayer material
+var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide, visible:true}); //this will substitute the problematic single multilayer material
 
 var materialHair = new THREE.MeshStandardMaterial({color:0xBB000B,opacity:.9,side:THREE.DoubleSide,depthTest:true});
-var materialBASE = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true, side:THREE.DoubleSide,depthWrite :false});
+var materialBASE = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true, alphaTest:0.05,side:THREE.DoubleSide,depthWrite :false,visible:true});
 
 var lambertType = new THREE.MeshLambertMaterial();
 var materialNoneToCode = new THREE.MeshLambertMaterial({color:0x808080,emissive:0xFFFF00,emissiveIntensity:.2});
 
 var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
+
+var materialLegacy = new THREE.MeshStandardMaterial({color:0xFF0000,side:THREE.DoubleSide,depthWrite :false,visible:true,transparent:false,alphaTest:0.05,name:"MLSBlegacy"});
 
 function string2arraybuffer(str) {
 	var buf = new ArrayBuffer(str.length); // 2 bytes for each char
@@ -409,7 +415,6 @@ function genTexture(color,size=16){
 	if (parseInt(size)>0){
 		var dataColor = new Uint8Array(4 * size);
 		//var color = new THREE.Color( color );
-		
 		if (color.hasOwnProperty('r') && color.hasOwnProperty('g') && color.hasOwnProperty('b')){
 			var r= Math.floor(color.r * 255);
 			var g= Math.floor(color.g * 255);
@@ -479,6 +484,9 @@ function cleanScene(){
 				TDengine.scene.remove(groupObj);
 			});
 		}
+
+		PARAMS.listSubmeshes = {};
+		document.getElementById("tweakContainer").dispatchEvent(new Event("cleanMeshes"));
 		
 		resolve(true);
 	})
@@ -495,6 +503,21 @@ const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0,5 ) )
 const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
 const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
 const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
+BLACK.userData = {name:"black"};
+GRAY.userData={name:"gray"};
+WHITE.userData={name:"white"};
+FlatNORM.userData={name:"normal"};
+ERROR.userData={name:"error"};
+
+BLACK.wrapS = BLACK.wrapT = THREE.RepeatWrapping;
+GRAY.wrapS = GRAY.wrapT = THREE.RepeatWrapping;
+WHITE.wrapS = WHITE.wrapT = THREE.RepeatWrapping;
+FlatNORM.wrapS = FlatNORM.wrapT = THREE.RepeatWrapping;
+ERROR.wrapS = ERROR.wrapT = THREE.RepeatWrapping;
+
+const debugTexture = new THREE.TextureLoader().load( 'images/system/uv_grid_opengl.jpg');
+debugTexture.wrapS = debugTexture.wrapT = THREE.RepeatWrapping;
+
 //screenshotSaver
 $("#takeashot").click(function(ev){
 	getImageData = true;
@@ -502,6 +525,22 @@ $("#takeashot").click(function(ev){
 });
 
 
+function updateUvTransform() {
+	console.log(matrixTransform);
+	let selected = activeMLayer();
+	if (materialStack[selected].map?.isTexture){
+		materialStack[selected].map.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
+		materialStack[selected].map.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+	}
+	if (materialStack[selected].roughnessMap?.isTexture){
+		materialStack[selected].roughnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
+		materialStack[selected].roughnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+	}
+	if (materialStack[selected].metalnessMap?.isTexture){
+		materialStack[selected].metalnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
+		materialStack[selected].metalnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+	}
+}
 
 
 //INIT
@@ -530,7 +569,6 @@ function init() {
 		TDengine.renderer.setSize(renderwidth, window.innerHeight-80);
 	}
 	TDengine.renderer.setPixelRatio( window.devicePixelRatio );
-    //TDengine.renderer.setClearColor(0x000000, 1.0);
 
     TDengine.camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),PARAMS.cameraNear,PARAMS.cameraFar);
     TDengine.camera.position.set(0.0,-0.4,-8);
@@ -573,13 +611,6 @@ function init() {
 
     //TDengine.scene.add( TDengine.lights.ambient );
     TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
-
-
-	/* TDengine.stats = new Stats();
-	document.body.appendChild( TDengine.stats.dom );
-	TDengine.gpuPanel = new GPUStatsPanel( TDengine.renderer.getContext() );
-	TDengine.stats.addPanel( TDengine.gpuPanel );
-	TDengine.stats.showPanel( 0 ); */
     animate();
 }
 
@@ -605,11 +636,22 @@ function animate() {
 	}
 
     TDengine.renderer.render(TDengine.scene, TDengine.camera);
-	/* TDengine.stats.update(); */
 
     if(getImageData == true){
 		let a = document.getElementById('takeashot');
-		imgDataShot = TDengine.renderer.domElement.toDataURL('image/png');
+		if (PARAMS.showImgOffSet){
+			let cvs = TDengine.renderer.getContext("2d");
+			let textsets = {
+				H:mLsetup.Layers[MLSB.Editor.layerSelected].offsetU,
+				V:mLsetup.Layers[MLSB.Editor.layerSelected].offsetV,
+				MH:mLsetup.Layers[MLSB.Editor.layerSelected].microblend.offset.h,
+				MV:mLsetup.Layers[MLSB.Editor.layerSelected].microblend.offset.v
+			}
+			console.log(textsets);
+		}
+			imgDataShot = TDengine.renderer.domElement.toDataURL('image/png');
+		
+
 		getImageData = false;
 		a.href = imgDataShot;
 		if ($("#modelTarget").val()==""){
@@ -654,7 +696,6 @@ function getImageInfo(binaryData){
 		const dx10Data = new Uint32Array( bufferData, 128, 4 ); //get the type of DDS
 		var channels = 4;
 		var DXGIformat = 'DXGI_FORMAT_R8G8B8A8_UNORM_SRGB'; //RGBA sRGB
-		var imageDatas
 
 		switch (dx10Data[0]){
 			case 11:
@@ -849,7 +890,9 @@ async function ddsResolve(binarydata, info){
 //Get texture file content to be processed
 async function _getFileContent(textureObj){
 	return new Promise((resolve, reject)=>{
-
+		if (PARAMS.textureDebug){
+			console.log(`request _getFileContent`,textureObj);
+		}
 		if (!textureObj.hasOwnProperty("file") && !textureObj.hasOwnProperty("maptype")){
 			reject({error:true,log:"invalid Texture"});
 		}
@@ -974,12 +1017,14 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 					}
 		
 					textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height, THREEFormat);
+					textureStack[TextureStackIndex].anisotropy = TDengine.renderer.capabilities.getMaxAnisotropy();
 				}
 			}else if (DockTexture.info.format=='PNG'){
 				textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height,THREEFormat);
 			}
 			textureStack[TextureStackIndex].wrapS=THREE.RepeatWrapping;
 			textureStack[TextureStackIndex].wrapT=THREE.RepeatWrapping;
+			textureStack[TextureStackIndex].anisotropy = TDengine.renderer.capabilities.getMaxAnisotropy();
 
 			paintDatas(TexturePromise,
 				DockTexture.info.width,
@@ -1079,6 +1124,7 @@ function MapTextures(textureObj){
  * to the right shader
  */
 async function ProcessStackTextures(){
+
 	texturePromise = textureDock.map((x)=>{return _getFileContent(x)});
 	clearTexturePanel();
 
@@ -1138,8 +1184,7 @@ async function ProcessStackTextures(){
 				);
 			}
 
-			textureStack[textureIndex].wrapS = THREE.RepeatWrapping;
-			textureStack[textureIndex].wrapT = THREE.RepeatWrapping;
+			textureStack[textureIndex].wrapS = textureStack[textureIndex].wrapT = THREE.RepeatWrapping;
 
 			paintDatas(elm.value,
 				textureDock[index].info.width,
@@ -1214,8 +1259,8 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.decals.includes(materialEntry.MaterialTemplate)){
 
 			var Rdecal = materialBASE.clone();
-			var decalConfig = {userData:{type:'decal'},color:0xFFFFFF,transparent:true, side:THREE.DoubleSide, depthWrite :false}
-
+			var decalConfig = {name:_materialName,userData:{type:'decal'},color:0xFFFFFF,transparent:true,alphaTest:0.05, side:THREE.DoubleSide, depthWrite :true}
+			
 			//Decal Textures
 			if (materialEntry.Data.hasOwnProperty('DiffuseTexture')){
 				//MD5 the name of the file to load or import it
@@ -1228,6 +1273,7 @@ function codeMaterials(materialEntry,_materialName){
 					decalConfig.alphaMap = retDefTexture(materialEntry.Data.NormalAlphaTex,_materialName,"normal");
 				}
 			}
+			
 			if (materialEntry?.Data.hasOwnProperty('NormalTexture')){
 				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.NormalTexture)
 				decalConfig.normalMap = retDefTexture(materialEntry.Data.NormalTexture,_materialName,"normal");
@@ -1239,7 +1285,8 @@ function codeMaterials(materialEntry,_materialName){
 			}
 
 			if (materialEntry?.Data.hasOwnProperty('RoughnessTexture')){
-				decalConfig.roughnessMap =retDefTexture(materialEntry.Data.RoughnessTexture,_materialName,"roughness");
+				decalConfig.roughnessMap = retDefTexture(materialEntry.Data.RoughnessTexture,_materialName,"roughness");
+				decalConfig.roughnessMap.needsUpdate = true
 				decalConfig.roughness = materialEntry.Data.RoughnessScale
 			}
 			
@@ -1248,6 +1295,10 @@ function codeMaterials(materialEntry,_materialName){
 				decalConfig.color = new THREE.Color(`rgb(${materialEntry.Data.DiffuseColor.Red},${materialEntry.Data.DiffuseColor.Green},${materialEntry.Data.DiffuseColor.Blue})`);
 				decalConfig.opacity = (materialEntry.Data.DiffuseColor.Alpha/255)
 			}
+
+			if (materialEntry.Data.hasOwnProperty('DiffuseAlpha')){
+				decalConfig.alphaTest=materialEntry.Data.DiffuseAlpha;
+			}
 			
 			decalConfig.name=_materialName;
 			Rdecal.setValues(decalConfig);
@@ -1255,6 +1306,7 @@ function codeMaterials(materialEntry,_materialName){
 		}
 
 		if (materialTypeCheck.metal_base.includes(materialEntry.MaterialTemplate)){
+
 			var Rbase = materialBASE.clone();
 			var rbaseConfig = {name:_materialName,userData:{type:'metal'},side:THREE.DoubleSide}
 
@@ -1267,7 +1319,10 @@ function codeMaterials(materialEntry,_materialName){
 			}
 			//Color applyed over textures
 			if (materialEntry.Data.hasOwnProperty('BaseColorScale')){
-				rbaseConfig.color = new THREE.Color(`rgb(${parseInt(materialEntry.Data.BaseColorScale.X*255)},${parseInt(materialEntry.Data.BaseColorScale.Y*255)},${parseInt(materialEntry.Data.BaseColorScale.Z*255)})`)
+				rbaseConfig.color = new THREE.Color().setRGB(
+					parseFloat(materialEntry.Data.BaseColorScale.X),
+					parseFloat(materialEntry.Data.BaseColorScale.Y),
+					parseFloat(materialEntry.Data.BaseColorScale.Z))
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Normal')){
@@ -1284,7 +1339,6 @@ function codeMaterials(materialEntry,_materialName){
 				rbaseConfig.metalness = materialEntry.Data.MetalnessScale
 			}
 			
-
 			Rbase.setValues(rbaseConfig);
 			Rbase.normalMap.needsUpdate = true;
 			return Rbase
@@ -1292,7 +1346,23 @@ function codeMaterials(materialEntry,_materialName){
 
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
-			var Mlayer = stdMaterial.clone();
+			var Mlayer = stdMaterial.clone()
+
+			Mlayer.name= _materialName;
+			/* Mlayer.defines.MLSBInspect = false;
+			Mlayer.onBeforeCompile = (shader)=>{
+				shader.fragmentShader = shader.fragmentShader.replace(
+					`#include <color_fragment>`,
+					`#include <color_fragment>
+					vec4 colorInspect = vec4(1,0,0,1);
+					#ifdef MLSBInspect
+						diffuseColor = colorInspect;
+					#else
+						diffuseColor = diffuseColor;
+					#endif
+`)
+				console.log(shader.fragmentShader);
+			} */
 			Mlayer.userData={name:_materialName,type:'multilayer'};
 
 			if (PARAMS.switchTransparency){
@@ -1332,7 +1402,6 @@ function codeMaterials(materialEntry,_materialName){
 				Mlayer.normalMap = FlatNORM;
 				Mlayer.normalMap.needsUpdate = true;
 			}
-
 			Mlayer.needsUpdate = true;
 			return Mlayer
 		}
@@ -1454,6 +1523,7 @@ function LoadMaterials(path){
 					//Build every unique material entry to be applyed to
 					materialSet.forEach((material)=>{
 						materialStack[material] = codeMaterials(materialJSON.Materials.filter(el => el.Name == material)[0],material);
+
 						let entry, idx
 						idx = materialJSON.findIndex(material)
 						
@@ -1463,6 +1533,8 @@ function LoadMaterials(path){
 
 								multilayerMaskMenu += materialJSON.codeMaterial(idx,`<li><a class="dropdown-item" href="#" data-multilayer="${idx}" >$_MATERIALFULLNAME</a></li>`);
 							}
+						}else{
+							notifyMe(`${material} not present`)
 						}
 					});
 				}
@@ -1512,8 +1584,6 @@ function LoadModel(path){
 		var modelstring = string2arraybuffer(modelfile);
 
 		if (modelfile.length > 0){
-			$("#sbmeshEN > ul").html();  //Cleanup of the checkbox for the submeshes
-
 			$(window).trigger('cleanTweakPanes');
 			/*
 			remove all the submesh toggle buttons
@@ -1521,13 +1591,14 @@ function LoadModel(path){
 			*/
 			$(window).trigger('uiResetMeshes');
 
-			var Boned=false;
+			MLSB.TreeD.model.bones = false;
 
 			MDLloader.parse( modelstring ,'', ( glbscene ) => {
 				glbscene.scene.traverse( function ( child ) {
 					
 					if (child.type=="Bone"){
-						Boned ||= true;
+						//Boned ||= true;
+						MLSB.TreeD.model.bones = true;
 					}
 
 					if ((child.type=="SkinnedMesh") && (PARAMS.modelDebug)) {
@@ -1536,25 +1607,22 @@ function LoadModel(path){
 
 					if (child.isMesh){
 						if (child.userData?.materialNames){
-							//console.info(`Model info ${child.name}, material used: ${child.userData?.materialNames[0]}`);
-
 							//Submesh Enabler UI
 							let check = {
 								name:child.name,
 								material:child.userData.materialNames[0]
 							}
-							$(window).trigger('uiPushMeshes',check);
-							/* subsCheckText +=`<li class="form-check" data-material="${child.userData.materialNames[0]}"><label for="${child.name}" class="form-check-label">${child.name}</label><input name="${child.name}" type="checkbox" class="form-check-input" checked ></li>` */
-							subsCheckUVs += `<input type="checkbox" class="btn-check" id="uvchk_${child.name}" checked >
-											 <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${child.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${child.name}</label>`
-							//Assign the Material
-							if (!child.userData.hasOwnProperty('materialNames')){
-								notifyMe(`Need a MaterialName for {child.name}`)
-							}else{
-								child.material = materialStack[child.userData?.materialNames[0]];
-							}
 
+							PARAMS.listSubmeshes[child.name]=true;
+							$(window).trigger('uiPushMeshes',check);
+							
 							try {
+								//Assign the Material
+								if (!child.userData.hasOwnProperty('materialNames')){
+									notifyMe(`Need a MaterialName for {child.name}`)
+								}else{
+									child.material = materialStack[child.userData?.materialNames[0]];
+								}
 								child.material.needsUpdate=true;
 							} catch (error) {
 								notifyMe(`${error}, switching to none Material`);
@@ -1569,10 +1637,6 @@ function LoadModel(path){
 						child.visible = true;
 					}
 				})
-
-				$("#withbones svg:nth-child(1) path").attr("fill",(Boned ? 'red':'currentColor'));
-				//$("#sbmeshEN > ul").html(subsCheckText);
-				$("#unChecksMesh").html(subsCheckUVs);
 
 				//Autocentering
 				var helper = new THREE.BoxHelper(glbscene.scene);
@@ -1593,7 +1657,7 @@ function LoadModel(path){
 
 				TDengine.control.target = centerPoint;
 				TDengine.scene.add(glbscene.scene);
-
+				$(window).trigger("uiUpdMeshes");
 				resolve(true);
 			})		
 		}else{
@@ -1603,8 +1667,69 @@ function LoadModel(path){
 	});
 }
 
+function traverseModel(subject,options){
+	var intOptions
+	if (typeof(options)!="object"){
+		intOptions = {resetCamera:false}
+	}else{
+		intOptions = options
+	}
 
-$("#thacanvas").on('loadScene',function(event,fileModel){
+	return new Promise((resolve,reject)=>{
+		if (subject?.isScene){
+			subject.scene.traverse( function( child ) {
+				console.log(child)
+			})
+			resolve(true);
+		}else{
+			reject(false);
+		}
+	})
+}
+
+function calcOffset(tiles,h,v){
+	h = parseFloat(h)
+	v = parseFloat(v)
+	tiles = parseFloat(tiles);
+	var tjsBottom = 0;
+	var ratio = 1/tiles
+	var calculated = {h:0,v:0}
+	
+	calculated.h = h < 0 ? (parseFloat(1+h)) % 1 : h;
+	calculated.v = v < 0 ?  (parseFloat(1+v)) % 1 : v;
+	
+	calculated.v =  calculated.v - (((1 - calculated.v) - calculated.v) * 2)
+
+	while (calculated.v < 0){
+		calculated.v = calculated.v + 1.0
+	}
+
+
+	h = parseFloat(calculated.h);
+	v = parseFloat(calculated.v);
+	
+	if (PARAMS.textureDebug){ console.log(tiles,h,v)}
+	var horizontal, vertical
+
+	horizontal = parseFloat(h).toPrecision(4);
+	vertical = parseFloat(v).toPrecision(4);
+
+	return new THREE.Vector2(horizontal,vertical)
+}
+
+$("#thacanvas").on("mouseover",function(event){
+	//is shift is pressed change the material, if it's release put it back
+	if (MLSB.Key.shiftPress){
+		
+	}
+}).on("mouseout",function(event){
+	//only when mouseout occur
+	TDengine.scene.traverse(oggetti=>{
+		if ((oggetti.type=="SkinnedMesh") && (oggetti.material.name=='MLSBlegacy')){
+			console.log(oggetti);
+		}
+	})
+}).on('loadScene',function(event,fileModel){
 	/*
     Need a Promise and the use of then
 
@@ -1633,6 +1758,7 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 				LoadModel(fileModel).then((ev)=>{
 					//load deferred textures in the textureDock
 					LoadStackTextures();
+					firstModelLoaded=true;
 				}).catch((error)=>{
 					notifyMe(`LoadModel ${error}`);
 				})
@@ -1666,9 +1792,11 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
-		let offset_h = repVal *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetU
-		let offset_v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
-		var offset = new THREE.Vector2(offset_h,offset_v);
+
+		let offset_h =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetU==null ? $("#layerOffU").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4)
+		let offset_v =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetV==null ? $("#layerOffV").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4)
+
+		var offset = calcOffset(repVal,offset_h,offset_v);
 
 		if ((layerMaterial.hasOwnProperty('diffuse')) && (layerMaterial?.diffuse?.texture!='' || layerMaterial?.diffuse?.texture!=null)){
 			if (PARAMS.textureDebug){
@@ -1682,8 +1810,8 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 			if (myTex?.length==1){
 				//there was it, map it
 				materialStack[selected].map = textureStack[C_diffuse];
-				materialStack[selected].map.repeat.set(repVal,repVal);
-				materialStack[selected].map.needsUpdate = true;
+				updateUvTransform()
+				materialStack[selected].needsUpdate = true;
 			}else{
 				
 				let test = retDefTexture(layerMaterial.diffuse.texture,selected,"diffuse");
@@ -1700,10 +1828,10 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 							//repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val())
 
 							materialStack[selected].map = textureStack[C_diffuse]
-							materialStack[selected].map.flipY = flippingdipping;
-							materialStack[selected].map.repeat.set(repVal,repVal)
-							materialStack[selected].map.offset=offset;
-							materialStack[selected].map.needsUpdate =true
+							materialStack[selected].map.wrapS = materialStack[selected].map.wrapT = THREE.RepeatWrapping;
+							updateUvTransform()
+							/* materialStack[selected].map.needsUpdate =true */
+							materialStack[selected].map.needsUpdate=true;
 						}).catch((error)=>{
 							notifyMe(error.message);
 							console.error('error #%d',error)
@@ -1814,102 +1942,96 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 		}
 	}
 }).on("texOffset",function(ev,source='layer'){
-	var tileValue = mLsetup.Layers[MLSB.Editor.layerSelected].tiles;
+	var tileMul = parseFloat($("#layerTile").prev("[data-mul]").data("mul"))
+	var tileValue = tileMul * parseFloat(source =='ui' ? $("#layerTile").val() : mLsetup.Layers[MLSB.Editor.layerSelected].tiles).toPrecision(4);
+	var offsetX = parseFloat(source =='ui' ? $("#layerOffU").val() : mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4);
+	var offsetY = parseFloat(source =='ui' ? $("#layerOffV").val() : mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4);
 
 	if (firstModelLoaded){
-		let h = tileValue * (source =='ui' ? parseFloat($("#layerOffU").val()) : mLsetup.Layers[MLSB.Editor.layerSelected].offsetU)
-		let v = (-1 * (source =='ui' ? parseFloat($("#layerOffV").val()) : mLsetup.Layers[MLSB.Editor.layerSelected].offsetV)) * tileValue
-		var offset = new THREE.Vector2(h,(v==-0 ? 0 : v));
-		let selected = activeMLayer();
-		materialStack[selected].map.offset = offset
+		var offset = calcOffset(tileValue,offsetX,offsetY) //new THREE.Vector2(h,(v==-0 ? 0 : v));
+		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
+		matrixTransform.offsetY = parseFloat(offset.y).toPrecision(4)
+		updateUvTransform()
 	}
 }).on("texTiled",function(ev,source='layer'){
 	if (firstModelLoaded){
 		var tileValue = mLsetup.Layers[MLSB.Editor.layerSelected].tiles;
 		if (source == 'ui'){
-			tileValue = parseFloat($("#layerTile").val());
+			tileValue = $("#layerTile").val();
 		}
-		
+		var offsetX = parseFloat(source =='ui' ? $("#layerOffU").val() : mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4);
+		var offsetY = parseFloat(source =='ui' ? $("#layerOffV").val() : mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4);
+		var offset = calcOffset(tileValue,offsetX,offsetY) //new THREE.Vector2(h,(v==-0 ? 0 : v));
+		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
+		matrixTransform.offsetY = parseFloat(offset.y).toPrecision(4)
+		matrixTransform.repeat = parseFloat(tileValue).toPrecision(4);
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
 		var actualMaterial = MLSB.getMaterial();
-
-		if (actualMaterial.hasOwnProperty("diffuse")){
-
-			let C_diffuse = CryptoJS.MD5(actualMaterial.diffuse.texture).toString();
-
-			if (textureStack[C_diffuse]!=undefined){
-				var repChange = actualMaterial.xTiles * tileValue;
-				materialStack[selected].map.repeat.set(repChange,repChange)
-				materialStack[selected].needsUpdate = true;
-			}
-		}
-		if (actualMaterial.hasOwnProperty("roughness")){
-
-			let C_rough = CryptoJS.MD5(actualMaterial.roughness.texture).toString();
-
-			if (textureStack[C_rough]!=undefined){
-				var repChange = actualMaterial.xTiles * tileValue;
-				materialStack[selected].roughnessMap.repeat.set(repChange,repChange)
-				materialStack[selected].roughnessMap.needsUpdate = true;
-			}
-		}
-		if (actualMaterial.hasOwnProperty("metal")){
-
-			let C_metal = CryptoJS.MD5(actualMaterial.metal.texture).toString();
-
-			if (textureStack[C_metal]!=undefined){
-				var repChange = actualMaterial.xTiles * tileValue;
-				materialStack[selected].metalnessMap.repeat.set(repChange,repChange)
-				materialStack[selected].needsUpdate = true;
-			}
-		}
+		var repChange = actualMaterial.xTiles * parseFloat(tileValue).toPrecision(4);
+		
+		updateUvTransform()
+		materialStack[selected].needsUpdate = true;
 	}
 }).on('switchLayer',function(ev,layer=0){
 	if (firstModelLoaded){
+		
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
 
-		if (materialStack[selected].hasOwnProperty("mask")){
-			test = _getFileContent({file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
-				.then((result)=>{
-					var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
-					if (myMask?.length==1){
-						//var LAYER = 
-						let nameMask = CryptoJS.MD5(materialStack[selected].mask).toString()
-						
-						paintDatas(result,myMask[0].info.width,myMask[0].info.height,'maskPainter',THREE.RGBAFormat)
-						textureStack[nameMask] = new THREE.DataTexture(result,myMask[0].info.width,myMask[0].info.height,THREE.RGBAFormat)
+		if (materialStack[selected]!=undefined){
+			if (materialStack[selected].hasOwnProperty("mask")){
+				var test = _getFileContent({file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
+					.then((result)=>{
+						var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
+						if (myMask?.length==1){
+							//var LAYER = 
+							let nameMask = CryptoJS.MD5(materialStack[selected].mask).toString()
+							
+							try{
+								if (myMask[0].hasOwnProperty("info")){
+									paintDatas(result,myMask[0].info.width,myMask[0].info.height,'maskPainter',THREE.RGBAFormat)
+									textureStack[nameMask] = new THREE.DataTexture(result,myMask[0].info.width,myMask[0].info.height,THREE.RGBAFormat)
+								}
+							}catch(error){
+								console.log(myMask);
+								notifyMe(error);
+							}
 
-						materialStack[selected].setValues({
-							alphaMap:textureStack[nameMask],
-							opacity: parseFloat($("#layerOpacity").val())
-						})
-						materialStack[selected].alphaMap.flipY = flippingdipping;
-						materialStack[selected].alphaMap.needsUpdate = true;
-						$('#thacanvas').trigger("texTiled");
-					}
-				}).catch((error)=>{
-					if (PARAMS.modelDebug){console.error(error)}
-					notifyMe(`switchLayer ${error.hasOwnProperty('stack') ? error.stack.split("\n") : error}`)
-				});
-			
+							materialStack[selected].setValues({
+								alphaMap:textureStack[nameMask],
+								opacity: parseFloat($("#layerOpacity").val())
+							})
+							materialStack[selected].alphaMap.flipY = flippingdipping;
+							materialStack[selected].alphaMap.needsUpdate = true;
+							$('#thacanvas').trigger("texTiled");
+						}
+					}).catch((error)=>{
+						if (PARAMS.modelDebug){console.error(error)}
+						notifyMe(`switchLayer ${error.hasOwnProperty('stack') ? error.stack.split("\n") : error}`)
+					});
+				
+			}
+		}else{
+			console.log("No Multilayer selected present")
 		}
 	}
 }).on('switchAppearance',function(ev, appearance){
-
 	try{
 		if ((appearance.hasOwnProperty("name")) && 
 			(appearance.hasOwnProperty("index"))) {
+				MLSB.TreeD.appearance = appearance.index;
 			
 			$(window).trigger(`uicleanMlmaterial`);
-
+			var foundMultilayer = false
+			
 			let new_Materials = materialJSON.Appearances[appearance.index].Materials;
 			new_Materials.forEach((mat)=>{
 				if (!materialSet.has(mat)){
 					materialSet.add(mat);
 					materialStack[mat] = codeMaterials(materialJSON.Materials.filter(el => el.Name == mat)[0], mat);
 					if (materialStack[mat].userData.type=='multilayer'){
+						foundMultilayer = true
 						$(window).trigger(`uiPushMlmaterial`,mat);
 					}
 				}
@@ -1918,13 +2040,17 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 			let k = 0;
 			TDengine.scene.traverse(oggetti=>{
 				if (oggetti.isMesh){
+					$("#sbmeshEN li").eq(k).attr("data-material",new_Materials[k]);
 					oggetti.material=materialStack[new_Materials[k]];
 					oggetti.material.needsUpdate=true;
 					k++;
 				}
 			});
-			$(window).trigger(`uiswitchMlmaterial`,1)
-			$("#thacanvas").trigger("switchLayer",MLSB.layerSelected);
+
+			if (foundMultilayer){
+				$(window).trigger(`uiswitchMlmaterial`,1)
+				$("#thacanvas").trigger("switchLayer",MLSB.Editor.layerSelected);
+			}
 		}
 	}catch(wrong){
 		notifyMe(wrong);
@@ -2014,7 +2140,7 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 		materialStack[selected].needsUpdate=true;
 	}
 }).on('maskAlpha',function(event){
-	if (firstModelLoaded){
+	if (TDengine.scene.children.filter((elm)=>elm.type=="Group").length>0){
 		//masking the alpha
 		if (!PARAMS.switchTransparency){
 			let selected = activeMLayer();
@@ -2023,12 +2149,16 @@ $("#thacanvas").on('loadScene',function(event,fileModel){
 		}
 	}
 }).on("theWire",function(event){
-	if (firstModelLoaded){
-		//changinf the wireframe value
-		let selected = activeMLayer();
-		if (materialStack[selected]){
-			materialStack[selected].setValues({wireframe:PARAMS.wireframes});
+	if (TDengine.scene.children.filter((elm)=>elm.type=="Group").length>0){
+		for(const[key,mat] of Object.entries(materialStack)){
+			mat.setValues({wireframe:PARAMS.wireframes});
+			mat.needsUpdate = true;
 		}
+	}
+}).on('changeOpacity',function(ev,opacity){
+	let selected = activeMLayer();
+	if (materialStack[selected]){
+		materialStack[selected].setValues({opacity:opacity});
 	}
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
