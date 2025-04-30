@@ -1949,6 +1949,7 @@ $("#thacanvas").on("mouseover",function(event){
 
 	if (firstModelLoaded){
 		var offset = calcOffset(tileValue,offsetX,offsetY) //new THREE.Vector2(h,(v==-0 ? 0 : v));
+		matrixTransform.repeat = tileValue
 		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
 		matrixTransform.offsetY = parseFloat(offset.y).toPrecision(4)
 		updateUvTransform()
@@ -1964,12 +1965,12 @@ $("#thacanvas").on("mouseover",function(event){
 		var offset = calcOffset(tileValue,offsetX,offsetY) //new THREE.Vector2(h,(v==-0 ? 0 : v));
 		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
 		matrixTransform.offsetY = parseFloat(offset.y).toPrecision(4)
-		matrixTransform.repeat = parseFloat(tileValue).toPrecision(4);
+		
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
 		var actualMaterial = MLSB.getMaterial();
 		var repChange = actualMaterial.xTiles * parseFloat(tileValue).toPrecision(4);
-		
+		matrixTransform.repeat = parseFloat(repChange).toPrecision(4);
 		updateUvTransform()
 		materialStack[selected].needsUpdate = true;
 	}
