@@ -9,7 +9,6 @@ import path from 'node:path';
 import * as fs from 'node:fs';
 import fse from 'fs-extra/esm';
 import Store from 'electron-store';
-/* import {crypto} from 'node:crypto'; */
 import sharp from 'sharp';
 import {dree} from 'dree';
 import { fileURLToPath } from 'url';
@@ -300,7 +299,7 @@ async function fqfnFile(event,arg){
 		const {canceled,filePaths } = await dialog.showOpenDialog({title:`Select the .${arg.extension} file`, properties: ['openFile'], defaultPath:path.join(preferences.get('paths.depot'),seenPath ), filters: [
 			{ name: 'specific type', extensions: [arg.extension] }] });
 		if (canceled){
-			return
+			return false
 		}else{
 			return filePaths[0]
 		}
@@ -480,8 +479,34 @@ const template = [
 			{
 			label: 'Mlsetup',
 			submenu: [
-					{label: 'Import', accelerator:'Ctrl+i', click: () =>{
-						mainWindow.webContents.send('preload:activate',"#importLink")
+					{label: 'Import', accelerator:'Ctrl+i', click: async () =>{
+						let depot = preferences.get('paths.depot')
+						var importPr = await fqfnFile(false,{extension:"json",path:depot})
+						if (importPr){
+							fs.stat(importPr,'utf8',function(err, stat) {
+								if (err) {
+								  if (err.code=='ENOENT'){
+									dialog.showErrorBox("File opening error","The searched file does not exists")
+								  }else{
+									dialog.showErrorBox("File opening error",err.message)
+								  }
+								  return
+								}else{
+								  var mlsetup_content = ""
+								  fs.readFile(importPr,'utf8',(err,data) =>{
+									try {
+										mlsetup_content = JSON.parse(data)
+									} catch(e) {
+									   dialog.showErrorBox("File error","Reading error: wrong json file format")
+									   mlsetup_content = ""
+									}
+									mainWindow.webContents.send('preload:load_source',mlsetup_content, importPr)
+								  })
+								}
+							  })
+						}else{
+							mainWindow.webContents.send('preload:logEntry','Loading cancelled',false)
+						}
 					}},
 					{label: 'Export',accelerator: 'Ctrl+e', click: () =>{
 						mainWindow.webContents.send('preload:activate','#exportversions')
