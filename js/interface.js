@@ -2001,6 +2001,7 @@ $("#layerRandomizer").click(function(){
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
 $("#importLink").click(function(ev){
+    ev.preventDefault();
     $("#importTech").click();
 });
 
@@ -2223,7 +2224,8 @@ $("#TheMagicIsHere").click(function(){
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
     //openMlsetups.push(mLsetup);
-    $("#MlSetupsList").trigger("addBlade",nomefile);
+    let UInomefile = nomefile.split("\\").reverse()[0];
+    $("#MlSetupsList").trigger("addBlade",UInomefile);
     notifyMe(`Imported : ${nomefile}`,false);
     $('#nametoexport').val(nomefile);
     $("#importTech").val("");
@@ -2980,24 +2982,29 @@ unCooKonfirm.addEventListener("click", (event) => {
   }).on('click','#MlSetupsList span',function(ev){
     ev.preventDefault();
     //TODO Switch setup
-
-  }).on('click',"#MlSetupsList .btn-close[data-bs-dismiss='badge']",function(ev){
+    $("#MlSetupsList").trigger("switchBlade",$(ev.target).index());
+  }).on('click',"#MlSetupsList > span > .btn-close[data-bs-dismiss='badge']",function(ev){
     ev.preventDefault();
     //TODO close the file and delete the mlsetup entity
     $(this).parent().remove();
+    $("#MlSetupsList").trigger("switchBlade",0);
   });
 
   $("#MlSetupsList").on("addBlade",function(ev,name){
     if (name!=''){
-      console.log(name);
-      $("#MlSetupsList").trigger("switchBlade");
       $("#MlSetupsList").append(`<span class="badge text-bg-secondary">${name.split(".json")[0]}<button type="button" class="ms-2 btn-close" data-bs-dismiss="badge" aria-label="Close"></button></span>`);
+      
+      $("#MlSetupsList").trigger("switchBlade", ($("#MlSetupsList span").length -1) );
     }
-  }).on("switchBlade",function(ev){
-    $("body #MlSetupsList > span").each((idx,elm)=>{
-      $(elm).removeClass("text-bg-secondary");
-      $(elm).addClass("text-bg-dark");
-    })
+  }).on("switchBlade",function(ev,index){
+    //change of focus
+    $("body #MlSetupsList > span.text-bg-secondary").addClass("text-bg-dark").removeClass("text-bg-secondary");
+    if (index==0){
+      $("body #MlSetupsList > span").eq(0).removeClass("text-bg-layer2").addClass("text-bg-active");
+    }else{
+      $("body #MlSetupsList > span").eq(0).removeClass("text-bg-active").addClass("text-bg-layer2");
+      $("body #MlSetupsList > span.text-bg-dark").eq(index -1).removeClass("text-bg-dark").addClass("text-bg-secondary");
+    }
   });
 
   $("#re-selectModel").click(async function(ev){
@@ -3098,6 +3105,4 @@ unCooKonfirm.addEventListener("click", (event) => {
 	});
 
   $("#thacanvas").trigger("changeBg");
-  
-  $("#MlSetupsList").trigger("addBlade","empty.mlsetup.json");
 });
