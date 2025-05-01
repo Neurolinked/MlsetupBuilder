@@ -538,6 +538,14 @@ $(function(){
       Workspaces.dom.attr('href',Workspaces.walk());
       movecontent();
     }
+    if (ctrl &&(key=='KeyW')){
+
+      console.log("inside");
+      //triggering close and reset to first
+      $("#MlSetupsList span.text-bg-secondary .btn-close").click();
+      return false;
+    }
+
     //CTRL + SHIFT + A
     if (ctrl && shift && (key=='KeyA')){
       $("#applytoMyLayer").click();

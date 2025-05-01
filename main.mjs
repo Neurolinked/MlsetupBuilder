@@ -701,22 +701,25 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
-
-app.on('browser-window-focus', () => {
-
-	globalShortcut.register("CommandOrControl+W", () => {
+function registerShortcuts(){
+	/* globalShortcut.register("CommandOrControl+W", () => {
 	//stuff here
-	})
-	/*
+	}); */
+	
 	globalShortcut.register("CommandOrControl+A",() => {
 		mainWindow.webContents.send('preload:activate', '#applytoMyLayer')
 	})
-	*/
-})
+}
+//Registering commands
+app.focus(()=>{ registerShortcuts() })
 
+app.on('browser-window-focus', () => {
+	registerShortcuts();
+})
 app.on('browser-window-blur', () => {
 	globalShortcut.unregisterAll()
 })
+
 
 ipcMain.on('main:aimMicros',(event,configurations) =>{
 	lastMicroConf = configurations
