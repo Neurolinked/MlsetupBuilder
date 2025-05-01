@@ -131,8 +131,9 @@ function clearTexturePanel(){
     $("#listTextures").html("");
 }
 
-function pushTexturetoPanel(filename, width, height){
+function pushTexturetoPanel(filename, width, height,type="diffuse"){
 	if (!document.getElementById(filename)){
+		$("#listTextures").append(`<span>${type}</span>`);
 		if (width == height){
 			$("#listTextures").append(`<canvas width="128" height="128" title="${filename}" id="${filename}"></canvas>`);
 		}else{
