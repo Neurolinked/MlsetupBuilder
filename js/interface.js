@@ -185,9 +185,9 @@ async function nubuildMB(microblendObj){
           package.microblends.forEach((microblend)=>{
             let tmpName = microblend.path.split('.')[0].split("\\").reverse()[0];
             let hash = microblend?.hash != undefined ? `data-hash='${microblend.hash}'` : "";
-            //$("#mbSelect optgroup[label='"+pkgName+"']").append("<option data-package='"+pkgName+"' data-thumbnail='./images/mblend/"+pkgName.toLowerCase()+"/"+tmpName+".png' value='"+microblend.path+"'>"+tmpName+"</option>");
+            
             $("#mbSelect optgroup[label='"+pkgName+"']").append(`<option data-package='${pkgName}' data-thumbnail='./images/mblend/${pkgName.toLowerCase()}/${tmpName}.png' value='${microblend.path}'>${tmpName}</option>`);
-            //$("#cagetheCuMBlends").append("<li style=\"background-image:url('./images/mblend/"+pkgName.toLowerCase()+"/thumbs/"+tmpName+".png'); '\" data-package='"+pkgName+"' data-path='"+microblend.path+"' title='"+tmpName+"' > </li>");
+            
             $("#cagetheCuMBlends").append(`<li style="background-image:url('./images/mblend/${pkgName.toLowerCase()}/thumbs/${tmpName}.png');" data-package='${pkgName}' data-path='${microblend.path}' title='${tmpName}' > </li>`);
             $("#mbHierarchy ul[data-package='"+pkgName+"']").append(`<li ${hash} data-path='${microblend.path}' class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> ${tmpName}</li>`);
           });
@@ -250,7 +250,8 @@ async function uiBuildHairs(hairDB){
 async function abuildHairs(aHairs){
 	if (typeof(aHairs)=="object"){
 		if (aHairs.hasOwnProperty('profiles')){
-			var hair_colors = shade = ''
+			var hair_colors = shade = UIhairCode = ''
+
 			aHairs.profiles.forEach((hair)=>{
 				hair_colors = '';
 				shade = ''
@@ -276,10 +277,9 @@ async function abuildHairs(aHairs){
 				    });
 					}
 				}
-
-				//console.log(hair_colors)
-				$("#hairSwatches").append("<span data-set='"+hair.set+"' alt='"+hair.name+"'  title='"+hair.name+"' data-name='"+hair.name+"' data-crtt='linear-gradient("+hair_colors+")' data-cid='linear-gradient("+shade+")' style='background:linear-gradient("+hair_colors+");order:"+hair.order+"' >"+"</span>"); //linear-gradient("+shade+");background-blend-mode: multiply
+        UIhairCode += `<span data-set='${hair.set}' alt='${hair.name}'  title='${hair.name}' data-name='${hair.name}' data-crtt='linear-gradient(${hair_colors})' data-cid='linear-gradient(${shade})' style='background:linear-gradient(${hair_colors});order:${hair.order}' >"+"</span>`
 			});
+      $("#hairSwatches").append(UIhairCode);
 		}
 	}
 }
