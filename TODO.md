@@ -42,7 +42,8 @@
   - [x] Assign shaders as from appearances
   - [x] masks loading from material configuration
   - [x] multilayer.mt conversion to three.js format (partial)
-    - [ ] One layer render at the time
+    - [x] One layer render at the time
+    - [x] Offset and tiles
   - [x] metal_base.remt conversion to three.js format
   - [x] mesh_decal.mt conversion to three.js format
 - [x] Custom models Material.json search and usage
@@ -57,6 +58,8 @@
   - [x] Management model addition
 - [x] Log copy syntax for Discord
 - [x] DotNet Framework check installation check
+- [x] Close the actual open mlsetup
+- [x] Minor mlsetup class update
 
 ### Todo 1.6.7
 - [x] Cleanup in the import function
