@@ -498,9 +498,8 @@ const template = [
 										mlsetup_content = JSON.parse(data)
 									} catch(e) {
 									   dialog.showErrorBox("File error","Reading error: wrong json file format")
-									   mlsetup_content = ""
 									}
-									mainWindow.webContents.send('preload:load_source',mlsetup_content, importPr)
+									mainWindow.webContents.send('preload:load_source',mlsetup_content, importPr);
 								  })
 								}
 							  })
