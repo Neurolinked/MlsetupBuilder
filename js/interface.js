@@ -110,6 +110,32 @@ const bc = new BroadcastChannel("streaming"); //communication between opened int
 bc.onmessage = (event)=>{ console.log(event.data); }
 
 var mLsetup = new Mlsetup();
+var openMlsetup = [];
+
+/*Proxy function to manage nested objects*/
+const createProxy = (obj,onSet)=>{
+  return new Proxy(obj,
+    {
+      set(target,key,value){
+        const updated = Reflect.set(target, key, value)// Update the property
+        if (updated){
+          onSet(key,value); //call the Callback to indicate a set operation
+        }
+      },
+      get(target,key,receiver){
+        const value = Reflect.get(target,key) //get the property value
+        if (typeof(value)==='object' && value !==null){
+          return createProxy(value,onSet);
+        }
+        return value;
+      }
+  });
+}
+const onSet = (key,value)=>{
+  console.log(`evaluate this value ${value} for this key ${key}`);
+}
+
+const MLsetupUI = createProxy(mLsetup);
 
 var layerSwapstart = null;
 
@@ -2042,6 +2068,8 @@ function passTheMlsetup(textContent=""){
         mls_content = JSON.parse(textContent,mlsContRevive);
         mLsetup = new Mlsetup();
         mLsetup.import(mls_content);
+        //openMlsetup.push(mLsetup);
+
         $("#TheMagicIsHere").click();
       } catch (error) {
         notifyMe(error);
@@ -2051,6 +2079,7 @@ function passTheMlsetup(textContent=""){
         mls_content = JSON.parse(textContent,mlsContRevive);
         mLsetup = new Mlsetup();
         mLsetup.import(mls_content);
+        //openMlsetup.push(mLsetup);
         let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
         $(".mlpreviewBody").html(test)
       }catch(error){
@@ -2169,22 +2198,26 @@ function vacuumCleaner(on = true, ranges = false){
   $('#layeringsystem li').eq(0).attr({"data-opacity":"1.0"});
 }
 
+function uiMlsetup(){
+}
+
+function disableLayers(totalLayers){
+  disabledLayers = 20 - mLsetup.Layers.length;
+  $(`#layeringsystem li`).removeAttr('disabled');
+  if (disabledLayers>0){
+    $(`#layeringsystem li:nth-last-child(-n+${disabledLayers})`).attr('disabled','disabled');
+  }
+}
+
 //----Button to load
 $("#TheMagicIsHere").click(function(){
     off_MLSetup.hide();
     //Layer Cleanup for disabled layers
-    disabledLayers = 20 - mLsetup.Layers.length;
-
-    $(`#layeringsystem li`).removeAttr('disabled');
-
-    if (disabledLayers>0){
-      $(`#layeringsystem li:nth-last-child(-n+${disabledLayers})`).attr('disabled','disabled');
-      for(h=19;h>=20-disabledLayers;h--){
-        mLsetup.reset(h);
-      }
-    }
+    //disabledLayers = 20 - mLsetup.Layers.length;
+    disableLayers(20 - mLsetup.Layers.length);
+    
     //Layer data build
-    for(k=0;k<20;k++){
+    for(k=0;k<mLsetup.Layers.length;k++){
       $('#layeringsystem li').eq(k).data({
         mattile:mLsetup.Layers[k].tiles,
         labels:'('+mLsetup.Layers[k].color+') '+ String(mLsetup.Layers[k].material).replace(/^.*[\\\/]/, '').split('.')[0],
@@ -2993,8 +3026,12 @@ unCooKonfirm.addEventListener("click", (event) => {
     $("#MlSetupsList").trigger("switchBlade",$(ev.target).index());
   }).on('click',"#MlSetupsList > span > .btn-close[data-bs-dismiss='badge']",function(ev){
     ev.preventDefault();
+    //remove the mlsetup from the list
+    let indexSetup = ($(this).parent().index() - 1);
+    openMlsetup.splice(indexSetup,1);
     //TODO close the file and delete the mlsetup entity
     $(this).parent().remove();
+    //Change of blade
     $("#MlSetupsList").trigger("switchBlade",0);
   });
 
@@ -3010,6 +3047,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     if (index==0){
       $("body #MlSetupsList > span").eq(0).removeClass("text-bg-layer2").addClass("text-bg-active");
     }else{
+      mLsetup = openMlsetup[index-1];
       $("body #MlSetupsList > span").eq(0).removeClass("text-bg-active").addClass("text-bg-layer2");
       $("body #MlSetupsList > span.text-bg-dark").eq(index -1).removeClass("text-bg-dark").addClass("text-bg-secondary");
     }
