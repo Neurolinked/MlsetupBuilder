@@ -57,11 +57,6 @@ class Mlsetup {
 	version = [0,0,3]
 	ratio = 1.0
 	normal = true
-	/**
-	 * maximum number of layer to import
-	 * @private
-	 */
-	#limit = 20
 
 	/** @constructs */
 	constructor(){
@@ -138,7 +133,7 @@ class Mlsetup {
 	 */
 	import(mlsetupObject){
 		this.getVersion(mlsetupObject)
-		this.#limit = 20
+		var limit = 20
 		var layeriteration = null
 		var i = 0;
     	var testMinVersion = Number(this.version[2]);
@@ -147,7 +142,7 @@ class Mlsetup {
 			case (testMinVersion>=2):
 				//Iteration on mlsetupObject.Data.RootChunk.layers
 				layeriteration = mlsetupObject.Data.RootChunk.layers;
-				this.#limit = mlsetupObject.Data.RootChunk.layers.length
+				limit = mlsetupObject.Data.RootChunk.layers.length
 				for (const [key, prop] of Object.entries(layeriteration)) {
 					this.Layers[i].color=prop.colorScale;
 					this.Layers[i].material=prop.material.DepotPath;
@@ -174,7 +169,7 @@ class Mlsetup {
 				break;
 			case (testMinVersion==1):
 				//Iteration on mlsetupObject.Chunks.0.Properties.layers
-				this.#limit = mlsetupObject.Data.RootChunk.Properties.layers.length
+				limit = mlsetupObject.Data.RootChunk.Properties.layers.length
 				layeriteration = mlsetupObject.Data.RootChunk.Properties.layers;
 				for (const [key, prop] of Object.entries(layeriteration)) {
 					let thisLayer = prop.Properties
@@ -202,7 +197,7 @@ class Mlsetup {
 				this.ratio = (mlsetupObject.Data.RootChunk.Properties.ratio!=undefined) ? mlsetupObject.Data.RootChunk.Properties.ratio : 1.0;
 				break;
 			default:
-				this.#limit = mlsetupObject.Chunks[0].Properties.layers.length
+				limit = mlsetupObject.Chunks[0].Properties.layers.length
 				layeriteration = mlsetupObject.Chunks[0].Properties.layers;
 				for (const [key, prop] of Object.entries(layeriteration)) {
 					this.Layers[i].color=prop.colorScale;
@@ -229,8 +224,12 @@ class Mlsetup {
 				this.ratio = (mlsetupObject.Chunks[0].Properties?.ratio!=undefined) ? mlsetupObject.Chunks[0].Properties?.ratio : 1.0;
 				break;
 		}
-		if (this.#limit < 20){
-      this.unplug(20-this.#limit)	//this.Layers.splice(this.#limit-1,20-this.#limit)
+		if (limit < 20){
+      		this.unplug(20-limit)
+		}
+		//fix unusual mlsetups with more than 20 layers
+		if (this.Layers.length>20){
+			this.Layers.splice(19,this.Layers.length-20);
 		}
 	}
 
