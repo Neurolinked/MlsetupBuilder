@@ -202,7 +202,7 @@ class Mlsetup {
 				for (const [key, prop] of Object.entries(layeriteration)) {
 					this.Layers[i].color=prop.colorScale;
 					this.Layers[i].material=prop.material;
-					this.Layers[i].tiles=prop?.matTile ? prop.matTile : 1;
+					this.Layers[i].tiles=prop?.matTile ? prop.matTile : 1.0;
 					this.Layers[i].microblend.tiles = prop.mbTile
 					this.Layers[i].metalIn=prop.metalLevelsIn
 					this.Layers[i].metalOut = prop.metalLevelsOut
