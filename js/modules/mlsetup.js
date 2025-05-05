@@ -54,9 +54,10 @@ class Layer {
  * @class
  */
 class Mlsetup {
-	version = [0,0,3]
+	version = [0,0,9]
 	ratio = 1.0
 	normal = true
+	#file = '';
 
 	/** @constructs */
 	constructor(){
@@ -140,6 +141,7 @@ class Mlsetup {
     
 		switch (true){
 			case (testMinVersion>=2):
+				this.#file = mlsetupObject.Header.ArchiveFileName
 				//Iteration on mlsetupObject.Data.RootChunk.layers
 				layeriteration = mlsetupObject.Data.RootChunk.layers;
 				limit = mlsetupObject.Data.RootChunk.layers.length
@@ -164,7 +166,7 @@ class Mlsetup {
 					this.Layers[i].roughnessOut = prop.roughLevelsOut
 					i++
 				}
-				this.normals = !!mlsetupObject.Data.RootChunk.usenormal
+				this.normal = mlsetupObject.Data.RootChunk.useNormal
 				this.ratio = (mlsetupObject.Data.RootChunk?.ratio!=undefined) ? mlsetupObject.Data.RootChunk.ratio : 1.0;
 				break;
 			case (testMinVersion==1):
@@ -193,7 +195,7 @@ class Mlsetup {
 					this.Layers[i].roughnessOut = thisLayer.roughLevelsOut
 					i++
 				}
-				this.normals = true
+				this.normal = true
 				this.ratio = (mlsetupObject.Data.RootChunk.Properties.ratio!=undefined) ? mlsetupObject.Data.RootChunk.Properties.ratio : 1.0;
 				break;
 			default:
@@ -220,7 +222,7 @@ class Mlsetup {
 					this.Layers[i].roughnessOut = prop.roughLevelsOut
 					i++
 				}
-				this.normals = true
+				this.normal = true
 				this.ratio = (mlsetupObject.Chunks[0].Properties?.ratio!=undefined) ? mlsetupObject.Chunks[0].Properties?.ratio : 1.0;
 				break;
 		}
@@ -233,6 +235,103 @@ class Mlsetup {
 		}
 	}
 
+	export(file){
+		//Export the actual mlsetup to last version Wolvenkit format
+		var dummyObj = {
+			"Header": {
+				"WolvenKitVersion": "8.16.1",
+				"WKitJsonVersion": "0.0.9",
+				"GameVersion": 2200,
+				"ExportedDateTime": "",
+				"DataType": "CR2W",
+				"ArchiveFileName": ""
+			},
+			"Data":{
+				"Version": 195,
+				"BuildVersion": 0,
+				"RootChunk": {
+					"$type": "Multilayer_Setup",
+					"cookingPlatform": "PLATFORM_PC",
+					"layers": [],
+					"ratio": this.ratio,
+					"useNormal": parseInt(this.normal)
+				}
+			}
+		};
+		for(var i=0;i<this.Layers.length;i++){
+			let actuallayer = this.Layers[i]
+			let layer = {
+					"$type": "Multilayer_Layer",
+					"colorScale": {
+						"$type": "CName",
+						"$storage": "string",
+						"$value": actuallayer.color,
+					},
+					"material": {
+						"DepotPath": {
+						"$type": "ResourcePath",
+						"$storage": "string",
+						"$value": actuallayer.material
+						},
+						"Flags": "Default"
+					},
+					"matTile": actuallayer.tiles,
+					"mbTile": actuallayer.microblend.tiles,
+					"metalLevelsIn": {
+						"$type": "CName",
+						"$storage": "string",
+						"$value": actuallayer.metalIn
+					},
+					"metalLevelsOut": {
+						"$type": "CName",
+						"$storage": "string",
+						"$value": actuallayer.metalOut
+					},
+					"microblend": {
+						"DepotPath": {
+						"$type": "ResourcePath",
+						"$storage": "string",
+						"$value": actuallayer.microblend.file
+						},
+						"Flags": "Default"
+					},
+					"microblendContrast": actuallayer.microblend.contrast,
+					"microblendNormalStrength": actuallayer.microblend.normal,
+					"microblendOffsetU": actuallayer.microblend.offset.h,
+          			"microblendOffsetV": actuallayer.microblend.offset.v,
+					"normalStrength": {
+						"$type": "CName",
+						"$storage": "string",
+						"$value": actuallayer.normal
+					},
+					"offsetU": actuallayer.offsetU,
+					"offsetV": actuallayer.offsetV,
+					"opacity": actuallayer.opacity,
+					"overrides": {
+						"$type": "CName",
+						"$storage": "string",
+						"$value": "None"
+					},
+					"roughLevelsIn": {
+						"$type": "CName",
+						"$storage": "string",
+						"$value": actuallayer.roughnessIn
+					},
+					"roughLevelsOut": {
+						"$type": "CName",
+						"$storage": "string",
+						"$value": actuallayer.roughnessOut
+					}
+				};
+			dummyObj.Data.RootChunk.layers.push(layer);
+		}
+		return JSON.stringify(dummyObj,null,2);
+	}
+	
+	//recheck all the format types 
+	matchTypes(){
+		console.log("not Now");
+	}
 	/**
 	 * Translate the source string into a compiled version of the whole MLsetup.
 	 * It replace from the source template, string to the parameters value from every Layer
