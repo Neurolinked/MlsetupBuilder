@@ -1,7 +1,7 @@
 {
   "name": "mlsetupbuilder",
   "productName": "MlsetupBuilder",
-  "version": "1.6.8-rc1",
+  "version": "1.6.8-rc2",
   "description": "MlSetupBuilder",
   "main": "main.mjs",
   "scripts": {
@@ -29,10 +29,10 @@
     "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "@electron/packager": "^18.3.5",
-    "@fortawesome/fontawesome-free": "^6.5.1",
+    "@electron/packager": "^18.3.6",
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "electron": "^35.0.0",
-    "tweakpane": "^4.0.3"
+    "electron": "^36.1.0",
+    "tweakpane": "^4.0.5"
   }
 }
