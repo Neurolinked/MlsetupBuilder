@@ -34,6 +34,12 @@
         {
           "path": "base\\surfaces\\microblends\\pattern_n_reaction_diffusion.xbm",
           "hash": "afd1bac5c2e272447978afe0ec7c3734"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_exa_squares.xbm"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_theeye.xbm"
         }
       ]
     }
