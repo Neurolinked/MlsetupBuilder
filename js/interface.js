@@ -2063,31 +2063,21 @@ function passTheMlsetup(textContent=""){
 
     $("#off_MLSetups div.offcanvas-body detail").fadeOut();
     var mls_content =" "
-    if (PARAMS.importSkip){
-      try {
-        mls_content = JSON.parse(textContent,mlsContRevive);
-        mLsetup = new Mlsetup();
-        mLsetup.import(mls_content);
-        //openMlsetup.push(mLsetup);
-
+    try {
+      mls_content = JSON.parse(textContent,mlsContRevive);
+      mLsetup = new Mlsetup();
+      mLsetup.import(mls_content);
+      if (PARAMS.importSkip){
         $("#TheMagicIsHere").click();
-      } catch (error) {
-        notifyMe(error);
-      }
-    }else{
-      try{
-        mls_content = JSON.parse(textContent,mlsContRevive);
-        mLsetup = new Mlsetup();
-        mLsetup.import(mls_content);
-        //openMlsetup.push(mLsetup);
+      }else{
         let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
         $(".mlpreviewBody").html(test)
-      }catch(error){
-        notifyMe(`Error: ${error}`)
+        off_MLSetup.show();
+        // focus on the exit button of the offcanvas
+        $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
       }
-      off_MLSetup.show();
-      // focus on the exit button of the offcanvas
-      $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
+    } catch (error) {
+      notifyMe(error);
     }
   }
 }
@@ -2215,7 +2205,6 @@ $("#TheMagicIsHere").click(function(){
     //Layer Cleanup for disabled layers
     //disabledLayers = 20 - mLsetup.Layers.length;
     disableLayers(20 - mLsetup.Layers.length);
-    
     //Layer data build
     for(k=0;k<mLsetup.Layers.length;k++){
       $('#layeringsystem li').eq(k).data({
@@ -2264,7 +2253,8 @@ $("#TheMagicIsHere").click(function(){
     document.title = document.title.split('[')[0]+" ["+nomefile+"]";
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
-    //openMlsetups.push(mLsetup);
+    openMlsetup.push(mLsetup);
+    console.log(openMlsetup);
     let UInomefile = nomefile.split("\\").reverse()[0];
     $("#MlSetupsList").trigger("addBlade",UInomefile);
     notifyMe(`Imported : ${nomefile}`,false);
@@ -2516,8 +2506,8 @@ $(".xportJSON").click(function(){
           preamble ='{\r\n'
           +'  "Header": {\r\n'
           +'    "WolvenKitVersion": "8.11.0",\r\n'
-          +'    "WKitJsonVersion": "0.0.8",\r\n'
-          +'    "GameVersion": 2000,\r\n'
+          +'    "WKitJsonVersion": "0.0.9",\r\n'
+          +'    "GameVersion": 2200,\r\n'
           +'    "ExportedDateTime": "'+jsonDate+'",\r\n'
           +'    "DataType": "CR2W",\r\n'
           +'    "ArchiveFileName": ""\r\n'
