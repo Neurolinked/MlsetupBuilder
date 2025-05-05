@@ -40,6 +40,9 @@
         },
         {
           "path": "base\\surfaces\\microblends\\pattern_n_theeye.xbm"
+        },
+        {
+          "path": "base\\surfaces\\microblends\\pattern_n_waves.xbm"
         }
       ]
     }
