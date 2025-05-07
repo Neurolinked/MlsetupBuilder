@@ -179,9 +179,12 @@ function customMblendselect(ev){
   $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
   $(this).addClass("MBactive");
   let theoneselected = $(this).data('path');
-  
+
   $("#mbSelect option").removeAttr("selected")
-  document.getElementById("cu_mu_display").scrollLeft = ($(`#cagetheCuMBlends li[data-path='${theoneselected.replaceAll('\\','\\\\')}']`).index() * (mblendPrevSize+2))
+
+  let customMBdisplay = document.getElementById("cu_mu_display")
+  
+  customMBdisplay.scrollLeft = ($(`#cagetheCuMBlends li[data-path='${theoneselected.replaceAll('\\','\\\\')}']`).index() * (parseInt(mblendPrevSize) + 2))
   
   $("#mbSelect option").removeAttr("selected");
   let mbZelected = $("#mbSelect option").filter(function() {
@@ -1468,9 +1471,12 @@ $("#layerOpacity").on("input",function(ev){
         let customSelected = $("#cagetheCuMBlends li").filter(function(el) {
            return $(this).data('path') === $("#mbSelect").val();
         })
+
         if (customSelected.length>0){
+          /*TODO Unify this portion that is executed in 2 part of the interface */
           customSelected.addClass("MBactive");
-          document.getElementById("cu_mu_display").scrollLeft = ($(`cagetheCuMBlends li[data-path='${$(this).val().replace("\\","\\\\")}']`).index() * (mblendPrevSize+2))
+          let customMBDisplay = document.getElementById("cu_mu_display")
+          customMBDisplay.scrollLeft = ($(`#cagetheCuMBlends li[data-path='${$(this).val().replaceAll("\\","\\\\")}']`).index() * (mblendPrevSize+2))
           //$("#cu_mu_display").scrollLeft($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").index()*($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").width()+2))
         }
   		}
@@ -3121,7 +3127,6 @@ unCooKonfirm.addEventListener("click", (event) => {
       
       CPModels.row(newline[0]).select();
       CPModels.row(newline[0]).scrollTo(false);
-      /*TODO add to the DB in pouchDB */
 
       mlsbDB.put({
         _id:`model_${CryptoJS.MD5(sureNewModel.file)}`,
