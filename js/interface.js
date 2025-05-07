@@ -91,7 +91,12 @@ $(window).on('limitLayers',function(ev,index){
     }
   }
 
-});
+}).on('UiMBselect',function(ev,source){
+  /* function to display, select and reset
+  * every UI controller about microblends file selection.
+  
+  */
+})
 
 /* CouchDB initialization */
 const mlsbDB = new PouchDB('Docs');
@@ -168,6 +173,25 @@ Number.prototype.countDecimals = function () {
 
 const range = (start, stop, step = 1) =>  Array(Math.ceil((stop - start) / step)+1).fill(start).map((x, y) => x + y * step)
 
+function customMblendselect(ev){
+  var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
+
+  $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
+  $(this).addClass("MBactive");
+  let theoneselected = $(this).data('path');
+  
+  $("#mbSelect option").removeAttr("selected")
+  document.getElementById("cu_mu_display").scrollLeft = ($(`#cagetheCuMBlends li[data-path='${theoneselected.replaceAll('\\','\\\\')}']`).index() * (mblendPrevSize+2))
+  
+  $("#mbSelect option").removeAttr("selected");
+  let mbZelected = $("#mbSelect option").filter(function() {
+     return $(this).val() === theoneselected;
+   });
+   
+  mbZelected.attr('selected', true).change();
+  $("#mbInput").val(theoneselected);
+}
+
 //Build the microblends gallery and compile the microblends select options
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
@@ -208,15 +232,22 @@ async function nubuildMB(microblendObj){
         }
         if (package.hasOwnProperty("microblends")){
 
+          var customMBlends = '';
           package.microblends.forEach((microblend)=>{
             let tmpName = microblend.path.split('.')[0].split("\\").reverse()[0];
             let hash = microblend?.hash != undefined ? `data-hash='${microblend.hash}'` : "";
             
             $("#mbSelect optgroup[label='"+pkgName+"']").append(`<option data-package='${pkgName}' data-thumbnail='./images/mblend/${pkgName.toLowerCase()}/${tmpName}.png' value='${microblend.path}'>${tmpName}</option>`);
             
-            $("#cagetheCuMBlends").append(`<li style="background-image:url('./images/mblend/${pkgName.toLowerCase()}/thumbs/${tmpName}.png');" data-package='${pkgName}' data-path='${microblend.path}' title='${tmpName}' > </li>`);
+
+            customMBlends += `<li style="background-image:url('./images/mblend/${pkgName.toLowerCase()}/thumbs/${tmpName}.png');" data-package='${pkgName}' data-path='${microblend.path}' title='${tmpName}' > </li>`;
+
             $("#mbHierarchy ul[data-package='"+pkgName+"']").append(`<li ${hash} data-path='${microblend.path}' class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> ${tmpName}</li>`);
           });
+          $("#cagetheCuMBlends").append(customMBlends);
+
+          $("#cagetheCuMBlends li").on("click",customMblendselect);
+
         }
       })
     }
@@ -617,10 +648,10 @@ $(function(){
     Object.entries(fileList).forEach(([key, file]) => {
       if (file.name.match(/\.png$/)){
         filteredFiles[key]=file
-        if ($("#mblendUserManager div[data-filepath='"+file.path+"']").length==0){
-          md5 = CryptoJS.MD5(file.path)
+        if ($("#mblendUserManager div[data-filepath='base\\surfaces\\microblends\\"+file.name+"']").length==0){
+          md5 = CryptoJS.MD5("base\\surfaces\\microblends\\"+file.name)
           if ($(`#mblendUserManager div[data-hash='${md5}']`).length==0){
-            $("#mblendUserManager").append(`<div data-filename='${file.name}' data-filepath='${file.path}' data-hash='${md5}'><input type="text" class="form-control form-control-sm" value="${file.name.replace(/\.png/,'.xbm').toLowerCase()}"></div>`);
+            $("#mblendUserManager").append(`<div data-filename='${file.name}' data-filepath='base\\surfaces\\microblends\\${file.name}' data-hash='${md5}'><input type="text" class="form-control form-control-sm" value="base\\surfaces\\microblends\\${file.name.replace(/\.png/,'.xbm').toLowerCase()}"></div>`);
           }
         }
       }
@@ -637,6 +668,7 @@ $(function(){
 
   $("#CheckSaveMblend").click(function(){
     if (/^[a-zA-z0-9_\-]+$/.test($("#mbListPackage").val())) {
+
       newMBlendMan.packageName = $("#mbListPackage").val();
       var md5
       $("#mblendUserManager div[data-filename]").each((index)=>{
@@ -1822,25 +1854,6 @@ $("#layerOpacity").on("input",function(ev){
     $("#mbInput").focusout();
   });
 
-  $("body").on("click","#cagetheCuMBlends li",function(){
-    var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
-
-    $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
-    $(this).addClass("MBactive");
-    let theoneselected = $(this).data('path');
-    console.log(theoneselected);
-    $("#mbSelect option").removeAttr("selected")
-    document.getElementById("cu_mu_display").scrollLeft = ($(`#cagetheCuMBlends li[data-path='${theoneselected}']`).index() * (mblendPrevSize+2))
-    
-    $("#mbSelect option").removeAttr("selected");
-    let mbZelected = $("#mbSelect option").filter(function() {
-       return $(this).val() === theoneselected;
-     });
-     
-    mbZelected.attr('selected', true).change();
-    $("#mbInput").val(theoneselected);
-  })
-
 const scrollMBContainer = document.getElementById("microdisplay");
 const scrollCustMBContainer = document.getElementById("cu_mu_display");
 
@@ -2254,7 +2267,7 @@ $("#TheMagicIsHere").click(function(){
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
     openMlsetup.push(mLsetup);
-    console.log(openMlsetup);
+
     let UInomefile = nomefile.split("\\").reverse()[0];
     $("#MlSetupsList").trigger("addBlade",UInomefile);
     notifyMe(`Imported : ${nomefile}`,false);
@@ -3014,6 +3027,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     ev.preventDefault();
     //TODO Switch setup
     $("#MlSetupsList").trigger("switchBlade",$(ev.target).index());
+    console.log(openMlsetup[$(this).index() - 1])
   }).on('click',"#MlSetupsList > span > .btn-close[data-bs-dismiss='badge']",function(ev){
     ev.preventDefault();
     //remove the mlsetup from the list
@@ -3023,6 +3037,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     $(this).parent().remove();
     //Change of blade
     $("#MlSetupsList").trigger("switchBlade",0);
+    
   });
 
   $("#MlSetupsList").on("addBlade",function(ev,name){

@@ -1618,7 +1618,10 @@ ipcMain.on('main:mBlender',(event,box)=>{
 			JsonResourceRead(userRfiles.microblends)
 			.then((contenuto)=>{
 				let listaPath = box.files.map(elm => {return {"path":elm.gamepath,"hash":elm.hash}})
-				let indexPackage = contenuto.packages.findIndex((pkg,index) => { if (pkg.name==box.packageName){ return index	}})
+				let indexPackage = contenuto.packages.findIndex((pkg,index) => {
+					 if (pkg.name==box.packageName){ return true }
+					 return false
+					})
 				if (indexPackage>=0){
 					//TODO push only the microblends not already there
 					//listaPath.filter(elm => contenuto.packages[indexPackage].microblends)
