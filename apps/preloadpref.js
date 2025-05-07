@@ -6,7 +6,6 @@ contextBridge.exposeInMainWorld(
 	Args: async() =>{
 		ipcRenderer.send('main:handle_args', {})
 	},
-      /*TODO Remove this function ConfiguraUnbundle:(path) => { ipcRenderer.send('main:setupUnbundle',path); },*/
 	ConfiguraWkitCli:(path) => {
         ipcRenderer.send('main:setupCR2Wr',path);
 	},

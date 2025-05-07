@@ -49,7 +49,6 @@
 - [x] Custom models Material.json search and usage
 - [x] Material Database and preview updated at PL last release
 - [x] UI redesign for the new materials management
-- [ ] Material Composer extension (postponed)
 - [x] Interface Workspace setup saved and reloaded from session to session
 - [x] Keyboard shortcut override
   - [x] CTRL+A Apply the edits on the current layer
