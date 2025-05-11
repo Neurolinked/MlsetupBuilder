@@ -238,7 +238,7 @@ const preferences = new Store({schema,
 } */
 
 preferences.watch = true
-var mainWindow,aimWindow; //check variable name
+var mainWindow,aimWindow, McomposerWindow; //check variable name
 
 var mljson = app.commandLine.getSwitchValue("open")
 if (mljson ==''){
@@ -558,7 +558,7 @@ const template = [
     label: 'View',
     submenu: [
 			{label: 'Material Composer',accelerator: 'Ctrl+K',click:()=>{
-				childWindow("apps/materials.html",mainWindow,1200,800,'Material Composer', {preload: path.join(__dirname, 'apps/preloadmats.js')} );
+				McomposerWindow = childWindow("apps/materials.html",mainWindow,1200,800,'Material Composer', {preload: path.join(__dirname, 'apps/preloadmats.js')} );
 			}},
 			{label: 'Hairs tool',accelerator: 'Ctrl+H',click:()=>{ mainWindow.webContents.send('preload:openModal','hairs')}},
 			{label:'Microblend Lab',accelerator: 'Ctrl+B',click:()=>{ mainWindow.webContents.send('preload:openModal','micromanager')}},
@@ -727,6 +727,20 @@ ipcMain.on('main:aimMicros',(event,configurations) =>{
 
 ipcMain.on('main:reloadAim',()=>{
 	aimWindow.webContents.send('preload:configure',lastMicroConf)
+});
+
+/** Send Material file content */
+ipcMain.handle('main:composerMaterial',async(ev,filepath)=>{
+	try {
+		const content = await AfileRead(filepath,'utf8',false);
+		//console.log(content);
+		McomposerWindow = childWindow("apps/materials.html",mainWindow,1200,800,'Material Composer', {preload: path.join(__dirname, 'apps/preloadmats.js')} );
+		setTimeout(()=>{
+			McomposerWindow.webContents.send('preload:openMaterial',content);
+		},1000);
+	} catch (error) {
+		mainWindow.webContents.send('preload:logEntry', `Impossible to read ${filepath} : ${error}`,true)
+	}
 });
 
 ipcMain.on('main:clickMenu',(event,menuVoice)=>{

@@ -100,6 +100,19 @@ $(window).on('limitLayers',function(ev,index){
 
 /* CouchDB initialization */
 const mlsbDB = new PouchDB('Docs');
+
+mlsbDB.allDocs({
+  startkey: 'mbpkg_',
+  endkey:'mbpkg_\ufff0',
+  include_docs: true,
+}).then(function(mb_records){
+  if (mb_records.rows.length > 0){
+    console.log("found Mblends in DB")
+  }else{
+    console.log("No custom mblends in DB")
+  }
+});
+
 const remoteCouch = false
 /* End */
 var notifications = 0;
@@ -510,8 +523,9 @@ $(function(){
   var mls_Offcanvas = document.getElementById('off_MLSetups')
   var off_MLSetup = new bootstrap.Offcanvas(mls_Offcanvas)
 
+  // Custom Event for Microblend loading
   const updblends = new Event('updMBlends');
-  document.addEventListener('updMBlends',(e)=>{
+  document.addEventListener(updblends,(e)=>{
       var updCustomMicroblends = thePIT.getMuBlends();
       updCustomMicroblends.then((listaMU) => {
         nubuildMB(listaMU);
@@ -1344,7 +1358,6 @@ $("#layerOpacity").on("input",function(ev){
         if (results.rows.length > 0){
           results.rows.forEach((row)=>{
             let record=row.doc
-            //console.log(`addition of ${JSON.stringify(record)}`);
             CPModels.row.add({
               name:record.name,
               file:record.file,
@@ -1354,13 +1367,13 @@ $("#layerOpacity").on("input",function(ev){
             })
           })
           CPModels.draw(true);
+          document.getElementById("Loading").close();
         }
       }).catch((error)=>{
         notifyMe(error);
       });
       notifyMe("Mesh linked :"+CPModels.data().length,false);
       $(".dt-buttons button" ).removeClass("dt-button");
-      document.getElementById("Loading").close();
       
       setTimeout(()=>{
         CPModels.searchBuilder.container().find('button.dtsb-add.dtsb-button').eq(0).bind("click", function(ev){
@@ -2763,6 +2776,14 @@ $(".shellOpen").click(function(ev){
     thePIT.openOS(pathCheck);
   }else{
     thePIT.openOS(materialJSON.MaterialRepo+pathCheck);
+  }
+});
+
+//Open the material File and import it in the Material Composer
+$("#matCompose").click(function(ev){
+  if ($("#materialTarget").val()!=""){
+    let pathCheck =  $("#prefxunbundle").val()+$("#materialTarget").val().replaceAll(/\//g,'\\')
+    thePIT.Materialize(pathCheck);
   }
 });
 

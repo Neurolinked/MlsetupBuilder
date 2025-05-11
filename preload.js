@@ -43,6 +43,9 @@ contextBridge.exposeInMainWorld(
         //return await ipcRenderer.invoke('main:uncookMicroblends');
 				ipcRenderer.send('main:uncookMicroblends');
 			},
+      Materialize: async(fullpath)=>{
+        ipcRenderer.invoke('main:composerMaterial',fullpath);
+      },
 			getModels: ()=>{
 				var additionalModels = ipcRenderer.sendSync('main:giveModels');
 				return additionalModels

@@ -86,6 +86,16 @@ $(function(){
 		//Cast the template
 		//Apply the values
 		//$("#Mat_S_name").val($("body #Material details:nth-child("+($(this).index()+1)+") summary").text());
+	}).on("loadMaterial",function(e){
+		try{
+			if (isValidJSON(e.detail.content)){
+				UItranslateMaterial(e.detail.content);
+			}else{
+				throw new Error("Invalid format");
+			}
+		}catch(error){
+			console.error(error);
+		}
 	});
 
 	$("#MatCFiltering").keyup(function(){
@@ -151,20 +161,22 @@ $(function(){
 		}
 	});
 
+	function UItranslateMaterial(content){
+		materialBuffer = null;
+		materialBuffer = new MaterialBuffer();
+		materialBuffer.import(content);
+
+		$("#Material").html(materialBuffer.codeMaterial());
+		$("#TexList ul.list-group").html(materialBuffer.codeTextures());
+		$("#Mtemplate").html(materialBuffer.codeTemplates());
+	}
+
 	$("#importfield").change(function(){
 		var fr=new FileReader(); //new reading Object
 		fr.onload=function(){
 			lastMaterialTXT = fr.result;
 			if (isValidJSON(lastMaterialTXT)){
-				//templateMBuffers(lastMaterialTXT);
-				materialBuffer = null
-				materialBuffer = new MaterialBuffer()
-				console.log(materialBuffer)
-				materialBuffer.import(lastMaterialTXT)
-				//interface Creation
-				$("#Material").html(materialBuffer.codeMaterial());
-				$("#TexList ul.list-group").html(materialBuffer.codeTextures());
-				$("#Mtemplate").html(materialBuffer.codeTemplates());
+				UItranslateMaterial(lastMaterialTXT);
 			}else{
 				new Notification("Json format",{ body: "Your file has been parsed and there are errors please verify it with a Json syntax checker" }).show();
 			}

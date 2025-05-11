@@ -33,3 +33,9 @@ function isValidJSON(text) {
     return false;
   }
 }
+
+ipcRenderer.on("preload:openMaterial",(event,stream)=>{
+  var load = new CustomEvent('loadMaterial',{detail:{content:stream}});
+  const thewindow = document.querySelector("body");
+  thewindow.dispatchEvent(load);
+});
