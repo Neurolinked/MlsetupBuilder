@@ -24,6 +24,7 @@
   - [x] Search in the library on filter enter press
 - [x] new Material library
   - [x] Thumbnails rebuild
+- [x] Materials model read integration in Material Composer
 - [x] Microblends update
 - [x] Replacing DAT.gui with Tweakpane library
   - [x] Light configuration addition 
