@@ -3,47 +3,29 @@
     {
       "name": "Neurolinked",
       "microblends": [
-        {
-          "path": "base\\surfaces\\microblends\\graphics_sogol_001.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_arrow.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_turtle.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_dflower.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_tri.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_tech_3lobe_01.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_tech_3lobe_02.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_tech_3lobe_03.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_net.xbm",
-          "hash": "94691d94404fcd4ec84bfe643a0a297e"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_reaction_diffusion.xbm",
-          "hash": "afd1bac5c2e272447978afe0ec7c3734"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_exa_squares.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_theeye.xbm"
-        },
-        {
-          "path": "base\\surfaces\\microblends\\pattern_n_waves.xbm"
-        }
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\3lobe.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\border_up_arrows.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\exa_squares.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\hex_ninja.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\hex_shuriken.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\hex_stripes.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\logos_01.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_arcs_full.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_arcs_half.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_flower_full.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_flower_half.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\net.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\reaction_diffusion_01.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\reaction_theeye.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\roman_dotted.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\roman_undot.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\spiral_flowers.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\tech_3lobe_01.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\tech_3lobe_02.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\tech_3lobe_03.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\turtle_abstract.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\turtle_default.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\waves_01.xbm"}
       ]
     }
   ]
