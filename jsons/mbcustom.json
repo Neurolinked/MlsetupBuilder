@@ -12,6 +12,7 @@
         {"path": "modder\\neurolinked\\surfaces\\microblends\\logos_01.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_arcs_full.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_arcs_half.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_arrows.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_flower_full.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\medieval_flower_half.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\net.xbm"},
@@ -23,6 +24,7 @@
         {"path": "modder\\neurolinked\\surfaces\\microblends\\tech_3lobe_01.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\tech_3lobe_02.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\tech_3lobe_03.xbm"},
+        {"path": "modder\\neurolinked\\surfaces\\microblends\\tri_shuriken.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\turtle_abstract.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\turtle_default.xbm"},
         {"path": "modder\\neurolinked\\surfaces\\microblends\\waves_01.xbm"}
