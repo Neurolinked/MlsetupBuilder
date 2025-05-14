@@ -134,12 +134,14 @@ const schema = {
 		}
 	}
 };
+var itMigrate = false;
 
 const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit/config.json');
 
 const preferences = new Store({schema,
 	beforeEachMigration: (store, context) => {
 		log.info(`[main-config] migrate from ${context.fromVersion} → ${context.toVersion}`)
+		itMigrate = true;
 	},
 	migrations: {
 		'<=1.6.2': store => {
@@ -229,13 +231,6 @@ const preferences = new Store({schema,
 		}
 	}
 });
-
-/* var archives={
-	engine : "basegame_1_engine.archive",
-	nightcity : "basegame_3_nightcity.archive",
-	appearances : "basegame_4_appearance.archive",
-	gamedata : "basegame_4_gamedata.archive"
-} */
 
 preferences.watch = true
 var mainWindow,aimWindow, McomposerWindow; //check variable name
@@ -984,7 +979,7 @@ ipcMain.on('main:handle_args', (event, payload) => {
 
 //setup the version of the software where needed
 ipcMain.on('main:getversion',(event, arg) =>{
-	event.reply('preload:setversion',app.getVersion())
+	event.reply('preload:setversion',{version:app.getVersion(),changed:itMigrate})
 	/*
 		Since it's the first operation requested from the renderer
 		And it's expected the store to be already initialized, i will
@@ -1528,49 +1523,11 @@ function microBuilder(contentdir){
 
 				uncookRun(true,["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div')
 					.then(()=> {
-						return new Promise((resolve,reject) =>{
-							fs.readdir(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/'),(err,files)=>{
-								if (err){
-										mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
-										reject()
-								}else {
-									var slavefiles = []
-									files.forEach((el)=>{
-										if (el.match(/.+\.png$/))
-										slavefiles.push(el)
-									})
-									mainWindow.webContents.send('preload:uncookErr','Found '+slavefiles.length+' microblends to process','#microLogger div')
-									resolve(slavefiles)
-								}
-							})
-						})
+						return listMBlends();
 					})
 					.then((files)=>{
-						//console.log(files)
 						try{
-							var perc = Number(100/files.length).toFixed(2)
-							var k = 1
-							files.forEach((png)=>{
-
-								sharp(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/',png))
-									.resize(256)
-									.toFile(path.join(app.getAppPath(),'images/',png).replace('app.asar', 'app.asar.unpacked'), (err, info) => {
-										 if(err){
-											 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
-										 }else{
-											 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mresize')
-										 }
-										})
-										.resize(64)
-										.toFile(path.join(app.getAppPath(),'images/thumbs/',png).replace('app.asar', 'app.asar.unpacked'), (err, info) => {
-											 if(err){
-												 mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
-											 }else{
-												 mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mthumbs')
-											 }
-											})
-								k++
-							})
+							resizeMblends(files,true);
 						}catch(err){
 							mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div');
 						}
@@ -1583,6 +1540,81 @@ function microBuilder(contentdir){
 			}
 	})
 }
+
+function listMBlends(){
+	return new Promise((resolve,reject) =>{
+		fs.readdir(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/'),(err,files)=>{
+			if (err){
+					mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
+					reject()
+			}else {
+				var slavefiles = []
+				files.forEach((el)=>{
+					if (el.match(/.+\.png$/))
+					slavefiles.push(el)
+				})
+				mainWindow.webContents.send('preload:uncookErr','Found '+slavefiles.length+' microblends to process','#microLogger div')
+				resolve(slavefiles)
+			}
+		})
+	})
+}
+
+function resizeMblends(mblends,bars=false){
+	var perc = Number(100/mblends.length).toFixed(2)
+	var k = 1
+	mblends.forEach((png)=>{
+		sharp(path.join(String(preferences.get('paths.depot')),'base/surfaces/microblends/',png))
+			.resize(256)
+			.toFile(path.join(app.getAppPath(),'images/',png).replace('app.asar', 'app.asar.unpacked'), (err, info) => {
+				if(err){
+					if (bars){
+						mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
+					}else{
+						mainWindow.webContents.send('preload:logEntry',`${err}`,false)
+					}
+				}else{
+					if (bars){
+						mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mresize')
+					}
+				}
+			})
+			.resize(64)
+			.toFile(path.join(app.getAppPath(),'images/thumbs/',png).replace('app.asar', 'app.asar.unpacked'), (err, info) => {
+				if(err){
+					if (bars){
+						mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')
+					}else{
+						mainWindow.webContents.send('preload:logEntry',`${err}`,false)
+					}
+				}else{
+					if (bars){
+						mainWindow.webContents.send('preload:uncookBar',String(Math.round(Number(perc * k))),'mthumbs')
+					}
+				}
+			})
+		k++
+	})
+}
+
+ipcMain.on('main:resmBlend',(event)=>{
+	if (itMigrate){
+		var listed = listMBlends();
+		listed.then((files)=>{
+			try{
+				resizeMblends(files);
+			}catch(err){
+				 mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+			}
+		})
+		.catch((err)=>{
+			 mainWindow.webContents.send('preload:logEntry',`${err}`,true)
+		})
+		.finally(() => {
+			mainWindow.webContents.send('preload:trigEvent',{target:"body", trigger:'updateMBlends'});
+		})
+	}
+});
 
 ipcMain.on('main:mBlender',(event,box)=>{
 	var pathPackage = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_microblends],box.packageName.toLowerCase())

@@ -3,6 +3,14 @@ const ml_randomized = [];
 var coreMblends = {};
 
 
+
+function setQuestion(text,action=''){
+  $("#winConfirm .modal-title").html(text);
+  $("#winConfirm button[value='yes']").data("action",action);
+  const  winConfirm = document.getElementById("winConfirm");
+  winConfirm.showModal();
+}
+
 $(window).on('limitLayers',function(ev,index){
   //limit the number of active layers in the interface
   ev.preventDefault();
@@ -212,14 +220,38 @@ function customMblendselect(ev){
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
     if (microblendObj.hasOwnProperty("packages")){
+
       for(const[package, microblends] of Object.entries(microblendObj.packages)){
         if (package=='core'){
+          var maxmicros = microblends.length
+          var notfetched = 0;
           microblends.forEach((microblend)=>{
+            try{
+              fetch(`./images/${microblend.name}.png`)
+                .then((res)=>{
+                  //it means that the microblend is there
+                  $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblend.name}.png');"  data-package='${package}' title='${microblend.name}' data-path='base\\surfaces\\microblends\\${microblend.name}.xbm' > </li>`);
+              }).catch((error)=>{
+                notfetched=notfetched+1;
+                $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/_nopreview.gif');"  data-package='${package}' title='${microblend.name}' data-path='base\\surfaces\\microblends\\${microblend.name}.xbm' > </li>`);
+              })
+            }catch(error){
+              notfetched=notfetched+1;
+              console.warn(error);
+            }
             //Select selector
             $('#mbSelect optgroup[label="core"]').append(`<option data-package="core" data-thumbnail="./images/${microblend.name}.png" value="base\\surfaces\\microblends\\${microblend.name}.xbm">${microblend.name}</option>`);
-            //UI visual list
-            $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblend.name}.png');"  data-package='${package}' title='${microblend.name}' data-path='base\\surfaces\\microblends\\${microblend.name}.xbm' > </li>`);
           })
+
+          var changedVersion = (sessionStorage.getItem("changedversion") === 'true' );
+          //delay to wait all the fetches
+          if (changedVersion=true){
+            setTimeout(()=>{
+              if (notfetched > (maxmicros/2) ){
+                setQuestion("Choom, most of your Microblends in MLSB are missing.<br>Wanna try to res them from the Depot ?","getmblend");
+              }
+            },2000);
+          }
         }
       }
     }
@@ -596,6 +628,7 @@ $(function(){
       });
     }
   }
+
   /*
 	var matChooser = document.getElementById('materialChoser')
   */
@@ -1477,7 +1510,6 @@ $("#layerOpacity").on("input",function(ev){
 
         if ($("#cagethemicroblends li[title='"+MBName+"']")){
           $("#cagethemicroblends li[title='"+MBName+"']").addClass("MBactive");
-          //$("#microdisplay").scrollLeft($("#cagethemicroblends li[title='"+MBName+"']").index()*($("#cagethemicroblends li[data-bs-original-title='"+MBName+"']").width()+2))
           document.getElementById("microdisplay").scrollLeft = ($(`#cagethemicroblends li[title='${MBName}']`).index() * (mblendPrevSize+2))
         }
 
@@ -1490,7 +1522,6 @@ $("#layerOpacity").on("input",function(ev){
           customSelected.addClass("MBactive");
           let customMBDisplay = document.getElementById("cu_mu_display")
           customMBDisplay.scrollLeft = ($(`#cagetheCuMBlends li[data-path='${$(this).val().replaceAll("\\","\\\\")}']`).index() * (mblendPrevSize+2))
-          //$("#cu_mu_display").scrollLeft($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").index()*($("#cagetheCuMBlends li[data-path='"+$(this).val().replace("\\","\\\\")+"']").width()+2))
         }
   		}
 	});
@@ -2828,7 +2859,6 @@ $("#matCompose").click(function(ev){
 const uncookfile = document.getElementById("uncookfile");
 const unCooKonfirm = document.getElementById("unCooKonfirm");
 
-
 uncookfile.addEventListener("close", (e) => {
   if (uncookfile.returnValue == "true") {
     notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel}`);
@@ -3182,4 +3212,21 @@ unCooKonfirm.addEventListener("click", (event) => {
 	});
 
   $("#thacanvas").trigger("changeBg");
+
+  //management of question form
+  $("#winConfirm form").on("submit",function(ev){
+    ev.preventDefault();
+    if (ev.originalEvent?.submitter?.value=="yes"){
+      var actionRequested = ev.originalEvent.submitter.dataset.action
+      switch (actionRequested) {
+        case 'getmblend':
+          thePIT.restoreMicro();
+          break;
+        default:
+          notifyMe(`You requested the action : ${actionRequested}`,false);
+          break;
+      }
+    }
+    document.getElementById("winConfirm").close();
+  })
 });

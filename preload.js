@@ -43,6 +43,9 @@ contextBridge.exposeInMainWorld(
         //return await ipcRenderer.invoke('main:uncookMicroblends');
 				ipcRenderer.send('main:uncookMicroblends');
 			},
+      restoreMicro:()=>{
+        ipcRenderer.send('main:resmBlend');
+      },
       Materialize: async(fullpath)=>{
         ipcRenderer.invoke('main:composerMaterial',fullpath);
       },
@@ -110,9 +113,11 @@ function isValidJSON(text) {
 const updblends = new Event('updMBlends');
 
 ipcRenderer
-  .on('preload:setversion', (event, nuversion) => {
+  .on('preload:setversion', (event, objversion) => {
     //autosetup version from the package
-    document.title = document.title + " - v"+nuversion+" "
+    nuversion = objversion.version;
+    document.title = document.title + " - v"+nuversion+" ";
+    sessionStorage.setItem("changedversion", objversion.changed);
   })
   .on('preload:load_source', (event, jsoncontent, filename = "") => {
     //Load The files in the arguments
