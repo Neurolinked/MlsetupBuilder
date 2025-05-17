@@ -6,12 +6,18 @@ var coreMblends = {};
 
 function setQuestion(text,action=''){
   $("#winConfirm .modal-title").html(text);
-  $("#winConfirm button[value='yes']").data("action",action);
+  $("#winConfirm button[value='yes']").attr("data-action",action);
   const  winConfirm = document.getElementById("winConfirm");
   winConfirm.showModal();
 }
 
-$(window).on('limitLayers',function(ev,index){
+$(window)
+  .on('setQuestion',function(ev){
+    let options = ev.detail;
+    console.log(options);
+    setQuestion(options.message,options.action);
+  })
+  .on('limitLayers',function(ev,index){
   //limit the number of active layers in the interface
   ev.preventDefault();
   $(`.controLayers li`).removeAttr("disabled");
@@ -3218,9 +3224,15 @@ unCooKonfirm.addEventListener("click", (event) => {
     ev.preventDefault();
     if (ev.originalEvent?.submitter?.value=="yes"){
       var actionRequested = ev.originalEvent.submitter.dataset.action
+      console.log(actionRequested);
       switch (actionRequested) {
         case 'getmblend':
           thePIT.restoreMicro();
+          break;
+        case 'uncook':
+          notifyMe(`Trigger the uncook of the file: ${MLSB.TreeD.lastModel}`);
+          thePIT.UnCookSingle(MLSB.TreeD.lastModel.replace(".glb",".mesh").replaceAll("\/","\\").replace("\\base\\","base\\").replaceAll("\\ep1\\","ep1\\"));
+          taskProcessBar();
           break;
         default:
           notifyMe(`You requested the action : ${actionRequested}`,false);

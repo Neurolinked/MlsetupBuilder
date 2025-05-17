@@ -129,6 +129,9 @@ ipcRenderer
     //fire the load events
     document.querySelector("#importFromWkit").click();
   })
+  .on('preload:dialog',(event,options)=>{
+    window.dispatchEvent(new CustomEvent("setQuestion",{detail:options}));
+  })
   .on('preload:request_uncook',(event)=>{
     var dialog = document.getElementById("uncookfile");
     dialog.showModal();

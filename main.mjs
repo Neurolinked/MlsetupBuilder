@@ -877,15 +877,16 @@ ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 								if (whereLoadFrom){
 									event.reply('preload:logEntry', `File not found in: ${whereLoadFrom}`,true)
 								}else{
-									dialog.showErrorBox("File opening error",`The searched file does not exists also in the Depot ${whereLoadFrom}`)
+									//dialog.showErrorBox("File opening error",`The searched file does not exists also in the Depot ${whereLoadFrom}`)
 									event.reply('preload:logEntry', `Missing file - ${whereLoadFrom}`,true)
 								}
 							}
 							contenutofile=""
 							a3dMatModel="";
-							if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
-								mainWindow.webContents.send('preload:request_uncook')
-							}
+							/* if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
+								mainWindow.webContents.send('preload:request_uncook');
+							} */
+							mainWindow.webContents.send('preload:dialog',{message:"File not found, do you want to try uncook the file now ?",action:'uncook'})
 						}else{
 							event.reply('preload:logEntry', 'File found in the Last Mod Folder, Yay!')
 						}
@@ -897,14 +898,21 @@ ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 						a3dMatModel="";
 
 						if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
-							dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
+							//dialog.showErrorBox("File opening error","The searched file does not exists \n"+whereLoadFrom)
+							//dialog.showErrorBox("Meow","The searched file does not exists \n"+whereLoadFrom)
 						}
 						
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 					contenutofile = ""
 					if (whereLoadFrom.match(new RegExp(/.+\.glb$/)) || whereLoadFrom.match(new RegExp(/.+\.Material\.json$/)) ){
-						mainWindow.webContents.send('preload:request_uncook')
+						mainWindow.webContents.send('preload:dialog',
+							{
+								message:"File not found, do you want to try uncook the file now ?",
+								action:'uncook'
+							})
+					}else if (whereLoadFrom.match( new RegExp(/.+masksset.+$/) ) ){
+						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 				}
 			}else{
@@ -953,8 +961,6 @@ ipcMain.on('main:handle_args', (event, payload) => {
 				minor:Number(wkitto.split('.')[1]),
 				patches:Number(wkitto.split('.')[2].split('-')[0])
 			}
-			event.reply('preload:logEntry', 'MlsetupBuilder is working as Wolvenkit plugin')
-			event.reply('preload:wkitBuild',JSON.stringify(objwkitto))
 		}else if (/^\d+\.\d+\.\d+$/.test(wkitto)){
 			 objwkitto={
 				full:wkitto,
@@ -962,8 +968,6 @@ ipcMain.on('main:handle_args', (event, payload) => {
 				minor:Number(wkitto.split('.')[1]),
 				patches:Number(wkitto.split('.')[2])
 			}
-			event.reply('preload:logEntry', 'MlsetupBuilder is working as Wolvenkit plugin')
-			event.reply('preload:wkitBuild',JSON.stringify(objwkitto))
 		}else if (/^\d+\.\d+-rc\d+$/.test(wkitto)){
 			 objwkitto={
 				full:wkitto,
@@ -971,9 +975,16 @@ ipcMain.on('main:handle_args', (event, payload) => {
 				minor:Number(wkitto.split('.')[1].split('-')[0]),
 				patches:0
 			}
-			event.reply('preload:logEntry', 'MlsetupBuilder is working as Wolvenkit plugin')
-			event.reply('preload:wkitBuild',JSON.stringify(objwkitto))
+		}else{
+			objwkitto={
+				full:0,
+				major:0,
+				minor:0,
+				patches:0
+			}
 		}
+		event.reply('preload:logEntry', 'MlsetupBuilder is working as Wolvenkit plugin')
+		event.reply('preload:wkitBuild',JSON.stringify(objwkitto))
 	}
 })
 
