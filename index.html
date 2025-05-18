@@ -601,23 +601,19 @@
     <div class="text-center">
       <ul class="nav nav-pills layer-2 px-2 fs-80" id="textureTabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="masks-tab" data-bs-toggle="tab" data-bs-target="#maskstab" type="button" role="tab" aria-controls="maskstab" aria-selected="false">Masks</button>
+          <button class="nav-link " id="masks-tab" data-bs-toggle="tab" data-bs-target="#maskstab" type="button" role="tab" aria-controls="maskstab" aria-selected="false">Masks</button>
         </li>
-        <!--
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="norm-tab" data-bs-toggle="tab" data-bs-target="#normtab" type="button" role="tab" aria-controls="Normal map" aria-selected="true">Normal map</button>
-        </li>-->
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="uvmap-tab" data-bs-toggle="tab" data-bs-target="#uvmaptab" type="button" role="tab" aria-controls="uvmap map" aria-selected="true">UV map</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="texturegrp-tab" data-bs-toggle="tab" data-bs-target="#textureGroup" type="button" role="tab" aria-controls="Texture Group" aria-selected="true">Textures</button>
+          <button class="nav-link active" id="texturegrp-tab" data-bs-toggle="tab" data-bs-target="#textureGroup" type="button" role="tab" aria-controls="Texture Group" aria-selected="true">Textures</button>
         </li>
       </ul>
       <div class="tab-content" id="OffcanvasInfo">
         <!--<div class="tab-pane fade" id="normtab" role="tabpanel" aria-labelledby="norm-tab">
         </div>-->
-        <div class="tab-pane fade show active " id="maskstab" role="tabpanel" aria-labelledby="masks-tab">
+        <div class="tab-pane fade" id="maskstab" role="tabpanel" aria-labelledby="masks-tab">
           <div class="row no-gutters">
             <div class="col-2" id="panelPain">
               <div class="my-2">
@@ -720,7 +716,7 @@
               </div>
           </div>
         </div>
-        <div class="tab-pane fade" id="textureGroup" role="tabpanel" aria-labelledby="texturegrp-tab">
+        <div class="tab-pane fade show active" id="textureGroup" role="tabpanel" aria-labelledby="texturegrp-tab">
           <div class="row p-0 m-0">
             <div class="col-2 py-2" id="listTextures" ></div>
             <div class="col-10" ><canvas id="texturePlayer"></canvas></div>
@@ -749,20 +745,7 @@
     <input type="text" size="10" class="form-control" loaded="false" id="modelTarget" placeholder="path to the model" readonly />
     <button type="button" class="btn btn-outline-info copyinfo"  data-target="#modelTarget" title="Copy folder path information on glb model"><i class="fas fa-copy"></i></button>
     <button id="modelOpenPath" type="button" class="btn btn-outline-info "   title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
-   <!--  <button id="modelCustomPath" type="button" class="btn btn-outline-primary"   title="Load a model"><i class="fas fa-box-open"></i> Custom</button> -->
   </div>
-  <!-- <div class="input-group input-group-sm border-secondary mb-2">
-    <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-mask"></i></span>
-    <input type="text" class="form-control form-control-sm" id="masksTemplate" placeholder="path to the masks" >
-    <button data-target="#masksTemplate" type="button" class="btn btn-outline-info copyinfo"   title="Copy folder path information for the maskset "><i class="fas fa-copy"></i></button>
-    <button id="masksOpenPath" type="button" class="btn btn-outline-info "   title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
-  </div>
-  <div class="input-group input-group-sm border-secondary">
-    <span class="input-group-text bg-dark text-info border-info"><i class="fas fa-compress-alt"></i></span>
-    <input type="text" class="form-control form-control-sm" id="normTemplate" placeholder="path to the normal map" readonly>
-    <button data-target="#normTemplate" type="button" class="btn btn-outline-info copyinfo"   title="Copy folder path information for normal map "><i class="fas fa-copy"></i></button>
-    <button id="NormOpenPath" type="button" class="btn btn-outline-info "   title="Check the folder content"><i class="fa-solid fa-folder-open"></i></button>
-  </div> -->
 </form>
 <!--Model table-->
     <table id="DataModelsLibrary" class="table bg-layer1 table-striped table-hover table-sm fs-80" style="width:100%">
