@@ -447,11 +447,15 @@ $(function(){
       $("#micropanel").appendTo("#SettingsScroller");
       $("#materialDis").appendTo("#SettingsSummary");
       $("#mb-preview").appendTo("#SettingsSummary");
-      $("#SettingsSummary").append("<div class='cube tint'> </div>");
+      $("#SettingsSummary").append(`<div class='cube tint'> </div>
+        <div id="rc-ColorSelector" style="display:none;">
+          <div></div>
+        </div>`);
       $("#cagecolors span.active").click();
       $("#Mlswitcher").parent().attr('open','');
     }else{
-      $("div.cube.tint").remove()
+      $("div.cube.tint").remove();
+      $("#rc-ColorSelector").remove();
       $("#layer_settings").insertAfter($("#MlEditor"));
       $("#micropanel").insertAfter($("#layer_settings"));
       $("#materialDis").appendTo("#matdisplay > div:nth-child(1)");
@@ -782,6 +786,7 @@ $(function(){
   const contextMenu = document.getElementById("layers-contextual");
   const layerscope = document.querySelector("#layeringsystem");
 
+  //Right click
   $("#layeringsystem li").on("contextmenu",function(event){
     if ($(this).attr("disabled")!="disabled"){
         event.preventDefault();
@@ -1691,6 +1696,7 @@ $("#layerOpacity").on("input",function(ev){
 			$("#Rough_In_values").html('');
 			$("#Norm_Pow_values").html('');
 			$("#cagecolors").html('');
+      $("#rc-ColorSelector div").html("");
       let toodarkClass;
 
       if ($("#BWAdd").is(":checked")){
@@ -1707,7 +1713,7 @@ $("#layerOpacity").on("input",function(ev){
 				if (!tinycolor.isReadable(colorchecking,"#3c454d")){
 					toodarkClass='bg-light';
 				}
-        cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${key}" alt="${key}" >&nbsp;</span>`;
+        cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-oklab="${rgb2lab([value[0],value[1],value[2]])[0]}" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${key}" alt="${key}" >&nbsp;</span>`;
       })
       $("#cagecolors").append(cageColorHtml);
 
@@ -1735,13 +1741,17 @@ $("#layerOpacity").on("input",function(ev){
       return;
     }
 
-    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
+    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors, #rc-ColorSelector > div");
     
     if (!chosenMaterial.colors.list[$("#layerColor").val()]){
-      $("#cagecolors span[title='"+chosenMaterial.colors.default+"']").click()
+      $("#cagecolors span[title='"+chosenMaterial.colors.default+"']").click();
     }
     let ricercacolore = $("#layerColor").val();
-
+    
+    $("#rc-ColorSelector > div span").on("click",function(){
+      //TODO unify events on color select.
+      $(`#cagecolors span[title='${$(this).attr("title")}']`).click();
+    })
     
     if ($("#cagecolors span[title='"+ricercacolore+"']").length>0){
       $("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
@@ -1749,7 +1759,6 @@ $("#layerOpacity").on("input",function(ev){
       notifyMe(`The color ${ricercacolore} isn't present in the material ${materialName}`);
     }
     $("#colorLbFinder").keyup();
-
 
 	});
 
@@ -1766,6 +1775,12 @@ $("#layerOpacity").on("input",function(ev){
 
   $("#colorCleaner").click(function(){$("#colorLbFinder").val("").keyup()});
 
+/*   $("#orderSet").click(function(ev){
+    $("#cagecolors").attr("data-index","oklab")
+    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
+    $("#rc-ColorSelector > div span").sort(sort_color).appendTo("#rc-ColorSelector > div");
+  }) */
+
   $("#colororder").change(function(ev){
     if ($("#colororder").is(":checked")){
       $("#cagecolors").attr("data-index","lum")
@@ -1773,6 +1788,7 @@ $("#layerOpacity").on("input",function(ev){
       $("#cagecolors").attr("data-index","order")
     }
     $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
+    $("#rc-ColorSelector > div span").sort(sort_color).appendTo("#rc-ColorSelector > div");
   });
 
   function sort_color(a, b,attribute = $("#cagecolors").attr("data-index")){
@@ -1865,6 +1881,11 @@ $("#layerOpacity").on("input",function(ev){
         contextMenu.classList.remove("visible");
       }
     }
+     const colorContextual = document.getElementById("rc-ColorSelector");
+    //clicked outside the color selector and color selector visible
+    if ((colorContextual.checkVisibility()) && ( !colorContextual.contains(event.target) )){
+      $("#rc-ColorSelector").hide();
+    }
   });
   
   /*simulate the selection of the null_null color */
@@ -1885,7 +1906,7 @@ $("#layerOpacity").on("input",function(ev){
 		let colorchanger = $(this).attr("title");
     let colorSwatchValue = $(this).css("background-color")
     $("#thacanvas").trigger('changeColor', [colorSwatchValue] ); //will trigger the color change for the selected material
-    $(".tint").prop('style','background-color:'+colorSwatchValue+"!important;");
+    $(".tint").prop('style','background-color: oklab(from '+colorSwatchValue+" l a b) !important;");
 	  let choosed_color = tinycolor(colorSwatchValue);
     if ($(".cube.tint")){
       let dummyCol = choosed_color.toPercentageRgb()
@@ -3240,5 +3261,13 @@ unCooKonfirm.addEventListener("click", (event) => {
       }
     }
     document.getElementById("winConfirm").close();
+  })
+
+  //right click on colors to display the list if the material is loaded
+  $("body").on("contextmenu","div.cube",function(ev){
+    /**
+     * the div with id #rc-ColorSelector will contains the colors
+     */
+    $("#rc-ColorSelector").show();
   })
 });

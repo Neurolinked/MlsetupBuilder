@@ -38,6 +38,7 @@
   <!--hardcoded MaskList DB --><script src="./js/maskList.js" type="text/javascript"></script><!--hardcoded DB -->
 	<!--hardcoded default Model-only  DB --><script src="./js/hairs.js" type="text/javascript"></script><!--hardcoded DB -->
   <!--Tiny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
+  <!--oklab converter--><script src="./js/oklab.js" type="text/javascript" data-source='https://github.com/antimatter15/rgb-lab/tree/master'></script>
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
   <script type="importmap" nonce="Meow">
     {
@@ -474,7 +475,8 @@
       <input type="text" class="form-control" aria-label="Sizing example input" id="colorLbFinder" placeholder="write a label to find the color">
       <button type="button" id="colorCleaner"   title="" class="btn text-warning" data-bs-original-title="Clear the search field"><i class="fa fa-times"></i></button>
       <input type="checkbox" class="btn-check" id="colororder" checked autocomplete="off">
-      <label class="btn btn-outline-warning btn-sm" for="colororder"   data-bs-original-title="Change the visual Order of the swatches" ><i class="fa-solid fa-sort"></i></label>
+      <label class="btn btn-outline-warning" for="colororder"   data-bs-original-title="Change the visual Order of the swatches" ><i class="fa-solid fa-sort"></i></label>
+      <!-- <button class="btn" id="orderSet" ><i class="fa-solid fa-palette"></i></button> -->
       <input type="checkbox" class="btn-check" id="BWAdd" autocomplete="off">
       <label class="btn btn-outline-warning btn-sm" for="BWAdd"   data-bs-original-title="Add Black and white, but you need to install a mod with them (Multilayer Material Xtender has them)"><i class="fa-solid fa-swatchbook"></i></label>
       <button type="button" id="colorReset"   title="" class="btn btn-outline-info" data-bs-original-title="Choose the basic override null_null"><i class="fa-solid fa-eraser"></i></button>
@@ -501,6 +503,18 @@
           </div>
         </div>
       </div>
+      <div id="CustMicroblendsGallery" class="my-2">
+          <div class="d-flex justify-content-between">
+            <span class=" d-block ps-2" >Custom &micro;blends </span>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
+              <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye-slash"></i></button>
+              <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
+            </div>
+          </div>
+          <div id="cu_mu_display" class="layer-2 mx-2">
+            <div id="cagetheCuMBlends" ></div>
+          </div>
+        </div>
       <details open>
         <summary class="bg-normal text-black">&micro;blends Parameters</summary>
         <div class="p-2">
@@ -538,18 +552,7 @@
             <button class="btn btn-normal rounded-0 btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
           </div>
         </div>
-        <div id="CustMicroblendsGallery" class="my-2">
-          <div class="d-flex justify-content-between">
-            <span class=" d-block ps-2" >Custom &micro;blends </span>
-            <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
-              <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye-slash"></i></button>
-              <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
-            </div>
-          </div>
-          <div id="cu_mu_display" class="layer-2 mx-2">
-            <div id="cagetheCuMBlends" ></div>
-          </div>
-        </div>
+        
         <div class="m-2">
           <span class="w-100 rounded-0 p-2" >&micro;blend preview tool</span>
           <div class='row gx-0'>
