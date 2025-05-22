@@ -56,9 +56,12 @@ class MLSBEditor {
 
     addMlsetup(mlsetup){
         try{
-            console.log(mlsetup instanceof Mlsetup)
-            this.MlSetups.push(mlsetup);
-            return true;
+            if (mlsetup instanceof Mlsetup){
+                this.MlSetups.push(mlsetup);
+                return true;
+            }else{
+                throw new Error(`Not a valid mlseutp object`);
+            }
         }catch(error){
             console.log(error);
         }
@@ -73,5 +76,27 @@ class MLSBEditor {
             console.log(`Removing mlsetup from mlsetup manager: ${error}`);
         }
         return false
+    }
+
+    updMlsetup(index,mlsetup,layerIndex){
+        try {
+            if (mlsetup instanceof Mlsetup){
+                if ((0 <= index) && (index < this.MlSetups.length)){
+                    if (this.MlSetups[index].layers[layerIndex] instanceof Layer){
+                        this.Mlsetups[index].layers[layerIndex] = mlsetup.layers[layerIndex];
+                        return true;
+                    }else{
+                        throw new Error(`layer,${layerindex} is not a layer object`);        
+                    }
+                }else{
+                    throw new Error(`Out of actual loaded mlsetups (${this.MlSetups.length})`);    
+                }
+            }else{
+                throw new Error(`Not a mlsetup object`);
+            }
+        } catch (error) {
+            console.log(`Removing mlsetup from mlsetup manager: ${error}`);
+        }
+        return false;
     }
 }

@@ -2091,6 +2091,7 @@ $("#layerRandomizer").click(function(){
 			$("#layeringsystem li.active").removeClass("notsync");
       normalizeNumbers();
       let livelloeditato =$("#layeringsystem li.active");
+
       livelloeditato.attr("data-opacity",$("#layerOpacity").val());//to activate/deactivate Opacity in layers display
       livelloeditato.attr("data-labels","("+$("#layerColor").val()+") "+ String($("#matInput").val()).replace(/^.*[\\\/]/, '').split('.')[0]);
       livelloeditato.data("material",$("#matInput").val());
@@ -2111,12 +2112,34 @@ $("#layerRandomizer").click(function(){
       livelloeditato.data("mboffu",$("#mbOffU").val());
       livelloeditato.data("mboffv",$("#mbOffV").val());
       semaphoreCLKmBlend=true;
-      
-      mLsetup.Layers[layerIndex].tiles = parseFloat($("#layerTile").val());
-      mLsetup.Layers[layerIndex].offsetU = parseFloat($("#layerOffU").val());
-      mLsetup.Layers[layerIndex].offsetV = parseFloat($("#layerOffV").val());
-      mLsetup.Layers[layerIndex].microblend.offset.h = parseFloat($("#mbOffU").val());
-      mLsetup.Layers[layerIndex].microblend.offset.v = parseFloat($("#mbOffV").val());
+
+      //Last edits
+      let tempLayer = new Layer();
+      tempLayer.opacity = parseFloat($("#layerOpacity").val());
+      tempLayer.material = $("#matInput").val();
+      tempLayer.tiles = parseFloat($("#layerTile").val());
+      tempLayer.color = $("#layerColor").val();
+      tempLayer.normal = String($("#layerNormal").val());
+      tempLayer.roughnessIn = String($("#layerRoughIn").val());
+      tempLayer.roughnessOut = String($("#layerRoughOut").val());
+      tempLayer.metalIn = String($("#layerMetalIn").val());
+      tempLayer.metalOut = String($("#layerMetalOut").val());
+      tempLayer.offsetU = parseFloat($("#layerOffU").val());
+      tempLayer.offsetV = parseFloat($("#layerOffV").val());
+      tempLayer.microblend.file = $("#mbInput").val();
+      tempLayer.microblend.tiles = parseFloat($("#mbTile").val());
+      tempLayer.microblend.contrast = parseFloat($("#mbCont").val());
+      tempLayer.microblend.normal = parseFloat($("#mbNorm").val());
+      tempLayer.microblend.offset.h = parseFloat($("#mbOffU").val());
+      tempLayer.microblend.offset.v = parseFloat($("#mbOffV").val());
+
+      //offset changes
+      mLsetup.Layers[layerIndex] = tempLayer;
+      let activeMLTab = $("#MlSetupsList span.text-bg-secondary").index()
+      if (activeMLTab>0){
+        MLSB.updMlsetup(activeMLTab-1,mLsetup,layerIndex);
+      }
+      delete tempLayer;
     }else{
       notifyMe("NO level selected, please redo then layer Edit operation with a selected layer on");
     }
