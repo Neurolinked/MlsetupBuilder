@@ -72,3 +72,64 @@
     padding: 2px;
   }
   #layeringsystem li::after {content: ' ' attr(data-labels);}
+
+#SettingsSummary div.cube{
+  anchor-name: --colorPreview;
+  position: relative;
+  width:120px;
+  height:120px!important;
+  margin:4px;
+  border: 1px dashed var(--bs-primary);
+}
+
+#SettingsSummary div.cube.tint::after {
+  content: attr(data-color);
+  color: white;
+  display: block;
+  text-shadow:0 0 0.2rem #000, 0 0 0.2rem #000, 0 0 0.2rem #000,0 0 0.2rem #000;
+  word-spacing: 100vw;
+  height: 120px!important;
+  text-align: center;
+  line-height: 30px;
+  padding-top: 10px;
+}
+
+#rc-ColorSelector{
+    position:absolute;
+    position-anchor: --colorPreview;
+    width: calc(calc(18 * var(--swatch-size)) + 49px);
+    max-height: calc(calc(25 * var(--swatch-size)) + 56px);
+    background-color: var(  --bs-layer0);
+    top:anchor(top);
+    right:anchor(left);
+    z-index: 2000;
+    border:1px solid var(--bs-layer1);
+    margin-right: 2px;
+    overflow-y: scroll;
+    box-shadow: -.5rem 0 1rem .5rem #30000060;
+    
+    &::-webkit-scrollbar{
+        width:10px;
+        background: #3f6c8180;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #3f6c81;
+        border: 1px solid rgb(129 241 255);
+    }
+
+    & > div{
+        display:flex;
+        flex-direction:row-reverse;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        width:calc(calc(18 * var(--swatch-size)) + 36px);
+        min-height: calc(5 * var(--swatch-size));
+        max-height:calc(calc(25 * var(--swatch-size)) + 50px);
+
+        & span{
+            width:var(--swatch-size);
+            height: var(--swatch-size);
+            border:1px solid #00000010;
+        }
+    }
+}
