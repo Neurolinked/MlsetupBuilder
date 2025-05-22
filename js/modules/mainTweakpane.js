@@ -225,7 +225,6 @@ defPromise.then((valuesDEF)=>{
 });
 
 tweakCleanMeshes()
-console.log(smeshtab)
 
 function tweakCleanMeshes(){
   //model submeshes
