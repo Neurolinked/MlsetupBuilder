@@ -142,7 +142,7 @@ const bc = new BroadcastChannel("streaming"); //communication between opened int
 bc.onmessage = (event)=>{ console.log(event.data); }
 
 var mLsetup = new Mlsetup();
-var openMlsetup = [];
+/* var openMlsetup = []; */
 
 /*Proxy function to manage nested objects*/
 const createProxy = (obj,onSet)=>{
@@ -2157,6 +2157,7 @@ function passTheMlsetup(textContent=""){
       mls_content = JSON.parse(textContent,mlsContRevive);
       mLsetup = new Mlsetup();
       mLsetup.import(mls_content);
+
       if (PARAMS.importSkip){
         $("#TheMagicIsHere").click();
       }else{
@@ -2289,61 +2290,76 @@ function disableLayers(totalLayers){
   }
 }
 
+function UIMlLayer(mlLayer){
+  $('#layeringsystem li').eq(k).data({
+    mattile:mlLayer.tiles,
+    labels:'('+mlLayer.color+') '+ String(mlLayer.material).replace(/^.*[\\\/]/, '').split('.')[0],
+    material:mlLayer.material,
+    opacity:mlLayer.opacity,
+    color:mlLayer.color,
+    normal:mlLayer.normal,
+    roughin:mlLayer.roughnessIn,
+    roughout:mlLayer.roughnessOut,
+    metalin:mlLayer.metalIn,
+    metalout:mlLayer.metalOut,
+    offsetU:mlLayer.offsetU,
+    offsetV:mlLayer.offsetV,
+    mblend:mlLayer.microblend.file,
+    mbtile:mlLayer.microblend.tiles,
+    mbcontrast:mlLayer.microblend.contrast,
+    mbnormal:mlLayer.microblend.normal,
+    mboffu:mlLayer.microblend.offset.h,
+    mboffv:mlLayer.microblend.offset.v
+  });
+  $('#layeringsystem li').eq(k).attr({
+    "data-mattile":mlLayer.tiles,
+    "data-labels":'('+mlLayer.color+') '+ String(mlLayer.material).replace(/^.*[\\\/]/, '').split('.')[0],
+    "data-material":mlLayer.material,
+    "data-opacity":mlLayer.opacity,
+    "data-color":mlLayer.color,
+    "data-normal":mlLayer.normal,
+    "data-roughin":mlLayer.roughnessIn,
+    "data-roughout":mlLayer.roughnessOut,
+    "data-metalin":mlLayer.metalIn,
+    "data-metalout":mlLayer.metalOut,
+    "data-offsetU":mlLayer.offsetU,
+    "data-offsetV":mlLayer.offsetV,
+    "data-mblend":mlLayer.microblend.file,
+    "data-mbtile":mlLayer.microblend.tiles,
+    "data-mbcontrast":mlLayer.microblend.contrast,
+    "data-mbnormal":mlLayer.microblend.normal,
+    "data-mboffu":mlLayer.microblend.offset.h,
+    "data-mboffv":mlLayer.microblend.offset.v
+  });
+}
+
+function convLayersMlsetup(mlsetupTarget){
+  if (mlsetupTarget instanceof Mlsetup){
+    var size = mlsetupTarget.Layers.length;
+    for(k=0;k<size;k++){
+      UIMlLayer(mlsetupTarget.Layers[k]);
+    }
+  }else{
+    notifyMe(`Impossible to convert a non mlsetup object`);
+  }
+}
+
 //----Button to load
 $("#TheMagicIsHere").click(function(){
     off_MLSetup.hide();
     //Layer Cleanup for disabled layers
     //disabledLayers = 20 - mLsetup.Layers.length;
     disableLayers(20 - mLsetup.Layers.length);
-    //Layer data build
-    for(k=0;k<mLsetup.Layers.length;k++){
-      $('#layeringsystem li').eq(k).data({
-        mattile:mLsetup.Layers[k].tiles,
-        labels:'('+mLsetup.Layers[k].color+') '+ String(mLsetup.Layers[k].material).replace(/^.*[\\\/]/, '').split('.')[0],
-        material:mLsetup.Layers[k].material,
-        opacity:mLsetup.Layers[k].opacity,
-        color:mLsetup.Layers[k].color,
-        normal:mLsetup.Layers[k].normal,
-        roughin:mLsetup.Layers[k].roughnessIn,
-        roughout:mLsetup.Layers[k].roughnessOut,
-        metalin:mLsetup.Layers[k].metalIn,
-        metalout:mLsetup.Layers[k].metalOut,
-        offsetU:mLsetup.Layers[k].offsetU,
-        offsetV:mLsetup.Layers[k].offsetV,
-        mblend:mLsetup.Layers[k].microblend.file,
-        mbtile:mLsetup.Layers[k].microblend.tiles,
-        mbcontrast:mLsetup.Layers[k].microblend.contrast,
-        mbnormal:mLsetup.Layers[k].microblend.normal,
-        mboffu:mLsetup.Layers[k].microblend.offset.h,
-        mboffv:mLsetup.Layers[k].microblend.offset.v
-      });
-      $('#layeringsystem li').eq(k).attr({
-        "data-mattile":mLsetup.Layers[k].tiles,
-        "data-labels":'('+mLsetup.Layers[k].color+') '+ String(mLsetup.Layers[k].material).replace(/^.*[\\\/]/, '').split('.')[0],
-        "data-material":mLsetup.Layers[k].material,
-        "data-opacity":mLsetup.Layers[k].opacity,
-        "data-color":mLsetup.Layers[k].color,
-        "data-normal":mLsetup.Layers[k].normal,
-        "data-roughin":mLsetup.Layers[k].roughnessIn,
-        "data-roughout":mLsetup.Layers[k].roughnessOut,
-        "data-metalin":mLsetup.Layers[k].metalIn,
-        "data-metalout":mLsetup.Layers[k].metalOut,
-        "data-offsetU":mLsetup.Layers[k].offsetU,
-        "data-offsetV":mLsetup.Layers[k].offsetV,
-        "data-mblend":mLsetup.Layers[k].microblend.file,
-        "data-mbtile":mLsetup.Layers[k].microblend.tiles,
-        "data-mbcontrast":mLsetup.Layers[k].microblend.contrast,
-        "data-mbnormal":mLsetup.Layers[k].microblend.normal,
-        "data-mboffu":mLsetup.Layers[k].microblend.offset.h,
-        "data-mboffv":mLsetup.Layers[k].microblend.offset.v
-      });
-    }
+    //Convert mlsetup Layers to UI layers
+    convLayersMlsetup(mLsetup);
     var nomefile  = $("#importTech").val()=="" ? $('#nametoexport').val() : $("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1);
     //change the name on file imported
     document.title = document.title.split('[')[0]+" ["+nomefile+"]";
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
-    openMlsetup.push(mLsetup);
+    /* openMlsetup.push(mLsetup); */
+
+    MLSB.addMlsetup(mLsetup);
 
     let UInomefile = nomefile.split("\\").reverse()[0];
     $("#MlSetupsList").trigger("addBlade",UInomefile);
@@ -3111,13 +3127,18 @@ unCooKonfirm.addEventListener("click", (event) => {
     ev.preventDefault();
     //TODO Switch setup
     $("#MlSetupsList").trigger("switchBlade",$(ev.target).index());
-    console.log(openMlsetup[$(this).index() - 1])
+   /*  console.log(openMlsetup[$(this).index() - 1]) */
   }).on('click',"#MlSetupsList > span > .btn-close[data-bs-dismiss='badge']",function(ev){
     ev.preventDefault();
     //remove the mlsetup from the list
     let indexSetup = ($(this).parent().index() - 1);
-    openMlsetup.splice(indexSetup,1);
+    /* openMlsetup.splice(indexSetup,1); */
+    
+    mlsetup = MLSB.getMlsetup(indexSetup);
+
+    MLSB.delMlsetup(indexSetup);
     //TODO close the file and delete the mlsetup entity
+
     $(this).parent().remove();
     //Change of blade
     $("#MlSetupsList").trigger("switchBlade",0);
@@ -3136,7 +3157,9 @@ unCooKonfirm.addEventListener("click", (event) => {
     if (index==0){
       $("body #MlSetupsList > span").eq(0).removeClass("text-bg-layer2").addClass("text-bg-active");
     }else{
-      mLsetup = openMlsetup[index-1];
+      //mLsetup = openMlsetup[index-1];
+      mLsetup = MLSB.getMlsetup(index-1);
+      convLayersMlsetup(mLsetup);
       $("body #MlSetupsList > span").eq(0).removeClass("text-bg-active").addClass("text-bg-layer2");
       $("body #MlSetupsList > span.text-bg-dark").eq(index -1).removeClass("text-bg-dark").addClass("text-bg-secondary");
     }

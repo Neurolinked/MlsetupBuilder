@@ -7,6 +7,7 @@
  * @property {object} Editor.Clone - information container manage cloning
  * @property {object} Editor.Clone.layerProperty - Class Layer information to clone to
  * @property {object} Materials - content of the material DB
+ * @property {array} MlSetups - array of the current loaded mlsetups
  * @property {object} TreeD - object that contains property about the 3d environment
  * @property {string} TreeD.lastModel - path of the latest model file requested to be loaded
  * @property {string} TreeD.appearance - the appearance the editor is working on
@@ -35,6 +36,8 @@ class MLSBEditor {
     }
 
     Materials = {}
+
+    MlSetups = []
     /**
      * Reset the params to the default state
      */
@@ -45,5 +48,30 @@ class MLSBEditor {
     getMaterial(){
         let searchedMaterial = this.Materials[this.TreeD.lastMaterial] ? this.Materials[this.TreeD.lastMaterial] : false 
             return searchedMaterial;
+    }
+
+    getMlsetup(index){
+        return this.MlSetups[index];
+    }
+
+    addMlsetup(mlsetup){
+        try{
+            console.log(mlsetup instanceof Mlsetup)
+            this.MlSetups.push(mlsetup);
+            return true;
+        }catch(error){
+            console.log(error);
+        }
+        return false;
+    }
+
+    delMlsetup(index,clear=false){
+        try{
+            this.MlSetups.splice(index,(clear==false ? 1: Infinity ))
+            return true
+        }catch(error){
+            console.log(`Removing mlsetup from mlsetup manager: ${error}`);
+        }
+        return false
     }
 }
