@@ -282,7 +282,7 @@ async function nubuildMB(microblendObj){
             pkgName = package.name;
             pkgList.innerHTML+="<option value='"+pkgName+"' />";
             $("#mbSelect").append("<optgroup label='"+pkgName+"'>");
-            $("#mbHierarchy").append("<ul class='list-group list-group-flush' data-package='"+pkgName+"' ></ul>");
+            $("#mbHierarchy").append(`<details open><summary>${pkgName}</summary><ul class='list-group list-group-flush' data-package='${pkgName}' ></ul></details>`);
         }
         if (package.hasOwnProperty("microblends")){
 

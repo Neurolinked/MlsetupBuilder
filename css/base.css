@@ -444,8 +444,16 @@ span.choose.active{border-color:var(--active-sel);}
 
 #KofiSupportPage{margin:1em 0;cursor: pointer;}
 
-#mbHierarchy ul::before{content:'package: 'attr(data-package);background-color: var(--layer-9);color:var(--bs-warning);padding:.2rem;}
+/* #mbHierarchy ul::before{content:'package: 'attr(data-package);background-color: var(--layer-9);color:var(--bs-warning);padding:.2rem;} */
 #mbHierarchy ul li{background-color: var(--layer-2)!important;}
+#mbHierarchy ul li::after {
+    display: block;
+    content: attr(data-path);
+    font-style: italic;
+    /* color: white; */
+    padding-left: 1rem;
+    opacity: .5;
+}
 #mbHierarchy{max-height:600px;overflow-y: scroll;}
 #mbLogPackager::-webkit-scrollbar,
 #mblendUserManager::-webkit-scrollbar,
