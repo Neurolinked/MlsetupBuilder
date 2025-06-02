@@ -236,19 +236,16 @@ function tweakCleanMeshes(){
 }
 function tweakAddMeshes(name){
   smeshtab.addBinding(PARAMS.listSubmeshes,`${name}`).on('change',(ev) => {
-
-    /* $("#thacanvas").trigger('toggleMesh',[nome,value]); */
+    $("#thacanvas").trigger('toggleMesh',[name,ev.value]);
   });
 }
 
 document.getElementById('tweakContainer')
   .addEventListener('cleanMeshes',function(ev){
-    //console.log(ev)
     tweakCleanMeshes()
 })
 document.getElementById('tweakContainer')
   .addEventListener('addMeshes',function(ev){
-    //console.log(ev);
     tweakAddMeshes(ev.detail);
     panel.refresh();
 })
