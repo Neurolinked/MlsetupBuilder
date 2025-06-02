@@ -1617,7 +1617,6 @@ $("#layerOpacity").on("input",function(ev){
           break;
         default:
           colormaterial = MLSB.Materials[materialName].colors.list[$(this).data('color')]
-          //colormaterial = ml_libraries[materialName].overrides.colorScale.filter(e => e.n == $(this).data('color'))[0];
           break;
       }
       $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
