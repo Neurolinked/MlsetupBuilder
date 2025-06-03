@@ -35,12 +35,22 @@ class MLSBEditor {
         shiftPress : false
     }
 
+    UI = {
+        ready:false
+    }
+
     Materials = {}
 
     MlSetups = []
     /**
      * Reset the params to the default state
      */
+    initialized(){
+        this.UI.ready = true
+    }
+    isReady(){
+        return this.UI.ready;
+    }
     reset(){
         this.Editor.layerSelected = 0;
         this.TreeD.model = {bones:false};
