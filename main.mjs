@@ -141,6 +141,55 @@ const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit
 const preferences = new Store({schema,
 	beforeEachMigration: (store, context) => {
 		log.info(`[main-config] migrate from ${context.fromVersion} → ${context.toVersion}`)
+		if (!store.has("editorCfg")){
+			store.set({
+				editorCfg:{
+					layer:{
+						tiles:{
+							default: 150.0,
+							value: 150.0
+						}
+					},
+					mblend:{
+						tiles:{
+							default: 150.0,
+							value: 150.0
+						},
+						contrast:{
+							default: 1.0,
+							value: 1.0
+						},
+						normal:{
+							default: 2.0,
+							value:2.0
+						}
+					},
+					skipImport:false,
+					switchTransparency:true
+				}
+			});
+		}
+		if (!store.has("editorCfg.switchTransparency")){
+			store.set('editorCfg.switchTransparency',true);
+		}
+		if (!store.has("editorCfg.skipImport")){
+			store.set('editorCfg.skipImport',false);
+		}
+		if (store.has("pathfix")){
+			store.delete('pathfix')
+		}
+		if (store.has("depot")){
+			store.delete("depot");
+		}
+		if (store.has("game")){
+			store.delete("game")
+		}
+		if (store.has("unbundle")){
+			store.delete("unbundle")
+		}
+		if (store.has("wcli")){
+			store.delete("wcli")
+		}
 		itMigrate = true;
 	},
 	migrations: {
@@ -210,18 +259,7 @@ const preferences = new Store({schema,
 						wcli: store.get('wcli')
 					}
 				})
-			if (store.has("depot")){
-				store.delete("depot");
-			}
-			if (store.has("game")){
-				store.delete("game")
-			}
-			if (store.has("unbundle")){
-				store.delete("unbundle")
-			}
-			if (store.has("wcli")){
-				store.delete("wcli")
-			}
+			
 		},
 		'1.6.8-beta8': store=>{
 			store.set('editorCfg.skipImport',false);
