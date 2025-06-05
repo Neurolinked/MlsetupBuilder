@@ -526,7 +526,7 @@ $("#takeashot").click(function(ev){
 
 
 function updateUvTransform() {
-	console.log(matrixTransform);
+	if (PARAMS.textureDebug){console.log(matrixTransform)}
 	let selected = activeMLayer();
 	if (materialStack[selected].map?.isTexture){
 		materialStack[selected].map.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
@@ -994,7 +994,7 @@ async function _getFileContent(textureObj){
  *  * @param {Number} TextureStackIndex index of the texture in textureStack array
  * @returns nothing
  */
-function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
+function  genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 	return new Promise((resolve, reject)=>{
 		try {
 			var THREEFormat = THREE.RGBAFormat //Default format for PNGs
@@ -1348,9 +1348,11 @@ function codeMaterials(materialEntry,_materialName){
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone()
 
-			Mlayer.name= _materialName;
-			/* Mlayer.defines.MLSBInspect = false;
+			Mlayer.name = _materialName;
+			Mlayer.defines.MLSBInspect = false;
 			Mlayer.onBeforeCompile = (shader)=>{
+				shader.uniforms.detailNormalMap = {value:FlatNORM};
+				shader.uniforms.detailNormalScale = {value:new THREE.Vector2(1,1)};
 				shader.fragmentShader = shader.fragmentShader.replace(
 					`#include <color_fragment>`,
 					`#include <color_fragment>
@@ -1361,8 +1363,16 @@ function codeMaterials(materialEntry,_materialName){
 						diffuseColor = diffuseColor;
 					#endif
 `)
-				console.log(shader.fragmentShader);
-			} */
+					console.log(shader.uniforms)
+				/* shader.fragmentShader = shader.fragmentShader.replace(
+					`#include <normal_fragment_maps>`,
+					`#include <normal_fragment_maps>
+						uniform sampler2D detailNormalMap;
+						uniform vec2 detailNormalScale;
+					`
+				); */
+				//console.log(shader.fragmentShader);
+			}
 			Mlayer.userData={name:_materialName,type:'multilayer'};
 
 			if (PARAMS.switchTransparency){
@@ -1720,7 +1730,6 @@ function calcOffset(tiles,h,v){
 $("#thacanvas").on("mouseover",function(event){
 	//is shift is pressed change the material, if it's release put it back
 	if (MLSB.Key.shiftPress){
-		
 	}
 }).on("mouseout",function(event){
 	//only when mouseout occur
@@ -1902,7 +1911,6 @@ $("#thacanvas").on("mouseover",function(event){
 				let C_metal = CryptoJS.MD5(layerMaterial.metal.texture).toString();
 				
 				if (myTex?.length==1){
-					console.log(layerMaterial.metal.texture);
 					//there was it, map it
 					materialStack[selected].metalnessMap = textureStack[C_metal];
 					
@@ -1940,6 +1948,33 @@ $("#thacanvas").on("mouseover",function(event){
 				materialStack[selected].metalnessMap.needsUpdate =true
 			}
 		}
+		/**normal management */
+		/* 
+		// load the material normal
+		if (layerMaterial.hasOwnProperty('normal')) {
+			var myTex = textureDock.filter(elm=>elm.file==layerMaterial.normal.texture);
+			let C_normal = CryptoJS.MD5(layerMaterial.normal.texture).toString();
+
+			if (myTex?.length==1){
+				console.warn(`Found texture, still not loaded`);
+			}else{
+				let test = retDefTexture(layerMaterial.normal.texture,selected,"normal");
+				let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.normal.texture)
+				var texProm = _getFileContent(textureDock[tInd])
+				.then((texturePromised)=>{
+					
+					genDataTexture(texturePromised,textureDock[tInd],C_normal).then((response)=>{
+						if (PARAMS.textureDebug){console.log(textureStack[C_normal])}
+					}).catch((err)=>{
+						notifyMe(`genDataTexture: ${error}`);
+					});
+				}).catch((error)=>{
+					if (PARAMS.textureDebug){console.log(layerMaterial.normal.texture)}
+					notifyMe(error.message);
+					console.error('error #%d',error)
+				})
+			}
+		} */
 	}
 }).on("texOffset",function(ev,source='layer'){
 	var tileMul = parseFloat($("#layerTile").prev("[data-mul]").data("mul"))
