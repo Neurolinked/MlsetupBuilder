@@ -159,6 +159,9 @@ EDAdvSetup.addBinding(PARAMS, 'importSkip',{label:'Skip Import Preview'}).on('ch
 
 EDAdvSetup.addBinding(PARAMS, 'modelDebug',{label:'Model debug'}).on('change',(ev)=>{});
 EDAdvSetup.addBinding(PARAMS, 'textureDebug',{label:'Texture debug'}).on('change',(ev)=>{});
+EDAdvSetup.addBinding(PARAMS, 'forceMaterialHighlight',{label:'Material highlight'}).on('change',(ev)=>{
+  $("#thacanvas").trigger('matHighlight',[PARAMS.forceMaterialHighlight]);
+});
 EDAdvSetup.addBlade({view: 'separator'});
 EDAdvSetup.addBinding(PARAMS, 'showImgOffSet',{label:'Export render with offsets data'}).on('change',(ev)=>{});
 

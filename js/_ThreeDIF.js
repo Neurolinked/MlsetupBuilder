@@ -1363,7 +1363,7 @@ function codeMaterials(materialEntry,_materialName){
 						diffuseColor = diffuseColor;
 					#endif
 `)
-					console.log(shader.uniforms)
+					/* console.log(shader.uniforms) */
 				/* shader.fragmentShader = shader.fragmentShader.replace(
 					`#include <normal_fragment_maps>`,
 					`#include <normal_fragment_maps>
@@ -2090,6 +2090,12 @@ $("#thacanvas").on("mouseover",function(event){
 		}
 	}catch(wrong){
 		notifyMe(wrong);
+	}
+}).on('matHighlight',function(ev,highlight){
+	let selected = activeMLayer();
+	if (selected!=undefined){
+		materialStack[selected].defines.MLSBInspect = highlight;
+		materialStack[selected].needsUpdate = true;
 	}
 }).on('hairColorSwitch',function(ev,profile){
 	console.log(profile)
