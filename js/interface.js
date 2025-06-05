@@ -1390,7 +1390,7 @@ $("#layerOpacity").on("input",function(ev){
       toggleable: true
     },
     initComplete: function(settings, json){
-
+      let loadingwin = document.getElementById("Loading")
       /*
       PouchDB way of getting docs
       */
@@ -1411,11 +1411,14 @@ $("#layerOpacity").on("input",function(ev){
             })
           })
           CPModels.draw(true);
-          document.getElementById("Loading").close();
         }
       }).catch((error)=>{
         notifyMe(error);
+      }).finally(()=>{
+        loadingwin.close();
+        MLSB.initialized();
       });
+      
       notifyMe("Mesh linked :"+CPModels.data().length,false);
       $(".dt-buttons button" ).removeClass("dt-button");
       
@@ -1428,7 +1431,7 @@ $("#layerOpacity").on("input",function(ev){
             lastSelect.dispatchEvent(new Event('change'));  
           }, 300);
         });
-      },3000)
+      },4000)
       /* CPModels.searchBuilder.container().getElementsByClassName('dtsb-add')[0].addEventListener("click", function(ev){
         let select =document.querySelector('dtsb-data')[-1];
         console.log(select);
@@ -1602,6 +1605,7 @@ $("#layerOpacity").on("input",function(ev){
   });
 
   $("#layeringsystem li").mouseenter(function (e) {
+    if (!MLSB.isReady()){return false;}
     if ((parseFloat($(this).data('opacity')) > 0) && ($(this).attr("disabled") == undefined)) {
       let materialPath = $(this).data('material');
       let materialName = materialPath.split("\\").reverse()[0].split(".")[0]
@@ -1616,7 +1620,9 @@ $("#layerOpacity").on("input",function(ev){
           colormaterial = {v:[255,255,255] };
           break;
         default:
-          colormaterial = MLSB.Materials[materialName].colors.list[$(this).data('color')]
+          if ((MLSB.Materials[materialName]?.colors)!=undefined){
+            colormaterial = MLSB.Materials[materialName].colors.list[$(this).data('color')]
+          }
           break;
       }
       $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
@@ -2398,14 +2404,18 @@ $("select[name='exportVersion']").change(function(){
 
 //3 export versions for Wkit
 $(".xportJSON").click(function(){
+  
   ver = Number($("select[name='exportVersion']").val());
 
-  let nomefile = 'commonlayer.mlsetup.json';
-  //check if there is already a chosed Names
-  if (String($("#nametoexport").val()).trim()!==''){
-    nomefile = String($("#nametoexport").val()).split('.')[0].replace(/\W/g, '').toLowerCase();
-  }
+  let nomefile =  mLsetup.getFile();
 
+  //check if there is already a chosed Names
+  if (nomefile==""){
+    if (String($("#nametoexport").val()).trim()!==''){
+      nomefile = String($("#nametoexport").val()).split('\\').reverse()[0].split('.')[0].replace(/\W/g, '').toLowerCase();
+    }
+  }
+  
   if ($("#layeringsystem li").length > 0 ){
     var jsonDate = (new Date()).toJSON();
     var preamble, ratiovalue, ratioIVal, useNormal, closing, jsonbody = "";
