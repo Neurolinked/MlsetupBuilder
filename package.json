@@ -1,7 +1,7 @@
 {
   "name": "mlsetupbuilder",
   "productName": "MlsetupBuilder",
-  "version": "1.6.8-rc2",
+  "version": "1.6.8-rc3",
   "description": "MlSetupBuilder",
   "main": "main.mjs",
   "scripts": {
