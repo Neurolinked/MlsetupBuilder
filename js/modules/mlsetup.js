@@ -327,7 +327,20 @@ class Mlsetup {
 		}
 		return JSON.stringify(dummyObj,null,2);
 	}
-	
+
+	getPath(){
+		return this.#file;
+	}
+	getFile(){
+		var filename = "";
+		if (this.#file!=""){
+			filename = String(this.#file).split("\\").reverse()[0].split(".")[0]
+			console.log(filename)
+		}else{
+			return "commonlayer";
+		}
+		return filename;
+	}
 	//recheck all the format types 
 	matchTypes(){
 		console.log("not Now");
