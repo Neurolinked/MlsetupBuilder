@@ -1,16 +1,18 @@
 $(function(){
 	var configDepot
-	var completeBuffer
+	var completeBuffer, materialBuffer
 
-	let pDepot = thePIT.ReadConfig('depot');
+	let pDepot = thePIT.ReadConfig('paths.depot');
 
 	pDepot.then((result)=>{
 		configDepot = result
+		console.log(result);
+		materialBuffer = new MaterialBuffer(configDepot)
 	}).catch((error) => {
-    console.error(`Error after reading the configuration: ${error.message}`);
-  })
+		console.error(`Error after reading the configuration: ${error.message}`);
+	})
 
-	var materialBuffer = new MaterialBuffer(configDepot)
+	/* var materialBuffer = new MaterialBuffer(configDepot) */
 
 	var templateLibrary
 	//__________________________________________________________________
@@ -163,7 +165,7 @@ $(function(){
 
 	function UItranslateMaterial(content){
 		materialBuffer = null;
-		materialBuffer = new MaterialBuffer();
+		materialBuffer = new MaterialBuffer(configDepot);
 		materialBuffer.import(content);
 
 		$("#Material").html(materialBuffer.codeMaterial());
@@ -203,10 +205,10 @@ $(function(){
 			materialBuffer.Materials.splice(el,1);
 		})
 		//cleaned Up materials entry, then templates, in between you get the textures that need to be eliminated
-		var exportThoseTemplate = Array.from(new Set(materialBuffer.Materials.map(el => el.MaterialTemplate)))
-		bufferProduced.MaterialTemplates = materialBuffer.MaterialTemplates.filter(el => exportThoseTemplate.indexOf(el.Name) >= 0)
+/* 		var exportThoseTemplate = Array.from(new Set(materialBuffer.Materials.map(el => el.MaterialTemplate)))
+		bufferProduced.MaterialTemplates = materialBuffer.MaterialTemplates.filter(el => exportThoseTemplate.indexOf(el.Name) >= 0) */
 		//console.log(bufferProduced.MaterialTemplates)
-		thePIT.Export(JSON.stringify(materialBuffer,null, "  "))
+		thePIT.Export(materialBuffer.export());
 	});
 
 	$("#packItBack").click(function(){
