@@ -1896,6 +1896,27 @@ $("#layerOpacity").on("input",function(ev){
   /*simulate the selection of the null_null color */
   $("#colorReset").click(function(){
     $("body #cagecolors span[title='null_null']").click();
+  });
+  $("#colorWkitExport").click(function(){
+    var chosenMaterial = MLSB.getMaterial();
+     if (chosenMaterial!=undefined){
+      let materialcolor = chosenMaterial.colors.list;
+      let materialList = {"colorscale":[]};
+      for(const[name,colors] of Object.entries(materialcolor)){
+        materialList.colorscale.push(
+          {
+            "$type": "Multilayer_LayerTemplateOverridesColor",
+            "n": {
+              "$type": "CName",
+              "$storage": "string",
+              "$value": name
+            },
+            "v": {"Elements": [colors[0],colors[1],colors[2]]}
+          }
+        )
+      }
+      console.log(JSON.stringify(materialList,null,2))
+     }
   })
 
 	$("body").on('click','#cagecolors span',function(){
