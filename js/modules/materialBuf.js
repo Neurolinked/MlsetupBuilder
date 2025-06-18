@@ -172,15 +172,9 @@ class MaterialBuffer {
 				if (mbDummy.hasOwnProperty('Appearances')){
 					this.Appearances = []
 					let names = Object.keys(mbDummy.Appearances);
-					
-					var times = 0;
-					while (times < (names.length/(10**times))) {
-						times=times + 1;
-					}
-					var conditionName = new RegExp(`\\d{${times}}$`)
 
 					names.forEach(name => {
-						this.pushAppearance(new Appearance(name.replace(conditionName,''),mbDummy.Appearances[name]))
+						this.pushAppearance(new Appearance(name,mbDummy.Appearances[name]))
 					});
 				}
 				//console.log(this.Appearances);
@@ -373,4 +367,20 @@ class MaterialBuffer {
 		this.TexturesList = Array.from(TextureListed)
 	}
 	
+	export(){
+		var appearanceReturn = {};
+		this.Appearances.forEach((elm,key)=>{
+			appearanceReturn[`${elm.Name}`]=elm.Materials;
+		})
+		return JSON.stringify({
+			"Header":{
+				"MaterialJsonVersion": "1.0.0"
+			},
+			"MaterialRepo": this.MaterialRepo,
+			"Materials":this.Materials,
+			"TexturesList":this.TexturesList,
+			"MaterialTemplates":this.MaterialTemplates,
+			"Appearances": appearanceReturn
+		},null,2);
+	}
 }
