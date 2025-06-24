@@ -738,7 +738,7 @@ function registerShortcuts(){
 	//stuff here
 	}); */
 	
-	globalShortcut.register("CommandOrControl+A",() => {
+	globalShortcut.register("Shift+CommandOrControl+A",() => {
 		mainWindow.webContents.send('preload:activate', '#applytoMyLayer')
 	})
 }
