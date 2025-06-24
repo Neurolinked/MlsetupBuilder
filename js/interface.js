@@ -1901,9 +1901,9 @@ $("#layerOpacity").on("input",function(ev){
     var chosenMaterial = MLSB.getMaterial();
      if (chosenMaterial!=undefined){
       let materialcolor = chosenMaterial.colors.list;
-      let materialList = {"colorscale":[]};
+      let materialList = {"colorScale":[]};
       for(const[name,colors] of Object.entries(materialcolor)){
-        materialList.colorscale.push(
+        materialList.colorScale.push(
           {
             "$type": "Multilayer_LayerTemplateOverridesColor",
             "n": {
