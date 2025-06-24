@@ -2,9 +2,9 @@
 Cyberpunk 2077 modding tool to build json version of .mlsetup files (electron version).
 A Compiled version is under the Release section on the right side
 
-MLSB 1.6.8 rc1 (release candidate)
+MLSB 1.6.8 rc4 (release candidate)
 
-![Shaders refactor](https://www.kientzproduction.com/gitcontent/mlsb_168_1_beta6_texture_loading.png)
+![New Materials](https://www.kientzproduction.com/gitcontent/mlsb_168_rc4_materials.png)
 
 ## Displaying the models
 
