@@ -1888,8 +1888,11 @@ $("#layerOpacity").on("input",function(ev){
     }
      const colorContextual = document.getElementById("rc-ColorSelector");
     //clicked outside the color selector and color selector visible
-    if ((colorContextual.checkVisibility()) && ( !colorContextual.contains(event.target) )){
-      $("#rc-ColorSelector").hide();
+    if ((colorContextual!==undefined) && (colorContextual!==null)){
+      console.log(colorContextual);
+      if ((colorContextual.checkVisibility()) && ( !colorContextual.contains(event.target) )){
+        $("#rc-ColorSelector").hide();
+      }
     }
   });
   
