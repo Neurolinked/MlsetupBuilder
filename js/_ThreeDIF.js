@@ -1801,9 +1801,15 @@ $("#thacanvas").on("mouseover",function(event){
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
+		let offset_h =0, offset_v = 0
+		if (mLsetup.Layers[MLSB.Editor.layerSelected].offsetU!==undefined){
 
-		let offset_h =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetU==null ? $("#layerOffU").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4)
-		let offset_v =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetV==null ? $("#layerOffV").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4)
+			offset_h =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetU==null ? $("#layerOffU").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4)
+			offset_v =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetV==null ? $("#layerOffV").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4)
+		}else{
+			offset_h = $("#layerOffU").val();
+			offset_v = $("#layerOffV").val();
+		}
 
 		var offset = calcOffset(repVal,offset_h,offset_v);
 
