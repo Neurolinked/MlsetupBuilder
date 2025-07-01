@@ -127,6 +127,18 @@ mlsbDB.allDocs({
   }
 });
 
+mlsbDB.allDocs({
+  startkey: 'material_',
+  endkey:'material_\ufff0',
+  include_docs: true,
+}).then(function(material_records){
+  if (material_records.rows.length>0){
+    notifyMe(`Found ${material_records.rows.length} materials`);
+  }else{
+    console.log(`No custom materials in DB`);
+  }
+})
+
 const remoteCouch = false
 /* End */
 var notifications = 0;
