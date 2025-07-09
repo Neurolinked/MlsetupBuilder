@@ -29,6 +29,7 @@ const MLSB = new MLSBEditor;
 var closeModal
 
 const PARAMS = {
+	sortLevels:false,
 	importSkip: false,
 	modelDebug:false,
 	textureDebug:false,
@@ -76,6 +77,7 @@ var _editorCfg = thePIT.RConfig('editorCfg')
 		console.log(configuration);
 		PARAMS.importSkip = configuration?.skipImport;
 		PARAMS.switchTransparency = configuration?.switchTransparency;
+		PARAMS.sortLevels = configuration?.sortLevels;
 	}).catch((error)=>{
 		notifyMe(error);
 	})

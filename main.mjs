@@ -130,7 +130,8 @@ const schema = {
 				}
 			},
 			skipImport:false,
-			switchTransparency:true
+			switchTransparency:true,
+			sortLevels:false
 		}
 	}
 };
@@ -165,9 +166,13 @@ const preferences = new Store({schema,
 						}
 					},
 					skipImport:false,
-					switchTransparency:true
+					switchTransparency:true,
+					sortLevels:false
 				}
 			});
+		}
+		if (!store.has("editorCfg.sortLevels")){
+			store.set('editorCfg.sortLevels',false);
 		}
 		if (!store.has("editorCfg.switchTransparency")){
 			store.set('editorCfg.switchTransparency',true);
@@ -266,6 +271,9 @@ const preferences = new Store({schema,
 		},
 		'1.6.8-rc1': store=>{
 			store.set('editorCfg.switchTransparency',true);
+		},
+		'1.6.8-rc4': store=>{
+			store.set('editorCfg.sortLevels',false);
 		}
 	}
 });
@@ -1162,6 +1170,7 @@ ipcMain.on('main:saveStore',(event, arg) => {
 		preferences.set('editorCfg.mblend.normal.value',arg.editorCfg.mblend.normal.value);
 		preferences.set('editorCfg.skipImport',arg.editorCfg.skipImport);
 		preferences.set('editorCfg.switchTransparency',arg.editorCfg.switchTransparency);
+		preferences.set('editorCfg.sortLevels',arg.editorCfg.sortLevels);
 	}else{
 		/*
 		Get the object property and cycle them, test if they are there
