@@ -2,12 +2,34 @@ window.$ = window.jQuery;
 const ml_randomized = [];
 var coreMblends = {};
 
-function orderLevelsValue(a,b){
+function orderLevelsMetal(a,b){
   //The format is [label,[value,value]]
   const label = 0;
   const threshold = 1;
   if (Array.isArray(a) && Array.isArray(b)){
+    if ((a[threshold][1]==0) && (b[threshold][1]==0)){
+      return b[threshold][0]- a[threshold][0];
+    }else if ((a[threshold][0]==0) && (b[threshold][0]==0)){
+       return a[threshold][1] - b[threshold][1];
+    }else{
+      if (a[threshold][1]==0){
+        return -1
+      }else if (b[threshold][1]==0){
+        return 0
+      }else{
+        return b[threshold][0] - a[threshold][0];
+      }
+    }
+  }else{
+    return true;
+  }
+};
 
+function orderLevelsRough(a,b){
+  //The format is [label,[value,value]]
+  const label = 0;
+  const threshold = 1;
+  if (Array.isArray(a) && Array.isArray(b)){
     if ((a[threshold][1]==0) && (b[threshold][1]==0)){
       return a[threshold][0] - b[threshold][0];
     }else if ((a[threshold][0]==0) && (b[threshold][0]==0)){
@@ -18,13 +40,14 @@ function orderLevelsValue(a,b){
       }else if (b[threshold][1]==0){
         return 0
       }else{
-        return a[threshold][0] - b[threshold][0];
+        return b[threshold][0] - a[threshold][0];
       }
     }
   }else{
     return true;
   }
 };
+
 
 function setQuestion(text,action=''){
   $("#winConfirm .modal-title").html(text);
@@ -1764,7 +1787,7 @@ $("#layerOpacity").on("input",function(ev){
       
       if (PARAMS.sortLevels){
         let reOrderbyLevels = Object.entries(chosenMaterial.roughness.OUT.list);
-        let orderedRoughByLevels = reOrderbyLevels.sort(orderLevelsValue)
+        let orderedRoughByLevels = reOrderbyLevels.sort(orderLevelsRough)
         orderedRoughByLevels.forEach(([key,value])=>{
           $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
         })
@@ -1783,7 +1806,7 @@ $("#layerOpacity").on("input",function(ev){
       //Metal Out
       if (PARAMS.sortLevels){
         let metOrderbyLevels = Object.entries(chosenMaterial.metal.OUT.list);
-        let orderedMetalByLevels = metOrderbyLevels.sort(orderLevelsValue)
+        let orderedMetalByLevels = metOrderbyLevels.sort(orderLevelsMetal)
         orderedMetalByLevels.forEach(([key,value])=>{
           $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value.toString()})</option>`);
         })
