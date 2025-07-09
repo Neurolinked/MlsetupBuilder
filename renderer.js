@@ -70,7 +70,17 @@ const PARAMS = {
 	listSubmeshes:{}
 };
 
-var skip = thePIT.RConfig('editorCfg.skipImport')
+/**Optimize Reading from configuration */
+var _editorCfg = thePIT.RConfig('editorCfg')
+	_editorCfg.then((configuration)=>{
+		console.log(configuration);
+		PARAMS.importSkip = configuration?.skipImport;
+		PARAMS.switchTransparency = configuration?.switchTransparency;
+	}).catch((error)=>{
+		notifyMe(error);
+	})
+
+/* var skip = thePIT.RConfig('editorCfg.skipImport')
 	skip.then((result)=>{
 		PARAMS.importSkip = result;
 	}).catch((error)=>{
@@ -82,7 +92,7 @@ var transparency =thePIT.RConfig('editorCfg.switchTransparency')
 		PARAMS.switchTransparency = result;
 	}).catch((error)=>{
 		notifyMe(error);
-	});
+	}); */
 
 
 var hairDB = {}
