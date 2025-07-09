@@ -2,7 +2,29 @@ window.$ = window.jQuery;
 const ml_randomized = [];
 var coreMblends = {};
 
+function orderLevelsValue(a,b){
+  //The format is [label,[value,value]]
+  const label = 0;
+  const threshold = 1;
+  if (Array.isArray(a) && Array.isArray(b)){
 
+    if ((a[threshold][1]==0) && (b[threshold][1]==0)){
+      return a[threshold][0] - b[threshold][0];
+    }else if ((a[threshold][0]==0) && (b[threshold][0]==0)){
+       return a[threshold][1] - b[threshold][1];
+    }else{
+      if (a[threshold][1]==0){
+        return -1
+      }else if (b[threshold][1]==0){
+        return 0
+      }else{
+        return a[threshold][0] - b[threshold][0];
+      }
+    }
+  }else{
+    return true;
+  }
+};
 
 function setQuestion(text,action=''){
   $("#winConfirm .modal-title").html(text);
@@ -1738,18 +1760,38 @@ $("#layerOpacity").on("input",function(ev){
       Object.entries(chosenMaterial.roughness.IN.list).forEach(([key,value])=>{
 				$("#Rough_In_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
 			});
-      //Roughness OUT
-      Object.entries(chosenMaterial.roughness.OUT.list).forEach(([key,value])=>{
-				$("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-			});
+
+      
+      if (PARAMS.sortLevels){
+        let reOrderbyLevels = Object.entries(chosenMaterial.roughness.OUT.list);
+        let orderedRoughByLevels = reOrderbyLevels.sort(orderLevelsValue)
+        orderedRoughByLevels.forEach(([key,value])=>{
+          $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
+        })
+      }else{
+        //Roughness OUT
+        Object.entries(chosenMaterial.roughness.OUT.list).forEach(([key,value])=>{
+          $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
+        });
+      }
+
       //Normal Strenght
       Object.entries(chosenMaterial.normal.list).forEach(([key,value])=>{
 				$("#Norm_Pow_values").append(`<option value="${key}" data-force='${key}' >${key} (${String(value)})</option>`);
 			});
+
       //Metal Out
-      Object.entries(chosenMaterial.metal.OUT.list).forEach(([key,value])=>{
-				$("#Metal_Out_values").append(`<option value="${key}" >${key} (${value})</option>`);
-			});
+      if (PARAMS.sortLevels){
+        let metOrderbyLevels = Object.entries(chosenMaterial.metal.OUT.list);
+        let orderedMetalByLevels = metOrderbyLevels.sort(orderLevelsValue)
+        orderedMetalByLevels.forEach(([key,value])=>{
+          $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value.toString()})</option>`);
+        })
+      }else{
+        Object.entries(chosenMaterial.metal.OUT.list).forEach(([key,value])=>{
+          $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value})</option>`);
+        });
+      }
     }else{
       console.log(
         `%c No material override entry loaded for:  ${materialName} `,"color:blue;background-color: white;"
@@ -1901,8 +1943,8 @@ $("#layerOpacity").on("input",function(ev){
      const colorContextual = document.getElementById("rc-ColorSelector");
     //clicked outside the color selector and color selector visible
     if ((colorContextual!==undefined) && (colorContextual!==null)){
-      console.log(colorContextual);
       if ((colorContextual.checkVisibility()) && ( !colorContextual.contains(event.target) )){
+        console.log(colorContextual);
         $("#rc-ColorSelector").hide();
       }
     }
@@ -2185,6 +2227,26 @@ $("#layerRandomizer").click(function(){
       notifyMe("NO level selected, please redo then layer Edit operation with a selected layer on");
     }
   });
+/**
+ * Import or replaceMaterials in the DB
+ */
+$("#materialHook").change(function(ev){
+  var fr=new FileReader();
+  fr.onload = function(){
+    var materialFile = JSON.parse(fr.result);
+    console.log(materialFile);
+    if (materialFile.hasOwnProperty('Header')){
+      if (materialFile.Header.hasOwnProperty('WKitJsonVersion')){
+        notifyMe(`Multilayer Material file Version ${materialFile.Header.WKitJsonVersion}`,false);  
+      }
+    }else{
+      notifyMe("No Header in the file");
+    }
+  }
+  if ($("#materialHook")[0].files[0]){
+    fr.readAsText($("#materialHook")[0].files[0]); //Read as a text file
+  }
+})
  /*------------------------------------------------------------------------------------
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
