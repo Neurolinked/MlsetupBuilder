@@ -2,13 +2,11 @@
 ## 1.6.9
 ### Done
 ### Todo 
-- [ ] Code cleanup
-- [ ] Layer interface selection events unified
-  - [ ] Layer property read from Mlsetup instance instead of the interface
+- [ ] Huge Code cleanup
+- [ ] Custom Shader material normal blending
+- [ ] Substance Painter-like new layer interface
 - [ ] Material Composer extension
-  - [ ] Appearances Editor
-  - [ ] Panels column slider
-  - [ ] Content list and editor together
+  - [ ] Add Appearances Editor
 - [ ] Mlsetup autocompile in Wolvenkit project from raw to archive folder
 
 ## Todo 1.6.8
