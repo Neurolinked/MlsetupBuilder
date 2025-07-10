@@ -27,6 +27,7 @@
 - [x] Materials model read integration in Material Composer
 - [x] Microblends update
 - [x] Replacing DAT.gui with Tweakpane library
+  - [x] Enable sorting mechanism for Roughness and metalness
   - [x] Light configuration addition 
   - [x] Camera far/near distance configurable
   - [x] Fog configuration addition
