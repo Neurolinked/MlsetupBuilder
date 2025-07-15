@@ -18,25 +18,10 @@ const crypto = await import('node:crypto');
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
-/* 
-TODO remove this shit
-
-var child = require('child_process').execFile;
-var spawner = require('child_process').spawn; */
-
-/* const path = require('path') */
-/* const fs = require('fs')
-const fse = require('fs-extra') */
-/* const store = require('electron-store'); //https://github.com/sindresorhus/electron-store#readme */
-/* const sharp = require('sharp');
-const dree = require('dree'); */
-//const outside = require('electron').shell;
-/* const crypto = require('crypto'); */
-
 app.commandLine.appendSwitch('enable-gpu') //enable acceleration
-//app.commandLine.appendSwitch('disable-features', 'WidgetLayering'); //minor fixes for console layering not working as intended
+app.commandLine.appendSwitch('disable-features', 'UiGpuRasterization') //Fix white border on window
+
 const hash = crypto.createHash('sha256');
-//hash.digest('base64');
 //Log setups
 log.transports.file.level = 'info' 
 log.transports.console.level = 'info'
@@ -274,6 +259,9 @@ const preferences = new Store({schema,
 		},
 		'1.6.8-rc4': store=>{
 			store.set('editorCfg.sortLevels',false);
+		},
+		'1.6.8-final':store=>{
+			//just for another version
 		}
 	}
 });
