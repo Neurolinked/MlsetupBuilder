@@ -326,7 +326,16 @@ ipcRenderer
   })
   .on("preload:trigEvent",(event,targetAction)=>{
     if (targetAction.hasOwnProperty('target') && targetAction.hasOwnProperty('trigger')){
-      const myEvent = new CustomEvent(targetAction.trigger,{bubble:true});
+      const myEvent = new CustomEvent(
+                            targetAction.trigger,
+                            {
+                              detail:{
+                                message:targetAction.options.message,
+                                title:targetAction.options.title,
+                                seconds:targetAction.options?.seconds!==undefined ? targetAction.options.seconds:null
+                              },
+                              bubble:true
+                            });
       let objtarget = document.querySelector(targetAction.target);
       objtarget.dispatchEvent(myEvent);
     }

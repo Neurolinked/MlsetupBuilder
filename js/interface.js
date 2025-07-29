@@ -3440,10 +3440,21 @@ unCooKonfirm.addEventListener("click", (event) => {
   })
 
   //right click on colors to display the list if the material is loaded
-  $("body").on("contextmenu","div.cube",function(ev){
+  $("body")
+    .on("contextmenu","div.cube",function(ev){
     /**
      * the div with id #rc-ColorSelector will contains the colors
      */
     $("#rc-ColorSelector").show();
+  }).on('alert',function(ev){
+    /**
+    Get a data Object with
+      message,
+      title,
+      seconds - optional
+    */
+    const alert = ev.detail
+    alertMe(alert.message,alert.title,alert?.seconds!==undefined ? alert.seconds:null);
   })
+
 });
