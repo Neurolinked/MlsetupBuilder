@@ -1284,10 +1284,47 @@ $("#layerOpacity").on("input",function(ev){
     );
   }
 
+/**
+ * tag list :
+ * --- base | PL
+ * * gang
+ * * * kind of
+ * * car
+ * * bike
+ *  player,
+ *  man,
+ *  women,
+ *  big,
+ *  fat,
+ *  massive,
+ *  child,
+ *  arms,
+ *  legs,
+ *  head,
+ *  torso,
+ *  gloves,
+ *  shoes,
+ *  cyberware,
+ *  item,
+ *  animals,
+ *  tattoo,
+ *  npc,
+ *  root,
+ *  weapons,
+ *  firearms,
+ *  melee,
+ *  explosives,
+ *  vehicle,
+ *  environment,
+ *  mechanical
+ */
+
+
   var CPModels = $('#DataModelsLibrary').DataTable({
     ajax: {
       dataSrc:'models',
-      url:'jsons/tablemodels.json'
+      url:'jsons/models-DB230.json'
+      //url:'jsons/tablemodels.json'
     },
     buttons: [
       {
@@ -1399,7 +1436,7 @@ $("#layerOpacity").on("input",function(ev){
         },
         searchable:true
       },
-      {data:'normal'},
+      /* {data:null}, */
       {
         data:'origin',
         defaultContent: 'vanilla',
@@ -1502,8 +1539,6 @@ $("#layerOpacity").on("input",function(ev){
     MLSB.TreeD.lastModel = data.file;
     localStorage.setItem(`lastModelOpened`,data.file);
     $("#masksTemplate").val(data.mask!=null?maskList[data.mask].mask.replace('{format}',textureformat):'');
-    $("#normTemplate").val(data.normal!=null?normList[data.normal].replace('{format}',textureformat):'');
-
     $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb/,'.Material.json'));
     $("#modelTarget").val(MLSB.TreeD.lastModel);
     $("#thacanvas").trigger("loadScene",[MLSB.TreeD.lastModel]); //start loading the scene
