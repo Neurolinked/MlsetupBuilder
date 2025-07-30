@@ -18,28 +18,15 @@ const crypto = await import('node:crypto');
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
-/* 
-TODO remove this shit
-
-var child = require('child_process').execFile;
-var spawner = require('child_process').spawn; */
-
-/* const path = require('path') */
-/* const fs = require('fs')
-const fse = require('fs-extra') */
-/* const store = require('electron-store'); //https://github.com/sindresorhus/electron-store#readme */
-/* const sharp = require('sharp');
-const dree = require('dree'); */
-//const outside = require('electron').shell;
-/* const crypto = require('crypto'); */
-
 app.commandLine.appendSwitch('enable-gpu') //enable acceleration
-//app.commandLine.appendSwitch('disable-features', 'WidgetLayering'); //minor fixes for console layering not working as intended
+app.commandLine.appendSwitch('disable-features', 'UiGpuRasterization') //Fix white border on window
+
 const hash = crypto.createHash('sha256');
-//hash.digest('base64');
+
 //Log setups
 log.transports.file.level = 'info' 
 log.transports.console.level = 'info'
+//model log file
 
 var subproc
 
@@ -141,7 +128,9 @@ const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit
 
 const preferences = new Store({schema,
 	beforeEachMigration: (store, context) => {
+		//migration incoming
 		log.info(`[main-config] migrate from ${context.fromVersion} → ${context.toVersion}`)
+
 		if (!store.has("editorCfg")){
 			store.set({
 				editorCfg:{
@@ -293,6 +282,26 @@ var lastMicroConf = {}
 
 //register the application name
 if (process.platform === 'win32'){ app.setAppUserModelId(app.name); }
+
+/**
+ * 
+ * @param {string} message 
+ * @param {string} title 
+ * @param {integer} seconds 
+ */
+function alert(message,title="Warning",seconds=null){
+	mainWindow.webContents.send('preload:trigEvent',
+		{
+			target:"body",
+			trigger:'alert',
+			options:{
+				message:message,
+				title:title,
+				seconds:seconds
+			}
+		}
+	);
+}
 
 /*Read the custom Microblends from the resource list*/
 
@@ -580,18 +589,14 @@ const template = [
     ]
   },
 	...(buildMenu ? [
-		{id:99, label: 'Build', submenu:[ {
-			label:'Repository',
-			click: () =>{
-				mainWindow.webContents.send('preload:openModal','uncook')
-			}
-		}, {
-			label:'Microblends',
-			click: () =>{
-				mainWindow.webContents.send('preload:openModal','micro')
-			}
-		}] }
-	] : [
+		{id:99, label: 'Build',
+			submenu:[
+				{ label:'Repository', click: () =>{ mainWindow.webContents.send('preload:openModal','uncook')} },
+				{ label:'Microblends', click: () =>{ mainWindow.webContents.send('preload:openModal','micro')} },
+				{ label:"Model's Database", click: () => { genModelListDB(); } }
+			]
+		}
+		] : [
 		{id:99, label: 'Build', submenu:[{label:'Setup first Wolvenkit CLI', enabled:false}] }
 	]),
   // { role: 'viewMenu' }
@@ -1365,6 +1370,148 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 	})
 })
 
+//fill an array with operations to be done in the cli execution
+function wcliPlanner(){
+
+}
+
+/**
+ * 
+ * @param {string} barIdentifier - identifier for a UI progressbar
+ */
+function manageProgressbars(barIdentifier){
+	switch (barIdentifier) {
+		case 'step1':
+		case 'step3':
+		case 'step5':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Mesh with materials done</span>')
+			break;
+		case 'step2':
+		case 'step4':
+		case 'step6':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Normal map Done</span>')
+			break;
+		case 'step7':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals uncooked</span>')
+			break;
+		case 'step9':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Base Environments models exported</span>')
+			break;
+		case 'step10':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty chars exported</span>')
+			break;
+		case 'step11':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty weapons exported</span>')
+			break;
+		case 'step12':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty vehicles exported</span>')
+			break;
+		case 'step13':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty mechanical exported</span>')
+			break;
+		case 'step14':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
+			break;
+			/* 				
+		case 'step15':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
+			break; */
+		case 'step16':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Materials Textures exported</span>')
+			break;
+		case 'micro_opt01':
+		case 'micro_opt02':
+		case 'micro_opt03':
+			mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends step done</span>','#microLogger div')
+			break;
+	}
+}
+/**
+ * 
+ * @param {array} params - list of the parameter to use for the execution
+ * @param {Object[]} options - additional options to work with
+ * @param {string} options.bar - bar to pass parameters to
+ * @param {boolean} options.log - enable or disable log
+ * @param {string} options.logTarget - UI or Disk
+ * @param {string} options.logger - where to redirect the log to
+ * @param {string} options.toggle - toggle to eneble disable after command completion
+ */
+function wcliExecuter(params,options){
+	return new Promise((resolve,reject) =>{
+		//variable initialization
+		var deblog = oldtext = '' //debounce double entry logs
+		let cliExecutable = preferences.get('paths.wcli')
+
+		if (!options.hasOwnProperty("logTarget")) {
+			//fix default behavious
+			options.logTarget="UI";
+		}else{
+			if (options.logTarget!="DISK"){
+				options.logTarget="UI";
+			}
+		}
+
+		subproc = spawner(cliExecutable,params).on('error',function(err){
+			mainWindow.webContents.send('preload:uncookErr',err)
+		});
+		//Output reading
+		subproc.stdout.on('data', (data) => {
+			if (options?.log){
+				if (!(/%/.test(data.toString()))){
+					//don't clog the logger with duplicates
+					if (deblog!=data.toString()){
+						if (options.logTarget=="UI"){
+							mainWindow.webContents.send('preload:uncookErr',`${data}`,options.logger)
+						}else{
+
+						}
+						deblog = data.toString()
+					}
+				}else{
+					if (oldtext != data.toString().split("%")[0]){
+						oldtext = data.toString().split("%")[0]
+
+						if (oldtext.length>4){
+							mainWindow.webContents.send('preload:uncookErr',`${data}`,options.logger)
+						}else{
+							if (options.bar){
+								mainWindow.webContents.send('preload:uncookBar',oldtext,options.bar)
+							}
+						}
+					}
+				}
+			}
+		});
+
+		subproc.stderr.on('data', (data) => {
+			mainWindow.webContents.send('preload:logEntry',`stderr: ${data}`,true)
+		});
+
+		subproc.on('close', (code,signal) => {
+			if (code == 0){
+				//No Error
+				if (options.stepbar){
+					manageProgressbars(options.stepbar);
+					//TODO change to fillbar since it's just a bar and not an uncook one
+					mainWindow.webContents.send('preload:uncookBar','100',options.stepbar)
+				}
+				resolve()
+			}else{
+				mainWindow.webContents.send('preload:logEntry',`child process exited with code ${code}`,true)
+				reject()
+			}
+		});
+	});
+}
+
+/**
+ * 
+ * @param {string} toggle - toggle identifier to deactivate/activate 
+ * @param {array} params - list of the command parameters
+ * @param {string} stepbar - id of the parameter to work with
+ * @param {string} logger - id of the logger of the actions
+ * @returns 
+ */
 function uncookRun(toggle,params,stepbar,logger){
 	return new Promise((resolve,reject) =>{
 		var oldmsg = '';
@@ -1406,8 +1553,9 @@ function uncookRun(toggle,params,stepbar,logger){
 
 			subproc.on('close', (code,signal) => {
 				if (code == 0){
+					manageProgressbars(stepbar);
 					//No Error
-					switch (stepbar) {
+					/* switch (stepbar) {
 						case 'step1':
 						case 'step3':
 						case 'step5':
@@ -1439,9 +1587,9 @@ function uncookRun(toggle,params,stepbar,logger){
 						case 'step14':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
 							break;
-	/* 					case 'step15':
+							/* 					case 'step15':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
-							break; */
+							break; /
 						case 'step16':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Materials Textures exported</span>')
 							break;
@@ -1450,7 +1598,7 @@ function uncookRun(toggle,params,stepbar,logger){
 						case 'micro_opt03':
 							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends step done</span>','#microLogger div')
 							break;
-					}
+					} */
 					if (stepbar){
 						mainWindow.webContents.send('preload:uncookBar','100',stepbar)
 					}
@@ -1537,6 +1685,38 @@ function repoBuilder(contentdir, conf){
 		}
 	})
 }
+
+function genModelListDB(){
+	fs.access(
+		path.normalize(preferences.get('paths.depot')),
+		fs.constants.W_OK,
+		(err)=>{
+			if (err){
+				/* The folder isn't accessible for writing
+				then the list can't be build */
+				alert("The Depot folder isn't accessible for writing","Error",3000);
+			}else{
+				//You can write in the Depot
+				//If there is the CLI, execute the command for archive listing
+				//saving the result in the depot
+				const modeldbLog = log.create({ logId: 'modeldb' });
+				modeldbLog.transports.file.resolvePathFn = () => path.join(preferences.get('paths.depot'), 'modeldb.log');
+				modeldbLog.transports.file.format = '{text}'
+				modeldbLog.transports.file.level = 'info'
+				modeldbLog.transports.console.level = false;
+				//modeldbLog.info(`Miao`); logging text like this
+				
+				// .\WolvenKit.CLI.exe archive -l -r '^\b(ep1||base)\b.\b(characters||environment||items||vehicles||weapons)\b.+(?!proxy).+\.mesh$' -p "C:\Program Files (x86)\GOG Galaxy\Games\Cyberpunk 2077\archive\pc\content\" > ..\base.txt
+				// .\WolvenKit.CLI.exe archive -l -r '^\b(ep1||base)\b.\b(characters||environment||items||vehicles||weapons)\b.+(?!proxy).+\.mesh$' -p "C:\Program Files (x86)\GOG Galaxy\Games\Cyberpunk 2077\archive\pc\ep1\" > ..\ep1.txt
+			}
+		}
+	)
+}
+
+ipcMain.on('main:genModelListDB',(event,datas)=>{
+	genModelListDB();
+})
+
 
 ipcMain.on('main:setMicroCoords',(event,datas)=>{
 	aimWindow.close()
