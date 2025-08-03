@@ -1350,20 +1350,31 @@ function codeMaterials(materialEntry,_materialName){
 
 			Mlayer.name = _materialName;
 			Mlayer.defines.MLSBInspect = false;
+			/**
+			 * 
+			 RoughLevel and MetalLevel are
+			 multiply-add parameter
+			 the param 0 is the multiply part
+			 the param 1 is the add components
+			 */
 			Mlayer.onBeforeCompile = (shader)=>{
-				shader.uniforms.detailNormalMap = {value:FlatNORM};
+				shader.uniforms.roughLevel = {value:new THREE.Vector2(1,0)};
+				shader.uniforms.metalLevel = {value:new THREE.Vector2(0,1)};
+				shader.uniforms.detailNormalMap = {value: FlatNORM };
 				shader.uniforms.detailNormalScale = {value:new THREE.Vector2(1,1)};
-				shader.fragmentShader = shader.fragmentShader.replace(
-					`#include <color_fragment>`,
-					`#include <color_fragment>
-					vec4 colorInspect = vec4(1,0,0,1);
-					#ifdef MLSBInspect
-						diffuseColor = colorInspect;
-					#else
-						diffuseColor = diffuseColor;
-					#endif
-`)
-					/* console.log(shader.uniforms) */
+				shader.fragmentShader = shader.fragmentShader
+					.replace(
+						`#include <color_fragment>`,
+						`#include <color_fragment>
+						vec4 colorInspect = vec4(1,0,0,1);
+						#ifdef MLSBInspect
+							diffuseColor = colorInspect;
+						#else
+							diffuseColor = diffuseColor;
+						#endif`);
+					//.replace(``,``);
+
+				/* console.log(shader.uniforms) */
 				/* shader.fragmentShader = shader.fragmentShader.replace(
 					`#include <normal_fragment_maps>`,
 					`#include <normal_fragment_maps>
