@@ -322,6 +322,8 @@ ipcRenderer
   })
   .on("preload:activate",(event,target)=>{
     var objtarget = document.querySelector(target)
+    //unify solution and use this to activate different behaviour by tag type
+    //console.log(objtarget.tagName);
     objtarget.click()
   })
   .on("preload:trigEvent",(event,targetAction)=>{
@@ -330,8 +332,8 @@ ipcRenderer
                             targetAction.trigger,
                             {
                               detail:{
-                                message:targetAction.options.message,
-                                title:targetAction.options.title,
+                                message:targetAction.options?.message!==undefined ? targetAction.options.message:null,
+                                title:targetAction.options?.title!==undefined ? targetAction.options.title:null,
                                 seconds:targetAction.options?.seconds!==undefined ? targetAction.options.seconds:null
                               },
                               bubble:true
