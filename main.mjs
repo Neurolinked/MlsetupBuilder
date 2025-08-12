@@ -12,7 +12,9 @@ import Store from 'electron-store';
 import sharp from 'sharp';
 import {dree} from 'dree';
 import { fileURLToPath } from 'url';
+/* import { arrayBuffer } from 'node:stream/consumers'; */
 
+const compatibleVersion = 2.3;
 const crypto = await import('node:crypto');
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -332,10 +334,23 @@ function fileOpener(target=''){
 		fs.readFile(target,(err,filecontent) =>{
 			if (err) {
 				mainWindow.webContents.send('preload:logEntry',`Error when trying to read ${target} file`,true);
-				reject()
+				reject(err)
 			}else{
 				mainWindow.webContents.send('preload:logEntry',`File ${target} opened`,false);
 				resolve(filecontent)
+			}
+		})
+	})
+}
+
+function fileWriter(target,content='',encode='utf8'){
+	return new Promise((resolve,reject) =>{
+		 fs.writeFile(target, content, encode,(err) => {
+  			if (err) {
+				reject(err)
+				throw err
+			}else{
+				resolve()
 			}
 		})
 	})
@@ -1263,7 +1278,14 @@ ipcMain.on('main:writefile',(event,arg) => {
 				}
 		})
 	}else if (arg.type=='customlist'){
-		fs.writeFile(path.join(app.getPath('userData'),arg.file), arg.content,'utf8',(errw, data) =>{
+		const customListPath = path.join(app.getPath('userData'),arg.file)
+		const customListWrite = fileWriter(customListPath,arg.content)
+		customListWrite.then((ev)=>{
+			event.reply('preload:logEntry', 'models list saved')
+		}).catch((err)=>{
+			event.reply('preload:logEntry', `Save procedure aborted ${err}`,true)
+		})
+		/* fs.writeFile(customListPath, arg.content,'utf8',(errw, data) =>{
 			if(errw){
 				event.reply('preload:logEntry', 'Save procedure aborted',true)
 				dialog.showErrorBox('Error during the writing process of the file')
@@ -1272,7 +1294,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 				new Notification({title:"Save List", body: "Your file has been saved" }).show()
 				event.reply('preload:logEntry', 'models list saved')
 			}
-		})
+		}) */
 	}else if (arg.type=='materialLibrary'){
 		let app_matLib = path.join(app.getAppPath(),userRScheme[_jsons],arg.file)/* application file  */
 		let bk_matLib = path.join(app.getPath('userData'),userResourcesPath,userRScheme[_jsons],arg.file)/* application file  */
@@ -1313,7 +1335,7 @@ ipcMain.on('main:writefile',(event,arg) => {
 		}).catch((error)=>{
 			mainWindow.webContents.send('preload:logEntry', "it's impossible to create the template material Library backup",true)
 		})
-	}else if (arg.type=='maskslist'){
+	}else if (arg.type=='maskslist'){	
 		fs.writeFile(path.join(app.getAppPath(),userRScheme[_jsons],`/${userRfiles.masks}.json`), arg.content,'utf8',(errw, data) =>{
 			if(errw){
 				event.reply('preload:logEntry', 'Save procedure aborted',true)
@@ -1437,10 +1459,13 @@ function manageProgressbars(barIdentifier){
  * @param {string} options.toggle - toggle to eneble disable after command completion
  */
 function wcliExecuter(params,options){
+	//console.log(params);
 	return new Promise((resolve,reject) =>{
 		//variable initialization
-		var deblog = oldtext = '' //debounce double entry logs
-		let cliExecutable = preferences.get('paths.wcli')
+		var deblog = '';
+		var oldtext = ''; //debounce double entry logs
+		var entireLog = '';
+		const cliExecutable = preferences.get('paths.wcli');
 
 		if (!options.hasOwnProperty("logTarget")) {
 			//fix default behavious
@@ -1451,28 +1476,57 @@ function wcliExecuter(params,options){
 			}
 		}
 
-		subproc = spawner(cliExecutable,params).on('error',function(err){
-			mainWindow.webContents.send('preload:uncookErr',err)
+		subproc = spawner(cliExecutable,params)
+		.on('error',function(err){
+			mainWindow.webContents.send('preload:logEntry',err);
 		});
 		//Output reading
 		subproc.stdout.on('data', (data) => {
-			if (options?.log){
-				if (!(/%/.test(data.toString()))){
-					//don't clog the logger with duplicates
-					if (deblog!=data.toString()){
-						if (options.logTarget=="UI"){
-							mainWindow.webContents.send('preload:uncookErr',`${data}`,options.logger)
-						}else{
-
+			var commandlog = data.toString();
+			if (/%/.test(commandlog)){
+				// there is a percentage
+				if (oldtext != commandlog.split("%")[0]){
+					//extract the percentage
+					oldtext = commandlog.split("%")[0]
+					if (oldtext.length>4){
+						mainWindow.webContents.send('preload:uncookErr',`${commandlog}`,options.logger)
+					}else{
+						if (options.bar){
+							mainWindow.webContents.send('preload:uncookBar',oldtext,options.bar)
 						}
-						deblog = data.toString()
+					}
+				}
+			}else{
+				//straight text
+				if (deblog!=commandlog){
+					if (options?.log){
+						if (options.logTarget=="UI"){
+							mainWindow.webContents.send('preload:logEntry',`${commandlog}`)
+						}else{
+							//to change
+						}
+					}
+					deblog = commandlog
+					entireLog +=commandlog;
+				}
+			}
+			/* if (options?.log){
+				if (!(/%/.test(commandlog))){
+					//don't clog the logger with duplicates
+					if (deblog!=commandlog){
+						if (options.logTarget=="UI"){
+							mainWindow.webContents.send('preload:logEntry',`${commandlog}`)
+						}else{
+							//to change
+						}
+						deblog = commandlog
 					}
 				}else{
-					if (oldtext != data.toString().split("%")[0]){
-						oldtext = data.toString().split("%")[0]
+					if (oldtext != commandlog.split("%")[0]){
+						oldtext = commandlog.split("%")[0]
 
 						if (oldtext.length>4){
-							mainWindow.webContents.send('preload:uncookErr',`${data}`,options.logger)
+							mainWindow.webContents.send('preload:uncookErr',`${commandlog}`,options.logger)
 						}else{
 							if (options.bar){
 								mainWindow.webContents.send('preload:uncookBar',oldtext,options.bar)
@@ -1480,7 +1534,9 @@ function wcliExecuter(params,options){
 						}
 					}
 				}
-			}
+			}else{
+				entireLog +=commandlog;
+			} */
 		});
 
 		subproc.stderr.on('data', (data) => {
@@ -1490,12 +1546,14 @@ function wcliExecuter(params,options){
 		subproc.on('close', (code,signal) => {
 			if (code == 0){
 				//No Error
-				if (options.stepbar){
+				if (options?.stepbar){
 					manageProgressbars(options.stepbar);
 					//TODO change to fillbar since it's just a bar and not an uncook one
 					mainWindow.webContents.send('preload:uncookBar','100',options.stepbar)
 				}
-				resolve()
+				resolve(entireLog);
+			}else if ((code==160) && (params.includes("archive"))){
+				resolve(entireLog);
 			}else{
 				mainWindow.webContents.send('preload:logEntry',`child process exited with code ${code}`,true)
 				reject()
@@ -1686,9 +1744,196 @@ function repoBuilder(contentdir, conf){
 	})
 }
 
+function getModelTags(filename){
+	const name = getModelName(filename);
+	var tags = new Set();
+	/** base or expansion */
+	if (/^base/.test(filename)){tags.add("base")}
+	if (/^ep1/.test(filename)){tags.add("PL")}
+	/** gender match and body size */
+	let genderMale = name.match("_p?m[ambcf]_")
+	let genderFemale = name.match("_p?w[ambcf]_")
+	if (genderMale!=null){
+		tags.add("man")
+		
+		switch (genderMale[0]){
+			case '_pma_': tags.add("player");
+				break;
+			case '_mc_': tags.add("child");
+				break;
+			case '_mb_': tags.add("big");
+				break;
+			case '_mm_': tags.add("massive");
+			break;
+			case '_mf_': tags.add("fat");
+		}
+	}
+	if (genderFemale!=null){
+		tags.add("female")
+		switch (genderFemale[0]){
+			case '_pwa_': tags.add("player");
+				break;
+			case '_wc_': tags.add("child");
+				break;
+			case '_wb_': tags.add("big");
+				break;
+			case '_wm_': tags.add("massive");
+			break;
+			case '_wf_': tags.add("fat");
+		}
+	}
+	/** body parts */
+	if (name.match("^t\d_")!=null){
+		tags.add("torso")
+	}
+	if (name.match("^h\d_")!=null){
+		tags.add("head")
+	}
+	if (name.match("^l\d_")!=null){
+		tags.add("legs")
+	}
+	if (name.match("^s\d_")!=null){
+		tags.add("feet")
+	}
+	if (name.match("^a\d_")!=null){
+		tags.add("arms")
+	}
+	if (name.match("^g\d_")!=null){
+		tags.add("hands")
+	}
+	if (name.match("^hh_")!=null){
+		tags.add("hairs")
+	}
+	/** objects */
+	if (name.match("^q\d{3}_")!=null){
+		tags.add("quest")
+	}
+	if (name.match("^d\d_")!=null){
+		tags.add("dismembered")
+	}
+	if (name.match("^mch_")!=null){
+		tags.add("mechanical")
+	}
+	if (name.match("^w_")!=null){
+		tags.add("weapon")
+		if(filename.match("melee")!=null){
+			tags.add("melee")
+		}else if (filename.match("explosives")!=null){
+			tags.add("explosives")
+		}else{
+			tags.add("firearms")
+		}
+	}
+	/** Npcs */
+	if(filename.match("main_npc")!=null){
+		tags.add("npc")
+		let npcname = /^\w+\\\w+\\\w+\\(\w+)/g
+		let npc = [...filename.matchAll(npcname)]
+		tags.add(npc[0][1])
+	}
+
+	if(filename.match("cyberware")!=null){tags.add("cyberware")}
+
+	if(filename.match("environment")!=null){
+		tags.add("environment")
+		if (name.match("^wat_kab_")){
+			tags.add("kabuki")
+		}
+	}
+	// vehicles
+	if(filename.match("vehicle")!=null){
+		tags.add("vehicle")
+		let category = name.match("^v_[a-z]+")
+		if (category!=null){
+			tags.add(category[0].slice(2))
+		}
+		if(filename.match("sportbike")!=null){
+			tags.add("bike")
+		}else if(filename.match("special")!=null){
+			if (name.match("^av_")!=null){
+			tags.add("av")
+			}else{
+			tags.add("special")
+			}
+		}else{
+			tags.add("car")
+		}
+	}
+	if(filename.match("garment")!=null){
+		tags.add("cloth")
+		if(filename.match("gang")!=null){
+			tags.add("gang")
+		}
+	}
+
+	return Array.from(tags) //Jsons doesn't convert-like Set objects
+}
+/**
+ * 
+ * @param {string} path 
+ * @returns {string}
+ */
+function getModelName(path){
+	var name = '';
+	let tempPath = path.split("\\")
+	let filename = tempPath.reverse()[0];
+	if (/\.(\bmesh\b||\bglb\b)$/.test(filename)){
+		name = filename.split(".")[0];
+	}else{
+		name = filename
+	}
+	return name;
+}
+/**
+ * 
+ * @param {string} text 
+ * @returns {array} 
+ */
+function objDBuilder(text){
+	const models = [];
+	//read file as text every line
+	const lines  = text.split("\r\n");
+
+	for (var line = 0, completeText = lines.length; line < completeText; line++) {
+		if (
+			(lines[line]!='') &&
+			(!(/^\[/.test(lines[line]))) &&
+			(!((lines[line]).includes("proxy") || (lines[line]).includes("shadow")))
+			){
+			let model = {
+				file: lines[line],
+				name: getModelName(lines[line]),
+				tags: getModelTags(lines[line])
+			}
+			models.push(model);
+		}
+    }
+	return models;
+}
+/**
+ * 
+ * @param {string} text 
+ * @returns {string}
+ */
+function bruteCleanupModelText(text){
+	return text.replaceAll(/\.mesh/g,".glb") //change to 3d glb model
+}
+/**
+ * 
+ * @param {string} text 
+ */
+function buildModelDB(text){
+	//DB Cleanup
+	text = bruteCleanupModelText(text);
+	const myBuildDB = {models:objDBuilder(text), version:compatibleVersion}
+	return myBuildDB;
+}
+
 function genModelListDB(){
+	const gameContent = preferences.get('paths.game');
+	const depotFolder = preferences.get('paths.depot');
 	fs.access(
-		path.normalize(preferences.get('paths.depot')),
+		path.normalize(depotFolder),
 		fs.constants.W_OK,
 		(err)=>{
 			if (err){
@@ -1699,13 +1944,69 @@ function genModelListDB(){
 				//You can write in the Depot
 				//If there is the CLI, execute the command for archive listing
 				//saving the result in the depot
-				const modeldbLog = log.create({ logId: 'modeldb' });
+				/* const modeldbLog = log.create({ logId: 'modeldb' });
 				modeldbLog.transports.file.resolvePathFn = () => path.join(preferences.get('paths.depot'), 'modeldb.log');
 				modeldbLog.transports.file.format = '{text}'
 				modeldbLog.transports.file.level = 'info'
-				modeldbLog.transports.console.level = false;
+				modeldbLog.transports.console.level = false; */
+				var modelText = '';
+				mainWindow.webContents.send('preload:trigEvent',{target:"body",trigger:'processBar'});
 				//modeldbLog.info(`Miao`); logging text like this
-				
+			
+				const archiveList = wcliExecuter(
+					[
+						"archive",
+						"-l",
+						"-r",
+						"^\\b(ep1|base)\\b.\\b(characters|environment|items|vehicles|weapons)\\b.+(?!proxy).+\\.mesh$",
+						"-p",
+						path.normalize(path.join(gameContent,"archive\\pc\\content"))
+					],{})
+				.then((result)=>{
+					if (result!=''){
+						modelText += result
+					}
+				})
+				.then(()=>wcliExecuter([
+						"archive",
+						"-l",
+						"-r",
+						"^\\b(ep1|base)\\b.\\b(characters|environment|items|vehicles|weapons)\\b.+(?!proxy).+\\.mesh$",
+						"-p",
+						path.normalize(path.join(gameContent,"archive\\pc\\ep1"))
+					],{}))
+				.then((result)=>{
+					if (result!=''){
+						modelText += result
+					}
+					mainWindow.webContents.send('preload:logEntry',`Archives listing complete`,false);
+				})
+				.then(()=>{
+					const objDB = buildModelDB(modelText)
+					//Sort models
+					objDB.models.sort((x,y)=>{
+								return x.file.localeCompare(y.file);
+							})
+					const JsonDBModel = JSON.stringify(objDB,null,0);
+
+					const customDB = path.join(app.getAppPath(),"jsons/cliModelsDB.json");
+					const customModelsWrite = fileWriter(customDB,JsonDBModel);
+
+					customModelsWrite.then((result)=>{
+						mainWindow.webContents.send('preload:logEntry', 'Model database saved',false)
+					}).catch((error)=>{
+						mainWindow.webContents.send('preload:logEntry', `Model database save error ${error}`,true)
+					}).finally(()=>{
+						mainWindow.webContents.send('preload:logEntry', `The model database has been rebuilt`,false);
+					})
+				})
+				.catch((error)=>{
+					 mainWindow.webContents.send('preload:logEntry',`${error} `,true);
+				}).finally((res)=>{
+					//completed everything
+					mainWindow.webContents.send('preload:noBar','');
+				});
+
 				// .\WolvenKit.CLI.exe archive -l -r '^\b(ep1||base)\b.\b(characters||environment||items||vehicles||weapons)\b.+(?!proxy).+\.mesh$' -p "C:\Program Files (x86)\GOG Galaxy\Games\Cyberpunk 2077\archive\pc\content\" > ..\base.txt
 				// .\WolvenKit.CLI.exe archive -l -r '^\b(ep1||base)\b.\b(characters||environment||items||vehicles||weapons)\b.+(?!proxy).+\.mesh$' -p "C:\Program Files (x86)\GOG Galaxy\Games\Cyberpunk 2077\archive\pc\ep1\" > ..\ep1.txt
 			}
