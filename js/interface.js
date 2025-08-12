@@ -1319,13 +1319,13 @@ $("#layerOpacity").on("input",function(ev){
  *  mechanical
  */
 
-
   var CPModels = $('#DataModelsLibrary').DataTable({
-    ajax: {
+    /* data:[], */
+    data:MLSB.Models,
+    /* ajax: {
       dataSrc:'models',
-      url:'jsons/models-DB230.json'
-      //url:'jsons/tablemodels.json'
-    },
+      url:'jsons/tablemodels.json'
+    }, */
     buttons: [
       {
         extend: 'selected',
@@ -1506,14 +1506,13 @@ $("#layerOpacity").on("input",function(ev){
           })
           CPModels.draw(true);
         }
+        notifyMe("Mesh linked :"+CPModels.data().length,false);
       }).catch((error)=>{
         notifyMe(error);
       }).finally(()=>{
         loadingwin.close();
         MLSB.initialized();
       });
-      
-      notifyMe("Mesh linked :"+CPModels.data().length,false);
       $(".dt-buttons button" ).removeClass("dt-button");
       
       setTimeout(()=>{

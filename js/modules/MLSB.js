@@ -42,6 +42,7 @@ class MLSBEditor {
     Materials = {}
 
     MlSetups = []
+    Models = []
     /**
      * Reset the params to the default state
      */
