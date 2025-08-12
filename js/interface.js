@@ -3490,6 +3490,9 @@ unCooKonfirm.addEventListener("click", (event) => {
     */
     const alert = ev.detail
     alertMe(alert.message,alert.title,alert?.seconds!==undefined ? alert.seconds:null);
+  }).on('processBar',function(ev){
+    console.log(ev);
+    taskProcessBar();
   })
 
 });
