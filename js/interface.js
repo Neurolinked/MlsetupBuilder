@@ -3036,14 +3036,24 @@ $(".shellOpen").click(function(ev){
   if (pathCheck.match(/^[A-Za-z]:(\\|\/)/)){
     thePIT.openOS(pathCheck);
   }else{
-    thePIT.openOS(materialJSON.MaterialRepo+pathCheck);
+    if (! /^\\/.test(pathCheck)){
+      thePIT.openOS(materialJSON.MaterialRepo+"\\"+pathCheck);
+    }else{
+      thePIT.openOS(materialJSON.MaterialRepo+pathCheck);
+    }
   }
 });
 
 //Open the material File and import it in the Material Composer
 $("#matCompose").click(function(ev){
   if ($("#materialTarget").val()!=""){
-    let pathCheck =  $("#prefxunbundle").val()+$("#materialTarget").val().replaceAll(/\//g,'\\')
+    const materialFile = $("#materialTarget").val().replaceAll(/\//g,'\\')
+    let pathCheck = ''
+    if (! /^\\/.test(materialFile)){
+      pathCheck =  $("#prefxunbundle").val()+"\\"+$("#materialTarget").val()
+    }else{
+      pathCheck =  $("#prefxunbundle").val()+$("#materialTarget").val()
+    }
     thePIT.Materialize(pathCheck);
   }
 });

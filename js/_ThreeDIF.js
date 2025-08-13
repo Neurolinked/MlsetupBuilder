@@ -69,6 +69,7 @@ if (window.Worker) {
 				let offset_v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
 
 				var offset = new THREE.Vector2(offset_h,offset_v);
+				console.log(datas[4]);
 
 				materialStack[datas[4]].roughnessMap = textureStack[roughMD5Code];
 
@@ -217,8 +218,9 @@ function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
 
 function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="default",type="diffuse"){
 	// kind of listed maps
-	type = ((type=="diffuse") || (type=="normal") || (type=="metal") || (type=="rough") || (type=="alpha")  || (type=="emissive") || (type=="mlmask") ) ? type : "diffuse";
-
+	console.log(mapName,type)
+	type = ((type=="diffuse") || (type=="normal") || (type=="metal") || (type=="rough") || (type=="roughness") || (type=="alpha")  || (type=="emissive") || (type=="mlmask") ) ? type : "diffuse";
+	console.log(mapName,type)
 	switch (mapName){
 		case "engine\\textures\\editor\\black.xbm":
 			return BLACK;
@@ -1169,7 +1171,7 @@ async function ProcessStackTextures(){
 						THREEFormat);
 				}
 
-/* 				paintDatas(elm.value,
+				/*paintDatas(elm.value,
 					textureDock[index].info.width,
 					textureDock[index].info.height,
 					target,
@@ -1192,21 +1194,12 @@ async function ProcessStackTextures(){
 				target,
 				THREEFormat
 			)
+			if (PARAMS.textureDebug){ console.log(textureDock[index].maptype,target); }
+			
 			switch (textureDock[index].maptype) {
 				case 'mlmask':
 					//Blur here ?
 					//texturedatas,width,height,fileNAME,material,channelsTarget,pixels
-					/* if (PARAMS.maskBlur>0){
-						imgWorker.postMessage([
-							'blurApply',
-							elm.value, 
-							textureDock[index].info.width, 
-							textureDock[index].info.height, 
-							target,
-							textureDock[index].shader,
-							PARAMS.maskBlur
-						]);
-					} */
 					MapTextures(textureDock[index])
 					break;
 				case 'normal':
