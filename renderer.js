@@ -30,25 +30,7 @@ const MLSB = new MLSBEditor;
 const jsonsFolder = 'jsons';
 var modelDB = 'tablemodels.json';
 
-fetch(`${jsonsFolder}/cliModelsDB.json`)
-	.then(response=>response.text())
-	.then((response)=>{
-		const convtxt = JSON.parse(response);
-		MLSB.Models = convtxt.models;
-		console.log(`Custom ${convtxt.version} Build Model database`)
-	}).catch((error)=>{
-		console.log(error);
-		fetch(`${jsonsFolder}/${modelDB}`)
-			.then(response=>response.text())
-			.then((response)=>{
-				const convtxt = JSON.parse(response);
-				MLSB.Models = convtxt.models;
-				console.log("Vanilla Model DB")
-			}).catch((error)=>{
-				console.log(error)
-			})
-	})
-//
+
 
 var closeModal
 
@@ -203,3 +185,23 @@ function callOnce(func, within=300, timerId=null){
     timer = setTimeout(() => func(), within);
     window.callOnceTimers[timerId] = timer;
 }
+
+fetch(`${jsonsFolder}/cliModelsDB.json`)
+	.then(response=>response.text())
+	.then((response)=>{
+		const convtxt = JSON.parse(response);
+		MLSB.Models = convtxt.models;
+		console.log(`Custom ${convtxt.version} Build Model database`)
+	}).catch((error)=>{
+		console.log(error);
+		fetch(`${jsonsFolder}/${modelDB}`)
+			.then(response=>response.text())
+			.then((response)=>{
+				const convtxt = JSON.parse(response);
+				MLSB.Models = convtxt.models;
+				console.log("Vanilla Model DB")
+			}).catch((error)=>{
+				console.log(error)
+			})
+	})
+//

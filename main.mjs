@@ -175,6 +175,7 @@ const preferences = new Store({schema,
 			store.delete('pathfix')
 		}
 		if (store.has("depot")){
+			console.log("deteled Depot");
 			store.delete("depot");
 		}
 		if (store.has("game")){
@@ -265,6 +266,9 @@ const preferences = new Store({schema,
 		},
 		'1.6.8-rc4': store=>{
 			store.set('editorCfg.sortLevels',false);
+		},
+		'1.6.9': store=>{
+
 		}
 	}
 });
@@ -1751,8 +1755,8 @@ function getModelTags(filename){
 	if (/^base/.test(filename)){tags.add("base")}
 	if (/^ep1/.test(filename)){tags.add("PL")}
 	/** gender match and body size */
-	let genderMale = name.match("_p?m[ambcf]_")
-	let genderFemale = name.match("_p?w[ambcf]_")
+	let genderMale = name.match("_p?m[ambcf]a?_")
+	let genderFemale = name.match("_p?w[ambcf]a?_")
 	if (genderMale!=null){
 		tags.add("man")
 		
@@ -1761,6 +1765,7 @@ function getModelTags(filename){
 				break;
 			case '_mc_': tags.add("child");
 				break;
+			case '_mba_':
 			case '_mb_': tags.add("big");
 				break;
 			case '_mm_': tags.add("massive");
@@ -1775,6 +1780,7 @@ function getModelTags(filename){
 				break;
 			case '_wc_': tags.add("child");
 				break;
+			case '_wba_':
 			case '_wb_': tags.add("big");
 				break;
 			case '_wm_': tags.add("massive");
@@ -1783,38 +1789,41 @@ function getModelTags(filename){
 		}
 	}
 	/** body parts */
-	if (name.match("^t\d_")!=null){
+	if (/^t\d_/.test(name)){
 		tags.add("torso")
 	}
-	if (name.match("^h\d_")!=null){
+	if (/^h\d_/.test(name)){
 		tags.add("head")
 	}
-	if (name.match("^l\d_")!=null){
+	if (/^l\d_/.test(name)){
 		tags.add("legs")
 	}
-	if (name.match("^s\d_")!=null){
+	if (/^s\d_/.test(name)){
 		tags.add("feet")
 	}
-	if (name.match("^a\d_")!=null){
+	if (/^a\d_/.test(name)){
 		tags.add("arms")
 	}
-	if (name.match("^g\d_")!=null){
+	if (/^g\d_/.test(name)){
 		tags.add("hands")
 	}
-	if (name.match("^hh_")!=null){
+	if (/^hh_/.test(name)){
 		tags.add("hairs")
 	}
+	if (/^i\d_/.test(name)){
+		tags.add("item")
+	}
 	/** objects */
-	if (name.match("^q\d{3}_")!=null){
+	if (/^q\d{3}_/.test(name)){
 		tags.add("quest")
 	}
-	if (name.match("^d\d_")!=null){
+	if (/^d\d_/.test(name)){
 		tags.add("dismembered")
 	}
-	if (name.match("^mch_")!=null){
+	if (/^mch_/.test(name)){
 		tags.add("mechanical")
 	}
-	if (name.match("^w_")!=null){
+	if (/^w_/.test(name)){
 		tags.add("weapon")
 		if(filename.match("melee")!=null){
 			tags.add("melee")
@@ -1836,7 +1845,7 @@ function getModelTags(filename){
 
 	if(filename.match("environment")!=null){
 		tags.add("environment")
-		if (name.match("^wat_kab_")){
+		if (/^wat_kab_/.test(name)){
 			tags.add("kabuki")
 		}
 	}
