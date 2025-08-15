@@ -119,6 +119,51 @@ ipcRenderer
     document.title = document.title + " - v"+nuversion+" ";
     sessionStorage.setItem("changedversion", objversion.changed);
   })
+  /** configuration
+   * @param {Object[]} configuration
+   * @param {string} configuration.command - command to execute
+   * @param {string} configuration.target Queryselector DOM object in the UI
+   * @param {*} configuration.content the value is has to set
+  */
+  .on("preload:UImanager",(event,configuration)=>{
+    if ((configuration.hasOwnProperty("command")) && (configuration.hasOwnProperty("target"))){
+
+      const element = document.querySelector(configuration?.target)
+      const type = element.tagName
+      console.log(type);
+      
+      switch (configuration.command) {
+        case "enable":
+          element.disabled = false
+          break;
+        case "disable":
+          element.disabled = true
+          break;
+        case "prepend":
+          element.innerHTML = configuration.content + element.innerHTML
+          break;
+        case "append":
+          element.innerHTML += configuration.content
+          break;
+        case "reset":
+          element.innerHTML = ''
+          break;
+        case "update":
+          element.innerHTML = configuration.content
+          break;
+        case "set":
+          element.value = configuration.content
+          element.dispatchEvent(new Event('change', { 'bubbles': true }));
+          break;
+        case "checked":
+          element.checked = configuration.content
+          element.dispatchEvent(new Event("change"));
+        case "show":
+        case "hide":
+          break;
+      }
+    }
+  })
   .on('preload:load_source', (event, jsoncontent, filename = "") => {
     //Load The files in the arguments
     var filecompletePath = document.querySelector("#nametoexport");
@@ -279,10 +324,6 @@ ipcRenderer
       logtext.innerHTML = `Process Killed ${logtext.innerHTML}`
     }
     
-  })
-  .on('preload:uncookLogClean',(event,logger='#uncookLogger div')=>{
-    var logtext = document.querySelector(logger)
-    logtext.innerHTML = ''
   })
   .on('preload:packageDone',(event,result)=>{
     var mbloading = document.querySelector('#CheckSaveMblend div')

@@ -10,7 +10,7 @@ import * as fs from 'node:fs';
 import fse from 'fs-extra/esm';
 import Store from 'electron-store';
 import sharp from 'sharp';
-import {dree} from 'dree';
+import * as dree from 'dree';
 import { fileURLToPath } from 'url';
 /* import { arrayBuffer } from 'node:stream/consumers'; */
 
@@ -1381,6 +1381,8 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 				event.reply('preload:logEntry',`Searching for the file in the whole archive, be patient`,true);
 				if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 					//Trying to export
+					console.log(path.normalize(conf));
+					/* wcliExecuter(["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],{log:true,logTarget:"UI",logger:'#NotificationCenter .offcanvas-body'}) */
 					uncookRun(true,["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],false,'#NotificationCenter .offcanvas-body')
 					.then(()=>{
 						event.reply('preload:logEntry',"Export of the model Done, reload");
@@ -1458,7 +1460,7 @@ function manageProgressbars(barIdentifier){
  * @param {Object[]} options - additional options to work with
  * @param {string} options.bar - bar to pass parameters to
  * @param {boolean} options.log - enable or disable log
- * @param {string} options.logTarget - UI or Disk
+ * @param {string} options.logTarget - UI or Disk value
  * @param {string} options.logger - where to redirect the log to
  * @param {string} options.toggle - toggle to eneble disable after command completion
  */
@@ -1514,33 +1516,6 @@ function wcliExecuter(params,options){
 					entireLog +=commandlog;
 				}
 			}
-			/* if (options?.log){
-				if (!(/%/.test(commandlog))){
-					//don't clog the logger with duplicates
-					if (deblog!=commandlog){
-						if (options.logTarget=="UI"){
-							mainWindow.webContents.send('preload:logEntry',`${commandlog}`)
-						}else{
-							//to change
-						}
-						deblog = commandlog
-					}
-				}else{
-					if (oldtext != commandlog.split("%")[0]){
-						oldtext = commandlog.split("%")[0]
-
-						if (oldtext.length>4){
-							mainWindow.webContents.send('preload:uncookErr',`${commandlog}`,options.logger)
-						}else{
-							if (options.bar){
-								mainWindow.webContents.send('preload:uncookBar',oldtext,options.bar)
-							}
-						}
-					}
-				}
-			}else{
-				entireLog +=commandlog;
-			} */
 		});
 
 		subproc.stderr.on('data', (data) => {
@@ -1554,6 +1529,9 @@ function wcliExecuter(params,options){
 					manageProgressbars(options.stepbar);
 					//TODO change to fillbar since it's just a bar and not an uncook one
 					mainWindow.webContents.send('preload:uncookBar','100',options.stepbar)
+				}
+				if (options?.toggle){
+
 				}
 				resolve(entireLog);
 			}else if ((code==160) && (params.includes("archive"))){
@@ -1617,50 +1595,6 @@ function uncookRun(toggle,params,stepbar,logger){
 				if (code == 0){
 					manageProgressbars(stepbar);
 					//No Error
-					/* switch (stepbar) {
-						case 'step1':
-						case 'step3':
-						case 'step5':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Mesh with materials done</span>')
-							break;
-						case 'step2':
-						case 'step4':
-						case 'step6':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Normal map Done</span>')
-							break;
-						case 'step7':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Decals uncooked</span>')
-							break;
-						case 'step9':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Base Environments models exported</span>')
-							break;
-						case 'step10':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty chars exported</span>')
-							break;
-						case 'step11':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty weapons exported</span>')
-							break;
-						case 'step12':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty vehicles exported</span>')
-							break;
-						case 'step13':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty mechanical exported</span>')
-							break;
-						case 'step14':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
-							break;
-							/* 					case 'step15':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Phantom Liberty environment exported</span>')
-							break; /
-						case 'step16':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Materials Textures exported</span>')
-							break;
-						case 'micro_opt01':
-						case 'micro_opt02':
-						case 'micro_opt03':
-							mainWindow.webContents.send('preload:uncookErr','<span class="bg-success text-light">Microblends step done</span>','#microLogger div')
-							break;
-					} */
 					if (stepbar){
 						mainWindow.webContents.send('preload:uncookBar','100',stepbar)
 					}
@@ -1716,7 +1650,9 @@ function repoBuilder(contentdir, conf){
 		
 		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 			if (typeof(conf)=='object'){
-				mainWindow.webContents.send('preload:uncookLogClean')
+
+				mainWindow.webContents.send('preload:UImanager',{command:"reset",target:"#uncookLogger"})
+
 				var exportFormatGE = preferences.get('maskformat')
 				uncookRun(conf[0],["uncook", "-gp", contentdir, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],'step1')
 					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
@@ -2067,9 +2003,14 @@ function microBuilder(contentdir){
 			var countingOnYou = 0
 
 			if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
-				mainWindow.webContents.send('preload:uncookLogClean','#microLogger div')
-
-				uncookRun(true,["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div')
+				mainWindow.webContents.send('preload:UImanager',{command:"reset",target:"#microLogger div"})
+				wcliExecuter(["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],{
+					log:true,
+					logTarget:"UI",
+					logger:"#microLogger div",
+					toggle:"#micro_opt01"
+				})
+				/* uncookRun(true,["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div') */
 					.then(()=> {
 						return listMBlends();
 					})
@@ -2077,12 +2018,25 @@ function microBuilder(contentdir){
 						try{
 							resizeMblends(files,true);
 						}catch(err){
-							mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div');
+							mainWindow.webContents.send("preload:UImanager",
+								{
+									command:"prepend",
+									target:	"#microLogger div",
+									content:`${err}`
+								})
 						}
 					})
-					.catch((err)=>{mainWindow.webContents.send('preload:uncookErr',`${err}`,'#microLogger div')})
+					.catch((err)=>{
+						mainWindow.webContents.send("preload:UImanager",
+							{
+								command:"prepend",
+								target:	"#microLogger div",
+								content:`${err}`
+							})
+					})
 					.finally(() => {
-						mainWindow.webContents.send('preload:enable',"#MycroMe");
+						mainWindow.webContents.send('preload:UImanager',{command:"enable",target:"#MycroMe"})
+						/* mainWindow.webContents.send('preload:enable',"#MycroMe"); */
 						mainWindow.webContents.send('preload:trigEvent',{target:"body", trigger:'updateMBlends'});
 					})
 			}
