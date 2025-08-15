@@ -1,7 +1,7 @@
 {
   "name": "mlsetupbuilder",
   "productName": "MlsetupBuilder",
-  "version": "1.6.8-rc4",
+  "version": "1.6.9",
   "description": "MlSetupBuilder",
   "main": "main.mjs",
   "scripts": {
@@ -21,16 +21,16 @@
     "url": "https://github.com/Neurolinked/MlsetupBuilder.git"
   },
   "dependencies": {
-    "dree": "^4.8.5",
+    "dree": "^5.1.5",
     "electron-log": "^5.1.5",
     "electron-store": "^8.1.0",
     "fs-extra": "^11.2.0",
     "intro.js": "^7.2.0",
-    "sharp": "^0.33.5"
+    "sharp": "^0.34.3"
   },
   "devDependencies": {
     "@electron/packager": "^18.4.0",
-    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fortawesome/fontawesome-free": "^7.0.0",
     "@tweakpane/plugin-essentials": "^0.2.1",
     "electron": "^37.2.6",
     "tweakpane": "^4.0.5"
