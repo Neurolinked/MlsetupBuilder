@@ -2008,7 +2008,7 @@ function microBuilder(contentdir){
 					log:true,
 					logTarget:"UI",
 					logger:"#microLogger div",
-					toggle:"#micro_opt01"
+					bar:"micro_opt01",
 				})
 				/* uncookRun(true,["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div') */
 					.then(()=> {
@@ -2035,8 +2035,9 @@ function microBuilder(contentdir){
 							})
 					})
 					.finally(() => {
+						mainWindow.webContents.send('preload:UImanager',{command:"hide",target:"#mycroCog"})
 						mainWindow.webContents.send('preload:UImanager',{command:"enable",target:"#MycroMe"})
-						/* mainWindow.webContents.send('preload:enable',"#MycroMe"); */
+						//mainWindow.webContents.send('preload:UImanager',{command:"hide",target:"#uncookMicro"})
 						mainWindow.webContents.send('preload:trigEvent',{target:"body", trigger:'updateMBlends'});
 					})
 			}
