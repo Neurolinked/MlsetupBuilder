@@ -1382,13 +1382,21 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 				if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 					//Trying to export
 					console.log(path.normalize(conf));
-					/* wcliExecuter(["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],{log:true,logTarget:"UI",logger:'#NotificationCenter .offcanvas-body'}) */
-					uncookRun(true,["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],false,'#NotificationCenter .offcanvas-body')
+					wcliExecuter(["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],
+					{
+						log:true,
+						logTarget:"UI",
+						logger:'#NotificationCenter .offcanvas-body'
+					})
+					/* uncookRun(true,["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],false,'#NotificationCenter .offcanvas-body') */
 					.then(()=>{
 						event.reply('preload:logEntry',"Export of the model Done, reload");
+					}).catch(err => { console.log(err) })
+					.finally(()=>{
 						mainWindow.webContents.send('preload:noBar','');
 						mainWindow.webContents.send('preload:activate','#btnMdlLoader');
-					}).catch(err => { console.log(err) });
+
+					});
 				}else{
 					event.reply('preload:logEntry',`Wolvenkit.CLI isn't selected in the settings`,true)
 				}
