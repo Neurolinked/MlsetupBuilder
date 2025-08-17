@@ -131,36 +131,54 @@ ipcRenderer
       const element = document.querySelector(configuration?.target)
       const type = element.tagName
       console.log(type);
-      
-      switch (configuration.command) {
-        case "enable":
-          element.disabled = false
-          break;
-        case "disable":
-          element.disabled = true
-          break;
-        case "prepend":
-          element.innerHTML = configuration.content + element.innerHTML
-          break;
-        case "append":
-          element.innerHTML += configuration.content
-          break;
-        case "reset":
-          element.innerHTML = ''
-          break;
-        case "update":
-          element.innerHTML = configuration.content
-          break;
-        case "set":
-          element.value = configuration.content
-          element.dispatchEvent(new Event('change', { 'bubbles': true }));
-          break;
-        case "checked":
-          element.checked = configuration.content
-          element.dispatchEvent(new Event("change"));
-        case "show":
-        case "hide":
-          break;
+      try {
+        
+        switch (configuration.command) {
+          case "remove":
+            element.remove()
+            break;
+          case "enable":
+            element.disabled = false
+            break;
+          case "disable":
+            element.disabled = true
+            break;
+          case "prepend":
+            element.innerHTML = configuration.content + element.innerHTML
+            break;
+          case "append":
+            element.innerHTML += configuration.content
+            break;
+          case "reset":
+            element.innerHTML = ''
+            break;
+          case "update":
+            element.innerHTML = configuration.content
+            break;
+          case "set":
+            element.value = configuration.content
+            element.dispatchEvent(new Event('change', { 'bubbles': true }));
+            break;
+          case "checked":
+            element.checked = configuration.content
+            element.dispatchEvent(new Event("change"));
+          case "show":
+            if (type!="DIALOG"){
+              element.classList.remove("d-none")
+            }else{
+              element.showModal();
+            }
+            break;
+          case "hide":
+            if (type!="DIALOG"){
+              element.classList.add("d-none")
+            }else{
+              element.close();
+            }
+            break;
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
   })
