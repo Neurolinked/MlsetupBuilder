@@ -109,6 +109,18 @@ function isValidJSON(text) {
   }
 }
 
+function UIcustomActions(reference, action, content){
+  if (action=='enable'){
+    if (reference=='#triggerUncook'){
+      let loadCog = document.querySelector(`${reference} svg`)
+      loadCog.remove();
+    }else if(reference=='#MycroMe'){
+      let mycroCog = document.querySelector(reference)
+      mycroCog.classList.add('d-none')
+    }
+  }
+}
+
 /* Firable events */
 const updblends = new Event('updMBlends');
 
@@ -130,7 +142,6 @@ ipcRenderer
 
       const element = document.querySelector(configuration?.target)
       const type = element.tagName
-      console.log(type);
       try {
         
         switch (configuration.command) {
@@ -177,6 +188,10 @@ ipcRenderer
             }
             break;
         }
+        
+        //cleanup previous code
+        UIcustomActions(configuration?.target,configuration?.command,configuration?.content)
+
       } catch (error) {
         console.log(error);
       }
