@@ -784,6 +784,17 @@ app.on('browser-window-blur', () => {
 	globalShortcut.unregisterAll()
 })
 
+/**
+ * @param {string} target DOM queryselector value
+ * @param {boolean} value value for the checkbox
+ */
+function switchUICheckbox(target,value){
+	mainWindow.webContents.send('preload:UImanager',{
+		command:"checked",
+		target:target,
+		content:value
+	})
+}
 
 ipcMain.on('main:aimMicros',(event,configurations) =>{
 	lastMicroConf = configurations
@@ -1650,6 +1661,8 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 	})
 })
 
+
+
 //function to execute the series of uncook
 function repoBuilder(contentdir, conf){
 	return new Promise((resolve,reject) =>{
@@ -1658,34 +1671,57 @@ function repoBuilder(contentdir, conf){
 		
 		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 			if (typeof(conf)=='object'){
+				
+				console.log(conf);
 
-				mainWindow.webContents.send('preload:UImanager',{command:"reset",target:"#uncookLogger"})
+				mainWindow.webContents.send('preload:UImanager',{command:"reset",target:"#uncookLogger div"})
 
 				var exportFormatGE = preferences.get('maskformat')
+
 				uncookRun(conf[0],["uncook", "-gp", contentdir, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],'step1')
-					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_NC3")})
+					.then(()=>{
+						switchUICheckbox("#arc_NC3",false);
+					})
 					.then(()=>uncookRun(conf[1],["uncook", "-gp", contentdir, "-r","^base.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step3'))
-					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_AP4")})
+					.then(()=>{
+						switchUICheckbox("#arc_AP4",false);
+					})
 					.then(()=>uncookRun(conf[2],["uncook", "-gp", contentdir, "-r","^base.(vehicles|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step5'))
-					.then(()=>{mainWindow.webContents.send('preload:stepok',"#arc_GA4")})
+					.then(()=>{
+						switchUICheckbox("#arc_GA4",false);
+					})
 					.then(()=>uncookRun(conf[3],["uncook", "-gp", contentdir, "-r","^base.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step9'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#arc_EN")})
+					.then(()=>{
+						switchUICheckbox("#arc_EN",false);
+					})
 					.then(()=>uncookRun(conf[4],["uncook", "-gp", contentdir, "-r","^ep1.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step10'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_CH")})
+					.then(()=>{
+						switchUICheckbox("#ep1_CH",false);
+					})
 					.then(()=>uncookRun(conf[5],["uncook", "-gp", contentdir, "-r","^ep1.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step11'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_WE")})
+					.then(()=>{
+						switchUICheckbox("#ep1_WE",false);
+					})
 					.then(()=>uncookRun(conf[6],["uncook", "-gp", contentdir, "-r","^ep1.vehicles.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step12'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_VE")})
-					.then(()=>uncookRun(conf[7],["uncook", "-r","^ep1.mechanical.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step13'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_ME")})
-					.then(()=>uncookRun(conf[8],["uncook", "-r","^ep1.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step14'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#ep1_EN")})
+					.then(()=>{
+						switchUICheckbox("#ep1_VE",false);
+					})
+					.then(()=>uncookRun(conf[7],["uncook", "-gp", contentdir,"-r","^ep1.mechanical.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step13'))
+					.then(()=>{
+						 switchUICheckbox("#ep1_ME",false);
+						})
+					.then(()=>uncookRun(conf[8],["uncook", "-gp", contentdir,"-r","^ep1.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step14'))
+					.then(()=>{
+						switchUICheckbox("#ep1_EN",false);
+					})
 					.then(()=>uncookRun(conf[9],["uncook", "-gp", contentdir, "-r","^base.surfaces.materials.+\.xbm$", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step16'))
-					.then(()=>{ mainWindow.webContents.send('preload:stepok',"#base_MT")})
+					.then(()=>{
+						switchUICheckbox("#base_MT",false);
+					})
 					.catch(err => { console.log(err) })
 					.finally(() => {
-						mainWindow.webContents.send('preload:enable',"#triggerUncook")
-						mainWindow.webContents.send('preload:disable',"#stopUncook")
+						mainWindow.webContents.send('preload:UImanager',{command:"enable",target:"#triggerUncook"})
+						mainWindow.webContents.send('preload:UImanager',{command:"disable",target:"#stopUncook"})
 					})
 				}
 		}
