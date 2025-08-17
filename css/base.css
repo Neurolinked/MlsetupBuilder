@@ -180,7 +180,7 @@ input[type="range" i] {
 #layeringsystem li[disabled],
 #layeringsystem li[disabled]:hover,
 #layeringsystem li.active[disabled] {color:var(--bs-layer0);border-style: dashed;background-color:transparent!important;}
-#layeringsystem li.notsync::before{font-family: "Font Awesome 6 Free";content:' ';color:var(--active-sel);font-weight:900;}
+#layeringsystem li.notsync::before{font-family: "Font Awesome 7 Free";content:' ';color:var(--active-sel);font-weight:900;}
 /*
 Contextual Menu for the layering Systems
 */
@@ -394,7 +394,7 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 		background-color:var(--bs-layer1);
 }
 #hairSwatches span{display:inline-block;width: var(--hairswatch);height:var(--hairswatch);margin:1px;text-align: center;text-shadow: 0 0 2px rgba(0,0,0,0.5);vertical-align: bottom;}
-#hairSwatches span[data-set='custom']::before{font-family: "Font Awesome 6 Free";content:'';font-weight:900;color:var(--bs-danger)!important;bottom:0;}
+#hairSwatches span[data-set='custom']::before{font-family: "Font Awesome 7 Free";content:'';font-weight:900;color:var(--bs-danger)!important;bottom:0;}
 /* roottotip and id */
 #sp-gradients div{border:1px solid var(--layer-9);min-height:calc(100% - 40px);width:1.5rem;margin:0 .5em;}
 #bkgshades{border: 0 none!important;padding: 0;}
@@ -439,7 +439,7 @@ span.choose.active{border-color:var(--active-sel);}
 #Snapshots img{max-width:64px;max-height:64px;border:1px dotted var(--bs-secondary);margin-bottom:.25rem; margin-right:.25rem;}
 #Snapshots img:nth-child(even){margin-right:0;}
 
-#strokeMsk:before{content:"";font-family: "Font Awesome 6 Free";font-weight:900;color:var(--active-sel)!important;padding-right:.5rem;font-size:1.5rem!important;}
+#strokeMsk:before{content:"";font-family: "Font Awesome 7 Free";font-weight:900;color:var(--active-sel)!important;padding-right:.5rem;font-size:1.5rem!important;}
 #maskPainter{touch-action: none;/*it fixes the fadeoff*/}
 
 #KofiSupportPage{margin:1em 0;cursor: pointer;}
@@ -553,7 +553,7 @@ div.dataTables_wrapper div.dataTables_info {padding:0;}
 /*caret fix for Datatables CSS*/
 table.dataTable td.dt-control:before {
   content:"";
-  font-family: "Font Awesome 6 Free";
+  font-family: "Font Awesome 7 Free";
   font-weight:900;
 }
 table.dataTable tr.dt-hasChild td.dt-control:before {

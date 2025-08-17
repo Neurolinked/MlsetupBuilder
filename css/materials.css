@@ -33,10 +33,10 @@ footer div{border:1px solid var(--layer-1);font-size:0.75rem;}
 
 details summary[data-type]::marker {content: '';display: none; overflow-wrap: anywhere!important;}
 details.active > summary[data-type]{background-color: var( --bs-secondary);}
-summary[data-type]:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-info);font-weight:900;}
-summary[data-type='engine\\materials\\multilayered.mt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-normal);font-weight:900;}
-summary[data-type='engine\\materials\\metal_base.remt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-error);font-weight:900;}
-summary[data-type='base\\materials\\mesh_decal.mt']:before{content: " ";font-family: "Font Awesome 6 Free";color:var(--bs-secondary);font-weight:900;}
+summary[data-type]:before{content: " ";font-family: "Font Awesome 7 Free";color:var(--bs-info);font-weight:900;}
+summary[data-type='engine\\materials\\multilayered.mt']:before{content: " ";font-family: "Font Awesome 7 Free";color:var(--bs-normal);font-weight:900;}
+summary[data-type='engine\\materials\\metal_base.remt']:before{content: " ";font-family: "Font Awesome 7 Free";color:var(--bs-error);font-weight:900;}
+summary[data-type='base\\materials\\mesh_decal.mt']:before{content: " ";font-family: "Font Awesome 7 Free";color:var(--bs-secondary);font-weight:900;}
 
 #Mat_Setup > div.card > div.input-group .badge{min-width:100px;}
 
