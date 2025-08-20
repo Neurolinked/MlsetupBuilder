@@ -10,7 +10,7 @@ import * as fs from 'node:fs';
 import fse from 'fs-extra/esm';
 import Store from 'electron-store';
 import sharp from 'sharp';
-import {dree} from 'dree';
+import * as dree from 'dree';
 import { fileURLToPath } from 'url';
 
 const crypto = await import('node:crypto');
