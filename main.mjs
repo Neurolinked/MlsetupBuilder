@@ -1418,8 +1418,11 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 })
 
 //fill an array with operations to be done in the cli execution
-function wcliPlanner(){
-
+/**
+ * 
+ * @param {string} sourceSwitch 
+ */
+function wcliPlanner(sourceSwitch){
 }
 
 /**
@@ -1550,7 +1553,7 @@ function wcliExecuter(params,options){
 					mainWindow.webContents.send('preload:uncookBar','100',options.stepbar)
 				}
 				if (options?.toggle){
-
+					switchUICheckbox(options.toggle,false);
 				}
 				resolve(entireLog);
 			}else if ((code==160) && (params.includes("archive"))){
@@ -1671,13 +1674,19 @@ function repoBuilder(contentdir, conf){
 		
 		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 			if (typeof(conf)=='object'){
-				
-				console.log(conf);
 
 				mainWindow.webContents.send('preload:UImanager',{command:"reset",target:"#uncookLogger div"})
 
-				var exportFormatGE = preferences.get('maskformat')
+				console.log(conf[0]);
 
+				var exportFormatGE = preferences.get('maskformat')
+				/* wcliExecuter(["uncook", "-gp", contentdir, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],{
+					log:true,
+					logTarget:"UI",
+					logger:"#uncookLogger div",
+					bar:"step1",
+					toggle:"#arc_NC3",
+				}) */
 				uncookRun(conf[0],["uncook", "-gp", contentdir, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],'step1')
 					.then(()=>{
 						switchUICheckbox("#arc_NC3",false);
