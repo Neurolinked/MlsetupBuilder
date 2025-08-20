@@ -70,7 +70,7 @@ class MLSBEditor {
                 this.MlSetups.push(mlsetup);
                 return true;
             }else{
-                throw new Error(`Not a valid mlseutp object`);
+                throw new Error(`Not a valid mlsetup object`);
             }
         }catch(error){
             console.log(error);
