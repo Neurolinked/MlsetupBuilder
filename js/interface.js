@@ -480,7 +480,8 @@ $(function(){
     alternatives: [
       './css/workspace_legacy.css',
       './css/workspace_compact.css',
-      './css/workspace_substance.css'
+      './css/workspace_substance.css',
+      './css/workspace_no3d.css'
       ],
     dom : $("#workspaceCSS"),
     config( idx = 0 ){
@@ -1178,6 +1179,7 @@ $("#layerOpacity").on("input",function(ev){
 	var TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
+  //Layer click
 	$("#layeringsystem li").click(function(e){
 
 		if (!$(this).attr("disabled")){
@@ -1215,11 +1217,11 @@ $("#layerOpacity").on("input",function(ev){
       /* ColorChange before the switch */
       //if (MLSB.Materials[])
       if (MLSB.Materials[materialByClick]){
-        if (!MLSB.Materials[materialByClick]?.colors.list[$(this).data("color")]){
-          $(this).data("color",MLSB.Materials[materialByClick]?.colors.default);
-        }
+        /* if (!MLSB.Materials[materialByClick]?.colors.list[$(this).data("color")]){
+          $(this).data("color",MLSB.Materials[materialByClick]?.colors.default);*/
       }
-      $("#layerColor").val($(this).data("color"));
+      const color = $(this).attr("data-color");
+      $("#layerColor").val(color);
 			/*trigger the material change */
       $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
 
@@ -1248,9 +1250,11 @@ $("#layerOpacity").on("input",function(ev){
       $("#mbOffU").val($(this).data("mboffu"));
       $("#mbOffV").val($(this).data("mboffv"));
 
-			let  ricercacolore = $(this).data("color");
       $("#cagecolors span").removeClass("active");
-			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
+
+      if ($(`#cagecolors span[title='${color}']`).length==1){
+        $("#cagecolors span[title='"+color+"']").addClass("active").click();
+      }
 			$("#mbInput").focusout(); //fires up the change of material blending preview
       //$("#mbSelect").trigger('change');
 		}
@@ -1698,7 +1702,11 @@ $("#layerOpacity").on("input",function(ev){
       }
       
       $("#floatLayer div.colDisplayer").attr("title", $(this).data('color'));
-      $("#floatLayer div.colDisplayer").css("background-color", `#${tinycolor.fromRatio({ r: colormaterial[0], g: colormaterial[1], b: colormaterial[2] }).toHex()}`);
+      if (colormaterial!==undefined){
+        $("#floatLayer div.colDisplayer").css("background-color", `#${tinycolor.fromRatio({ r: colormaterial[0], g: colormaterial[1], b: colormaterial[2] }).toHex()}`);
+      }else{
+        $("#floatLayer div.colDisplayer").css("background-color", `transparent`);
+      }
       //$("#floatLayer div.colDisplayer").css("background-color", `#${tinycolor.fromRatio({ r: colormaterial.v[0], g: colormaterial.v[1], b: colormaterial.v[2] }).toHex()}`);
       $("#floatLayer footer").html(`<strong>M:</strong> ${materialName}<br><strong>&micro;b:</strong> ${mblendlName}<br><strong>C:</strong> ${$(this).data('color')}`)
       $("#floatLayer").removeClass('d-none');
@@ -1826,7 +1834,8 @@ $("#layerOpacity").on("input",function(ev){
     $("#cagecolors span").sort(sort_color).appendTo("#cagecolors, #rc-ColorSelector > div");
     
     if (!chosenMaterial.colors.list[$("#layerColor").val()]){
-      $("#cagecolors span[title='"+chosenMaterial.colors.default+"']").click();
+      notifyMe(`The color ${ricercacolore} isn't present in the material ${materialName}`);
+      //$("#cagecolors span[title='"+chosenMaterial.colors.default+"']").click();
     }
     let ricercacolore = $("#layerColor").val();
     
@@ -2000,6 +2009,7 @@ $("#layerOpacity").on("input",function(ev){
   })
 
 	$("body").on('click','#cagecolors span',function(){
+    
     if ($("#layeringsystem li.active").length!=1){
       //window.alert("first select a layer, then operate");
       alertMe("Select a Layer before trying to change colors");
@@ -2204,6 +2214,7 @@ $("#layerRandomizer").click(function(){
       livelloeditato.data("mattile",$("#layerTile").val());
       livelloeditato.data("opacity",$("#layerOpacity").val());
       livelloeditato.data("color",$("#layerColor").val());
+      livelloeditato.attr("data-color",$("#layerColor").val());
       livelloeditato.data("normal",String($("#layerNormal").val()));
       livelloeditato.data("roughin",String($("#layerRoughIn").val()));
       livelloeditato.data("roughout",String($("#layerRoughOut").val()));
@@ -2439,7 +2450,7 @@ function disableLayers(totalLayers){
   }
 }
 
-function UIMlLayer(mlLayer){
+function UIMlLayer(mlLayer,k){
   $('#layeringsystem li').eq(k).data({
     mattile:mlLayer.tiles,
     labels:'('+mlLayer.color+') '+ String(mlLayer.material).replace(/^.*[\\\/]/, '').split('.')[0],
@@ -2486,7 +2497,7 @@ function convLayersMlsetup(mlsetupTarget){
   if (mlsetupTarget instanceof Mlsetup){
     var size = mlsetupTarget.Layers.length;
     for(k=0;k<size;k++){
-      UIMlLayer(mlsetupTarget.Layers[k]);
+      UIMlLayer(mlsetupTarget.Layers[k],k);
     }
   }else{
     notifyMe(`Impossible to convert a non mlsetup object`);
@@ -2525,8 +2536,10 @@ $("select[name='exportVersion']").change(function(){
 
 //3 export versions for Wkit
 $(".xportJSON").click(function(){
-  
+  const activeMlsetup = $("#MlSetupsList span.text-bg-secondary").index();
+
   ver = Number($("select[name='exportVersion']").val());
+  console.log(ver);
 
   let nomefile =  mLsetup.getFile();
 
@@ -2762,6 +2775,7 @@ $(".xportJSON").click(function(){
 
         break;
         case 3:
+
           preamble ='{\r\n'
           +'  "Header": {\r\n'
           +'    "WolvenKitVersion": "8.11.0",\r\n'
@@ -2795,6 +2809,7 @@ $(".xportJSON").click(function(){
           closing = '\r\n      ]'+ratiovalue+useNormal+'    },\r\n    "EmbeddedFiles": []\r\n  }\r\n}';
           jsonbody = '';
           for (k=0;k<$("#layeringsystem li:not([disabled])").length;k++){
+            
             jsonOpacity='';
             if (k!=0){
               //no Opacity
