@@ -247,13 +247,13 @@ const preferences = new Store({schema,
 					}
 				}
 			})
-			var fixGamePath = store.get('game');
+			var fixGamePath = store.get('paths.game');
 			store.set({
 				paths:{
-						depot: store.get('depot'),
+						depot: store.get('paths.depot'),
 						game:fixGamePath,
 						lastmod: '',
-						wcli: store.get('wcli')
+						wcli: store.get('paths.wcli')
 					}
 				})
 			
@@ -268,7 +268,7 @@ const preferences = new Store({schema,
 			store.set('editorCfg.sortLevels',false);
 		},
 		'1.6.9': store=>{
-
+			
 		}
 	}
 });
@@ -1398,7 +1398,6 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 						logTarget:"UI",
 						logger:'#NotificationCenter .offcanvas-body'
 					})
-					/* uncookRun(true,["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],false,'#NotificationCenter .offcanvas-body') */
 					.then(()=>{
 						event.reply('preload:logEntry',"Export of the model Done, reload");
 					}).catch(err => { console.log(err) })
@@ -1432,7 +1431,6 @@ function wcliPlanner(sourceSwitch,conf){
 	switch (sourceSwitch){
 		case 'arc_NC3':
 			options.bar='step1';
-
 			params = ["uncook", "-gp", conf.content, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat, "-o",conf.depot]
 			break;
 		case 'arc_AP4':
@@ -2082,7 +2080,6 @@ function microBuilder(contentdir){
 					logger:"#microLogger div",
 					bar:"micro_opt01",
 				})
-				/* uncookRun(true,["uncook", "-gp", contentdir, "-r","^base.surfaces.microblends.+(?!proxy).+\.xbm$","--uext","png","-o",unbundlefoWkit],'micro_opt01','#microLogger div') */
 					.then(()=> {
 						return listMBlends();
 					})
