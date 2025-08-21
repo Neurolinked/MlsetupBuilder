@@ -1392,7 +1392,6 @@ ipcMain.on('main:modelExport',(event,conf)=>{
 				event.reply('preload:logEntry',`Searching for the file in the whole archive, be patient`,true);
 				if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 					//Trying to export
-					console.log(path.normalize(conf));
 					wcliExecuter(["uncook", "-gp", contentpath, "-w", path.normalize(conf),"--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],
 					{
 						log:true,
@@ -1422,7 +1421,59 @@ ipcMain.on('main:modelExport',(event,conf)=>{
  * 
  * @param {string} sourceSwitch 
  */
-function wcliPlanner(sourceSwitch){
+function wcliPlanner(sourceSwitch,conf){
+	var params = []
+	var options = {
+		log:true,
+		logTarget:"UI",
+		logger:"#uncookLogger div",
+		toggle:`#${sourceSwitch}`,
+	}
+	switch (sourceSwitch){
+		case 'arc_NC3':
+			options.bar='step1';
+
+			params = ["uncook", "-gp", conf.content, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat, "-o",conf.depot]
+			break;
+		case 'arc_AP4':
+			options.bar='step3';
+			params = ["uncook", "-gp", conf.content, "-r","^base.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot]
+			break;
+		case 'arc_GA4':
+			options.bar='step5';
+			params = ["uncook", "-gp", conf.content, "-r","^base.(vehicles|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot]
+			break;
+		case 'arc_EN':
+			options.bar='step9';
+			params = ["uncook", "-gp", conf.content, "-r","^base.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot];
+			break;
+		case 'ep1_CH':
+			options.bar = 'step10'
+			params=["uncook", "-gp", conf.content, "-r","^ep1.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot]
+			break;
+		case 'ep1_WE':
+			options.bar = 'step11'
+			params = ["uncook", "-gp", conf.content, "-r","^ep1.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot]
+			break;
+		case 'ep1_VE':
+			options.bar = 'step12'
+			params = ["uncook", "-gp", conf.content, "-r","^ep1.vehicles.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot]
+			break;
+		case 'ep1_ME':
+			options.bar = 'step13'
+			params = ["uncook", "-gp", conf.content,"-r","^ep1.mechanical.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot,"-or",conf.depot]
+			break;
+		case 'ep1_EN':
+			options.bar = 'step14'
+			params = ["uncook", "-gp", conf.content,"-r","^ep1.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", conf.maskformat,"-o",conf.depot]
+			break;
+		case 'base_MT':
+			options.bar = 'step16'
+			params = ["uncook", "-gp", conf.content, "-r","^base.surfaces.materials.+\.xbm$", "--uext", conf.maskformat,"-o",conf.depot]
+			break;
+		
+	}
+	return wcliExecuter(params,options)
 }
 
 /**
@@ -1529,9 +1580,10 @@ function wcliExecuter(params,options){
 				if (deblog!=commandlog){
 					if (options?.log){
 						if (options.logTarget=="UI"){
-							mainWindow.webContents.send('preload:logEntry',`${commandlog}`)
+							if (options?.logger!='')
+							mainWindow.webContents.send('preload:uncookErr',`${commandlog}`,options.logger)
 						}else{
-							//to change
+							//write to disk
 						}
 					}
 					deblog = commandlog
@@ -1541,7 +1593,7 @@ function wcliExecuter(params,options){
 		});
 
 		subproc.stderr.on('data', (data) => {
-			mainWindow.webContents.send('preload:logEntry',`stderr: ${data}`,true)
+			mainWindow.webContents.send('preload:uncookErr',`stderr: ${data}`,options.logger)
 		});
 
 		subproc.on('close', (code,signal) => {
@@ -1652,6 +1704,10 @@ ipcMain.on('main:uncookForRepo',(event,conf)=> {
 				in ${gameContentPath}`)
 				mainWindow.webContents.send('preload:logEntry',`The export will be done into ${preferences.get('paths.depot')}`)
 				var archiveFilter = repoBuilder(gameContentPath,conf)
+				.then((result)=>{
+					console.log(result);
+				})
+				.catch(err => mainWindow.webContents.send('preload:logEntry',`${err} `, true))
 			}else{
 				var archivefold = dialog.showOpenDialog({title:'Select the game folder (Cyberpunk 2077)',properties: ['openDirectory'],defaultPath:app.getPath('desktop')})
 				.then(selection => {
@@ -1675,64 +1731,27 @@ function repoBuilder(contentdir, conf){
 		if (uncooker.match(/.+WolvenKit\.CLI\.exe$/)){
 			if (typeof(conf)=='object'){
 
-				mainWindow.webContents.send('preload:UImanager',{command:"reset",target:"#uncookLogger div"})
-
-				console.log(conf[0]);
-
+				mainWindow.webContents.send('preload:UImanager',{command:"reset",target:"#uncookLogger div"});
 				var exportFormatGE = preferences.get('maskformat')
-				/* wcliExecuter(["uncook", "-gp", contentdir, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],{
-					log:true,
-					logTarget:"UI",
-					logger:"#uncookLogger div",
-					bar:"step1",
-					toggle:"#arc_NC3",
-				}) */
-				uncookRun(conf[0],["uncook", "-gp", contentdir, "-r","^base.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE, "-o",unbundlefoWkit],'step1')
-					.then(()=>{
-						switchUICheckbox("#arc_NC3",false);
-					})
-					.then(()=>uncookRun(conf[1],["uncook", "-gp", contentdir, "-r","^base.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step3'))
-					.then(()=>{
-						switchUICheckbox("#arc_AP4",false);
-					})
-					.then(()=>uncookRun(conf[2],["uncook", "-gp", contentdir, "-r","^base.(vehicles|mechanical).+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step5'))
-					.then(()=>{
-						switchUICheckbox("#arc_GA4",false);
-					})
-					.then(()=>uncookRun(conf[3],["uncook", "-gp", contentdir, "-r","^base.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step9'))
-					.then(()=>{
-						switchUICheckbox("#arc_EN",false);
-					})
-					.then(()=>uncookRun(conf[4],["uncook", "-gp", contentdir, "-r","^ep1.characters.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step10'))
-					.then(()=>{
-						switchUICheckbox("#ep1_CH",false);
-					})
-					.then(()=>uncookRun(conf[5],["uncook", "-gp", contentdir, "-r","^ep1.weapons.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step11'))
-					.then(()=>{
-						switchUICheckbox("#ep1_WE",false);
-					})
-					.then(()=>uncookRun(conf[6],["uncook", "-gp", contentdir, "-r","^ep1.vehicles.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step12'))
-					.then(()=>{
-						switchUICheckbox("#ep1_VE",false);
-					})
-					.then(()=>uncookRun(conf[7],["uncook", "-gp", contentdir,"-r","^ep1.mechanical.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step13'))
-					.then(()=>{
-						 switchUICheckbox("#ep1_ME",false);
-						})
-					.then(()=>uncookRun(conf[8],["uncook", "-gp", contentdir,"-r","^ep1.environment.+(?!proxy).+\.mesh$","--mesh-export-type", "MeshOnly", "--uext", exportFormatGE,"-o",unbundlefoWkit,"-or",unbundlefoWkit],'step14'))
-					.then(()=>{
-						switchUICheckbox("#ep1_EN",false);
-					})
-					.then(()=>uncookRun(conf[9],["uncook", "-gp", contentdir, "-r","^base.surfaces.materials.+\.xbm$", "--uext", exportFormatGE,"-o",unbundlefoWkit],'step16'))
-					.then(()=>{
-						switchUICheckbox("#base_MT",false);
-					})
-					.catch(err => { console.log(err) })
-					.finally(() => {
-						mainWindow.webContents.send('preload:UImanager',{command:"enable",target:"#triggerUncook"})
-						mainWindow.webContents.send('preload:UImanager',{command:"disable",target:"#stopUncook"})
-					})
-				}
+				
+				const additionalRef = {
+					content:contentdir,
+					depot:unbundlefoWkit,
+					maskformat:exportFormatGE
+				};
+				
+				conf.reduce((previousPromise,nextID)=>{
+					return previousPromise.then(()=>{
+						return wcliPlanner(nextID,additionalRef)
+					});
+				},Promise.resolve())
+
+				.catch(err=>mainWindow.webContents.send("preload:logEntry",`${err} `, true))
+				.finally(()=>{
+					mainWindow.webContents.send('preload:UImanager',{command:"enable",target:"#triggerUncook"})
+					mainWindow.webContents.send('preload:UImanager',{command:"disable",target:"#stopUncook"})
+				})
+			}
 		}
 	})
 }
@@ -1977,7 +1996,7 @@ function genModelListDB(){
 					if (result!=''){
 						modelText += result
 					}
-					mainWindow.webContents.send('preload:logEntry',`Archives listing complete`,false);
+					mainWindow.webContents.send('preload:logEntry',`Vanilla archives listing complete`,false);
 				})
 				.then(()=>{
 					const objDB = buildModelDB(modelText)
@@ -2096,6 +2115,37 @@ function microBuilder(contentdir){
 			}
 	})
 }
+
+async function list_files(path,options){
+	return dree.scanAsync(path,options);
+}
+
+async function listMaterials(){
+	const depotfiles = `${preferences.get('paths.depot')}/`
+	fs.access(depotfiles,(err)=>{
+		if (!err){
+			const options = {
+				stat:false,
+				followLinks:false,
+				hash:true,
+				sizeInBytes: false,
+				size: false,
+				normalize: true,
+				extensions: ["json"],
+				excludeEmptyDirectories:true,
+			}
+			list_files(depotfiles,options)
+			.then(function (tree) {
+				console.log(tree)
+			});
+
+		}
+		return `Path not accessible : ${depotfiles}`;
+	})
+}
+//const a = await listMaterials()
+
+
 
 function listMBlends(){
 	return new Promise((resolve,reject) =>{

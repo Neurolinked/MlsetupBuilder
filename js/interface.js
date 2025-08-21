@@ -2951,7 +2951,10 @@ $("#triggerUncook").click(function(){
   $("#triggerUncook").prepend('<i class="fa-solid fa-gear fa-spin"></i> ');
 	let files = new Array()
 	$('#uncookCheck > details > div > input.form-check-input').each(function(){
-		files.push($(this).is(':checked'))
+		/* files.push($(this).is(':checked')) */
+    if ($(this).is(':checked')){
+      files.push($(this).prop("id"))
+    }
 	})
 	thePIT.UnCookMe(files);
   uncookTimer = setInterval(()=>{
