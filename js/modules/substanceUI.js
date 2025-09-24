@@ -19,17 +19,26 @@ class SubstanceLayer extends HTMLElement {
     }
 
     //enable the first element disabled
-    enable(){
-        const layer =this.shadowRoot.querySelector(`div.wrapper[disabled]`);
-        if (layer!=null){
-            layer.removeAttribute("disabled");
+    enable(all=false){
+        if (all==true){
+            const layers =this.shadowRoot.querySelectorAll(`div.wrapper[disabled]`);
+            layers.forEach(element => {
+                if (element!=null){
+                element.removeAttribute("disabled");
+                }
+            });
+        }else{
+            const layer =this.shadowRoot.querySelector(`div.wrapper[disabled]`);
+            if (layer!=null){
+                layer.removeAttribute("disabled");
+            }
         }
     }
 
     //get the number of masks and disable the layer after that number
     disable(masks){
         masks = parseInt(masks)<=0 ? 1 :masks;
-        this.shadowRoot.querySelector(`div.wrapper`).removeAttribute("disabled");
+        this.enable(true);
         const noi = this.shadowRoot.querySelectorAll(`div.wrapper:nth-child(n + ${masks + 1})`);
         noi.forEach(element=>{
             element.setAttribute("disabled","");
@@ -53,7 +62,7 @@ class SubstanceLayer extends HTMLElement {
         return null;
     }
 
-    setMask(index,imageData=null){
+    setMask(index,imageData){
         
     }
     /**
@@ -122,6 +131,10 @@ class SubstanceLayer extends HTMLElement {
     _trigger(type,index){
         //To trigger events on window
         window.dispatchEvent(new CustomEvent("substanceLayer",{detail:{action:type,layer:index}}));
+    }
+
+    connectedMoveCallback(){
+        this.enclosure.remove();
     }
 
     connectedCallback() {
@@ -343,20 +356,22 @@ class SubstanceLayer extends HTMLElement {
             this.enable();
         })
         
-        shadow.appendChild(style);
-        shadow.appendChild(enclosure);
-        wrapper.appendChild(indicator);
-        wrapper.appendChild(maskImg);
-        wrapper.appendChild(materialImg);
-        wrapper.appendChild(microblendImg);
-        wrapper.appendChild(colorSq);
-        wrapper.appendChild(filler);
-        wrapper.appendChild(opacityMeter);
-
-        for(var i=0;i<this.length;i++){
-            indicator.textContent = i;
-            enclosure.appendChild(wrapper.cloneNode(true));
+        if (!(shadow.hasChildNodes())){
+            shadow.appendChild(style);
+            shadow.appendChild(enclosure);
+            wrapper.appendChild(indicator);
+            wrapper.appendChild(maskImg);
+            wrapper.appendChild(materialImg);
+            wrapper.appendChild(microblendImg);
+            wrapper.appendChild(colorSq);
+            wrapper.appendChild(filler);
+            wrapper.appendChild(opacityMeter);
+    
+            for(var i=0;i<this.length;i++){
+                indicator.textContent = i;
+                enclosure.appendChild(wrapper.cloneNode(true));
+            }
+            enclosure.childNodes[0].classList.add("active")
         }
-        enclosure.childNodes[0].classList.add("active")
     }
 }

@@ -97,6 +97,10 @@ $(window)
       $(`.controLayers li`).removeClass("active")
     })
   }
+  
+  const sbUI = document.querySelector("substance-layer");
+  sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:index}}));
+
 }).on('fetchMaterialsComplete',function(ev){
   var matListText = materialTemplate(`<li class='p-1 fs-80' data-ref='materialName' data-path='materialPath'>materialNameNoUScore</li>`);
   matListText.then((result)=>{
@@ -341,6 +345,7 @@ async function abuildMB(microblendObj){
 
 async function nubuildMB(microblendObj){
   if ((typeof(microblendObj)=="object" ) ) {
+    
     if (microblendObj.hasOwnProperty("packages")){
       var pkgName;
       var pkgList = document.getElementById('mbListPackages');
@@ -3526,9 +3531,9 @@ unCooKonfirm.addEventListener("click", (event) => {
   })
 
   // substance layer test features
-  setTimeout(()=>{
+  /* setTimeout(()=>{
     const el = document.querySelector("substance-layer");
     el.dispatchEvent(new CustomEvent("setMblend",{detail:{layer:1,mblend:"cracks_concrete.xbm"}}))
-  },2000)
+  },2000) */
 
 });
