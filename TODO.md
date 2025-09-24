@@ -3,6 +3,7 @@
 ### Done
 ### Todo 
 - [ ] Huge Code cleanup
+- [x] Model DB rebuild
 - [ ] Custom Shader material normal blending
 - [ ] Substance Painter-like new layer interface
 - [ ] Material Composer extension

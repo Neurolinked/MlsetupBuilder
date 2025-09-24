@@ -2,6 +2,8 @@ window.$ = window.jQuery;
 const ml_randomized = [];
 var coreMblends = {};
 
+customElements.define("substance-layer", SubstanceLayer);
+
 function orderLevelsMetal(a,b){
   //The format is [label,[value,value]]
   const label = 0;
@@ -57,6 +59,22 @@ function setQuestion(text,action=''){
 }
 
 $(window)
+  .on('substanceLayer',function(ev){
+    //In case i Need something
+    const action = ev.detail?.action
+    const index = ev.detail?.layer
+    
+    console.log(MLSB.Editor.layerSelected,index)
+
+    switch (action){
+      case 'switchLayer':
+        MLSB.Editor.layerSelected=index;
+        $("#thacanvas").trigger("switchLayer");
+        break
+      default:
+        console.log(ev.detail);
+    }
+  })
   .on('setQuestion',function(ev){
     let options = ev.detail;
     console.log(options);
@@ -3506,5 +3524,11 @@ unCooKonfirm.addEventListener("click", (event) => {
     console.log(ev);
     taskProcessBar();
   })
+
+  // substance layer test features
+  setTimeout(()=>{
+    const el = document.querySelector("substance-layer");
+    el.dispatchEvent(new CustomEvent("setMblend",{detail:{layer:1,mblend:"cracks_concrete.xbm"}}))
+  },2000)
 
 });

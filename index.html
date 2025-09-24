@@ -52,6 +52,7 @@
       }
     }
   </script>
+  <script type="text/javascript" src="./js/modules/substanceUI.js"></script>
   <script type='module' src='./js/modules/mlsetup.js'></script>
   <script type="text/javascript" src='./public/cryptojs/cryptojs.min.js'></script>
   <script type="text/javascript" src='./js/interface.js'></script>
@@ -292,7 +293,11 @@
           <summary>ML materials</summary>
           <section id="Mlswitcher"></section>
         </details>
-      </div>      
+      </div>
+      <div>
+       <span class="badge w-100 rounded-0 ">Layers</span>
+       <substance-layer></substance-layer>
+     </div>
 <div id="MlEditor" class="text-white layer-1 rounded">
     <div class="dropdown" id="appearanceSwitcher">
       <button class="btn btn-sm rounded-0 btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"  data-bs-auto-close="true" aria-expanded="false" style="width:100%;">
