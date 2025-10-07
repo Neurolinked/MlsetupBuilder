@@ -755,6 +755,10 @@ $(function(){
       trigPARAMSchange();
       $("#layerOpacity").trigger("input");
     }
+
+    if (ctrl && (key=='KeyU')){
+      $(".UI-layer-switch").toggleClass("d-none");
+    }
     
     MLSB.Key.shiftPress = !MLSB.Key.shiftPress;
   });

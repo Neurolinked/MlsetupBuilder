@@ -294,10 +294,6 @@
           <section id="Mlswitcher"></section>
         </details>
       </div>
-      <div>
-       <span class="badge w-100 rounded-0 ">Layers</span>
-       <substance-layer></substance-layer>
-     </div>
 <div id="MlEditor" class="text-white layer-1 rounded">
     <div class="dropdown" id="appearanceSwitcher">
       <button class="btn btn-sm rounded-0 btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"  data-bs-auto-close="true" aria-expanded="false" style="width:100%;">
@@ -309,7 +305,11 @@
     </div>
   <span class="badge w-100 rounded-0 ">Layers</span>
   <div class="d-grid"><button class="btn btn-out-Prim btn-sm rounded-0" id="applytoMyLayer" type="button"   data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
-  <ul id="layeringsystem" class="layer-2 controLayers" tabindex="1">
+  <div id="substanceUI" class="UI-layer-switch d-none">
+      <!-- <span class="badge w-100 rounded-0 ">Layers</span> -->
+      <substance-layer></substance-layer>
+  </div>
+  <ul id="layeringsystem" class="UI-layer-switch layer-2 controLayers" tabindex="1">
     <li  data-labels="(null_null) unused"  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >0</li>
       <li  data-labels="(null_null) unused"   data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >1</li>
       <li  data-labels="(null_null) unused"  data-mattile="1.0" data-material="base\surfaces\materials\special\unused.mltemplate" data-opacity="1.0" data-color="null_null" data-normal="null" data-roughin="null" data-roughout="null" data-metalin="null" data-metalout="null" data-offsetu="0.0" data-offsetv="0.0" data-mblend="base\surfaces\microblends\default.xbm" data-mbtile="1.0" data-mbcontrast="0.0" data-mbnormal="1.0" data-mboffu="0" data-mboffv="0" >2</li>
