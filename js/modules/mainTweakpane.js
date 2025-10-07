@@ -234,6 +234,13 @@ defPromise.then((valuesDEF)=>{
 });
 
 tweakCleanMeshes()
+threeD_Viewport()
+
+function threeD_Viewport(){
+  TDtabManager.pages[0].disabled = !PARAMS.threeDUI;
+  TDtabManager.pages[1].disabled = !PARAMS.threeDUI;
+  panel.refresh();
+}
 
 function tweakCleanMeshes(){
   //model submeshes
@@ -257,6 +264,10 @@ document.getElementById('tweakContainer')
   .addEventListener('addMeshes',function(ev){
     tweakAddMeshes(ev.detail);
     panel.refresh();
+})
+document.getElementById('tweakContainer')
+  .addEventListener('threedPresence',function(ev){
+    threeD_Viewport();
 })
 document.getElementById('tweakContainer')
   .addEventListener('changedUI',function(ev){

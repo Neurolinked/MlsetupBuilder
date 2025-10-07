@@ -35,6 +35,7 @@ var modelDB = 'tablemodels.json';
 var closeModal
 
 const PARAMS = {
+	threeDUI:true,	//parameter to make optional the 3d view port
 	sortLevels:false,
 	importSkip: false,
 	modelDebug:false,
