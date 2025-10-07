@@ -71,6 +71,7 @@ const PARAMS = {
 	l2_pos:{x:-3,y:0,z:-3},
 	l3_pos:{x:0,y:0.5,z:-3},
 	l4_pos:{x:0,y:3,z:3},
+	opacityPreview:false,
 	bkgColors:'#120202',
 	switchTransparency:true,
 	showImgOffSet:false,

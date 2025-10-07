@@ -1,11 +1,15 @@
 # MlsetupBuilder
 ## 1.6.9
 ### Done
-### Todo 
+### Todo
 - [ ] Huge Code cleanup
+  - [ ] Better format performance for in-memory textures
 - [x] Model DB rebuild
 - [ ] Custom Shader material normal blending
-- [ ] Substance Painter-like new layer interface
+- [ ] UI
+  - [ ] Substance Painter-like new layer interface
+  - [x] Display opacity on 3d IF optional (default false)
+    - [x] Enable/disable feature with shortcut Ctrl+O 
 - [ ] Material Composer extension
   - [ ] Add Appearances Editor
 - [ ] Mlsetup autocompile in Wolvenkit project from raw to archive folder

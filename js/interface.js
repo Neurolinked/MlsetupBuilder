@@ -719,6 +719,10 @@ $(function(){
     }
   }
 
+  function trigPARAMSchange(){
+     document.getElementById("tweakContainer").dispatchEvent(new CustomEvent("changedUI"));
+  }
+
   /*
 	var matChooser = document.getElementById('materialChoser')
   */
@@ -736,8 +740,6 @@ $(function(){
       movecontent();
     }
     if (ctrl &&(key=='KeyW')){
-
-      console.log("inside");
       //triggering close and reset to first
       $("#MlSetupsList span.text-bg-secondary .btn-close").click();
       return false;
@@ -746,6 +748,12 @@ $(function(){
     //CTRL + SHIFT + A
     if (ctrl && shift && (key=='KeyA')){
       $("#applytoMyLayer").click();
+    }
+
+    if (ctrl && (key=='KeyO')){
+      PARAMS.opacityPreview = !PARAMS.opacityPreview;
+      trigPARAMSchange();
+      $("#layerOpacity").trigger("input");
     }
     
     MLSB.Key.shiftPress = !MLSB.Key.shiftPress;
@@ -893,8 +901,12 @@ $("#resetShades span.choose").click(function(){
   $("#maskoolor").css("background-color","#"+theshade);
 });
 
+function opacityCheck(value){
+  return PARAMS.opacityPreview ? value : 1.0;
+}
+
 $("#layerOpacity").on("input",function(ev){
-  $("#thacanvas").trigger("changeOpacity",$(this).val());
+    $("#thacanvas").trigger("changeOpacity", opacityCheck($(this).val()) );
 });
 //Change in layer displayer
 	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(ev){
@@ -1188,6 +1200,7 @@ $("#layerOpacity").on("input",function(ev){
 	//activate/deactivate wireframe display
  $("#wireFrame").click(function(ev){
     PARAMS.wireframes = $(this).is(':checked');
+    trigPARAMSchange();
     $("#thacanvas").trigger("theWire");
   });
 
@@ -1195,6 +1208,7 @@ $("#layerOpacity").on("input",function(ev){
 
   $("#onlyOneSide").click(function(ev){
     PARAMS.oneside = $(this).is(':checked');
+    trigPARAMSchange();
     $("#thacanvas").trigger("sided");
   });
 

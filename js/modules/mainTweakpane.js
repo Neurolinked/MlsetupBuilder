@@ -71,6 +71,10 @@ TDtabManager.pages[0].addBinding(PARAMS, 'maskChannel',{min:0.0,max:1.0, step:0.
 TDtabManager.pages[0].addBinding(PARAMS, 'oneside',{label:'One side rendering'}).on('change',(ev)=>{
   $("#thacanvas").trigger('sided');
 });
+TDtabManager.pages[0].addBinding(PARAMS,'opacityPreview',{label:'Layer opacity in VP'}).on('change',(ev)=>{
+  //change just the value
+   $("#layerOpacity").trigger("input");
+})
 
 const tweakReset = TDtabManager.pages[0].addButton({
   title: 'Reset to Default',
@@ -80,6 +84,7 @@ PARAMS.cameraNear = PARAMdef.cameraNear
 PARAMS.cameraFar = PARAMdef.cameraFar
 PARAMS.speed = PARAMdef.speed
 PARAMS.maskChannel = PARAMdef.maskChannel
+PARAMS.opacityPreview = false
 TDtabManager.refresh();
 
 });
@@ -251,5 +256,9 @@ document.getElementById('tweakContainer')
 document.getElementById('tweakContainer')
   .addEventListener('addMeshes',function(ev){
     tweakAddMeshes(ev.detail);
+    panel.refresh();
+})
+document.getElementById('tweakContainer')
+  .addEventListener('changedUI',function(ev){
     panel.refresh();
 })
