@@ -63,7 +63,7 @@ class SubstanceLayer extends HTMLElement {
     }
 
     setMask(index,imageData){
-        
+        console.log(imagedata);
     }
     /**
      * 
