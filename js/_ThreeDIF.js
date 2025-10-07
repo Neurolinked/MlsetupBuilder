@@ -218,9 +218,9 @@ function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
 
 function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="default",type="diffuse"){
 	// kind of listed maps
-	console.log(mapName,type)
 	type = ((type=="diffuse") || (type=="normal") || (type=="metal") || (type=="rough") || (type=="roughness") || (type=="alpha")  || (type=="emissive") || (type=="mlmask") ) ? type : "diffuse";
-	console.log(mapName,type)
+	if (PARAMS.debugTexture) {console.log("retDefTexture: ", mapName,type)}
+	
 	switch (mapName){
 		case "engine\\textures\\editor\\black.xbm":
 			return BLACK;
@@ -1129,6 +1129,26 @@ async function ProcessStackTextures(){
 
 	texturePromise = textureDock.map((x)=>{return _getFileContent(x)});
 	clearTexturePanel();
+	/**
+	 * The approach map a promise the Settle all work in a
+	 * bad performance behaviour giving a spike in demanding resources
+	 * 
+	 * This will run parallel concursive Promise resolution
+	 * a best approach as used in main.mjs is tu use an
+	 * array and a reduce function into a promise to 
+	 * map every texture and then get a series
+	 * 
+	 * Example as in the RepoBuilder function in main.mjs
+	 * conf is an Array of configuration that get a promise
+	 * from the wcliPlanner function.
+	 * 
+	 * conf.reduce((previousPromise,nextID)=>{
+					return previousPromise.then(()=>{
+						return wcliPlanner(nextID,additionalRef)
+					});
+				},Promise.resolve())
+	 */
+	
 
 	Promise.allSettled(texturePromise).then((res)=>{
 		
@@ -1200,6 +1220,15 @@ async function ProcessStackTextures(){
 				case 'mlmask':
 					//Blur here ?
 					//texturedatas,width,height,fileNAME,material,channelsTarget,pixels
+					/* imgWorker.postMessage([
+						'resize',
+						{
+							data:elm.value,
+							width:textureDock[index].info.width,
+							height:textureDock[index].info.height,
+							layer: MLSB.Editor.layerSelected
+						}
+					]); */
 					MapTextures(textureDock[index])
 					break;
 				case 'normal':
@@ -2036,7 +2065,16 @@ $("#thacanvas").on("mouseover",function(event){
 							
 							try{
 								if (myMask[0].hasOwnProperty("info")){
+									
 									paintDatas(result,myMask[0].info.width,myMask[0].info.height,'maskPainter',THREE.RGBAFormat)
+									/* window.dispatchEvent(new CustomEvent("setMask",{
+										detail:{
+											data:
+											width:
+											height:
+											layer:
+										}
+									})) */
 									textureStack[nameMask] = new THREE.DataTexture(result,myMask[0].info.width,myMask[0].info.height,THREE.RGBAFormat)
 								}
 							}catch(error){
