@@ -29,6 +29,9 @@ onmessage = function(event){
     case 'gradientApply':
       var workerResult = gradientApply(datas[0],datas[1],datas[2],datas[3],datas[4],recalcChannels)
       break;
+    case 'resize':
+      console.log(datas);
+      break;
     case 'normalFix':
     default:
       var workerResult = nMapFix(datas[0],datas[1],datas[2],datas[3],datas[4],recalcChannels);
