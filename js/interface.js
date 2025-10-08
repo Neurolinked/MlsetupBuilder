@@ -149,9 +149,27 @@ $(window)
 }).on('uiswitchMlmaterial',function(ev,index){
   $(`#Mlswitcher div:nth-child(${index}) input[type='radio']`).prop("checked",true);
   $(`#mLayerOperator li:nth-child(${index})`).addClass("active");
+}).on('uiResetAppearance',function(ev){
+  $("#appeInfo").html("");
+  $("#appearanceSwitcher ul").html("");
+
+}).on('uiLoadMaterial',function(ev){
+  console.log(ev.detail);
+  $("#Mlswitcher").html(ev.detail?.mlSwitch);
+  $("#mLayerOperator").html(ev.detail?.multilayerMaskMenu);
+
+  if ($("#Mlswitcher div:nth-child(1) input[type='radio']")) {
+    $("#mLayerOperator li:nth-child(1)").addClass("active");
+    $("#Mlswitcher div:nth-child(1) input[type='radio']").prop("checked",true);
+  }
+
+  $("#appeInfo").html(ev.detail?.appeInfo);
+  $("#appearanceSwitcher ul").html(ev.detail.appeSwitch);
+
 }).on('uicleanMlmaterial',function(ev){
   $("#Mlswitcher").html("");
   $("#mLayerOperator").html("");
+  
 }).on('uiPushMlmaterial',function(ev,material){
   var idx = materialJSON.findIndex(material);
   if (idx >=0){
