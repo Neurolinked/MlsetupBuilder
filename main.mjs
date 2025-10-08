@@ -2304,15 +2304,39 @@ ipcMain.on('main:scanFolder',()=>{
 		});
 })
 
+function mlMaskNameExplode(maskTemplate){
+	const ext = preferences.get("maskformat");
+	const response = {
+			customPath: "",
+			filetemplate: "",
+			actuallayer: "",
+			maskslayers: []
+		}
+	try{
+		response.customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
+		response.filetemplate = maskTemplate.split("\\").pop().toString();
+		response.actuallayer = response.filetemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
+	}catch(error){
+		mainWindow.webContents.send('preload:logEntry',`fn > mlmask name explosion - ${error}`,true)
+	}
+	return response
+}
+
+ipcMain.handle('main:getMaskset',(ev,maskTemplate)=>{
+});
+
 ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 	return new Promise((resolve,reject)=>{
-		var actualfile, fileTemplate, customPath
+		var actualfile, fileTemplate, customPath, maskLayers
+		
+		[actualfile, fileTemplate, customPath, maskLayers] = Object.values(mlMaskNameExplode(maskTemplate))
+		
 		try {
 			
-			customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
+			/* customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
 			fileTemplate = maskTemplate.split("\\").pop().toString();
 			let ext = preferences.get("maskformat");
-			actualfile = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
+			actualfile = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`) */
 			//var newpath = String(maskTemplate).replace(".mlmask","_layers\\");
 			var test = path.join(preferences.get('paths.depot'),customPath)
 			
