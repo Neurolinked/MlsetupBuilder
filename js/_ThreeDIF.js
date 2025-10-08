@@ -1126,8 +1126,24 @@ function MapTextures(textureObj){
  * to the right shader
  */
 async function ProcessStackTextures(){
-
 	texturePromise = textureDock.map((x)=>{return _getFileContent(x)});
+
+	/* textureDock.reduce((previousPromise,nextID)=>{
+			return previousPromise.then(()=>{
+				return _getFileContent(nextID)
+			});
+		},Promise.resolve())
+		.then(()=>{
+			clearTexturePanel();
+			textureDock.forEach((elm, index)=>{
+				console.log(index);
+			})
+		}).catch((error)=>{
+			notifyMe(error);
+		}).finally(()=>{
+
+		})
+				 */
 	clearTexturePanel();
 	/**
 	 * The approach map a promise the Settle all work in a
@@ -1551,8 +1567,9 @@ function LoadMaterials(path){
 		try {
 			if (tempMaterial!=''){
 				//Reset multilayer list for appearances
-				$("#Mlswitcher").html("");
-				$("#mLayerOperator").html("");
+				window.dispatchEvent(new CustomEvent('uicleanMlmaterial'));
+/* 				$("#Mlswitcher").html("");
+				$("#mLayerOperator").html(""); */
 				
 				var multilayerSwitch ="";
 				var multilayerMaskMenu = "";
@@ -1584,18 +1601,18 @@ function LoadMaterials(path){
 
 				// Defer textureDock;
 				if (materialLoaded){
-					$("#Mlswitcher").html(multilayerSwitch);
-					$("#mLayerOperator").html(multilayerMaskMenu);
-					$("#mLayerOperator li:nth-child(1)").addClass("active");
-					$("#Mlswitcher div:nth-child(1) input[type='radio']").prop("checked",true);
-	
-					//Appearances building
-					$("#appeInfo").html(materialJSON.codeAppearances());
-					$("#appearanceSwitcher ul").html(materialJSON.codeAppearances(`<li><a class="dropdown-item" data-name='$APPEARANCE$'>$APPEARANCE$</a></li>`));
+					const materialEventData = {
+						detail:{
+							mlSwitch:multilayerSwitch,
+							mlMaskMenu:multilayerMaskMenu,
+							appeInfo: materialJSON.codeAppearances(),
+							appeSwitch: materialJSON.codeAppearances(`<li><a class="dropdown-item" data-name='$APPEARANCE$'>$APPEARANCE$</a></li>`)
+						}
+					}
+					window.dispatchEvent(new CustomEvent("uiLoadMaterial",materialEventData));
 				}else{
 					//Appearances building
-					$("#appeInfo").html("");
-					$("#appearanceSwitcher ul").html("");
+					window.dispatchEvent(new CustomEvent("uiResetAppearance"));
 					throw new Error("Failed the Material Import");
 				}
 			}else{
@@ -1797,7 +1814,8 @@ $("#thacanvas").on("mouseover",function(event){
 				$("#layeringsystem li").removeClass("active");
 				$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
 
-				LoadModel(fileModel).then((ev)=>{
+				LoadModel(fileModel)
+				.then((ev)=>{
 					//load deferred textures in the textureDock
 					LoadStackTextures();
 					firstModelLoaded=true;
