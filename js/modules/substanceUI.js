@@ -45,13 +45,17 @@ class SubstanceLayer extends HTMLElement {
         })
     }
 
-    getActiveIndex(){
-        const child = this.shadowRoot.querySelector(`div.wrapper.active`);
+    getIndexBySelector(selector){
+        const child = this.shadowRoot.querySelector(`div.wrapper.${selector}`);
         if (child==undefined){
             return 0;
         }
         return this.getIndex(child);
     }
+
+    getSelectedIndex(){ return this.getIndexBySelector("selected"); }
+
+    getActiveIndex(){ return this.getIndexBySelector("active"); }
 
     getIndex(child=null){
         if (child!=null){
