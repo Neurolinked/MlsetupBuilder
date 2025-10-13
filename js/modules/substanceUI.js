@@ -290,6 +290,10 @@ class SubstanceLayer extends HTMLElement {
                         background-color:var(--bs-active);
                     }
                 }
+
+                &.selected{
+                    background-color:var(--bs-primary-border-subtle);         
+                }
             }
             `;
         //Events
@@ -308,6 +312,7 @@ class SubstanceLayer extends HTMLElement {
                 return;
             }
             enclosure.childNodes.forEach(element => {
+                element.classList.remove("selected")
                 if (element==layerDOM){
                     element.classList.add("active")
                 }else{
@@ -328,7 +333,10 @@ class SubstanceLayer extends HTMLElement {
             }
             enclosure.childNodes.forEach(element => {
                 if (element==layerDOM){
+                    element.classList.add("selected");
                     console.log(this.getIndex(element));
+                }else{
+                    element.classList.remove("selected");
                 }
             })
         })
