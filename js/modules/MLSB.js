@@ -36,7 +36,8 @@ class MLSBEditor {
     }
 
     UI = {
-        ready:false
+        ready:false,
+        substance:false
     }
 
     Materials = {}
