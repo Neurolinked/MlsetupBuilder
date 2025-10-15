@@ -1120,6 +1120,26 @@ function MapTextures(textureObj){
 	}
 }
 
+function getTHREEFormat(textureObject){
+	var result = THREE.RGBAFormat;
+	if (textureObject?.info.format=='DDS'){
+		if (textureObject?.info.bytes!=16){
+			switch (textureObject.info?.channels) {
+				case 1:
+					result = THREE.RedFormat
+					break;
+				case 2:
+					result = THREE.RGFormat;
+					break;
+				case 3:
+					result = THREE.RGBFormat;
+					break;
+			}
+		}
+	}
+	return result
+}
+
 /**
  * Async function that process every texture in the Stack
  * It takes elements from the Texture Doc and than apply
@@ -1130,20 +1150,21 @@ async function ProcessStackTextures(){
 
 	/* textureDock.reduce((previousPromise,nextID)=>{
 			return previousPromise.then(()=>{
-				return _getFileContent(nextID)
+				return _getFileContent(nextID).then((textureContent)=>{
+					nextID.content=textureContent;
+				})
 			});
 		},Promise.resolve())
 		.then(()=>{
-			clearTexturePanel();
-			textureDock.forEach((elm, index)=>{
-				console.log(index);
-			})
+			//clearTexturePanel();
+			//textureDock.forEach((elm, index)=>{	
+			//}) 
 		}).catch((error)=>{
 			notifyMe(error);
 		}).finally(()=>{
 
-		})
-				 */
+		}) */
+				
 	clearTexturePanel();
 	/**
 	 * The approach map a promise the Settle all work in a
@@ -1177,11 +1198,16 @@ async function ProcessStackTextures(){
 
 			let textureIndex = CryptoJS.MD5(textureDock[index].file)
 
-			var THREEFormat = THREE.RGBAFormat //Default format for PNGs
-
+			var THREEFormat = getTHREEFormat(textureDock[index]) //Default format for PNGs
 
 			if (textureDock[index].info.format=='DDS'){
-				if (textureDock[index].info.bytes==16){
+				textureStack[textureIndex] = new THREE.DataTexture(elm.value,
+								textureDock[index].info.width,
+								textureDock[index].info.height,
+								THREEFormat,
+								(textureDock[index].info.bytes==16 ? RGBA16UI : THREE.UnsignedByteType));
+
+				/* if (textureDock[index].info.bytes==16){
 					textureStack[textureIndex] = new THREE.DataTexture(elm.value,
 																	textureDock[index].info.width,
 																	textureDock[index].info.height,
@@ -1205,14 +1231,7 @@ async function ProcessStackTextures(){
 						textureDock[index].info.width,
 						textureDock[index].info.height,
 						THREEFormat);
-				}
-
-				/*paintDatas(elm.value,
-					textureDock[index].info.width,
-					textureDock[index].info.height,
-					target,
-					THREEFormat
-				) */
+				} */
 
 			}else if (textureDock[index].info.format=='PNG'){
 				textureStack[textureIndex] = new THREE.DataTexture(elm.value,
@@ -1272,9 +1291,10 @@ async function ProcessStackTextures(){
 					MapTextures(textureDock[index])
 					break;
 			}
-		/* 	if (textureDock[index].shader.userData?.type=='hair'){
-				console.log(`Bisogna snegrare`);
-			} */
+			
+			if (textureDock[index].shader.userData?.type=='hair'){
+				console.log(`hair shader`);
+			}
 		})
 	}).then(()=>{
 		$("#thacanvas").trigger("switchMlayer");
