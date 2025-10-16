@@ -2,6 +2,11 @@ window.$ = window.jQuery;
 const ml_randomized = [];
 var coreMblends = {};
 
+const copypasteManager = {
+  source:null,
+  destination:null
+}
+
 customElements.define("substance-layer", SubstanceLayer);
 
 function orderLevelsMetal(a,b){
@@ -154,7 +159,6 @@ $(window)
   $("#appearanceSwitcher ul").html("");
 
 }).on('uiLoadMaterial',function(ev){
-  console.log(ev.detail);
   $("#Mlswitcher").html(ev.detail?.mlSwitch);
   $("#mLayerOperator").html(ev.detail?.multilayerMaskMenu);
 
@@ -776,6 +780,7 @@ $(function(){
 
     if (ctrl && (key=='KeyU')){
       $(".UI-layer-switch").toggleClass("d-none");
+      MLSB.UI.substance = !$("#substanceUI").hasClass("d-none");
     }
     
     MLSB.Key.shiftPress = !MLSB.Key.shiftPress;
@@ -896,15 +901,22 @@ $(function(){
   const contextMenu = document.getElementById("layers-contextual");
   const layerscope = document.querySelector("#layeringsystem");
 
+  
+
   //Right click
-  $("#layeringsystem li").on("contextmenu",function(event){
-    if ($(this).attr("disabled")!="disabled"){
-        event.preventDefault();
-        indexLayerContextual = Number($(this).text());
-        //event.target.classList.add("active");
-        const { clientX: mouseX, clientY: mouseY } = event;
-        $("#layers-contextual").css("top",`${mouseY-60}px`).css("left",`${mouseX}px`);
-        $("#layers-contextual").addClass("visible");
+  $("substance-layer, #layeringsystem li").on("contextmenu",function(event){
+    if (MLSB.UI.substance){
+      //New UI
+      
+    }else{
+      //default UI
+      if ($(this).attr("disabled")!="disabled"){
+          event.preventDefault();
+          indexLayerContextual = Number($(this).text());
+          const { clientX: mouseX, clientY: mouseY } = event;
+          $("#layers-contextual").css("top",`${mouseY-60}px`).css("left",`${mouseX}px`);
+          $("#layers-contextual").addClass("visible");
+      }
     }
   });
 
@@ -984,9 +996,9 @@ $("#layerOpacity").on("input",function(ev){
           dataContextual.mbnormal = $("#layeringsystem li").eq(indexLayerContextual).data("mbnormal");
           dataContextual.mboffu = $("#layeringsystem li").eq(indexLayerContextual).data("mboffu");
           dataContextual.mboffv = $("#layeringsystem li").eq(indexLayerContextual).data("mboffv");
-          $("#layers-contextual li").eq(1).removeAttr("disabled");
-          $("#layers-contextual li").eq(3).removeAttr("disabled");
-					$("#layers-contextual li").eq(5).removeAttr("disabled");
+          $("#layers-contextual li[data-action='pstall']").removeAttr("disabled");
+          $("#layers-contextual li[data-action='pstmb']").removeAttr("disabled");
+					$("#layers-contextual li[data-action='pstcol']").removeAttr("disabled");
           break;
         case 'pstall':
           $("#layeringsystem li").eq(indexLayerContextual).data("labels",dataContextual.labels);
@@ -1029,18 +1041,6 @@ $("#layerOpacity").on("input",function(ev){
           });
           $("#layeringsystem li").eq(indexLayerContextual).click();
           break;
-        case 'cpmb':
-          dataContextual = {};
-          dataContextual.mblend = $("#layeringsystem li").eq(indexLayerContextual).data("mblend");
-          dataContextual.mbtile = $("#layeringsystem li").eq(indexLayerContextual).data("mbtile");
-          dataContextual.mbcontrast = $("#layeringsystem li").eq(indexLayerContextual).data("mbcontrast");
-          dataContextual.mbnormal = $("#layeringsystem li").eq(indexLayerContextual).data("mbnormal");
-          dataContextual.mboffu = $("#layeringsystem li").eq(indexLayerContextual).data("mboffu");
-          dataContextual.mboffv = $("#layeringsystem li").eq(indexLayerContextual).data("mboffv");
-          $("#layers-contextual li").eq(1).attr("disabled","disabled");
-          $("#layers-contextual li").eq(3).removeAttr("disabled");
-					$("#layers-contextual li").eq(5).attr("disabled","disabled");
-          break;
         case 'pstmb':
           $("#layeringsystem li").eq(indexLayerContextual).data("mblend",dataContextual.mblend);
           $("#layeringsystem li").eq(indexLayerContextual).data("mbtile",dataContextual.mbtile);
@@ -1058,13 +1058,6 @@ $("#layerOpacity").on("input",function(ev){
           });
           $("#layeringsystem li").eq(indexLayerContextual).click();
           break;
-				case 'cpcol':
-					dataContextual = {};
-					dataContextual.color = $("#layeringsystem li").eq(indexLayerContextual).data("color");
-					$("#layers-contextual li").eq(1).attr("disabled","disabled");
-          $("#layers-contextual li").eq(3).attr("disabled","disabled");
-					$("#layers-contextual li").eq(5).removeAttr("disabled");
-					break;
 				case 'pstcol':
 					$("#layeringsystem li").eq(indexLayerContextual).data("color",dataContextual.color);
 					$('#layeringsystem li').eq(indexLayerContextual).attr({"data-color":dataContextual.color});
@@ -1072,12 +1065,12 @@ $("#layerOpacity").on("input",function(ev){
 					break;
         case 'swapsrc':
           layerSwapstart = indexLayerContextual
-          $("#layers-contextual li").eq(7).removeAttr("disabled");
+          $("#layers-contextual li[data-action='swapdest']").removeAttr("disabled");
           break;
         case 'swapdest':
           if (layerSwapstart!=indexLayerContextual){
             mLsetup.swap(layerSwapstart,indexLayerContextual)
-            $("#layers-contextual li").eq(7).attr("disabled",'disabled');
+            $("#layers-contextual li[data-action='swapdest']").attr("disabled",'disabled');
           }else{
             notifyMe(`You really won't swap the layer with itself, right ?!?!??!`, true);
           }
@@ -1750,7 +1743,6 @@ $("#layerOpacity").on("input",function(ev){
   $("#layeringsystem li").mousemove(function(e){
       mouseX = e.clientX;
       mouseY = e.clientY;
-      //$("#floatLayer").css({ "left": `${(mouseX + 30)}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090, "background": `url(images/material/${materialName}.jpg) 0 0 no-repeat`, "background-size": " 128px,128px" });
       $("#floatLayer").css({ "left": `${(mouseX + 30)}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090 });
   });
 
