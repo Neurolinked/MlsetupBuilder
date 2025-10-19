@@ -132,9 +132,15 @@ class SubstanceLayer extends HTMLElement {
         })
     }
 
-    _trigger(type,index){
-        //To trigger events on window
-        window.dispatchEvent(new CustomEvent("substanceLayer",{detail:{action:type,layer:index}}));
+    /**
+     * 
+     * @param {string} type command to be executed in the window like 'switchLayer' or 'contextMenu'
+     * @param {number} index number of the layer to operate to
+     * @param {object} details additional details
+     * @returns 
+     */
+    _trigger(type,index,details=undefined){
+        window.dispatchEvent(new CustomEvent("substanceLayer",{detail:{action:type,layer:index,details:details}}));
     }
 
     connectedMoveCallback(){
@@ -338,7 +344,9 @@ class SubstanceLayer extends HTMLElement {
             enclosure.childNodes.forEach(element => {
                 if (element==layerDOM){
                     element.classList.add("selected");
-                    console.log(this.getIndex(element));
+                    this._trigger("contextMenu",this.getSelectedIndex(),{position:{x:e.clientX,y:e.clientY}})
+                    console.log(this.getSelectedIndex())
+                    console.log(e.clientX,e.clientY);
                 }else{
                     element.classList.remove("selected");
                 }
