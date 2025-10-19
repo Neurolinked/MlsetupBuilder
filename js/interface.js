@@ -55,6 +55,26 @@ function orderLevelsRough(a,b){
   }
 };
 
+/**
+ * 
+ * @param {object} mousePosition
+ * @param {number} mousePosition.x
+ * @param {number} mousePosition.y
+ * @param {number} layerIndex 
+ * @returns 
+ */
+  function showContextMenu(mousePosition,layerIndex){
+    if (!(mousePosition.hasOwnProperty("x") && mousePosition.hasOwnProperty("y"))){
+      return 
+    }
+    layerIndex = parseInt(layerIndex)
+    if (isNaN(layerIndex)){
+      return
+    }
+    $("#layers-contextual").attr("data-source",layerIndex);
+    $("#layers-contextual").css("top",`${mousePosition.y-60}px`).css("left",`${mousePosition.x}px`);
+    $("#layers-contextual").addClass("visible");
+  }
 
 function setQuestion(text,action=''){
   $("#winConfirm .modal-title").html(text);
@@ -68,6 +88,7 @@ $(window)
     //In case i Need something
     const action = ev.detail?.action
     const index = ev.detail?.layer
+    const details = ev.detail?.details
     
     console.log(MLSB.Editor.layerSelected,index)
 
@@ -76,6 +97,10 @@ $(window)
         MLSB.Editor.layerSelected=index;
         $("#thacanvas").trigger("switchLayer");
         break
+      case 'contextMenu':
+        const mousePosition = details?.position
+        showContextMenu(mousePosition,index);
+        break;
       default:
         console.log(ev.detail);
     }
@@ -901,22 +926,12 @@ $(function(){
   const contextMenu = document.getElementById("layers-contextual");
   const layerscope = document.querySelector("#layeringsystem");
 
-  
-
   //Right click
-  $("substance-layer, #layeringsystem li").on("contextmenu",function(event){
-    if (MLSB.UI.substance){
-      //New UI
-      
-    }else{
-      //default UI
-      if ($(this).attr("disabled")!="disabled"){
-          event.preventDefault();
-          indexLayerContextual = Number($(this).text());
-          const { clientX: mouseX, clientY: mouseY } = event;
-          $("#layers-contextual").css("top",`${mouseY-60}px`).css("left",`${mouseX}px`);
-          $("#layers-contextual").addClass("visible");
-      }
+  $("#layeringsystem li").on("contextmenu",function(event){
+    //default UI
+    if ($(this).attr("disabled")!="disabled"){
+        event.preventDefault();
+        showContextMenu({x:event.clientX,y:event.clientY},Number($(this).text()))
     }
   });
 
