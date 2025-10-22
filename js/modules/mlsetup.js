@@ -35,13 +35,34 @@ class Layer {
 	metalOut = 'null'
 	offsetU = 0.0
 	offsetV = 0.0
-	overrides = 0
+	overrides = 'None'
 	microblend = {
 			file : 'base\\surfaces\\microblends\\default.xbm',
 			tiles : 1.0,
 			contrast : 0.0,
 			normal : 1.0,
 			offset : { h:0.0, v:0.0}
+	}
+
+	constructor(_tiles=1.0,_material='base\\surfaces\\materials\\special\\unused.mltemplate',_opacity=1.0,_color='null_null',_normal='null',_roughIn='null',_roughOut='null',_metalIn='null',_metalOut='null',_offsetU=0.0,_offsetV=0.0,_overrides='None',_mbFile='base\\surfaces\\microblends\\default.xbm',_mbTiles=1.0,_mbContrast=0.0,_mbNormal=1.0,_mbOffsetU=0.0,_mbOffsetV=0.0){
+		this.tiles= parseFloat(_tiles);
+		this.material = String(_material);
+		this.opacity = parseFloat(_opacity)
+		this.color = String(_color)
+		this.normal = String(_normal)
+		this.roughnessIn = String(_roughIn)
+		this.roughnessOut = String(_roughIn)
+		this.metalIn = String(_metalIn)
+		this.metalOut = String(_metalOut)
+		this.offsetU = parseFloat(_offsetU)
+		this.offsetV = parseFloat(_offsetV)
+		this.overrides = String(_overrides)
+		this.microblend.file = String(_mbFile),
+		this.microblend.tiles = parseFloat(_mbTiles),
+		this.microblend.contrast = parseFloat(_mbContrast),
+		this.microblend.normal = parseFloat(_mbNormal),
+		this.microblend.offset.h = parseFloat(_mbOffsetU);
+		this.microblend.offset.v = parseFloat(_mbOffsetV);
 	}
 }
 
