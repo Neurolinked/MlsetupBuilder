@@ -281,7 +281,7 @@
 </ul>
 <div class="tab-content ps-1 layer1" id="nav-tabMLSB">
   <div class="tab-pane fade show active" id="nav-editor" role="tabpanel" aria-labelledby="pills-editor-tab" tabindex="-1">
-    <div id="MlSetupsList" class=""><span class="badge text-bg-active p-2" >UI</span></div>
+    <div id="MlSetupsList" class=""><span class="badge text-bg-active p-2 active" >UI</span></div>
 <!--The New Editor-->
     <div id="editor-container">
       <div id="MatSelector">
@@ -431,6 +431,7 @@
           </div>
           <div>
             <div class="input-group input-group-sm mt-1">
+              <input type="hidden" id="layerMetalIn" value="null">
               <div class="badge my-auto">Metal</div><span class="input-group-text border-0">Out</span>
               <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
                 <optgroup id="defaultMetalOut" label='Reset'><option value="null">null</option></optgroup>
@@ -441,6 +442,13 @@
         </div>
       </div>
     </div>
+    <div class="border border-secondary">
+      <div class="input-group">
+        <div class="badge my-auto">Override</div>
+        <input type="text" class="form-control rounded-0 " id="matOverride" data-default="None" value="None" disabled>
+      </div>
+    </div>
+    <span class="d-block ps-2 bg-secondary">Material</span>
     <div class="input-group mb-1">
       <input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
       <button class="btn d-inline-block btn-sm float-end rounded copyMe" type="button">Copy</button>

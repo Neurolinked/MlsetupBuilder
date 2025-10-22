@@ -683,6 +683,23 @@ table.dataTable tr:hover td:not([colspan]){
     font-weight: 700;
     display:inline-block;
   }
+  & > span{
+    color: #fff !important;
+    background-color: RGBA(var(--bs-dark-rgb), var(--bs-bg-opacity, 1)) !important;
+    &.active{
+      color: #fff !important;
+      background-color: RGBA(var(--bs-secondary-rgb), var(--bs-bg-opacity, 1)) !important;
+    }
+
+    &:first-child{
+      color:#FFF ! important;
+      background-color:RGBA(var(--bs-layer2-rgb), var(--bs-bg-opacity, 1)) !important;
+      &.active{
+        color: #000 !important;
+        background-color: RGBA(var(--bs-active-rgb), var(--bs-bg-opacity, 1)) !important;
+      }
+    }
+  }
 }
 .multiplier:after{
   content:  " * "attr(data-mul);
