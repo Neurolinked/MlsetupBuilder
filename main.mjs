@@ -2064,6 +2064,7 @@ async function listMaterials(){
 				normalize: true,
 				extensions: ["json"],
 				excludeEmptyDirectories:true,
+				matches:/.+\.mltemplate\.json$/
 			}
 			list_files(depotfiles,options)
 			.then(function (tree) {
@@ -2074,7 +2075,7 @@ async function listMaterials(){
 		return `Path not accessible : ${depotfiles}`;
 	})
 }
-//const a = await listMaterials()
+/* const a = await listMaterials() */
 
 
 
@@ -2310,7 +2311,8 @@ function mlMaskNameExplode(maskTemplate){
 			customPath: "",
 			filetemplate: "",
 			actuallayer: "",
-			maskslayers: []
+			maskslayers: [],
+			extension: ext
 		}
 	try{
 		response.customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
@@ -2322,36 +2324,59 @@ function mlMaskNameExplode(maskTemplate){
 	return response
 }
 
-ipcMain.handle('main:getMaskset',(ev,maskTemplate)=>{
+ipcMain.handle('main:getMasksset',(ev,maskTemplate)=>{
+
 });
 
 ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 	return new Promise((resolve,reject)=>{
 		var actualfile, fileTemplate, customPath, maskLayers
-		
-		[actualfile, fileTemplate, customPath, maskLayers] = Object.values(mlMaskNameExplode(maskTemplate))
+		let temp = mlMaskNameExplode(maskTemplate)
+
+		actualfile = temp.actuallayer
+		fileTemplate = temp.filetemplate
+		customPath = temp.customPath
+		maskLayers = temp.maskslayers
 		
 		try {
-			
-			/* customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
-			fileTemplate = maskTemplate.split("\\").pop().toString();
-			let ext = preferences.get("maskformat");
-			actualfile = fileTemplate.replace(".mlmask",`_\\d+\\.${ext}$`) */
-			//var newpath = String(maskTemplate).replace(".mlmask","_layers\\");
 			var test = path.join(preferences.get('paths.depot'),customPath)
-			
-			fs.readdir(test,{recursive:false},(err,files)=>{
-				if (!err){
-					let res = files.filter((el) =>{
-						return el.match(actualfile)
-					})
-					resolve(res.length)
-				}else{
-					log.info(`${actualfile} not found`);
-					mainWindow.webContents.send('preload:logEntry',`${err}`,true)
-					reject(false)
+
+			const options = {
+				stat:false,
+				followLinks:false,
+				hash:true,
+				sizeInBytes: false,
+				size: false,
+				normalize: true,
+				extensions: [temp?.extension],
+				excludeEmptyDirectories:true,
+				matches:new RegExp(actualfile)
+			}
+
+			list_files(test,options)
+			.then(function (tree) {
+				
+				if (tree?.children.length > 0){
+					
+/* 					const allLayers = Array(20).fill(false,0,19);
+					const onlyFileNames = tree.children.map((x)=> x.name )
+					//generate the list of files of the masks
+					for(let i=0 , j=tree.children.length; i < j; i++){
+
+						let unmaskedFile = actualfile.replace("\\d+\\",i).replace("$","")
+						if (onlyFileNames.includes(unmaskedFile)){
+							allLayers[i] = unmaskedFile
+						}
+					} */
+
+					resolve(tree.children.length)
 				}
-			})
+				resolve(0)
+			}).catch((error)=>{
+				log.info(`${actualfile} not found`);
+				mainWindow.webContents.send('preload:logEntry',`${error}`,true)
+				resolve(0)
+			});
 		} catch (error) {
 			mainWindow.webContents.send('preload:logEntry',`${error}, '${maskTemplate}'`);
 			reject(false);
