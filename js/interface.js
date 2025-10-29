@@ -609,7 +609,7 @@ $(function(){
       $("#mb-preview").appendTo("#SettingsSummary");
       $("#SettingsSummary").append(`<div class='cube tint'> </div>
         <div id="rc-ColorSelector" style="display:none;">
-          <div></div>
+          <div class="colorSelector"></div>
         </div>`);
       $("#cagecolors span.active").click();
       $("#Mlswitcher").parent().attr('open','');
@@ -1903,6 +1903,17 @@ $("#layerOpacity").on("input",function(ev){
     }
     colorCode.sort(sort_color)
     colorCode.appendTo("#cagecolors, #rc-ColorSelector > div");
+    $(".colorSelector span").on("click",(ev)=>{
+      $(".colorSelector span").removeClass("active");
+      $(`.colorSelector span[title='${$("#layerColor").val()}']`).addClass("active");
+
+      if (ev.target.parentNode.getAttribute("id")!=null){
+        //cagecolors
+      }else{
+
+      }
+      
+    });
   }
 
 
