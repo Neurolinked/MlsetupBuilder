@@ -1304,7 +1304,10 @@ $("#layerOpacity").on("input",function(ev){
 	$("#layeringsystem li").click(function(e){
 
 		if (!$(this).attr("disabled")){
+
       MLSB.Editor.layerSelected = $(this).index();
+      applyInEditor();
+
       //activate the new one only if isn't disabled
 			$('#layeringsystem li').removeClass('active notsync');
       //sync with the mask paint editor
@@ -1879,7 +1882,40 @@ $("#layerOpacity").on("input",function(ev){
 		$("#floatMat").addClass('d-none');
 	});
 
+  function uiBuildMaterialColorCode(chosenMaterial){
+    let cageColorHtml = '';
+    Object.entries(chosenMaterial.colors.list).forEach(([key,value])=>{
+      toodarkClass='';
+      //check brightness
+      let colorchecking = tinycolor.fromRatio({r:value[0],g:value[1],b:value[2]});
+      if (!tinycolor.isReadable(colorchecking,"#3c454d")){
+        toodarkClass='bg-light';
+      }
+      cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-oklab="${rgb2lab([value[0],value[1],value[2]])[0]}" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${key}" alt="${key}" >&nbsp;</span>`;
+    })
 
+    let colorCode = $(cageColorHtml)
+
+    if (!chosenMaterial.colors.list[$("#layerColor").val()]){
+      colorCode.find(`span[title='${chosenMaterial.colors.default}']`).addClass("active")
+    }else{
+      colorCode.find(`span[title='${$("#layerColor").val()}']`).addClass("active")
+    }
+    colorCode.sort(sort_color)
+    colorCode.appendTo("#cagecolors, #rc-ColorSelector > div");
+  }
+
+
+  function uiBuildMaterialEditorList(list,template){
+    if (typeof(list)!="object"){
+      return '';
+    }
+    let listCode = '';
+    for( const [key,value] of Object.entries(list)){
+      listCode += template.replaceAll("KEY",`${key}`).replaceAll("VALUESTRING",`${value.toString()}`).replaceAll("VALUE",`${value}`)
+    }
+    return listCode
+  }
 
   function uiSwitchMaterial(){
     var chosenMaterial = MLSB.getMaterial();
@@ -1899,7 +1935,6 @@ $("#layerOpacity").on("input",function(ev){
     $("#matInput").val(chosenMaterial.file);  // path of the material
     $("#matInput").trigger("change"); //trigger the check on the level configuration change
 
-
     //reflect on UI the material swap
     switchLegacyMat(MLSB.TreeD.lastMaterial);
     drawMaterial(MLSB.TreeD.lastMaterial);
@@ -1910,34 +1945,45 @@ $("#layerOpacity").on("input",function(ev){
     $("#Norm_Pow_values").html('');
     $("#cagecolors").html('');
     $("#rc-ColorSelector div").html("");
-    let toodarkClass;
     
     if ($("#BWAdd").is(":checked")){
+      //if there is not Black and white color, they will be added
       if (!chosenMaterial.colors.list.hasOwnProperty("000000_null")){
         chosenMaterial.colors.list['000000_null']=[0,0,0];
         chosenMaterial.colors.list['ffffff_null']=[255,255,255];
       }
     }
 
-    //will be replaced
-    let cageColorHtml = '';
-    Object.entries(chosenMaterial.colors.list).forEach(([key,value])=>{
-      toodarkClass='';
-      //check brightness
-      let colorchecking = tinycolor.fromRatio({r:value[0],g:value[1],b:value[2]});
-      if (!tinycolor.isReadable(colorchecking,"#3c454d")){
-        toodarkClass='bg-light';
-      }
-      cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-oklab="${rgb2lab([value[0],value[1],value[2]])[0]}" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${key}" alt="${key}" >&nbsp;</span>`;
-    })
-    $("#cagecolors").append(cageColorHtml);
+    uiBuildMaterialColorCode(chosenMaterial);
 
-    Object.entries(chosenMaterial.roughness.IN.list).forEach(([key,value])=>{
+    $("#Rough_In_values").html(
+      uiBuildMaterialEditorList(
+        chosenMaterial.roughness.IN.list,
+        `<option value="KEY">KEY (VALUESTRING)</option>`
+        )
+      )
+    
+    /* Object.entries(chosenMaterial.roughness.IN.list).forEach(([key,value])=>{
       $("#Rough_In_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-    });
+    }); */
 
-      
+    var reOrderbyLevels = chosenMaterial.roughness.OUT.list
     if (PARAMS.sortLevels){
+      let sortedRoughByLevels = Object.entries(reOrderbyLevels).sort(orderLevelsRough)
+      reOrderbyLevels = {}
+      sortedRoughByLevels.forEach((rough)=>{
+        reOrderbyLevels[`${rough[0]}`]=rough[1]
+      })
+    }
+
+    $("#Rough_out_values").html(
+      uiBuildMaterialEditorList(
+        reOrderbyLevels,
+        `<option value="KEY">KEY (VALUESTRING)</option>`
+      )
+    )
+
+    /* if (PARAMS.sortLevels){
       let reOrderbyLevels = Object.entries(chosenMaterial.roughness.OUT.list);
       let orderedRoughByLevels = reOrderbyLevels.sort(orderLevelsRough)
       orderedRoughByLevels.forEach(([key,value])=>{
@@ -1948,15 +1994,37 @@ $("#layerOpacity").on("input",function(ev){
       Object.entries(chosenMaterial.roughness.OUT.list).forEach(([key,value])=>{
         $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
       });
-    }
+    } */
 
     //Normal Strenght
-    Object.entries(chosenMaterial.normal.list).forEach(([key,value])=>{
+    /* Object.entries(chosenMaterial.normal.list).forEach(([key,value])=>{
       $("#Norm_Pow_values").append(`<option value="${key}" data-force='${key}' >${key} (${String(value)})</option>`);
-    });
+    }); */
+
+    $("#Norm_Pow_values").html(
+      uiBuildMaterialEditorList(
+        chosenMaterial.normal.list,
+        `<option value="KEY" data-force='KEY' >KEY (VALUESTRING)</option>`
+        )
+    )
 
     //Metal Out
+    var reOrderbyLevels = chosenMaterial.metal.OUT.list
     if (PARAMS.sortLevels){
+      let sortedMetalByLevels = Object.entries(reOrderbyLevels).sort(orderLevelsMetal)
+      reOrderbyLevels = {}
+      sortedMetalByLevels.forEach((rough)=>{
+        reOrderbyLevels[`${rough[0]}`]=rough[1]
+      })
+    }
+
+    $("#Metal_Out_values").html(
+      uiBuildMaterialEditorList(
+        reOrderbyLevels,
+        `<option value="KEY">KEY (VALUESTRING)</option>`
+      )
+    )
+    /* if (PARAMS.sortLevels){
       let metOrderbyLevels = Object.entries(chosenMaterial.metal.OUT.list);
       let orderedMetalByLevels = metOrderbyLevels.sort(orderLevelsMetal)
       orderedMetalByLevels.forEach(([key,value])=>{
@@ -1966,7 +2034,9 @@ $("#layerOpacity").on("input",function(ev){
       Object.entries(chosenMaterial.metal.OUT.list).forEach(([key,value])=>{
         $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value})</option>`);
       });
-    }
+    } */
+
+    return
 
     $("#cagecolors span").sort(sort_color).appendTo("#cagecolors, #rc-ColorSelector > div");
     if (!chosenMaterial.colors.list[$("#layerColor").val()]){
@@ -2001,113 +2071,6 @@ $("#layerOpacity").on("input",function(ev){
     const materialName = $(this).data('ref')
     MLSB.TreeD.lastMaterial = materialName
     uiSwitchMaterial();
-    return;
-    var chosenMaterial = MLSB.getMaterial();
-    
-    if (chosenMaterial!=undefined){
-      
-      //Trigger a new texture material Loading only if the material is changed
-      if ($("#matInput").val()!=chosenMaterial.file){
-        $("#thacanvas").trigger("renderMaterial",chosenMaterial); //trigger the loading of a new Material
-        $(".multiplier").attr("data-mul",chosenMaterial.xTiles.toFixed(2));
-      }
-      $("#materialSummary").html(materialName); //name of the material
-      $("#matInput").val(chosenMaterial.file);  // path of the material
-      $("#matInput").trigger("change"); //trigger the check on the level configuration change
-      
-      //reflect on UI the material swap
-      switchLegacyMat(materialName);
-      drawMaterial(materialName);
-      //Reset fields values in the interface
-      $("#Rough_out_values").html('');
-			$("#Metal_Out_values").html('');  
-			$("#Rough_In_values").html('');
-			$("#Norm_Pow_values").html('');
-			$("#cagecolors").html('');
-      $("#rc-ColorSelector div").html("");
-      let toodarkClass;
-
-      if ($("#BWAdd").is(":checked")){
-        if (!chosenMaterial.colors.list.hasOwnProperty("000000_null")){
-          chosenMaterial.colors.list['000000_null']=[0,0,0];
-          chosenMaterial.colors.list['ffffff_null']=[255,255,255];
-        }
-      }
-      let cageColorHtml = '';
-      Object.entries(chosenMaterial.colors.list).forEach(([key,value])=>{
-        toodarkClass='';
-        //check brightness
-				let colorchecking = tinycolor.fromRatio({r:value[0],g:value[1],b:value[2]});
-				if (!tinycolor.isReadable(colorchecking,"#3c454d")){
-					toodarkClass='bg-light';
-				}
-        cageColorHtml+=`<span style="background-color:${colorchecking.toRgbString()};" data-oklab="${rgb2lab([value[0],value[1],value[2]])[0]}" data-lum="${colorchecking.getLuminance()}" data-order="${key}" title="${key}" alt="${key}" >&nbsp;</span>`;
-      })
-      $("#cagecolors").append(cageColorHtml);
-
-      //Roughness IN
-      Object.entries(chosenMaterial.roughness.IN.list).forEach(([key,value])=>{
-				$("#Rough_In_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-			});
-
-      
-      if (PARAMS.sortLevels){
-        let reOrderbyLevels = Object.entries(chosenMaterial.roughness.OUT.list);
-        let orderedRoughByLevels = reOrderbyLevels.sort(orderLevelsRough)
-        orderedRoughByLevels.forEach(([key,value])=>{
-          $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-        })
-      }else{
-        //Roughness OUT
-        Object.entries(chosenMaterial.roughness.OUT.list).forEach(([key,value])=>{
-          $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-        });
-      }
-
-      //Normal Strenght
-      Object.entries(chosenMaterial.normal.list).forEach(([key,value])=>{
-				$("#Norm_Pow_values").append(`<option value="${key}" data-force='${key}' >${key} (${String(value)})</option>`);
-			});
-
-      //Metal Out
-      if (PARAMS.sortLevels){
-        let metOrderbyLevels = Object.entries(chosenMaterial.metal.OUT.list);
-        let orderedMetalByLevels = metOrderbyLevels.sort(orderLevelsMetal)
-        orderedMetalByLevels.forEach(([key,value])=>{
-          $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value.toString()})</option>`);
-        })
-      }else{
-        Object.entries(chosenMaterial.metal.OUT.list).forEach(([key,value])=>{
-          $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value})</option>`);
-        });
-      }
-    }else{
-      console.log(
-        `%c No material override entry loaded for:  ${materialName} `,"color:blue;background-color: white;"
-      );
-      notifyMe("Material Inexistent in the DB, import it");
-      return;
-    }
-
-    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors, #rc-ColorSelector > div");
-    
-    if (!chosenMaterial.colors.list[$("#layerColor").val()]){
-      $("#cagecolors span[title='"+chosenMaterial.colors.default+"']").click();
-    }
-    let ricercacolore = $("#layerColor").val();
-    
-    $("#rc-ColorSelector > div span").on("click",function(){
-      //TODO unify events on color select.
-      $(`#cagecolors span[title='${$(this).attr("title")}']`).click();
-    })
-    
-    if ($("#cagecolors span[title='"+ricercacolore+"']").length>0){
-      $("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
-    }else{
-      notifyMe(`The color ${ricercacolore} isn't present in the material ${materialName}`);
-    }
-    $("#colorLbFinder").keyup();
-
 	});
 
   $("#colorLbFinder").keyup(function () {
