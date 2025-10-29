@@ -66,7 +66,15 @@ class SubstanceLayer extends HTMLElement {
         return null;
     }
 
+    setActive(index){
+        this.shadowRoot.querySelectorAll("div.wrapper").forEach((el)=>{
+            el.classList.remove("active")
+        })
+        this.shadowRoot.querySelector(`div.wrapper:nth-child(${index + 1})`).classList.add("active");
+    }
+
     setMask(index,imageData){
+        //TODO implement mask loading
         console.log(imagedata);
     }
     /**
@@ -75,18 +83,34 @@ class SubstanceLayer extends HTMLElement {
      * @param {Object} mblend the whole mblend object
      */
     setMblend(index,mblend){
+        /**
+         *  TODO address custom microblends loaded into MLSB
+         * need to get package and name or just the corresponding
+         * file name in the UI
+         */
+        if (mblend.includes("base\\surfaces\\microblends")){
+            mblend = mblend.split("\\").reverse()[0]
+        }else{
+
+        }
         const file = mblend.split(".xbm")[0];
         const layer = parseInt(index);
         if ((layer>=0) && (layer<20)){
             const affectedlayer = this.shadowRoot.querySelector(`.wrapper:nth-child(${layer+1}) img.microblend`)
-            
-            affectedlayer.src = `./images/${file}.png`
+            if (file.includes("./images")){
+                affectedlayer.src = file
+            }else{
+                affectedlayer.src = `./images/${file}.png`
+            }
             affectedlayer.title = `${file}`
         }
     }
 
 
     setMaterial(index,material="unused"){
+        if (material.includes("\\")){
+            material = material.split("\\").reverse()[0].split(".")[0]
+        }
         const layer = parseInt(index);
         if ((layer>=0) && (layer<20)){
             const affectedlayer = this.shadowRoot.querySelector(`.wrapper:nth-child(${layer+1}) img.material`)
@@ -102,8 +126,9 @@ class SubstanceLayer extends HTMLElement {
         }
         const layer = parseInt(index);
         if ((layer>=0) && (layer<20)){
+            var lightness = color[0]+color[1]+color[2] > 1.9 ? 'black':'white';
             const affectedColorSwatch = this.shadowRoot.querySelector(`.wrapper:nth-child(${index+1}) span.colorswatch`)
-            affectedColorSwatch.setAttribute("style",`background-color:rgb(${Math.floor(255*color[0])} ${Math.floor(255*color[1])} ${Math.floor(255*color[2])})`)
+            affectedColorSwatch.setAttribute("style",`background-color:rgb(${Math.floor(255*color[0])} ${Math.floor(255*color[1])} ${Math.floor(255*color[2])});color:${lightness}`)
             affectedColorSwatch.innerText = `R:${Math.floor(color[0]*100)}%\n G:${Math.floor(color[1]*100)}%\nB:${Math.floor(color[2]*100)}%`;
         }
     }
@@ -330,7 +355,7 @@ class SubstanceLayer extends HTMLElement {
                 }
             });
             
-            this.reset();
+            //this.reset();
             this._trigger("switchLayer",this.getActiveIndex())
         });
         
@@ -353,7 +378,26 @@ class SubstanceLayer extends HTMLElement {
             })
         })
 
-        this.addEventListener("material",(e)=>{
+        this.addEventListener("update",(e)=>{
+            if (e.detail.hasOwnProperty("material")){
+                this.setMaterial(e.detail.layer, e.detail.material);    
+            }
+            if (e.detail.hasOwnProperty("opacity")){
+                this.setOpacity(e.detail.layer, e.detail.opacity);    
+            }
+            if (e.detail.hasOwnProperty("microblend")){
+                this.setMblend(e.detail.layer, e.detail.microblend);    
+            }
+            if (e.detail.hasOwnProperty("color")){
+                this.setColor(e.detail.layer, e.detail.color); 
+            }
+        })
+
+        this.addEventListener("setActive",(e)=>{
+            this.setActive(e.detail.layer);
+        })
+
+        /* this.addEventListener("material",(e)=>{
             this.setMaterial(e.detail.layer, e.detail.material);
         })
 
@@ -361,11 +405,12 @@ class SubstanceLayer extends HTMLElement {
             this.setOpacity(e.detail.layer, e.detail.opacity);
         })
         this.addEventListener("setMblend",(e)=>{
-            this.setMblend(e.detail.layer,e.detail.mblend);
+            this.setMblend(e.detail.layer,e.detail.microblend);
         })
         this.addEventListener("color",(e)=>{
             this.setColor(e.detail.layer, e.detail.color);
-        })
+        }) */
+
         this.addEventListener("reset",(e)=>{
             this.reset();
         })
@@ -375,6 +420,11 @@ class SubstanceLayer extends HTMLElement {
         this.addEventListener("enable",(e)=>{
             this.enable();
         })
+
+        /**
+         * TODO implement a multiaction event
+         * like a layer of actions to change everything in one layer of the UI
+         * */
         
         if (!(shadow.hasChildNodes())){
             shadow.appendChild(style);
