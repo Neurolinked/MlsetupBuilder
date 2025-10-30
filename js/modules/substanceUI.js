@@ -129,7 +129,7 @@ class SubstanceLayer extends HTMLElement {
             var lightness = color[0]+color[1]+color[2] > 1.9 ? 'black':'white';
             const affectedColorSwatch = this.shadowRoot.querySelector(`.wrapper:nth-child(${index+1}) span.colorswatch`)
             affectedColorSwatch.setAttribute("style",`background-color:rgb(${Math.floor(255*color[0])} ${Math.floor(255*color[1])} ${Math.floor(255*color[2])});color:${lightness}`)
-            affectedColorSwatch.innerText = `R:${Math.floor(color[0]*100)}%\n G:${Math.floor(color[1]*100)}%\nB:${Math.floor(color[2]*100)}%`;
+            affectedColorSwatch.innerText = `R:${Math.round(color[0]*100)}%\n G:${Math.round(color[1]*100)}%\nB:${Math.round(color[2]*100)}%`;
         }
     }
     
