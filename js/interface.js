@@ -195,7 +195,7 @@ function convLayersMlsetup(mlsetupTarget){
 
 function applyInEditor(){
   let activeMLTab = getActiveMultilayerSetup();
-  let layersSelected = MLSB.getMlsetup(activeMLTab).Layers[MLSB.Editor.layerSelected];
+  let layersSelected = MLSB.getMllayer(activeMLTab); //MLSB.getMlsetup(activeMLTab).Layers[MLSB.Editor.layerSelected];
   $("#layerTile").val(layersSelected.tiles);
   $("#matInput").val(layersSelected.material).trigger("change");
   $(window).trigger("uiMaterialSelect",layersSelected.material);
@@ -2109,8 +2109,8 @@ $("#layerOpacity").on("input",function(ev){
     }else{
       $("#cagecolors").attr("data-index","order")
     }
-    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors");
-    $("#rc-ColorSelector > div span").sort(sort_color).appendTo("#rc-ColorSelector > div");
+    $("#cagecolors span").sort(sort_color).appendTo(".colorSelector");
+    /* $("#rc-ColorSelector > div span").sort(sort_color).appendTo("#rc-ColorSelector > div"); */
   });
 
   function sort_color(a, b,attribute = $("#cagecolors").attr("data-index")){

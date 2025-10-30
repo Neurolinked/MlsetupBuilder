@@ -73,6 +73,13 @@ class MLSBEditor {
         return this.MlSetups[index];
     }
 
+    getMllayer(index){
+        if (this.MlSetups[index]?.Layers.length > index ){
+            return this.MlSetups[index].Layers[this.Editor.layerSelected]
+        }
+        return false;
+    }
+
     addMlsetup(mlsetup){
         try{
             if (mlsetup instanceof Mlsetup){
