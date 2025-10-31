@@ -700,6 +700,7 @@ $(function(){
     img.src = `./images/material/${materialChoose}.jpg`
   }
 
+  MLSB.TreeD.lastMaterial = "unused";
   drawMaterial("unused");
 
   function uiSetMaterial(materialName,materialEntry){
@@ -852,7 +853,7 @@ $(function(){
       if (MLSB.UI.substance){
         sbUI.dispatchEvent(new CustomEvent("setActive",{detail:{layer:MLSB.Editor.layerSelected}}))
 
-        let limitLayers = MLSB.getMlsetup(activeMlSetup).Layers.length
+        let limitLayers = MLSB.getMlsetup(activeMlSetup)?.Layers.length
         if (limitLayers>0){
           sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:limitLayers}}))
         }
@@ -1882,6 +1883,39 @@ $("#layerOpacity").on("input",function(ev){
 		$("#floatMat").addClass('d-none');
 	});
 
+
+  function uiColorPercentage(color){
+    if ((typeof(color)=='object') && (color?.length==3)){
+      return `red.${Math.round(color[0]*100)}%\n green.${Math.round(color[1]*100)}%\n blue.${Math.round(color[2]*100)}%`;
+    }
+    return `R:50%\n G:50%\nB:50%`
+  }
+  //This will set the color in the interface
+  function uiApplyColor(colorObject){
+    if (!(
+      colorObject.hasOwnProperty("label") &&
+      colorObject.hasOwnProperty("rgb") &&
+      colorObject.hasOwnProperty("percentageString") &&
+      colorObject.hasOwnProperty("style")
+    )){
+      colorObject.label="unused";
+      colorObject.rgb=[.5,.5,.5];
+      colorObject.percentageString = `red.50%\ngreen.50%\nblue.50%`
+      colorObject.style = `rgb(128,128,128)`
+    }
+
+    $(".colorSelector span").removeClass("active");
+    $(`.colorSelector span[title='${colorObject.label}']`).addClass("active");
+    $(".tint").prop('style',`background-color: oklab(from ${colorObject.style} l a b) !important;`);
+    if ($(".cube.tint")){
+        //$(".cube.tint").attr("data-color",`red.${colorSelected.rgb[0]}\r\ngreen.${colorSelected.rgb[1]}\r\nblue.${colorSelected.rgb[2]}\r\n`)
+        $(".cube.tint").attr("data-color",colorObject.percentageString)
+    }
+    $("#colorPntage").html(colorObject.percentageString);
+    $("#layerColor").val(colorObject.label).change();
+    $("#colorManagament").html(colorObject.label);
+  }
+
   function uiBuildMaterialColorCode(chosenMaterial){
     let cageColorHtml = '';
     Object.entries(chosenMaterial.colors.list).forEach(([key,value])=>{
@@ -1895,24 +1929,37 @@ $("#layerOpacity").on("input",function(ev){
     })
 
     let colorCode = $(cageColorHtml)
+    let colorLabel = chosenMaterial.colors.list[$("#layerColor").val()] ? chosenMaterial.colors.list[$("#layerColor").val()] : chosenMaterial.colors.default ;
 
-    if (!chosenMaterial.colors.list[$("#layerColor").val()]){
-      colorCode.find(`span[title='${chosenMaterial.colors.default}']`).addClass("active")
-    }else{
-      colorCode.find(`span[title='${$("#layerColor").val()}']`).addClass("active")
-    }
+    colorCode.find(`span[title='${colorLabel}']`).addClass("active")
     colorCode.sort(sort_color)
     colorCode.appendTo("#cagecolors, #rc-ColorSelector > div");
+
+    //Add events
     $(".colorSelector span").on("click",(ev)=>{
-      $(".colorSelector span").removeClass("active");
-      $(`.colorSelector span[title='${$("#layerColor").val()}']`).addClass("active");
-
-      if (ev.target.parentNode.getAttribute("id")!=null){
-        //cagecolors
-      }else{
-
+      if (!MLSB.UI.substance){
+        if ($("#layeringsystem li.active").length!=1) {
+          //window.alert("first select a layer, then operate");
+          alertMe("Select a Layer before trying to change colors");
+        }
       }
-      
+
+      let material = MLSB.getMaterial()
+      const colorSwatch = ev.target
+
+      const colorSelected = {
+        label: colorSwatch.getAttribute("title"),
+        rgb : null,
+        percentageString: null,
+        style: colorSwatch.style.getPropertyValue("background-color")
+      }
+
+      colorSelected.rgb = material?.colors.list[colorSwatch.getAttribute("title")];
+      colorSelected.percentageString = uiColorPercentage(colorSelected.rgb)
+
+      uiApplyColor(colorSelected);
+      //trigger color change
+      $("#thacanvas").trigger('changeColor', [colorSelected.style] );
     });
   }
 
@@ -2048,24 +2095,6 @@ $("#layerOpacity").on("input",function(ev){
     } */
 
     return
-
-    $("#cagecolors span").sort(sort_color).appendTo("#cagecolors, #rc-ColorSelector > div");
-    if (!chosenMaterial.colors.list[$("#layerColor").val()]){
-      $("#cagecolors span[title='"+chosenMaterial.colors.default+"']").click();
-    }
-    let ricercacolore = $("#layerColor").val();
-    
-    $("#rc-ColorSelector > div span").on("click",function(){
-      //TODO unify events on color select.
-      $(`#cagecolors span[title='${$(this).attr("title")}']`).click();
-    })
-    
-    if ($("#cagecolors span[title='"+ricercacolore+"']").length>0){
-      $("#cagecolors span[title='"+ricercacolore+"']").addClass("active");
-    }else{
-      notifyMe(`The color ${ricercacolore} isn't present in the material ${materialName}`);
-    }
-    $("#colorLbFinder").keyup();
   }
 
   //Click on material to swap it
@@ -2239,22 +2268,13 @@ $("#layerOpacity").on("input",function(ev){
      }
   })
 
-	$("body").on('click','#cagecolors span',function(){
-    if (!MLSB.UI.substance){
-      if ($("#layeringsystem li.active").length!=1) {
-        //window.alert("first select a layer, then operate");
-        alertMe("Select a Layer before trying to change colors");
-      }
-    }
-    /* retarget the colors chosen*/
 
-		$("#cagecolors span").removeClass('active');
-		$(this).addClass('active');
-
+  //TODO put this into uiBuildMaterialColorCode function
+	/* $("body").on('click','#cagecolors span',function(){
 		let colorchanger = $(this).attr("title");
     let colorSwatchValue = $(this).css("background-color")
     $("#thacanvas").trigger('changeColor', [colorSwatchValue] ); //will trigger the color change for the selected material
-    $(".tint").prop('style','background-color: oklab(from '+colorSwatchValue+" l a b) !important;");
+    //$(".tint").prop('style','background-color: oklab(from '+colorSwatchValue+" l a b) !important;");
 	  let choosed_color = tinycolor(colorSwatchValue);
     if ($(".cube.tint")){
       let dummyCol = choosed_color.toPercentageRgb()
@@ -2263,7 +2283,7 @@ $("#layerOpacity").on("input",function(ev){
 	  $("#colorPntage").html(choosed_color.toPercentageRgbString());
     $("#layerColor").val(colorchanger).change();
     $("#colorManagament").html(colorchanger);
-	});
+	}); */
 
   $("body").on("click","#cagethemicroblends li",function(ev){
     var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
