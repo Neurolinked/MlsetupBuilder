@@ -3831,6 +3831,8 @@ unCooKonfirm.addEventListener("click", (event) => {
     }
   }
   uiSetMaterial(keyName,MLSB.Materials[keyName]);
-})
+}).on('changeMBBackground',(ev)=>{
+  $("#mb-preview").css("background-color",PARMAS.mbBackColor);
+});
 
 });

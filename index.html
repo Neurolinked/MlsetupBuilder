@@ -532,6 +532,14 @@
         </div>
       <details open>
         <summary class="bg-normal text-black">&micro;blends Parameters</summary>
+
+        <nav class="navbar layer-3">
+          <form class="container-fluid justify-content-start">
+            <button class="btn btn-outline-info btn-sm rounded-0 me-2" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
+              <button class="btn btn-outline-warning btn-sm rounded-0" id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
+          </form>
+        </nav>
+
         <div class="p-2">
           <select class="form-select rounded-0" id="mbSelect" aria-label="microblends selection lists">
             <optgroup label='core'>
@@ -567,31 +575,10 @@
             <button class="btn btn-normal rounded-0 btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
           </div>
         </div>
-        
-        <div class="m-2">
-          <span class="w-100 rounded-0 p-2" >&micro;blend preview tool</span>
-          <div class='row gx-0'>
-            <div class="col-6 m-0">
-              <input id="bg-changer" type="color" value="#000000"   title="Background color check for microblend">
-            </div>
-            <div class="col-6 m-0">
-              <div class="btn-group btn-group-sm w-100" role="group" aria-label="microblend fx">
-                <button class="btn btn-outline-info rounded-0" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
-                <button class="btn btn-outline-warning rounded-0" id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
         <span> </span>
       </details>
       <div class="" >
         <img id="mb-preview" style="background-color:#000;" alt="microblend preview" src='./images/default.png' >
-        
-
-        
-        <!-- microblends-data -->
-
-        
       </div>
         <div id="versionDisplay">
           <a href="#" class="d-none" data-bs-toggle="modal" data-bs-target="#LicenseModal">License</a>
