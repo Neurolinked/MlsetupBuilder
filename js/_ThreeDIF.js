@@ -53,6 +53,8 @@ if (window.Worker) {
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
 				let textureMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
 				textureStack[textureMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
+				textureStack[textureMD5Code].minFilter = THREE.LinearFilter;
+				textureStack[textureMD5Code].magFilter = THREE.LinearFilter;
 				textureStack[textureMD5Code].needsUpdate = true
 				materialStack[datas[4]].normalMap = textureStack[textureMD5Code];
 				materialStack[datas[4]].normalMap.needsUpdate = true;
@@ -61,6 +63,8 @@ if (window.Worker) {
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
 				let roughMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
 				textureStack[roughMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
+				textureStack[roughMD5Code].minFilter = THREE.LinearFilter;
+				textureStack[roughMD5Code].magFilter = THREE.LinearFilter;
 				textureStack[roughMD5Code].needsUpdate = true
 
 				var repVal = parseFloat($(".multiplier")[0].attr("data-mul")) * parseFloat($("#layerTile").val());
@@ -1207,6 +1211,8 @@ async function ProcessStackTextures(){
 								THREEFormat,
 								(textureDock[index].info.bytes==16 ? RGBA16UI : THREE.UnsignedByteType));
 
+				textureStack[textureIndex].minFilter = THREE.LinearFilter;
+				textureStack[textureIndex].magFilter = THREE.LinearFilter;
 				/* if (textureDock[index].info.bytes==16){
 					textureStack[textureIndex] = new THREE.DataTexture(elm.value,
 																	textureDock[index].info.width,
@@ -1239,6 +1245,8 @@ async function ProcessStackTextures(){
 					textureDock[index].info.height,
 					THREEFormat,
 				);
+				textureStack[textureIndex].minFilter = THREE.LinearFilter;
+				textureStack[textureIndex].magFilter = THREE.LinearFilter;
 			}
 
 			textureStack[textureIndex].wrapS = textureStack[textureIndex].wrapT = THREE.RepeatWrapping;
