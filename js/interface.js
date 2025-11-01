@@ -193,7 +193,7 @@ function convLayersMlsetup(mlsetupTarget){
   }
 }
 
-function applyInEditor(){
+function applyValueInEditor(){
   let activeMLTab = getActiveMultilayerSetup();
   let layersSelected = MLSB.getMllayer(activeMLTab); //MLSB.getMlsetup(activeMLTab).Layers[MLSB.Editor.layerSelected];
   $("#layerTile").val(layersSelected.tiles);
@@ -210,13 +210,14 @@ function applyInEditor(){
   $("#layerOffU").val(layersSelected.offsetU)
   $("#layerOffV").val(layersSelected.offsetV)
   $("#matOverride").val(layersSelected.override)
-  $("#mbInput").val(layersSelected.microblend.file).trigger("focusout");
-  $('#mbSelect').change();
+  $("#mbInput, #mbSelect").val(layersSelected.microblend.file)
   $("#mbTile").val(layersSelected.microblend.tiles)
   $("#mbCont").val(layersSelected.microblend.contrast)
   $("#mbNorm").val(layersSelected.microblend.normal)
   $("#mbOffU").val(layersSelected.microblend.offset.h)
-  $("#mbOffV").val(layersSelected.microblend.offset.v).trigger("change")
+  $("#mbInput").trigger("focusout");
+  $("#mbSelect").trigger('change');
+  $("#mbOffV").val(layersSelected.microblend.offset.v).trigger("change");
 }
 
 function applyToLayer(){
@@ -395,17 +396,17 @@ async function abuildMB(microblendObj){
               fetch(`./images/${microblend.name}.png`)
                 .then((res)=>{
                   //it means that the microblend is there
-                  $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblend.name}.png');"  data-package='${package}' title='${microblend.name}' data-path='${microblend.path}' > </li>`);
+                  $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblend.name}.png');"  data-package='${package}' title='${microblend.name}' data-crypto="${CryptoJS.MD5(microblend.path)}" data-path='${microblend.path}' > </li>`);
               }).catch((error)=>{
                 notfetched=notfetched+1;
-                $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/_nopreview.gif');"  data-package='${package}' title='${microblend.name}' data-path='${microblend.path}' > </li>`);
+                $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/_nopreview.gif');"  data-package='${package}' title='${microblend.name}' data-crypto="${CryptoJS.MD5(microblend.path)}" data-path='${microblend.path}' > </li>`);
               })
             }catch(error){
               notfetched=notfetched+1;
               console.warn(error);
             }
             //Select selector
-            $('#mbSelect optgroup[label="core"]').append(`<option data-package="core" data-thumbnail="./images/${microblend.name}.png" value="${microblend.path}">${microblend.name}</option>`);
+            $('#mbSelect optgroup[label="core"]').append(`<option data-package="core" data-thumbnail="./images/${microblend.name}.png" value="${microblend.path}" >${microblend.name}</option>`);
           })
 
           var changedVersion = (sessionStorage.getItem("changedversion") === 'true' );
@@ -1185,16 +1186,6 @@ $("#layerOpacity").on("input",function(ev){
 		$(this).val(stringa);
 	});
 
-	/* Normalization layers numbers*/
-  function normalizeUINumbers(){
-    if ($("#layerTile").val() % 1 == 0){ $("#layerTile").val(Number($("#layerTile").val()).toFixed(1));    }
-    if ($("#layerOpacity").val() % 1 == 0){ $("#layerOpacity").val(Number($("#layerOpacity").val()).toFixed(1)); }
-    if ($("#layerOffU").val() % 1 == 0){ $("#layerOffU").val(Number($("#layerOffU").val()).toFixed(1)); }
-    if ($("#layerOffV").val() % 1 == 0){ $("#layerOffV").val(Number($("#layerOffV").val()).toFixed(1)); }
-    if ($("#mbTile").val() % 1 == 0){ $("#mbTile").val(Number($("#mbTile").val()).toFixed(1)); }
-    if ($("#mbNorm").val() % 1 == 0){ $("#mbNorm").val(Number($("#mbNorm").val()).toFixed(1)); }
-  }
-
   //const maskUVs = new fabric.Canvas('fabUVDis');
 
 
@@ -1307,7 +1298,7 @@ $("#layerOpacity").on("input",function(ev){
 		if (!$(this).attr("disabled")){
 
       MLSB.Editor.layerSelected = $(this).index();
-      applyInEditor();
+      applyValueInEditor();
 
       //activate the new one only if isn't disabled
 			$('#layeringsystem li').removeClass('active notsync');
@@ -1379,7 +1370,7 @@ $("#layerOpacity").on("input",function(ev){
       $("#cagecolors span").removeClass("active");
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
 			$("#mbInput").focusout(); //fires up the change of material blending preview
-      //$("#mbSelect").trigger('change');
+      $("#mbSelect").trigger('change');
 		}
 	});
 
@@ -3689,7 +3680,7 @@ unCooKonfirm.addEventListener("click", (event) => {
       case 'switchLayer':
         MLSB.Editor.layerSelected=index;
         //Loading the layer in the Editor
-        applyInEditor()
+        applyValueInEditor()
         $("#thacanvas").trigger("switchLayer");
         break
       case 'contextMenu':
