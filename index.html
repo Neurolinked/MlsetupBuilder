@@ -71,7 +71,7 @@
     </div>
     <div id="MainMenu" class="btn-group">
       <button class="btn btn-sm btn-secondary rounded" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false"><i class="fa-solid fa-caret-down"></i></button>
-      <ul class="dropdown-menu dropdown-menu-dark rounded-0 pt-0">
+      <ul class="dropdown-menu dropdown-menu-dark  pt-0">
         <li><h6 class="dropdown-header bg-warning text-black">Import/Export</h6></li>
         <li class="d-none"><a class="d-none" href="#" id="importFromWkit" ></li>
         <li><a class="dropdown-item" href="#" id="importLink" ><i class="fa-solid fa-file-import"></i> Import</a></li>
@@ -80,10 +80,10 @@
         <li><a class="dropdown-item xportJSON" href="#" id="exportversions" ><i class="fa-solid fa-file-export"></i> Export</a></li>
         <form class="m-1 plus_1_layer p-1">
           <div class="mb-1 ">
-            <input type="text" value="" class="form-control form-control-sm rounded-0" aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" />
+            <input type="text" value="" class="form-control form-control-sm " aria-label="emptyLevel"  id="nametoexport"  placeholder="filename without extension" />
           </div>
           <div class="mb-1">
-            <select name="exportVersion" class="form-select form-select-sm rounded-0 dropSelect">
+            <select name="exportVersion" class="form-select form-select-sm  dropSelect">
               <option value="3">Json v0.0.8 (Wkit 8.11+)</option>
               <option value="2">Json v0.0.2 (Wkit 8.7+)</option>
               <option value="1">Json v0.0.1 (Wkit 8.5)</option>
@@ -129,8 +129,8 @@
       <div class="row gx-0 ">
         <div class="col-11">
           <div id="hairSwatches" class=''></div>
-          <div id="hairprofileBuilder" class="layer-2 rounded-0 "><!-- maximum shades will be 5 at the start-->
-              <span class="badge bg-layer0 w-100 rounded-0">Shades planner</span>
+          <div id="hairprofileBuilder" class="layer-2  "><!-- maximum shades will be 5 at the start-->
+              <span class="badge bg-layer0 w-100 ">Shades planner</span>
               <div class="p-2">
                 <div class="row gx-0 mb-2"><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">RootToTip</span><div class="col-10 grad" id="hRootToTip"> </div></div>
                 <div class="row gx-0" ><span class="col-2 badge py-auto text-end pt-2 pe-2 bg-layer1">ID</span><div class="col-10 grad" id="hID" > </div></div>
@@ -155,7 +155,7 @@
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="mx-auto py-1">
-    <button class="btn btn-secondary fs-120 rounded-0" type="button" id="TheMagicIsHere"   data-bs-placement="bottom" title="Import a json file">Import the MuLtilayer Setup <i class="fa-solid fa-angles-right"></i></button>
+    <button class="btn btn-secondary fs-120 " type="button" id="TheMagicIsHere"   data-bs-placement="bottom" title="Import a json file">Import the MuLtilayer Setup <i class="fa-solid fa-angles-right"></i></button>
   </div>
   <div class="offcanvas-body">
     <div class="mlpreviewBody" ></div>
@@ -169,13 +169,13 @@
   </div>
   <div class="offcanvas-body">
     <span class="h3">Packages</span>
-    <div id="mbHierarchy" class="m-1 border border-dark list-group rounded-0" > </div>
+    <div id="mbHierarchy" class="m-1 border border-dark list-group " > </div>
     <span class="badge d-block pb-2">Drop .pngs here:</span>
     <div id="dropzone" class="bg-black rounded text-center" ><i class="fa-solid fa-circle-plus text-black fa-2x"></i></div>
     <div id="mblendCageManager" class="border border-secondary mt-4">
       <div class="input-group layer-4">
-        <span class="badge layer-9 rounded-0 ">Package</span>
-        <input type="text" class="form-control form-control-sm rounded-0"  list="mbListPackages" id="mbListPackage" />
+        <span class="badge layer-9  ">Package</span>
+        <input type="text" class="form-control form-control-sm "  list="mbListPackages" id="mbListPackage" />
       </div>
       <span class='d-block text-center bg-active text-light fs-120' >Write every path as in the archives</span>
       <datalist id="mbListPackages">
@@ -184,7 +184,7 @@
       </div>
     </div>
     <div class="d-grid mt-2">
-      <button type="button" class="btn btn-sm btn-outline-danger rounded-0" id="CheckSaveMblend" ><i class="fa-solid fa-plus"></i> Check &amp; save </button>
+      <button type="button" class="btn btn-sm btn-outline-danger " id="CheckSaveMblend" ><i class="fa-solid fa-plus"></i> Check &amp; save </button>
     </div>
     <div id="mbLogPackager" class="fade mt-3"> </div>
   </div>
@@ -257,24 +257,24 @@
 
 <ul class="nav nav-pills" id="pills-main-IF" role="tablist">
   <li class="nav-item" role="presentation">
-    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0 active" id="pills-editor-tab" data-bs-toggle="pill" data-bs-target="#nav-editor" type="button" role="tab" aria-controls="pills-editor" aria-selected="true">
+    <button class="nav-link fs-80 fw-bold p-1 px-2  active" id="pills-editor-tab" data-bs-toggle="pill" data-bs-target="#nav-editor" type="button" role="tab" aria-controls="pills-editor" aria-selected="true">
       <i class="fa-solid fa-sliders"></i> Editor
     </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0 " type="button" id="nav-modDatlib-tab" data-bs-toggle="tab" data-bs-target="#nav-modDatlib"  role="tab" aria-controls="nav-modDatlib" aria-selected="false">
+    <button class="nav-link fs-80 fw-bold p-1 px-2  " type="button" id="nav-modDatlib-tab" data-bs-toggle="tab" data-bs-target="#nav-modDatlib"  role="tab" aria-controls="nav-modDatlib" aria-selected="false">
       <span class="icon-mesh text-warning"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span><span class="path6"></span><span class="path7"></span><span class="path8"></span></span> Models library</button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0" data-bs-toggle="pill" id="pills-material-tab" data-bs-target="#nav-material" type="button" role="tab" aria-selected="false"> Materials</button>
+    <button class="nav-link fs-80 fw-bold p-1 px-2 " data-bs-toggle="pill" id="pills-material-tab" data-bs-target="#nav-material" type="button" role="tab" aria-selected="false"> Materials</button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0" id="pills-appearance-tab" data-bs-toggle="pill" data-bs-target="#nav-appearance" type="button" role="tab" aria-controls="pills-appearance" aria-selected="true">
+    <button class="nav-link fs-80 fw-bold p-1 px-2 " id="pills-appearance-tab" data-bs-toggle="pill" data-bs-target="#nav-appearance" type="button" role="tab" aria-controls="pills-appearance" aria-selected="true">
       <i class="fa-solid fa-palette"></i> Appearances
     </button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link fs-80 fw-bold p-1 px-2 rounded-0" id="pills-Maps-tab" data-bs-toggle="pill" data-bs-target="#nav-Maps" type="button" role="tab" aria-controls="pills-editor" aria-selected="false">
+    <button class="nav-link fs-80 fw-bold p-1 px-2 " id="pills-Maps-tab" data-bs-toggle="pill" data-bs-target="#nav-Maps" type="button" role="tab" aria-controls="pills-editor" aria-selected="false">
       <i class="fa-solid fa-images"></i> Maps
     </button>
   </li>
@@ -296,17 +296,17 @@
       </div>
 <div id="MlEditor" class="text-white layer-1 rounded">
     <div class="dropdown" id="appearanceSwitcher">
-      <button class="btn btn-sm rounded-0 btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"  data-bs-auto-close="true" aria-expanded="false" style="width:100%;">
+      <button class="btn btn-sm  btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"  data-bs-auto-close="true" aria-expanded="false" style="width:100%;">
         Appearances switcher
       </button>
-      <ul class="dropdown-menu dropdown-menu-dark rounded-0">
+      <ul class="dropdown-menu dropdown-menu-dark ">
         <li><a class="dropdown-item" href="#">Empty, load a model</a></li>
       </ul>
     </div>
-  <span class="badge w-100 rounded-0 ">Layers</span>
-  <div class="d-grid"><button class="btn btn-out-Prim btn-sm rounded-0" id="applytoMyLayer" type="button"   data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
+  <span class="badge w-100  ">Layers</span>
+  <div class="d-grid"><button class="btn btn-out-Prim btn-sm " id="applytoMyLayer" type="button"   data-bs-placement="left" title="Apply edits to the current selected layer"><i class="fas fa-paint-roller"></i> Apply edits</button></div>
   <div id="substanceUI" class="UI-layer-switch d-none">
-      <!-- <span class="badge w-100 rounded-0 ">Layers</span> -->
+      <!-- <span class="badge w-100  ">Layers</span> -->
       <substance-layer></substance-layer>
   </div>
   <ul id="layeringsystem" class="UI-layer-switch layer-2 controLayers" tabindex="1">
@@ -336,7 +336,7 @@
     <button class="btn btn-outline-warning" type="button" id="actAll-Layer"   data-bs-placement="bottom" title="Activate all layers">Refill layers</button>
   </div>
   <div class="text-center bg-layer2 m-2 p-1 rounded">
-    <input id="layerRandomCfg" class="form-control form-control-sm rounded-0 border border-warning bg-layer0" type="search" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
+    <input id="layerRandomCfg" class="form-control form-control-sm  border border-warning bg-layer0" type="search" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
     <div class="btn-toolbar justify-content-between mt-2" role="toolbar" aria-label="Toolbar actions for layers">
       <div class="btn-group btn-group-sm btn-tiny" role="group" aria-label="Layer Clean/wiping Actions">
          <button type="button" class="btn btn-outline-primary" id="wipe-layer"><i class="fas fa-eraser"></i> wipe</button>
@@ -362,10 +362,10 @@
     <div class="input-group input-group-sm m-1 " role="group" aria-label="Layers randomizer"> </div>
   </div>
   <div class="twoColGrid">
-    <div class="layer-2 m-2"><span class="badge w-100 rounded-0 "> Ratio </span>
-      <input type="number" class="form-control rounded-0"   title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
+    <div class="layer-2 m-2"><span class="badge w-100  "> Ratio </span>
+      <input type="number" class="form-control "   title="Horizontal/vertical ratio of the application of material maps over the model. value lower than 1 stretch horizontally, value higher than 1 stretch vertically" id="layerRatio" value="1.0" step="0.01">
     </div>
-    <div class="layer-2 m-2"><span class="badge w-100 rounded-0 "> Normal </span>
+    <div class="layer-2 m-2"><span class="badge w-100  "> Normal </span>
       <div class="form-check form-switch d-flex justify-content-center">
         <input class="form-check-input rounded-pill " type="checkbox" role="switch" id="useNormals" checked>
       </div>
@@ -373,7 +373,10 @@
   </div>
 </div>
 <!--End layersList-->
-<div id="layer_settings" class="layer-2 rounded-0">
+<div id="layer_settings" class="layer-2 ">
+  <!-- <div id="tweakEditor">
+
+  </div> -->
   <div id="matdisplay" class="no-gutters layer-3" >
     <div><canvas id="materialDis" width="128" height="128" data-bs-toggle="modal" data-bs-target="#materialModal" ></canvas></div>
       <div>
@@ -382,12 +385,12 @@
             <span class="d-block ps-2">Parameters</span>
             <div class="input-group input-group-sm mb-1">
               <div class="badge my-auto multiplier" data-mul="1">Tiles</div>
-              <input type="number" class="form-control rounded-0 driven" id="layerTile" value="1.0" step="0.01" min="0.01" max="150.0">
+              <input type="number" class="form-control  driven" id="layerTile" value="1.0" step="0.01" min="0.01" max="150.0">
               <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerTile" value="1.0" step="0.01"  min="0.01" max="150">
             </div>
             <div class="input-group input-group-sm my-1">
               <div class="badge my-auto">Opacity</div>
-              <input type="number" class="form-control form rounded-0 driven" id="layerOpacity" value="1.0" step="0.01" min="0">
+              <input type="number" class="form-control form  driven" id="layerOpacity" value="1.0" step="0.01" min="0">
               <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerOpacity" value="1.0" step="0.01"  min="0.0" max="1.0">
             </div>
           </div>
@@ -396,25 +399,25 @@
             <div class="input-group input-group-sm my-1">
               <div class="badge my-auto">Horiz.</div>
                 <!-- <span class="input-group-text border-0">H</span> -->
-              <input type="number" class="form-control rounded-0 driven" id="layerOffU" value="0.0" step="0.01">
+              <input type="number" class="form-control  driven" id="layerOffU" value="0.0" step="0.01">
               <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerOffU" value="0.0" step="0.01"  min="-1.0" max="8.0">
             </div>
             <div class="input-group input-group-sm my-1">
               <div class="badge my-auto">Vertical</div>
               <!-- <span class="input-group-text border-0">V</span> -->
-                <input type="number" class="form-control rounded-0 driven" id="layerOffV" value="0.0" step="0.01">
+                <input type="number" class="form-control  driven" id="layerOffV" value="0.0" step="0.01">
                 <input type="range" class="friendo flex-grow-1 border-0" data-control="#layerOffV" value="0.0" step="0.001"  min="-1.0" max="8.0">
             </div>
           </div>
           <div>
             <div class="input-group input-group-sm my-1" >
                 <div class="badge my-auto">Rough</div><span class="input-group-text border-0">In</span>
-                <select class="form-select rounded-0" id="layerRoughIn" aria-label="metallness Out">
+                <select class="form-select " id="layerRoughIn" aria-label="metallness Out">
                   <optgroup label="Reset"><option value="null" >null</option></optgroup>
                   <optgroup id="Rough_In_values" label="Material"></optgroup>
                 </select>
                 <span class="input-group-text border-0">Out</span>
-                  <select class="form-select rounded-0" id="layerRoughOut" aria-label="RoughnessOut">
+                  <select class="form-select " id="layerRoughOut" aria-label="RoughnessOut">
                     <optgroup label="Reset"><option value="null" >null</option></optgroup>
                     <optgroup label="Material specific" id="Rough_out_values"></optgroup>
                   </select>
@@ -423,7 +426,7 @@
           <div>
             <div class="input-group input-group-sm my-1">
               <div class="badge my-auto">Normals</div>
-              <select class="form-select rounded-0" id="layerNormal" aria-label="microblends selection lists">
+              <select class="form-select " id="layerNormal" aria-label="microblends selection lists">
                 <optgroup id="defaultNormal" label='Reset'><option value="null" data-force="1" >null</option></optgroup>
                 <optgroup id="Norm_Pow_values" label='Materials'></optgroup>
               </select>
@@ -433,7 +436,7 @@
             <div class="input-group input-group-sm mt-1">
               <input type="hidden" id="layerMetalIn" value="null">
               <div class="badge my-auto">Metal</div><span class="input-group-text border-0">Out</span>
-              <select class="form-select rounded-0" id="layerMetalOut" aria-label="metallness Out">
+              <select class="form-select " id="layerMetalOut" aria-label="metallness Out">
                 <optgroup id="defaultMetalOut" label='Reset'><option value="null">null</option></optgroup>
                 <optgroup id="Metal_Out_values" label='material'></optgroup>
               </select>
@@ -445,12 +448,12 @@
     <div class="border border-secondary">
       <div class="input-group">
         <div class="badge my-auto">Override</div>
-        <input type="text" class="form-control rounded-0 " id="matOverride" data-default="None" value="None" disabled>
+        <input type="text" class="form-control  " id="matOverride" data-default="None" value="None" disabled>
       </div>
     </div>
     <span class="d-block ps-2 bg-secondary">Material</span>
     <div class="input-group mb-1">
-      <input type="text" class="form-control rounded-0 " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
+      <input type="text" class="form-control  " id="matInput" data-default="base\surfaces\materials\special\unused.mltemplate" value="base\surfaces\materials\special\unused.mltemplate">
       <button class="btn d-inline-block btn-sm float-end rounded copyMe" type="button">Copy</button>
     </div>
     <details id="legacyMatSector"><summary id="materialSummary" >unused</summary>
@@ -468,18 +471,18 @@
     <details open><summary id="colorManagament">null_null</summary>
       <div id="colorGrid">
         <div>
-          <span class="badge  w-100 rounded-0">ColorCode</span>
-            <input type="text" class="form-control rounded-0" id="layerColor" value="null_null" maxlength="13">
+          <span class="badge  w-100 ">ColorCode</span>
+            <input type="text" class="form-control " id="layerColor" value="null_null" maxlength="13">
         </div>
         <div>
-          <span class="badge  w-100 rounded-0" id="colorPntage">rgb();</span>
-          <span class="badge border border-secondary w-100 rounded-0 tint" > </span>
+          <span class="badge  w-100 " id="colorPntage">rgb();</span>
+          <span class="badge border border-secondary w-100  tint" > </span>
         </div>
       </div>
       <div>
         <div class="input-group input-group-sm mb-1">
           <div class="badge my-auto">Luminosity</div>
-            <input type="number" class="form-control rounded-0 driven" id="colorLum" value="1.0" step="0.01" min="0.01" max="150.0">
+            <input type="number" class="form-control  driven" id="colorLum" value="1.0" step="0.01" min="0.01" max="150.0">
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#colorLum" value="1.0" step="0.01"  min="0.01" max="10.0">
           </div>
         </div>
@@ -504,17 +507,17 @@
   </div>
 
 <!-- Microblend part-->
-    <div id="micropanel" class="layer-2 rounded-0">
-      <span class="d-block bg-normal text-black rounded-0 p-2">&micro;blends</span>
+    <div id="micropanel" class="layer-2 ">
+      <span class="d-block bg-normal text-black  p-2">&micro;blends</span>
       <div class="input-group input-group-sm mb-1">
-        <input type="text" class="form-control rounded-0 " id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
-        <button class="btn btn-outline-danger rounded-0" id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
+        <input type="text" class="form-control  " id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
+        <button class="btn btn-outline-danger " id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
       </div>
       <div id="MicroblendsLibrary" class="my-2">
-        <span class="w-100 rounded-0 p-2" >Core &micro;blends</span>
+        <span class="w-100  p-2" >Core &micro;blends</span>
         <div id="microdisplay" class="layer-2 mx-2">
           <div id="cagethemicroblends" tabindex="1">
-            <li style="background-image:url('./images/thumbs/default.png');" data-package='source' title="default" data-path="base\surfaces\microblends\default.xbm" > </li>
+            <li style="background-image:url('./images/thumbs/default.png');" data-package='source' title="default" data-path="base\surfaces\microblends\default.xbm" data-crypto="fc4828e1eb8710e0cf83aa29bab51cd0" > </li>
           </div>
         </div>
       </div>
@@ -535,13 +538,13 @@
 
         <nav class="navbar layer-3">
           <form class="container-fluid justify-content-start">
-            <button class="btn btn-outline-info btn-sm rounded-0 me-2" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
-              <button class="btn btn-outline-warning btn-sm rounded-0" id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
+            <button class="btn btn-outline-info btn-sm  me-2" id="cleanFX" data-toggle='tooltip' title="Cleanup effects on microblend preview" type="button"><i class="fas fa-chalkboard"></i></button>
+              <button class="btn btn-outline-warning btn-sm " id="lumiFX" data-toggle='tooltip' title="Luminosity FX" type="button"><i class="fas fa-lightbulb"></i></button>
           </form>
         </nav>
 
         <div class="p-2">
-          <select class="form-select rounded-0" id="mbSelect" aria-label="microblends selection lists">
+          <select class="form-select " id="mbSelect" aria-label="microblends selection lists">
             <optgroup label='core'>
               <option data-package="source" data-thumbnail="./images/default.png" value="base\surfaces\microblends\default.xbm" selected >default</option>
             </optgroup>
@@ -549,30 +552,30 @@
         </div>
         <div class="p-2">
           <div class="input-group input-group-sm layer-2 ">
-            <div class="badge my-auto">Tiles</div> <input type="number" class="form-control rounded-0 driven" id="mbTile" value="1.0" step="0.01"  min="0.01" max="150">
+            <div class="badge my-auto">Tiles</div> <input type="number" class="form-control  driven" id="mbTile" value="1.0" step="0.01"  min="0.01" max="150">
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbTile" value="1.0" step="0.01"  min="0.01" max="150">
           </div>
           <div class="input-group input-group-sm layer-2">
             <div class="badge my-auto">contrast</div>
-            <input type="number" class="form-control rounded-0 driven" id="mbCont" value="0.0" step="0.01"    title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
+            <input type="number" class="form-control  driven" id="mbCont" value="0.0" step="0.01"    title="It affect the blending of the microblend trasparency (from 0 to 1) lower value -> lower blending of the transparency, higher value -> better blending and less crisp blending edge" >
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbCont" value="0.0" step="0.01"  min="0.0" max="1.0">
           </div>
           <div class="input-group input-group-sm layer-2 ">
               <div class="badge my-auto">normals</div>
-            <input type="number" class="form-control rounded-0 driven" id="mbNorm" value="1.0" step="0.01">
+            <input type="number" class="form-control  driven" id="mbNorm" value="1.0" step="0.01">
             <input type="range" class="friendo flex-grow-1 border-0" data-control="#mbNorm" value="1.0" step="0.01"  min="0.0" max="2.0">
           </div>
         </div>
         <div class="layer-3 m-1 p-1">
-          <span class="d-block rounded-0 p-2"><i class="fas fa-crosshairs"></i> &micro;blend offset</span>
+          <span class="d-block  p-2"><i class="fas fa-crosshairs"></i> &micro;blend offset</span>
           <div class="treeColGrid my-1">
             <div class="input-group input-group-sm">
-              <span class="input-group-text rounded-0 bg-dark text-warning  border-0">U</span> <input type="number" class="form-control rounded-0 text-end" id="mbOffU" value="0" step="0.01">
+              <span class="input-group-text  bg-dark text-warning  border-0">U</span> <input type="number" class="form-control  text-end" id="mbOffU" value="0" step="0.01">
             </div>
             <div class="input-group input-group-sm">
-              <span class="input-group-text rounded-0 bg-dark text-warning border-0">V</span> <input type="number" class="form-control rounded-0 text-end" id="mbOffV" value="0" step="0.01">
+              <span class="input-group-text  bg-dark text-warning border-0">V</span> <input type="number" class="form-control  text-end" id="mbOffV" value="0" step="0.01">
             </div>
-            <button class="btn btn-normal rounded-0 btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
+            <button class="btn btn-normal  btn-sm"  id="AimMBlend" ><i class="fas fa-crosshairs"></i> &micro; Aim</button>
           </div>
         </div>
         <span> </span>
@@ -622,9 +625,9 @@
           <div class="row no-gutters">
             <div class="col-2" id="panelPain">
               <div class="my-2">
-                <span class="d-block badge rounded-0 txt-secondary">layers</span>
-                <ul id="masksPanel" class="list-group rounded-0 list-group-horizontal justify-content-center controLayers">
-                  <li class="list-group-item rounded-0">0</li>
+                <span class="d-block badge  txt-secondary">layers</span>
+                <ul id="masksPanel" class="list-group  list-group-horizontal justify-content-center controLayers">
+                  <li class="list-group-item ">0</li>
                   <li class="list-group-item">1</li>
                   <li class="list-group-item">2</li>
                   <li class="list-group-item">3</li>
@@ -643,10 +646,10 @@
                   <li class="list-group-item">16</li>
                   <li class="list-group-item">17</li>
                   <li class="list-group-item">18</li>
-                  <li class="list-group-item rounded-0">19</li>
+                  <li class="list-group-item ">19</li>
                 </ul>
                 <div class="text-center my-1 py-1 layer-2 rounded svgBtn">
-                  <span class="d-block badge rounded-0 txt-secondary">Tools</span>
+                  <span class="d-block badge  txt-secondary">Tools</span>
                   <span class="dropdown">
                     <button class="btn btn-sm text-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="fa-solid fa-layer-group fa-2x"></i>
@@ -687,7 +690,7 @@
                   </datalist>
                 </div>
                 <div class="my-2 border border-secondary rounded" style="min-height:2rem;">
-                  <span class="d-block badge rounded-0 txt-secondary"><i class="fa-solid fa-camera-retro"></i> States</span>
+                  <span class="d-block badge  txt-secondary"><i class="fa-solid fa-camera-retro"></i> States</span>
                   <div id="Snapshots" class="py-1"> </div>
                 </div>
               </div>
@@ -762,20 +765,20 @@
   </div>
 </div>
 <footer class='w-100 main bg-layer0'>
-  <button id="notyCounter" type="button" class="btn btn-dark rounded-0 btn-sm text-start py-0 px-1 m-0" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" title="Click to see notification messages and errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
+  <button id="notyCounter" type="button" class="btn btn-dark  btn-sm text-start py-0 px-1 m-0" data-bs-toggle="offcanvas" data-bs-target="#NotificationCenter" title="Click to see notification messages and errors"><i class="fas fa-exclamation-triangle"></i> <span class="badge bg-warning text-dark"></span></button>
   <i id="paintActive" class="text-secondary fa-solid fa-brush align-bottom m-auto"></i>
   <div id="foot-message"> </div>
   <div id="pBar" > </div>
   <div> </div>
 </footer>
 <div class="modal fade " id="materialModal"  tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
-    <div class="modal-content rounded-0">
+  <div class="modal-dialog modal-dialog-centered modal-xl ">
+    <div class="modal-content ">
       <div class="modal-body p-0">
 				<div>
 					<div class="input-group">
-					  <input type="text" id="matModFinder" class="form-control rounded-0" placeholder="filter by material name" aria-label="Material name">
-						<!--<button class="btn btn-Prim rounded-0" type="button" id="matModSearch">search</button>-->
+					  <input type="text" id="matModFinder" class="form-control " placeholder="filter by material name" aria-label="Material name">
+						<!--<button class="btn btn-Prim " type="button" id="matModSearch">search</button>-->
 						<button type="button" id="matModFinderCleared" data-bs-toggle="tooltip" title="clean-up the searching field" class="btn text-warning layer-3"><i class="fa fa-soap fa-flip-horizontal"></i> </button>
 					</div>
 				</div>
@@ -787,8 +790,8 @@
 </div>
 
 <div class="modal fade " id="unCookModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
-    <div class="modal-content rounded-0">
+  <div class="modal-dialog modal-dialog-centered modal-xl ">
+    <div class="modal-content ">
       <div class="modal-body p-0 ">
 				<div class="row no-gutters">
 					<div id='uncookCheck' class="col-7">
@@ -887,8 +890,8 @@
 </div>
 
 <div class="modal fade " id="uncookMicro" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg rounded-0">
-    <div class="modal-content rounded-0">
+  <div class="modal-dialog modal-dialog-centered modal-lg ">
+    <div class="modal-content ">
       <div class="modal-body p-0 ">
 				<div class="row no-gutters">
 					<div id='microprep' class="col-4 p-3">
@@ -955,8 +958,8 @@
 </div>
 <!-- License agreement -->
 <div class="modal fade " id="LicenseModal" tabindex="-1" aria-labelledby="LicenseModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl rounded-0">
-    <div class="modal-content rounded-0">
+  <div class="modal-dialog modal-dialog-centered modal-xl ">
+    <div class="modal-content ">
       <div class="modal-body p-0">
 				<div class="row m-0">
 					<div class="col mlsblogo">
@@ -1173,5 +1176,17 @@ THE SOFTWARE.</p>
       <button>Close</button>
     </form>
   </dialog>
+  <style type="text/css">
+    .tp-lstv:has(> select[size]){
+      & .tp-lstv_s[size]{
+        height:unset;
+        overflow-y: auto;
+        padding-right:4px;
+      }
+      & .tp-lstv_m{
+        display:none;
+      }
+    }
+  </style>
   </body>
 </html>
