@@ -1005,13 +1005,12 @@ $("#resetShades span.choose").click(function(){
   $("#maskoolor").css("background-color","#"+theshade);
 });
 
-function opacityCheck(value){
-  return PARAMS.opacityPreview ? value : 1.0;
-}
 
-$("#layerOpacity").on("input",function(ev){
+
+/* $("#layerOpacity").on("input",function(ev){
+
     $("#thacanvas").trigger("changeOpacity", opacityCheck($(this).val()) );
-});
+}); */
 //Change in layer displayer
 	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(ev){
 		if (
@@ -1351,6 +1350,8 @@ $("#layerOpacity").on("input",function(ev){
       $("#matInput").val($(this).data("material"));
       $("#layerTile").val($(this).data("mattile")).change();
       $("#layerOpacity").val($(this).data("opacity")).change();
+      checkOpacityLayer();
+
       $("#layerNormal").val(String($(this).data("normal")));
       $("#layerRoughIn").val(String($(this).data("roughin")));
       $("#layerRoughOut").val(String($(this).data("roughout")));
@@ -2179,13 +2180,20 @@ $("#layerOpacity").on("input",function(ev){
 		$("#cagemLibrary div").eq($(this).data('inx')).click();
 	})
 
-	$("#layerOpacity").change(function(){
-			if (Number($(this).val())==0){
-				$("#layerOpacity").addClass('bg-attention');
+  
+
+  function checkOpacityLayer(){
+    const opacityHTMLInput = $("#layerOpacity")
+    if (Number(opacityHTMLInput.val())==0){
+				opacityHTMLInput.addClass('bg-attention');
 			}else{
-				$("#layerOpacity").removeClass('bg-attention');
+				opacityHTMLInput.removeClass('bg-attention');
 			}
-	});
+  }
+	$("#layerOpacity").on("change, input",()=>{
+    checkOpacityLayer();
+    $("#thacanvas").trigger("changeOpacity", opacityCheck($(this).val()) );
+  });
 
 	$("#materialModal").on('show.bs.modal',function(){
 		//reset the last active material

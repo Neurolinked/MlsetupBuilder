@@ -2130,8 +2130,9 @@ $("#thacanvas").on("mouseover",function(event){
 
 							materialStack[selected].setValues({
 								alphaMap:textureStack[nameMask],
-								opacity: parseFloat($("#layerOpacity").val())
+								opacity: PARAMS.opacityPreview ? opacityCheck($("#layerOpacity").val()) : 1.0
 							})
+
 							materialStack[selected].alphaMap.flipY = flippingdipping;
 							materialStack[selected].alphaMap.needsUpdate = true;
 							$('#thacanvas').trigger("texTiled");

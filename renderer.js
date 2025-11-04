@@ -208,3 +208,7 @@ fetch(`${jsonsFolder}/cliModelsDB.json`)
 			})
 	})
 //
+
+function opacityCheck(value){
+	return PARAMS.opacityPreview ? Number(value) : 1.0;
+}
