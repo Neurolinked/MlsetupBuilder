@@ -393,6 +393,9 @@ class SubstanceLayer extends HTMLElement {
             }
         })
 
+        this.addEventListener("getActive",(e)=>{
+            return this.getActiveIndex();
+        })
         this.addEventListener("setActive",(e)=>{
             this.setActive(e.detail.layer);
         })
