@@ -130,7 +130,7 @@ function UIMlLayer(mlLayer,k){
   sbUI.dispatchEvent(new CustomEvent("update",{detail:{
     layer:k,
     material:mlLayer.material,
-    opacity:mlLayer.opacity,
+    opacity:parseFloat(mlLayer.opacity),
     microblend:mlLayer.microblend.file,
     color:getMaterialColor(mlLayer.material,mlLayer.color)
   }}))
@@ -197,7 +197,7 @@ function applyValueInEditor(layersSelected){
   $("#layerTile").val(layersSelected.tiles);
   $("#matInput").val(layersSelected.material).trigger("change");
   $(window).trigger("uiMaterialSelect",layersSelected.material);
-  $("#layerOpacity").val(layersSelected.opacity)
+  $("#layerOpacity").val(layersSelected.opacity).trigger("input")
   $("#layerColor").val(layersSelected.color).trigger("change");
   $(`#cagecolors span[data-order='${layersSelected.color}']`).click();
   $("#layerNormal").val(layersSelected.normal)
@@ -216,6 +216,7 @@ function applyValueInEditor(layersSelected){
   $("#mbInput").trigger("focusout");
   $("#mbSelect").trigger('change');
   $("#mbOffV").val(layersSelected.microblend.offset.v).trigger("change");
+  $("#maskLayer").attr("value",MLSB.Editor.layerSelected);
 }
 
 function applyToLayer(){
@@ -1283,7 +1284,7 @@ $("#resetShades span.choose").click(function(){
     $("#thacanvas").trigger("sided");
   });
 
-	var TextureLoad = new Event('fire');
+	const TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
 	
@@ -3483,19 +3484,6 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   });
 
-  $(window).resize(function(){
-    updPanelCovers(); //on resize will update the position of the interface to cover
-    $("#DataModelsLibrary").DataTable().draw();
-    adaptTexturePlayer();
-    let tblsize = window.innerHeight-350
-    if ((window.innerHeight-350)<50){
-      tblsize = 50;
-    }
-    //adapt model table size to the window
-    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${tblsize}px`);
-    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("min-height",`${tblsize}px`);
-	});
-
   $("#thacanvas").trigger("changeBg");
 
   //management of question form
@@ -3540,23 +3528,33 @@ unCooKonfirm.addEventListener("click", (event) => {
   }).on('processBar',function(ev){  taskProcessBar(); })
 
 
-  function uiActiveLayer(index){
-    if ($("#layeringsystem li").eq(index).hasClass("active")){
-
+  function uiActivateLayer(){
+    const index = MLSB.Editor.layerSelected;
+    if (!$("#layeringsystem li").eq(index).hasClass("active")){
+      $('#layeringsystem li').removeClass('active notsync');
+       $('#layeringsystem li').eq(index).addClass("active");
     }
-    
+    if ($("substance-layer").trigger("getActive")!=index){
+      $("substance-layer").trigger("setactive",{detail:{layer:index}})
+    }
+    if (!$("#masksPanel li").eq(index).hasClass("active")){
+      $("#masksPanel li.active").removeClass("active");
+      $("#masksPanel li").eq(index).addClass("active");
+    }
   }
 
   function switchLayer(source=null){
     let activeMLTab = getActiveMultilayerSetup();
     let layersSelected = MLSB.getMllayer(activeMLTab);
-    console.log(layerSelected);
-    
+    console.log(layersSelected);
     applyValueInEditor(layersSelected);
+    uiActivateLayer()
+    if ($("#modelTarget").attr('loaded')=='true'){
+      let fireTxLoad = document.getElementById('maskLayer');
+      fireTxLoad.dispatchEvent(TextureLoad);
+    }
     $("#thacanvas").trigger("switchLayer");
   }
-
-
 
   $("#layeringsystem li").click(function(e){
     
@@ -3645,7 +3643,18 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   //Document Events
   $(window)
-  .on("load", function (e) {
+  .resize(function(){
+    updPanelCovers(); //on resize will update the position of the interface to cover
+    $("#DataModelsLibrary").DataTable().draw();
+    adaptTexturePlayer();
+    let tblsize = window.innerHeight-350
+    if ((window.innerHeight-350)<50){
+      tblsize = 50;
+    }
+    //adapt model table size to the window
+    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${tblsize}px`);
+    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("min-height",`${tblsize}px`);
+	}).on("load", function (e) {
     const AppLoading = document.getElementById("Loading");
     AppLoading.showModal();
   }).on('substanceLayer',function(ev){
