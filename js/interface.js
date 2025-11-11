@@ -193,9 +193,7 @@ function convLayersMlsetup(mlsetupTarget){
   }
 }
 
-function applyValueInEditor(){
-  let activeMLTab = getActiveMultilayerSetup();
-  let layersSelected = MLSB.getMllayer(activeMLTab); //MLSB.getMlsetup(activeMLTab).Layers[MLSB.Editor.layerSelected];
+function applyValueInEditor(layersSelected){
   $("#layerTile").val(layersSelected.tiles);
   $("#matInput").val(layersSelected.material).trigger("change");
   $(window).trigger("uiMaterialSelect",layersSelected.material);
@@ -561,11 +559,6 @@ function switchLegacyMat(material){
 	$("#materiaList li[data-ref='"+material+"']").addClass("active");
 }
 
-$(window).on("load", function (e) {
-  const AppLoading = document.getElementById("Loading");
-  AppLoading.showModal();
-})
-
 $(function(){
   var setupModPath = document.getElementById('setupModPath');
   //Get the hairs profiles Json Database
@@ -706,8 +699,9 @@ $(function(){
 
   function uiSetMaterial(materialName,materialEntry){
     //from switchLegacyMat function
-    $("#materiaList li").removeClass("active");
-    $(`#materiaList li[data-ref='${materialName}']`).addClass("active");
+    $("#materiaList li, #cagemLibrary > div").removeClass('active');
+
+    $(`#materiaList li[data-ref='${materialName}'],#cagemLibrary > div[data-ref='${materialName}']`).addClass("active");
     drawMaterial(materialName)
   }
 
@@ -1292,89 +1286,7 @@ $("#resetShades span.choose").click(function(){
 	var TextureLoad = new Event('fire');
 
   //actions connected to the click onto the layers list
-	$("#layeringsystem li").click(function(e){
-
-		if (!$(this).attr("disabled")){
-
-      MLSB.Editor.layerSelected = $(this).index();
-      applyValueInEditor();
-
-      //activate the new one only if isn't disabled
-			$('#layeringsystem li').removeClass('active notsync');
-      //sync with the mask paint editor
-      $("#masksPanel li.active").removeClass("active");
-      $("#masksPanel li").eq(MLSB.Editor.layerSelected).addClass("active");
-			$(this).addClass('active');
-			$("#maskLayer").attr("value",$(this).text());
-      //if the model is already loaded it fires the event to load the masks
-      //in the event if the layer selected is over the maximum layers
-      //it load the 0 masks for security
-      if ($("#modelTarget").attr('loaded')=='true'){
-  			let fireTxLoad = document.getElementById('maskLayer');
-  			fireTxLoad.dispatchEvent(TextureLoad);
-      }
-
-      //setup the chosen colors for the layer
-
-      //Load the layers infor into the fields
-      let materialByClick = String($(this).data("material")).replace(/^.*[\\\/]/, '').split('.')[0];
-			semaphoreCLKmBlend=true;
-			//Reset material Library 1.5.99
-			$("#cagemLibrary > div").removeClass("active");
-			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
-			switchLegacyMat(materialByClick);
-			//$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
-      drawMaterial(materialByClick); //draw the material in the canvas
-
-			slideMaterials($("#cagemLibrary > div.active").index());
-
-			$("#materialSummary").html(materialByClick);
-      /* ColorChange before the switch */
-      //if (MLSB.Materials[])
-      if (MLSB.Materials[materialByClick]){
-        if (!MLSB.Materials[materialByClick]?.colors.list[$(this).data("color")]){
-          $(this).data("color",MLSB.Materials[materialByClick]?.colors.default);
-        }
-      }
-      $("#layerColor").val($(this).data("color"));
-			/*trigger the material change */
-      $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
-
-      //Setup the inputs
-
-      if ( (($(this).data("color")=="000000_null") || ($(this).data("color")=="ffffff_null")) && (!$("#BWAdd").is(":checked")) ){
-        $( "#BWAdd" ).click();
-      }
-
-      //$("#layerColor").val($(this).data("color"));
-      $("#matInput").val($(this).data("material"));
-      $("#layerTile").val($(this).data("mattile")).change();
-      $("#layerOpacity").val($(this).data("opacity")).change();
-      checkOpacityLayer();
-
-      $("#layerNormal").val(String($(this).data("normal")));
-      $("#layerRoughIn").val(String($(this).data("roughin")));
-      $("#layerRoughOut").val(String($(this).data("roughout")));
-      $("#layerMetalIn").val(String($(this).data("metalin")));
-      $("#layerMetalOut").val(String($(this).data("metalout")));
-      $("#layerOffU").val($(this).data("offsetu"));
-      $("#layerOffV").val($(this).data("offsetv"));
-      //Microblend section
-      $("#mbInput").val($(this).data("mblend")).change();
-      $("#mbTile").val($(this).data("mbtile")).change();
-      $("#mbCont").val($(this).data("mbcontrast")).change();
-      $("#mbNorm").val($(this).data("mbnormal")).change();
-      $("#mbOffU").val($(this).data("mboffu"));
-      $("#mbOffV").val($(this).data("mboffv"));
-
-			let  ricercacolore = $(this).data("color");
-      $("#cagecolors span").removeClass("active");
-			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
-			$("#mbInput").focusout(); //fires up the change of material blending preview
-      $("#mbSelect").trigger('change');
-      $("#thacanvas").trigger("renderMaterial",materialByClick);
-		}
-	});
+	
 
   $("span.choose").click(function(){
     $("span.choose.active").removeClass("active");
@@ -1968,6 +1880,7 @@ $("#resetShades span.choose").click(function(){
 
   function uiSwitchMaterial(){
     var chosenMaterial = MLSB.getMaterial();
+
     if (chosenMaterial===undefined){
       console.log(
         `%c No material override entry loaded for:  ${MLSB.TreeD.lastMaterial} `,"color:blue;background-color: white;"
@@ -1977,8 +1890,8 @@ $("#resetShades span.choose").click(function(){
     }
     //Trigger a new texture material Loading only if the material is changed
     if ($("#matInput").val()!=chosenMaterial.file){
-      $("#thacanvas").trigger("renderMaterial",chosenMaterial); //trigger the loading of a new Material
       $(".multiplier").attr("data-mul",chosenMaterial.xTiles.toFixed(2));
+      $("#thacanvas").trigger("renderMaterial",chosenMaterial); //trigger the loading of a new Material
     }
     $("#materialSummary").html(MLSB.TreeD.lastMaterial); //name of the material
     $("#matInput").val(chosenMaterial.file);  // path of the material
@@ -3626,8 +3539,116 @@ unCooKonfirm.addEventListener("click", (event) => {
     alertMe(alert.message,alert.title,alert?.seconds!==undefined ? alert.seconds:null);
   }).on('processBar',function(ev){  taskProcessBar(); })
 
+
+  function uiActiveLayer(index){
+    if ($("#layeringsystem li").eq(index).hasClass("active")){
+
+    }
+    
+  }
+
+  function switchLayer(source=null){
+    let activeMLTab = getActiveMultilayerSetup();
+    let layersSelected = MLSB.getMllayer(activeMLTab);
+    console.log(layerSelected);
+    
+    applyValueInEditor(layersSelected);
+    $("#thacanvas").trigger("switchLayer");
+  }
+
+
+
+  $("#layeringsystem li").click(function(e){
+    
+		if (!$(this).attr("disabled")){
+
+      MLSB.Editor.layerSelected = $(this).index();
+      switchLayer();
+      return;
+      
+
+      //activate the new one only if isn't disabled
+			$('#layeringsystem li').removeClass('active notsync');
+      //sync with the mask paint editor
+      $("#masksPanel li.active").removeClass("active");
+      $("#masksPanel li").eq(MLSB.Editor.layerSelected).addClass("active");
+			$(this).addClass('active');
+			$("#maskLayer").attr("value",$(this).text());
+      //if the model is already loaded it fires the event to load the masks
+      //in the event if the layer selected is over the maximum layers
+      //it load the 0 masks for security
+      if ($("#modelTarget").attr('loaded')=='true'){
+  			let fireTxLoad = document.getElementById('maskLayer');
+  			fireTxLoad.dispatchEvent(TextureLoad);
+      }
+
+      //setup the chosen colors for the layer
+      //Load the layers infor into the fields
+      let materialByClick = String($(this).data("material")).replace(/^.*[\\\/]/, '').split('.')[0];
+			semaphoreCLKmBlend=true;
+			//Reset material Library 1.5.99
+			$("#cagemLibrary > div").removeClass("active");
+			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
+			switchLegacyMat(materialByClick);
+			//$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
+      drawMaterial(materialByClick); //draw the material in the canvas
+
+			slideMaterials($("#cagemLibrary > div.active").index());
+
+			$("#materialSummary").html(materialByClick);
+      /* ColorChange before the switch */
+      //if (MLSB.Materials[])
+      if (MLSB.Materials[materialByClick]){
+        if (!MLSB.Materials[materialByClick]?.colors.list[$(this).data("color")]){
+          $(this).data("color",MLSB.Materials[materialByClick]?.colors.default);
+        }
+      }
+      $("#layerColor").val($(this).data("color"));
+			/*trigger the material change */
+      $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
+
+      //Setup the inputs
+
+      if ( (($(this).data("color")=="000000_null") || ($(this).data("color")=="ffffff_null")) && (!$("#BWAdd").is(":checked")) ){
+        $( "#BWAdd" ).click();
+      }
+
+      //$("#layerColor").val($(this).data("color"));
+      $("#matInput").val($(this).data("material"));
+      $("#layerTile").val($(this).data("mattile")).change();
+      $("#layerOpacity").val($(this).data("opacity")).change();
+      checkOpacityLayer();
+
+      $("#layerNormal").val(String($(this).data("normal")));
+      $("#layerRoughIn").val(String($(this).data("roughin")));
+      $("#layerRoughOut").val(String($(this).data("roughout")));
+      $("#layerMetalIn").val(String($(this).data("metalin")));
+      $("#layerMetalOut").val(String($(this).data("metalout")));
+      $("#layerOffU").val($(this).data("offsetu"));
+      $("#layerOffV").val($(this).data("offsetv"));
+      //Microblend section
+      $("#mbInput").val($(this).data("mblend")).change();
+      $("#mbTile").val($(this).data("mbtile")).change();
+      $("#mbCont").val($(this).data("mbcontrast")).change();
+      $("#mbNorm").val($(this).data("mbnormal")).change();
+      $("#mbOffU").val($(this).data("mboffu"));
+      $("#mbOffV").val($(this).data("mboffv"));
+
+			let  ricercacolore = $(this).data("color");
+      $("#cagecolors span").removeClass("active");
+			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
+			$("#mbInput").focusout(); //fires up the change of material blending preview
+      $("#mbSelect").trigger('change');
+      $("#thacanvas").trigger("renderMaterial",materialByClick);
+		}
+	});
+
+  //Document Events
   $(window)
-  .on('substanceLayer',function(ev){
+  .on("load", function (e) {
+    const AppLoading = document.getElementById("Loading");
+    AppLoading.showModal();
+  }).on('substanceLayer',function(ev){
     //In case i Need something
     const action = ev.detail?.action
     const index = ev.detail?.layer
@@ -3636,16 +3657,15 @@ unCooKonfirm.addEventListener("click", (event) => {
       case 'switchLayer':
         MLSB.Editor.layerSelected=index;
         //Loading the layer in the Editor
-        applyValueInEditor()
-        $("#thacanvas").trigger("switchLayer");
+        switchLayer();
         break
       case 'contextMenu':
         const mousePosition = details?.position
         showContextMenu(mousePosition,index);
         break;
       default:
-        console.log(ev.detail);
     }
+    console.log(ev.detail);
   })
   .on('setQuestion',function(ev){
     let options = ev.detail;
