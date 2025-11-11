@@ -1372,6 +1372,7 @@ $("#resetShades span.choose").click(function(){
 			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
 			$("#mbInput").focusout(); //fires up the change of material blending preview
       $("#mbSelect").trigger('change');
+      $("#thacanvas").trigger("renderMaterial",materialByClick);
 		}
 	});
 
@@ -1871,9 +1872,7 @@ $("#resetShades span.choose").click(function(){
 		}
 	);
 
-	$("#materiaList").mouseout(function(e){
-		$("#floatMat").addClass('d-none');
-	});
+	$("#materiaList").mouseout(function(e){ $("#floatMat").addClass('d-none'); });
 
 
   function uiColorPercentage(color){
@@ -2012,10 +2011,6 @@ $("#resetShades span.choose").click(function(){
         `<option value="KEY">KEY (VALUESTRING)</option>`
         )
       )
-    
-    /* Object.entries(chosenMaterial.roughness.IN.list).forEach(([key,value])=>{
-      $("#Rough_In_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-    }); */
 
     var reOrderbyLevels = chosenMaterial.roughness.OUT.list
     if (PARAMS.sortLevels){
@@ -2032,24 +2027,6 @@ $("#resetShades span.choose").click(function(){
         `<option value="KEY">KEY (VALUESTRING)</option>`
       )
     )
-
-    /* if (PARAMS.sortLevels){
-      let reOrderbyLevels = Object.entries(chosenMaterial.roughness.OUT.list);
-      let orderedRoughByLevels = reOrderbyLevels.sort(orderLevelsRough)
-      orderedRoughByLevels.forEach(([key,value])=>{
-        $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-      })
-    }else{
-      //Roughness OUT
-      Object.entries(chosenMaterial.roughness.OUT.list).forEach(([key,value])=>{
-        $("#Rough_out_values").append(`<option value="${key}">${key} (${value.toString()})</option>`);
-      });
-    } */
-
-    //Normal Strenght
-    /* Object.entries(chosenMaterial.normal.list).forEach(([key,value])=>{
-      $("#Norm_Pow_values").append(`<option value="${key}" data-force='${key}' >${key} (${String(value)})</option>`);
-    }); */
 
     $("#Norm_Pow_values").html(
       uiBuildMaterialEditorList(
@@ -2074,36 +2051,18 @@ $("#resetShades span.choose").click(function(){
         `<option value="KEY">KEY (VALUESTRING)</option>`
       )
     )
-    /* if (PARAMS.sortLevels){
-      let metOrderbyLevels = Object.entries(chosenMaterial.metal.OUT.list);
-      let orderedMetalByLevels = metOrderbyLevels.sort(orderLevelsMetal)
-      orderedMetalByLevels.forEach(([key,value])=>{
-        $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value.toString()})</option>`);
-      })
-    }else{
-      Object.entries(chosenMaterial.metal.OUT.list).forEach(([key,value])=>{
-        $("#Metal_Out_values").append(`<option value="${key}" >${key} (${value})</option>`);
-      });
-    } */
 
     return
   }
 
-  //Click on material to swap it
-	$("body").on("click","#materiaList li, #cagemLibrary > div", function(event){
-     let target = $( event.target );
-     $("#materiaList li, #cagemLibrary > div").removeClass('active');
-     $(this).addClass('active');
-     
-     if (target.is( "div" )){
-       if ($(this).index()/4>1){
-         slideMaterials($(this).index());
-        }
-      }
-    const materialName = $(this).data('ref')
+  function uiMaterialClick(ev){
+    let target = $(ev.target);
+    const materialName = ev.target.dataset.ref;
+    $("#materiaList li, #cagemLibrary > div").removeClass('active');
+    $(`#materiaList li[data-ref='${materialName}'], #cagemLibrary > div[data-ref='${materialName}']`).addClass('active');
     MLSB.TreeD.lastMaterial = materialName
     uiSwitchMaterial();
-	});
+  }
 
   $("#colorLbFinder").keyup(function () {
 		if ($(this).val()==''){
@@ -2266,23 +2225,6 @@ $("#resetShades span.choose").click(function(){
       console.log(JSON.stringify(materialList,null,2))
      }
   })
-
-
-  //TODO put this into uiBuildMaterialColorCode function
-	/* $("body").on('click','#cagecolors span',function(){
-		let colorchanger = $(this).attr("title");
-    let colorSwatchValue = $(this).css("background-color")
-    $("#thacanvas").trigger('changeColor', [colorSwatchValue] ); //will trigger the color change for the selected material
-    //$(".tint").prop('style','background-color: oklab(from '+colorSwatchValue+" l a b) !important;");
-	  let choosed_color = tinycolor(colorSwatchValue);
-    if ($(".cube.tint")){
-      let dummyCol = choosed_color.toPercentageRgb()
-      $(".cube.tint").attr("data-color",`red.${dummyCol.r}\r\ngreen.${dummyCol.g}\r\nblue.${dummyCol.b}\r\n`)
-    }
-	  $("#colorPntage").html(choosed_color.toPercentageRgbString());
-    $("#layerColor").val(colorchanger).change();
-    $("#colorManagament").html(colorchanger);
-	}); */
 
   $("body").on("click","#cagethemicroblends li",function(ev){
     var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
@@ -2540,6 +2482,7 @@ $("#materialHook").change(function(ev){
  /*------------------------------------------------------------------------------------
   Import Export of JSON
 ---------------------------------------------------------------------------------------*/
+
 $("#importLink").click(function(ev){
     ev.preventDefault();
     $("#importTech").click();
@@ -2563,6 +2506,11 @@ $("#importFromWkit").click(function(){
   passTheMlsetup( $("#passaggio").val());
 });
 
+function uiPreviewMlsetup(mlsetup){
+  templateCode = "<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>";
+  return mLsetup.template(templateCode);
+}
+
 function passTheMlsetup(textContent=""){
   
   if (textContent!=""){
@@ -2577,7 +2525,7 @@ function passTheMlsetup(textContent=""){
       if (PARAMS.importSkip){
         $("#TheMagicIsHere").click();
       }else{
-        let test = $([mLsetup.template("<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>")].join("\n"));
+        let test = $([uiPreviewMlsetup(mLsetup)].join("\n"));
         $(".mlpreviewBody").html(test)
         off_MLSetup.show();
         // focus on the exit button of the offcanvas
@@ -3518,8 +3466,8 @@ unCooKonfirm.addEventListener("click", (event) => {
     
     mlsetup = MLSB.getMlsetup(indexSetup);
 
+    //close the file and delete the mlsetup entity
     MLSB.delMlsetup(indexSetup);
-    //TODO close the file and delete the mlsetup entity
     $(this).parent().remove();
     //Change of blade
     $("#MlSetupsList").trigger("switchBlade",0);
@@ -3733,24 +3681,32 @@ unCooKonfirm.addEventListener("click", (event) => {
   var matListText = materialTemplate(`<li class='p-1 fs-80' data-ref='materialName' data-path='materialPath'>materialNameNoUScore</li>`);
   matListText.then((result)=>{
     console.log(`Material List build (${performance.now()} milliseconds)` )
-        $("#materiaList").append(result);
-
-        ml_randomized.push(...Object.keys(MLSB.Materials)
-          .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g)))
-          //.reduce((cur,key) => { return Object.assign(cur,{[key]:MLSB.Materials[key]}) },{} );
-    }).catch((error)=>{notifyMe(error)});
+    $("#materiaList").append(result);
+    ml_randomized.push(...Object.keys(MLSB.Materials)
+      .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g)))
+  }).catch((error)=>{
+    notifyMe(error);
+  }).finally(()=>{
+    $("#materiaList li").click((ev)=>{
+      uiMaterialClick(ev);
+    });
+  });
       
-      var matGallery = materialTemplate(`<div style="background:url('images/material/materialName.jpg') no-repeat;background-size:100% auto;" data-ref='materialName' data-path='materialPath'>materialNameNoUScore</div>`);
+  var matGallery = materialTemplate(`<div style="background:url('images/material/materialName.jpg') no-repeat;background-size:100% auto;" data-ref='materialName' data-path='materialPath'>materialNameNoUScore</div>`);
 
   matGallery.then((result)=>{
     $("#cagemLibrary").append(result);
   }).catch((error)=>{
     notifyMe(error)
+  }).finally(()=>{
+    $("#cagemLibrary > div").click((ev)=>{
+      uiMaterialClick(ev);
+    })
   });
+
 }).on('uiUpdMeshes',function(ev){
   //update the interface after the model has been loaded
   $("#withbones svg:nth-child(1) path").attr("fill",(MLSB.TreeD.model.bones ? 'red':'currentColor'));
-
 }).on('uiResetMeshes',function(ev){
   //remove all the meshes ref in the UI
   $("#sbmeshEN > ul, #unChecksMesh").html("");
