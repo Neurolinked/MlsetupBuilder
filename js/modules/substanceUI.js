@@ -284,7 +284,7 @@ class SubstanceLayer extends HTMLElement {
                     padding:var(--myborder);
                     position:relative;
 
-/*                     & > div{
+                    /* & > div{
                         background-color:white;
                         width:100%;
                         height:100%;
@@ -328,6 +328,14 @@ class SubstanceLayer extends HTMLElement {
 
                 &.selected{
                     background-color:var(--bs-primary-border-subtle);         
+                }
+            }
+            .wrapper:has(.opacityMeter > progress[value='0']){
+                .indicator{
+                    opacity:50%;
+                }
+                *:not(.indicator){
+                    opacity:20%;
                 }
             }
             `;
