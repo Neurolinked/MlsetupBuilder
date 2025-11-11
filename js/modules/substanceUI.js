@@ -135,7 +135,7 @@ class SubstanceLayer extends HTMLElement {
     
     setOpacity(index,opacity=1.0){
         const layer = parseInt(index);
-        opacity = (parseFloat(opacity)>0.0) && (parseFloat(opacity)<=1.0) ? parseFloat(opacity) : 1;
+        opacity = (parseFloat(opacity)>=0.0) && (parseFloat(opacity)<=1.0) ? parseFloat(opacity) : 1;
         if ((layer>=0) && (layer<20)){
             const affectedOpacity = this.shadowRoot.querySelector(`.wrapper:nth-child(${layer+1}) progress`)
             affectedOpacity.value=opacity;
@@ -383,7 +383,7 @@ class SubstanceLayer extends HTMLElement {
                 this.setMaterial(e.detail.layer, e.detail.material);    
             }
             if (e.detail.hasOwnProperty("opacity")){
-                this.setOpacity(e.detail.layer, e.detail.opacity);    
+                this.setOpacity(e.detail.layer, e.detail.opacity);  
             }
             if (e.detail.hasOwnProperty("microblend")){
                 this.setMblend(e.detail.layer, e.detail.microblend);    
