@@ -2308,71 +2308,7 @@ $("#layerRandomizer").click(function(){
   });
 
   //applying data to the structure of li
-  $("#applytoMyLayer").click(function(){
-    applyToLayer()
-    return
-    var tempLayer = new Layer();
-
-    if ($("#layeringsystem li.active").length==1){
-      //var layerIndex = $("#layeringsystem li.active").index();
-      /* 
-			$("#layeringsystem li.active").removeClass("notsync");
-      normalizeUINumbers();
-      let livelloeditato =$("#layeringsystem li.active");
-
-      livelloeditato.attr("data-opacity",$("#layerOpacity").val());//to activate/deactivate Opacity in layers display
-      livelloeditato.attr("data-labels","("+$("#layerColor").val()+") "+ String($("#matInput").val()).replace(/^.*[\\\/]/, '').split('.')[0]);
-      livelloeditato.data("material",$("#matInput").val());
-      livelloeditato.data("mattile",$("#layerTile").val());
-      livelloeditato.data("opacity",$("#layerOpacity").val());
-      livelloeditato.data("color",$("#layerColor").val());
-      livelloeditato.data("normal",String($("#layerNormal").val()));
-      livelloeditato.data("roughin",String($("#layerRoughIn").val()));
-      livelloeditato.data("roughout",String($("#layerRoughOut").val()));
-      livelloeditato.data("metalin",String($("#layerMetalIn").val()));
-      livelloeditato.data("metalout",String($("#layerMetalOut").val()));
-      livelloeditato.data("offsetu",$("#layerOffU").val());
-      livelloeditato.data("offsetv",$("#layerOffV").val());
-      livelloeditato.data("mblend",$("#mbInput").val());
-      livelloeditato.data("mbtile",$("#mbTile").val());
-      livelloeditato.data("mbcontrast",$("#mbCont").val());
-      livelloeditato.data("mbnormal",$("#mbNorm").val());
-      livelloeditato.data("mboffu",$("#mbOffU").val());
-      livelloeditato.data("mboffv",$("#mbOffV").val());
-      semaphoreCLKmBlend=true;
-
-      //Last edits
-      tempLayer.opacity = parseFloat($("#layerOpacity").val());
-      tempLayer.material = $("#matInput").val();
-      tempLayer.tiles = parseFloat($("#layerTile").val());
-      tempLayer.color = $("#layerColor").val();
-      tempLayer.normal = String($("#layerNormal").val());
-      tempLayer.roughnessIn = String($("#layerRoughIn").val());
-      tempLayer.roughnessOut = String($("#layerRoughOut").val());
-      tempLayer.metalIn = String($("#layerMetalIn").val());
-      tempLayer.metalOut = String($("#layerMetalOut").val());
-      tempLayer.offsetU = parseFloat($("#layerOffU").val());
-      tempLayer.offsetV = parseFloat($("#layerOffV").val());
-      tempLayer.microblend.file = $("#mbInput").val();
-      tempLayer.microblend.tiles = parseFloat($("#mbTile").val());
-      tempLayer.microblend.contrast = parseFloat($("#mbCont").val());
-      tempLayer.microblend.normal = parseFloat($("#mbNorm").val());
-      tempLayer.microblend.offset.h = parseFloat($("#mbOffU").val());
-      tempLayer.microblend.offset.v = parseFloat($("#mbOffV").val()); */
-
-      //offset changes
-      //mLsetup.Layers[layerIndex] = tempLayer;
-      //let activeMLTab = getActiveMultilayerSetup();
-
-      /* if (activeMLTab>0){ */
-      //MLSB.updMlsetup(activeMLTab,mLsetup,layerIndex);
-      /* } */
-
-      //delete tempLayer;
-    }else{
-      notifyMe("NO level selected, please redo then layer Edit operation with a selected layer on");
-    }
-  });
+  $("#applytoMyLayer").click(function(){ applyToLayer(); });
 /**
  * Import or replaceMaterials in the DB
  */
