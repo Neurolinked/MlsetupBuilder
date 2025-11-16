@@ -274,7 +274,7 @@ const preferences = new Store({schema,
 });
 
 preferences.watch = true
-var mainWindow,aimWindow, McomposerWindow; //check variable name
+var mainWindow, aimWindow, McomposerWindow; //check variable name
 
 var mljson = app.commandLine.getSwitchValue("open")
 if (mljson ==''){
@@ -489,20 +489,23 @@ async function dirOpen(event,arg) {
 customResource()
 
 const createModal = (htmlFile, parentWindow, width, height, title='MlsetupBuilder', preferences,frameless=true) => {
-  let modal = new BrowserWindow({
-    width: width,
-    height: height,
-    modal: true,
-    parent: parentWindow,
-		webPreferences: preferences,
-		title: title
-  })
+	let modal = new BrowserWindow({
+		width: width,
+		height: height,
+		modal: true,
+		parent: parentWindow,
+			webPreferences: preferences,
+			title: title
+	});
 	modal.menuBarVisible=false
 	modal.minimizable=false
-  modal.loadFile(htmlFile)
+	modal.loadFile(htmlFile)
 	modal.once('ready-to-show', () => {
 		modal.show()
 	})
+	modal.once('close', ()=>{
+		modal.hide();
+	});
   return modal;
 }
 
