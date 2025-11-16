@@ -9,6 +9,13 @@ const copypasteManager = {
 
 customElements.define("substance-layer", SubstanceLayer);
 
+function isFilePath(term){
+  return term.match(/^(\w+\\)+(\w+\.\w{3,})/);
+}
+function isMltemplateFilePath(term){
+  return term.match(/^(\w+\\)+(\w+\.mltemplate)/);
+}
+
 function orderLevelsMetal(a,b){
   //The format is [label,[value,value]]
   const label = 0;
@@ -35,6 +42,18 @@ function orderLevelsMetal(a,b){
 function getActiveMultilayerSetup(){
   return $("#MlSetupsList span.active").index();
 }
+
+
+function materialToKey(mltemplatefile){
+  var keyName = null;
+  for(const [name,material] of Object.entries(MLSB.Materials)){
+    if (material.file==mltemplatefile){
+      keyName = name
+    }
+  }
+  return keyName;
+}
+
 
 function orderLevelsRough(a,b){
   //The format is [label,[value,value]]
@@ -191,32 +210,6 @@ function convLayersMlsetup(mlsetupTarget){
   }else{
     notifyMe(`Impossible to convert a non mlsetup object`);
   }
-}
-
-function applyValueInEditor(layersSelected){
-  $("#layerTile").val(layersSelected.tiles);
-  $("#matInput").val(layersSelected.material).trigger("change");
-  $(window).trigger("uiMaterialSelect",layersSelected.material);
-  $("#layerOpacity").val(layersSelected.opacity).trigger("input")
-  $("#layerColor").val(layersSelected.color).trigger("change");
-  $(`#cagecolors span[data-order='${layersSelected.color}']`).click();
-  $("#layerNormal").val(layersSelected.normal)
-  $("#layerRoughIn").val(layersSelected.roughnessIn)
-  $("#layerRoughOut").val(layersSelected.roughnessOut)
-  $("#layerMetalIn").val(layersSelected.metalIn)
-  $("#layerMetalOut").val(layersSelected.metalOut)
-  $("#layerOffU").val(layersSelected.offsetU)
-  $("#layerOffV").val(layersSelected.offsetV)
-  $("#matOverride").val(layersSelected.override)
-  $("#mbInput, #mbSelect").val(layersSelected.microblend.file)
-  $("#mbTile").val(layersSelected.microblend.tiles)
-  $("#mbCont").val(layersSelected.microblend.contrast)
-  $("#mbNorm").val(layersSelected.microblend.normal)
-  $("#mbOffU").val(layersSelected.microblend.offset.h)
-  $("#mbInput").trigger("focusout");
-  $("#mbSelect").trigger('change');
-  $("#mbOffV").val(layersSelected.microblend.offset.v).trigger("change");
-  $("#maskLayer").attr("value",MLSB.Editor.layerSelected);
 }
 
 function applyToLayer(){
@@ -680,7 +673,11 @@ $(function(){
   const canvasMaterial = document.getElementById('materialDis');
   const material2D = canvasMaterial.getContext("2d");
   var lastsize = canvasMaterial.offsetWidth;
-  //function to draw the image material
+
+  /**
+   * 
+   * @param {string} materialChoose keyname of the material
+   */
   function drawMaterial(materialChoose){
     var squaresize = canvasMaterial.offsetWidth
     lastsize = squaresize;
@@ -695,16 +692,17 @@ $(function(){
     img.src = `./images/material/${materialChoose}.jpg`
   }
 
-  MLSB.TreeD.lastMaterial = "unused";
-  drawMaterial("unused");
-
   function uiSetMaterial(materialName,materialEntry){
     //from switchLegacyMat function
     $("#materiaList li, #cagemLibrary > div").removeClass('active');
 
     $(`#materiaList li[data-ref='${materialName}'],#cagemLibrary > div[data-ref='${materialName}']`).addClass("active");
     drawMaterial(materialName)
+    $("#materialSummary").html(materialName);
   }
+
+  MLSB.TreeD.lastMaterial = "unused";
+  
 
   /* Material.json load and interface events */
   $("#materialJson").bind('update',()=>{
@@ -1003,11 +1001,13 @@ $("#resetShades span.choose").click(function(){
 
 
 /* $("#layerOpacity").on("input",function(ev){
-
-    $("#thacanvas").trigger("changeOpacity", opacityCheck($(this).val()) );
+  $("#thacanvas").trigger("changeOpacity", opacityCheck($(this).val()) );
 }); */
 //Change in layer displayer
 	$("#matInput, #layerTile, #layerOpacity, #layerOffU, #layerOffV, #layerColor, #mbInput, #mbOffU, #mbOffV, #mbTile, #mbCont, #mbNorm, #layerNormal, #layerMetalOut, #layerRoughIn, #layerRoughOut").on("change",function(ev){
+    //ls as abbreviation for layerselected
+    let ls = MLSB.getMllayer(MLSB.Editor.activeMlsetup);
+
 		if (
 			($("#matInput").val() != $("#layeringsystem li.active").data("material")) ||
 			(parseFloat($("#layerTile").val()) != parseFloat($("#layeringsystem li.active").data("mattile"))) ||
@@ -1545,6 +1545,10 @@ $("#resetShades span.choose").click(function(){
       }).finally(()=>{
         loadingwin.close();
         MLSB.initialized();
+        //set the default material
+        uiSetMaterial(MLSB.TreeD.lastMaterial);
+        //set the base color and precentages
+        uiApplyColor();
       });
       $(".dt-buttons button" ).removeClass("dt-button");
       
@@ -1601,9 +1605,7 @@ $("#resetShades span.choose").click(function(){
   });
 
   //
-  $('#DataModelsLibrary_filter input[type=search]').each(function () {
-    $(this).attr("placeholder", "Search...");
-  });
+  $('#DataModelsLibrary_filter input[type=search]').each(function () { $(this).attr("placeholder", "Search..."); });
 
 
   //when the loading of the layer configuration setup a microblend
@@ -1796,22 +1798,28 @@ $("#resetShades span.choose").click(function(){
   }
   //This will set the color in the interface
   function uiApplyColor(colorObject){
-    if (!(
-      colorObject.hasOwnProperty("label") &&
-      colorObject.hasOwnProperty("rgb") &&
-      colorObject.hasOwnProperty("percentageString") &&
-      colorObject.hasOwnProperty("style")
+    const defaultColor = {
+      label:"null_null",
+      rgb:[.5,.5,.5],
+      percentageString: `red.50%\ngreen.50%\nblue.50%`,
+      style : `rgb(128,128,128)`
+    }
+    if (colorObject==undefined){
+      colorObject = defaultColor
+    }else if (!(
+        colorObject.hasOwnProperty("label") &&
+        colorObject.hasOwnProperty("rgb") &&
+        colorObject.hasOwnProperty("percentageString") &&
+        colorObject.hasOwnProperty("style")
     )){
-      colorObject.label="unused";
-      colorObject.rgb=[.5,.5,.5];
-      colorObject.percentageString = `red.50%\ngreen.50%\nblue.50%`
-      colorObject.style = `rgb(128,128,128)`
+      colorObject= defaultColor
     }
 
     $(".colorSelector span").removeClass("active");
     $(`.colorSelector span[title='${colorObject.label}']`).addClass("active");
     $(".tint").prop('style',`background-color: oklab(from ${colorObject.style} l a b) !important;`);
     if ($(".cube.tint")){
+
         //$(".cube.tint").attr("data-color",`red.${colorSelected.rgb[0]}\r\ngreen.${colorSelected.rgb[1]}\r\nblue.${colorSelected.rgb[2]}\r\n`)
         $(".cube.tint").attr("data-color",colorObject.percentageString)
     }
@@ -1867,19 +1875,28 @@ $("#resetShades span.choose").click(function(){
     });
   }
 
-
   function uiBuildMaterialEditorList(list,template){
     if (typeof(list)!="object"){
       return '';
     }
     let listCode = '';
     for( const [key,value] of Object.entries(list)){
-      listCode += template.replaceAll("KEY",`${key}`).replaceAll("VALUESTRING",`${value.toString()}`).replaceAll("VALUE",`${value}`)
+      listCode += template
+                    .replaceAll("KEY",`${key}`)
+                    .replaceAll("VALUESTRING",`${value.toString()}`)
+                    .replaceAll("VALUE",`${value}`)
     }
     return listCode
   }
 
-  function uiSwitchMaterial(){
+  function uiSwitchMaterial(material=undefined){
+    if (material!=undefined){
+      if (isMltemplateFilePath(material)){
+        material = getMaterialFromFile(material);
+      }
+      MLSB.TreeD.lastMaterial = material
+    }
+
     var chosenMaterial = MLSB.getMaterial();
 
     if (chosenMaterial===undefined){
@@ -1889,18 +1906,22 @@ $("#resetShades span.choose").click(function(){
       notifyMe("Material Inexistent in the DB, import it");
       return
     }
+    uiSetMaterial(MLSB.TreeD.lastMaterial,chosenMaterial)
     //Trigger a new texture material Loading only if the material is changed
     if ($("#matInput").val()!=chosenMaterial.file){
       $(".multiplier").attr("data-mul",chosenMaterial.xTiles.toFixed(2));
       $("#thacanvas").trigger("renderMaterial",chosenMaterial); //trigger the loading of a new Material
     }
     $("#materialSummary").html(MLSB.TreeD.lastMaterial); //name of the material
-    $("#matInput").val(chosenMaterial.file);  // path of the material
-    $("#matInput").trigger("change"); //trigger the check on the level configuration change
+    if ($("#matInput").val()!=(chosenMaterial.file)){
+      $("#matInput").val(chosenMaterial.file);  // path of the material
+      $("#matInput").trigger("change"); //trigger the check on the level configuration change
+    }
 
     //reflect on UI the material swap
-    switchLegacyMat(MLSB.TreeD.lastMaterial);
-    drawMaterial(MLSB.TreeD.lastMaterial);
+    
+    /* switchLegacyMat(MLSB.TreeD.lastMaterial);
+    drawMaterial(MLSB.TreeD.lastMaterial); */ 
     //Reset fields values in the interface
     $("#Rough_out_values").html('');
     $("#Metal_Out_values").html('');  
@@ -1972,10 +1993,7 @@ $("#resetShades span.choose").click(function(){
   function uiMaterialClick(ev){
     let target = $(ev.target);
     const materialName = ev.target.dataset.ref;
-    $("#materiaList li, #cagemLibrary > div").removeClass('active');
-    $(`#materiaList li[data-ref='${materialName}'], #cagemLibrary > div[data-ref='${materialName}']`).addClass('active');
-    MLSB.TreeD.lastMaterial = materialName
-    uiSwitchMaterial();
+    uiSwitchMaterial(materialName);
   }
 
   $("#colorLbFinder").keyup(function () {
@@ -2063,6 +2081,7 @@ $("#resetShades span.choose").click(function(){
 				opacityHTMLInput.removeClass('bg-attention');
 			}
   }
+  
 	$("#layerOpacity").on("change, input",()=>{
     checkOpacityLayer();
     $("#thacanvas").trigger("changeOpacity", opacityCheck($(this).val()) );
@@ -3304,9 +3323,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     $("#thacanvas").trigger("switchMlayer");
   }).on('click','#MlSetupsList span',function(ev){
     ev.preventDefault();
-    //TODO Switch setup
     $("#MlSetupsList").trigger("switchBlade",$(ev.target).index());
-   /*  console.log(openMlsetup[$(this).index() - 1]) */
   }).on('click',"#MlSetupsList > span > .btn-close[data-bs-dismiss='badge']",function(ev){
     ev.preventDefault();
     //remove the mlsetup from the list
@@ -3320,6 +3337,7 @@ unCooKonfirm.addEventListener("click", (event) => {
     MLSB.delMlsetup(indexSetup);
     $(this).parent().remove();
     //Change of blade
+    MLSB.Editor.activeMlsetup = 0;
     $("#MlSetupsList").trigger("switchBlade",0);
   });
 
@@ -3333,8 +3351,10 @@ unCooKonfirm.addEventListener("click", (event) => {
     //change of focus
     $("body #MlSetupsList > span").removeClass("active");
     $("body #MlSetupsList > span").eq(index).addClass("active")
+    MLSB.Editor.activeMlsetup = index
     mLsetup = MLSB.getMlsetup(index);
     convLayersMlsetup(mLsetup);
+    switchLayer();
   });
 
   $("#re-selectModel").click(async function(ev){
@@ -3479,16 +3499,49 @@ unCooKonfirm.addEventListener("click", (event) => {
     }
   }
 
+function applyValueInEditor(layersSelected){
+  $("#layerTile").val(layersSelected.tiles);
+  uiSwitchMaterial(layersSelected.material);
+  $("#matInput").val(layersSelected.material).trigger("change");
+  //set material
+  keyName = materialToKey(layersSelected.material)
+  uiSetMaterial(keyName,MLSB.Materials[keyName]);
+
+  $("#layerOpacity").val(layersSelected.opacity);
+  $("#layerColor").val(layersSelected.color).trigger("change");
+  //set color
+  $(`#cagecolors span[data-order='${layersSelected.color}']`).click();
+  $("#layerNormal").val(layersSelected.normal)
+  $("#layerRoughIn").val(layersSelected.roughnessIn)
+  $("#layerRoughOut").val(layersSelected.roughnessOut)
+  $("#layerMetalIn").val(layersSelected.metalIn)
+  $("#layerMetalOut").val(layersSelected.metalOut)
+  $("#layerOffU").val(layersSelected.offsetU)
+  $("#layerOffV").val(layersSelected.offsetV)
+  $("#matOverride").val(layersSelected.override)
+  $("#mbInput, #mbSelect").val(layersSelected.microblend.file)
+  $("#mbTile").val(layersSelected.microblend.tiles)
+  $("#mbCont").val(layersSelected.microblend.contrast)
+  $("#mbNorm").val(layersSelected.microblend.normal)
+  $("#mbOffU").val(layersSelected.microblend.offset.h)
+  //trigger changes
+
+  checkOpacityLayer();
+  $("#mbInput").trigger("focusout");
+  $("#mbSelect").trigger('change');
+  $("#mbOffV").val(layersSelected.microblend.offset.v).trigger("change");
+  //$("#maskLayer").attr("value",MLSB.Editor.layerSelected);
+}
+
   function switchLayer(source=null){
-    let activeMLTab = getActiveMultilayerSetup();
-    let layersSelected = MLSB.getMllayer(activeMLTab);
-    console.log(layersSelected);
-    applyValueInEditor(layersSelected);
+    //let activeMLTab = getActiveMultilayerSetup();
+
+    let layersSelected = MLSB.getMllayer(MLSB.Editor.activeMlsetup);
+    //TODO Here we need to solve things and make a chart to understand better how to unravel things
     uiActivateLayer()
-    if ($("#modelTarget").attr('loaded')=='true'){
-      let fireTxLoad = document.getElementById('maskLayer');
-      fireTxLoad.dispatchEvent(TextureLoad);
-    }
+    applyValueInEditor(layersSelected);
+    //change the mask in the ui
+    
     $("#thacanvas").trigger("switchLayer");
   }
 
@@ -3579,180 +3632,172 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   //Document Events
   $(window)
-  .resize(function(){
-    updPanelCovers(); //on resize will update the position of the interface to cover
-    $("#DataModelsLibrary").DataTable().draw();
-    adaptTexturePlayer();
-    let tblsize = window.innerHeight-350
-    if ((window.innerHeight-350)<50){
-      tblsize = 50;
-    }
-    //adapt model table size to the window
-    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${tblsize}px`);
-    $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("min-height",`${tblsize}px`);
-	}).on("load", function (e) {
-    const AppLoading = document.getElementById("Loading");
-    AppLoading.showModal();
-  }).on('substanceLayer',function(ev){
-    //In case i Need something
-    const action = ev.detail?.action
-    const index = ev.detail?.layer
-    const details = ev.detail?.details
-    switch (action){
-      case 'switchLayer':
-        MLSB.Editor.layerSelected=index;
-        //Loading the layer in the Editor
-        switchLayer();
-        break
-      case 'contextMenu':
-        const mousePosition = details?.position
-        showContextMenu(mousePosition,index);
-        break;
-      default:
-    }
-    console.log(ev.detail);
-  })
-  .on('setQuestion',function(ev){
-    let options = ev.detail;
-    console.log(options);
-    setQuestion(options.message,options.action);
-  })
-  .on('limitLayers',function(ev,index){
-  //limit the number of active layers in the interface
-    ev.preventDefault();
-    if (MLSB.UI.substance){
-      const sbUI =document.querySelector("substance-layer")
-      sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:index}}))
-    }
-    
-    $(`.controLayers li`).removeAttr("disabled");
-    if (index > 0){
-      $(`.controLayers`).each((idx,elm)=>{
-        $(elm).find(`li:gt(${index-1})`).attr("disabled","disabled")
-        if (index < MLSB.Editor.layerSelected){
-          $(`.controLayers li`).removeClass("active")
-        }
-      })
-    }else{
-      $(`.controLayers`).each((idx,elm)=>{
-        $(elm).find(`li:gt(0)`).attr("disabled","disabled")
-        $(`.controLayers li`).removeClass("active")
-      })
-    }
-    
-    const sbUI = document.querySelector("substance-layer");
-    sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:index}}));
-}).on('fetchMaterialsComplete',function(ev){
-  var matListText = materialTemplate(`<li class='p-1 fs-80' data-ref='materialName' data-path='materialPath'>materialNameNoUScore</li>`);
-  matListText.then((result)=>{
-    console.log(`Material List build (${performance.now()} milliseconds)` )
-    $("#materiaList").append(result);
-    ml_randomized.push(...Object.keys(MLSB.Materials)
-      .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g)))
-  }).catch((error)=>{
-    notifyMe(error);
-  }).finally(()=>{
-    $("#materiaList li").click((ev)=>{
-      uiMaterialClick(ev);
-    });
-  });
-      
-  var matGallery = materialTemplate(`<div style="background:url('images/material/materialName.jpg') no-repeat;background-size:100% auto;" data-ref='materialName' data-path='materialPath'>materialNameNoUScore</div>`);
-
-  matGallery.then((result)=>{
-    $("#cagemLibrary").append(result);
-  }).catch((error)=>{
-    notifyMe(error)
-  }).finally(()=>{
-    $("#cagemLibrary > div").click((ev)=>{
-      uiMaterialClick(ev);
+    .resize(function(){
+      updPanelCovers(); //on resize will update the position of the interface to cover
+      $("#DataModelsLibrary").DataTable().draw();
+      adaptTexturePlayer();
+      let tblsize = window.innerHeight-350
+      if ((window.innerHeight-350)<50){
+        tblsize = 50;
+      }
+      //adapt model table size to the window
+      $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${tblsize}px`);
+      $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("min-height",`${tblsize}px`);
+    }).on("load", function (e) {
+      const AppLoading = document.getElementById("Loading");
+      AppLoading.showModal();
+    }).on('substanceLayer',function(ev){
+      //In case i Need something
+      const action = ev.detail?.action
+      const index = ev.detail?.layer
+      const details = ev.detail?.details
+      switch (action){
+        case 'switchLayer':
+          MLSB.Editor.layerSelected=index;
+          //Loading the layer in the Editor
+          switchLayer();
+          break
+        case 'contextMenu':
+          const mousePosition = details?.position
+          showContextMenu(mousePosition,index);
+          break;
+        default:
+      }
+      console.log(ev.detail);
     })
-  });
+    .on('setQuestion',function(ev){
+      let options = ev.detail;
+      console.log(options);
+      setQuestion(options.message,options.action);
+    })
+    .on('limitLayers',function(ev,index){
+    //limit the number of active layers in the interface
+      ev.preventDefault();
+      if (MLSB.UI.substance){
+        const sbUI =document.querySelector("substance-layer")
+        sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:index}}))
+      }
+      
+      $(`.controLayers li`).removeAttr("disabled");
+      if (index > 0){
+        $(`.controLayers`).each((idx,elm)=>{
+          $(elm).find(`li:gt(${index-1})`).attr("disabled","disabled")
+          if (index < MLSB.Editor.layerSelected){
+            $(`.controLayers li`).removeClass("active")
+          }
+        })
+      }else{
+        $(`.controLayers`).each((idx,elm)=>{
+          $(elm).find(`li:gt(0)`).attr("disabled","disabled")
+          $(`.controLayers li`).removeClass("active")
+        })
+      }
+      
+      const sbUI = document.querySelector("substance-layer");
+      sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:index}}));
+  }).on('fetchMaterialsComplete',function(ev){
+    var matListText = materialTemplate(`<li class='p-1 fs-80' data-ref='materialName' data-path='materialPath'>materialNameNoUScore</li>`);
+    matListText.then((result)=>{
+      console.log(`Material List build (${performance.now()} milliseconds)` )
+      $("#materiaList").append(result);
+      ml_randomized.push(...Object.keys(MLSB.Materials)
+        .filter((key) => !key.match(/^(concrete|ebony|wood|asphalt|cliff|ceramic|grass|brick|terrain|mud|soil|rock|gravel|sand|factory|wallpaper|window|plaster|unused)\w+/g)))
+    }).catch((error)=>{
+      notifyMe(error);
+    }).finally(()=>{
+      $("#materiaList li").click((ev)=>{
+        uiMaterialClick(ev);
+      });
+    });
+        
+    var matGallery = materialTemplate(`<div style="background:url('images/material/materialName.jpg') no-repeat;background-size:100% auto;" data-ref='materialName' data-path='materialPath'>materialNameNoUScore</div>`);
 
-}).on('uiUpdMeshes',function(ev){
-  //update the interface after the model has been loaded
-  $("#withbones svg:nth-child(1) path").attr("fill",(MLSB.TreeD.model.bones ? 'red':'currentColor'));
-}).on('uiResetMeshes',function(ev){
-  //remove all the meshes ref in the UI
-  $("#sbmeshEN > ul, #unChecksMesh").html("");
+    matGallery.then((result)=>{
+      $("#cagemLibrary").append(result);
+    }).catch((error)=>{
+      notifyMe(error)
+    }).finally(()=>{
+      $("#cagemLibrary > div").click((ev)=>{
+        uiMaterialClick(ev);
+      })
+    });
 
-}).on('uiPushMeshes',function(ev,datas={}){
-  if ( (datas.hasOwnProperty("name") ) && (datas.hasOwnProperty("material") ) ){
-    try {
-      document.getElementById("tweakContainer").dispatchEvent(new CustomEvent("addMeshes",{detail:datas.name}));
-    } catch (error) {
-      notifyMe("Isn't possible to add meshes controller")
+  }).on('uiUpdMeshes',function(ev){
+    //update the interface after the model has been loaded
+    $("#withbones svg:nth-child(1) path").attr("fill",(MLSB.TreeD.model.bones ? 'red':'currentColor'));
+  }).on('uiResetMeshes',function(ev){
+    //remove all the meshes ref in the UI
+    $("#sbmeshEN > ul, #unChecksMesh").html("");
+
+  }).on('uiPushMeshes',function(ev,datas={}){
+    if ( (datas.hasOwnProperty("name") ) && (datas.hasOwnProperty("material") ) ){
+      try {
+        document.getElementById("tweakContainer").dispatchEvent(new CustomEvent("addMeshes",{detail:datas.name}));
+      } catch (error) {
+        notifyMe("Isn't possible to add meshes controller")
+      }
+      /* $("#tweakContainer").trigger('addMeshes',datas.name); */
+
+      $("#sbmeshEN > ul").append(
+        `<li class="form-check" data-material="${datas.material}">
+          <label for="${datas.name}" class="form-check-label">${datas.name}</label>
+          <input name="${datas.name}" type="checkbox" class="form-check-input" checked >
+        </li>`);
+      /* <input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
+                        <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${datas.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${datas.name}</label> */
+      $("#unChecksMesh").append(`<input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
+        <label class="btn btn-sm btn-outline-secondary mb-2 d-block" for="uvchk_${datas.name}" autocomplete='off' title="${datas.material}" >${datas.name}</label>`);
     }
-    /* $("#tweakContainer").trigger('addMeshes',datas.name); */
+  }).on('uiswitchMlmaterial',function(ev,index){
+    $(`#Mlswitcher div:nth-child(${index}) input[type='radio']`).prop("checked",true);
+    $(`#mLayerOperator li:nth-child(${index})`).addClass("active");
+  }).on('uiResetAppearance',function(ev){
+    $("#appeInfo").html("");
+    $("#appearanceSwitcher ul").html("");
 
-    $("#sbmeshEN > ul").append(
-      `<li class="form-check" data-material="${datas.material}">
-        <label for="${datas.name}" class="form-check-label">${datas.name}</label>
-        <input name="${datas.name}" type="checkbox" class="form-check-input" checked >
-      </li>`);
-    /* <input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
-											 <label class="btn btn-sm btn-outline-secondary mb-2" for="uvchk_${datas.name}" autocomplete='off' title="${child.userData.materialNames[0]}" >${datas.name}</label> */
-    $("#unChecksMesh").append(`<input type="checkbox" class="btn-check" id="uvchk_${datas.name}" checked >
-      <label class="btn btn-sm btn-outline-secondary mb-2 d-block" for="uvchk_${datas.name}" autocomplete='off' title="${datas.material}" >${datas.name}</label>`);
-  }
-}).on('uiswitchMlmaterial',function(ev,index){
-  $(`#Mlswitcher div:nth-child(${index}) input[type='radio']`).prop("checked",true);
-  $(`#mLayerOperator li:nth-child(${index})`).addClass("active");
-}).on('uiResetAppearance',function(ev){
-  $("#appeInfo").html("");
-  $("#appearanceSwitcher ul").html("");
+  }).on('uiLoadMaterial',function(ev){
+    $("#Mlswitcher").html(ev.detail?.mlSwitch);
+    $("#mLayerOperator").html(ev.detail?.multilayerMaskMenu);
 
-}).on('uiLoadMaterial',function(ev){
-  $("#Mlswitcher").html(ev.detail?.mlSwitch);
-  $("#mLayerOperator").html(ev.detail?.multilayerMaskMenu);
+    if ($("#Mlswitcher div:nth-child(1) input[type='radio']")) {
+      $("#mLayerOperator li:nth-child(1)").addClass("active");
+      $("#Mlswitcher div:nth-child(1) input[type='radio']").prop("checked",true);
+    }
 
-  if ($("#Mlswitcher div:nth-child(1) input[type='radio']")) {
-    $("#mLayerOperator li:nth-child(1)").addClass("active");
-    $("#Mlswitcher div:nth-child(1) input[type='radio']").prop("checked",true);
-  }
+    $("#appeInfo").html(ev.detail?.appeInfo);
+    $("#appearanceSwitcher ul").html(ev.detail.appeSwitch);
 
-  $("#appeInfo").html(ev.detail?.appeInfo);
-  $("#appearanceSwitcher ul").html(ev.detail.appeSwitch);
+  }).on('uicleanMlmaterial',function(ev){
+    $("#Mlswitcher").html("");
+    $("#mLayerOperator").html("");
+    
+  }).on('uiPushMlmaterial',function(ev,material){
+    var idx = materialJSON.findIndex(material);
+    if (idx >=0){
+      if (entry = materialJSON.find(material)){
+        if ([
+          "engine\\materials\\multilayered.mt",
+          "base\\materials\\vehicle_destr_blendshape.mt",
+          "base\\fx\\_shaders\\sandevistan_multilayer.mt"
+          ].includes(entry.MaterialTemplate)){
 
-}).on('uicleanMlmaterial',function(ev){
-  $("#Mlswitcher").html("");
-  $("#mLayerOperator").html("");
-  
-}).on('uiPushMlmaterial',function(ev,material){
-  var idx = materialJSON.findIndex(material);
-  if (idx >=0){
-    if (entry = materialJSON.find(material)){
-      if ([
-        "engine\\materials\\multilayered.mt",
-        "base\\materials\\vehicle_destr_blendshape.mt",
-        "base\\fx\\_shaders\\sandevistan_multilayer.mt"
-        ].includes(entry.MaterialTemplate)){
+          var uiMultilayerSwitch = materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
 
-        var uiMultilayerSwitch = materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
+          var multilayerMaskMenu = materialJSON.codeMaterial(idx,`<li><a class="dropdown-item" href="#" data-multilayer="${idx}" >$_MATERIALFULLNAME</a></li>`);
 
-        var multilayerMaskMenu = materialJSON.codeMaterial(idx,`<li><a class="dropdown-item" href="#" data-multilayer="${idx}" >$_MATERIALFULLNAME</a></li>`);
-
-        $("#Mlswitcher").append(uiMultilayerSwitch);
-        $("#mLayerOperator").append(multilayerMaskMenu);
+          $("#Mlswitcher").append(uiMultilayerSwitch);
+          $("#mLayerOperator").append(multilayerMaskMenu);
+        }
       }
     }
-  }
 
-}).on('uiMBselect',function(ev,source){
-  /* function to display, select and reset
-  * every UI controller about microblends file selection.
-  
-  */
-}).on('uiMaterialSelect',function(ev,source){
-  var keyName = null;
-  for(const [name,material] of Object.entries(MLSB.Materials)){
-    if (material.file==source){
-      keyName = name
-    }
-  }
-  uiSetMaterial(keyName,MLSB.Materials[keyName]);
-}).on('changeMBBackground',(ev)=>{
-  $("#mb-preview").css("background-color",PARMAS.mbBackColor);
-});
+  }).on('uiMBselect',function(ev,source){
+    /* function to display, select and reset
+    * every UI controller about microblends file selection.
+    
+    */
+  }).on('changeMBBackground',(ev)=>{
+    $("#mb-preview").css("background-color",PARMAS.mbBackColor);
+  });
 
 });
