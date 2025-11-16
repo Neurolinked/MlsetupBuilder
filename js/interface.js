@@ -54,6 +54,23 @@ function materialToKey(mltemplatefile){
   return keyName;
 }
 
+function uiMicroblendSelect(microblendPath){
+  let uiMicroblendEntry = $(`#mbSelect option[value="${microblendPath}"]`);
+
+  if (uiMicroblendEntry.length==0){
+    $("#mb-preview").prop("src","./images/_nopreview.gif");
+  }else{
+    $("#mb-preview").prop("src",
+      $(`#mbSelect option[value="${microblendPath}"]`).attr("data-thumbnail")
+    ).on('error',
+      function() {
+       	$("#mb-preview").prop("src","./images/_nopreview.gif")
+      }
+    );
+  }
+
+}
+
 
 function orderLevelsRough(a,b){
   //The format is [label,[value,value]]
@@ -1611,27 +1628,35 @@ $("#resetShades span.choose").click(function(){
   //when the loading of the layer configuration setup a microblend
   //it activate the display onto the preview
 
-	$("#mbInput").on('focusout',function(){
-		$("#mbSelect option").removeAttr("selected");
-		$("#mbSelect").val($("#mbInput").val()).trigger('updateMblend');
+	$("#mbInput").on('focusout, keyup',function(e){
+    //uiMicroblendSelect($("#mbInput").val())
+    if (
+      (e.type=="keyup") && (e.which==13) ||
+      (e.type=="focusout")
+    ){
+      $("#mbSelect option").removeAttr("selected");
+      uiMicroblendSelect($("#mbInput").val());
+    }
 	});
 
-	$("#mbInput").keyup(function (event) {
+	/* $("#mbInput").keyup(function (event) {
     if (event.which === 13) {
 			$("#mbSelect option").removeAttr("selected");
 			$("#mbSelect").val($("#mbInput").val()).trigger('updateMblend');
     }
-	});
+	}); */
 
 	$("#mbSelect").on('updateMblend',function(){
-		test = $("#mbInput").val()
+		microblendPath = $("#mbInput").val();
+    uiMicroblendSelect(microblendPath);
+    /* 
 		if ($(`#mbSelect option[value="${test}"]`).length==0){
 			$("#mb-preview").prop("src","./images/_nopreview.gif");
 		}else{
 			//if ($("#mbSelect option[value='"+$("#mbInput").val()+"']").attr("data-thumbnail")!== undefined){
   			$("#mb-preview").prop("src",$(`#mbSelect option[value="${test}"]`).attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif")});
   		//}
-		}
+		} */
 		$("#mbInput").change();
 	})
 
