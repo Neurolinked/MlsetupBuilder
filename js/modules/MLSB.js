@@ -43,6 +43,10 @@ class MLSBEditor {
     }
 
     Materials = {}
+    /**
+     * contains objects with file path and package property
+     */
+    Microblends = [];
 
     MlSetups = []
     Models = []
@@ -143,5 +147,32 @@ class MLSBEditor {
             console.log(mlsetup)
         }
         return false;
+    }
+
+    /**
+     * 
+     * @param {string} microblendPath the complete file path
+     * @returns the Microblend path found
+     */
+    getMBlend(microblendPath){
+        return this.Microblends.filter((el)=>el.path==microblendPath);
+    }
+    
+    /**
+     * 
+     * @param {Object} microblendObject 
+     * @param {string} microblendObject.path 
+     * @param {string} microblendObject.package //default value = core
+     * @returns 
+     */
+    putMBlend(microblendObject){
+        if ((!(microblendObject.hasOwnProperty("path"))) && 
+        (!(microblendObject.hasOwnProperty("package")))){
+            return false
+        }
+        if ((this.getMBlend(microblendObject.path)).length==0 ){
+            this.Microblends.push(microblendObject);
+        }
+        return true
     }
 }
