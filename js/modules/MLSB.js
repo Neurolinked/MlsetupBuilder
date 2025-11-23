@@ -154,10 +154,13 @@ class MLSBEditor {
      * @param {string} microblendPath the complete file path
      * @returns the Microblend path found
      */
-    getMBlend(microblendPath){
+    getMBlends(microblendPath){
         return this.Microblends.filter((el)=>el.path==microblendPath);
     }
-    
+    //singular search
+    getMBlend(microblendPath){
+        return this.Microblends.filter((el)=>el.path==microblendPath)[0];
+    }
     /**
      * 
      * @param {Object} microblendObject 
@@ -170,7 +173,7 @@ class MLSBEditor {
         (!(microblendObject.hasOwnProperty("package")))){
             return false
         }
-        if ((this.getMBlend(microblendObject.path)).length==0 ){
+        if ((this.getMBlends(microblendObject.path)).length==0 ){
             this.Microblends.push(microblendObject);
         }
         return true
