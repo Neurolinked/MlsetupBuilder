@@ -13,6 +13,7 @@
             { "name": "cracks2", "path": "base\\surfaces\\microblends\\cracks2.xbm"},
             { "name": "cracks_concrete", "path": "base\\surfaces\\microblends\\cracks_concrete.xbm"},
             { "name": "cracks", "path": "base\\surfaces\\microblends\\cracks.xbm"},
+            { "name": "default", "path": "base\\surfaces\\microblends\\default.xbm"},
             { "name": "damp_stains_a", "path": "base\\surfaces\\microblends\\damp_stains_a.xbm"},
             { "name": "debug_uv_testing_mb", "path": "base\\surfaces\\microblends\\debug_uv_testing_mb.xbm"},
             { "name": "dirt_stains", "path": "base\\surfaces\\microblends\\dirt_stains.xbm"},
