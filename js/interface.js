@@ -39,6 +39,14 @@ function orderLevelsMetal(a,b){
   }
 };
 
+function rangesFix(rangeString){
+  return rangeString.replace(/^[,\-]+/,'')
+                    .replace(/[a-zA-Z\s]+/g,'')
+                    .replace(/[^0-9,\-\s]+/g,'')
+                    .replace(/,{2,}/g,',')
+                    .replace(/\-{2,}/g,'-');
+}
+
 function getActiveMultilayerSetup(){
   return $("#MlSetupsList span.active").index();
 }
@@ -1274,9 +1282,7 @@ $("#resetShades span.choose").click(function(){
 
 	//replace chars not matching the standard features
 	$("#layerRandomCfg").keyup(function (event) {
-		let stringa = $(this).val();
-		stringa = stringa.replace(/^[,\-]+/,'').replace(/[a-zA-Z\s]+/g,'').replace(/[^0-9,\-\s]+/g,'').replace(/,{2,}/g,',').replace(/\-{2,}/g,'-');
-		$(this).val(stringa);
+		$(this).val(rangesFix($(this).val()));
 	});
 
   //const maskUVs = new fabric.Canvas('fabUVDis');
@@ -2380,9 +2386,9 @@ $("#layerRandomizer").click(function(){
 
   //Erase layers but let opacity at 1.0
   $("#wipe-layer").click(function(){
-    $("#layerRandomCfg").keyup(); //fixes a possible layer selection
+    $("#layerRandomCfg").val(rangesFix($("#layerRandomCfg").val()))
     vacuumCleaner(false,true);
-    $("#layeringsystem li.active").click();
+    switchLayer();
   });
 
   //applying data to the structure of li
@@ -2440,28 +2446,39 @@ function uiPreviewMlsetup(mlsetup){
 }
 
 function passTheMlsetup(textContent=""){
-  
-  if (textContent!=""){
+   if (textContent==""){return}
 
-    $("#off_MLSetups div.offcanvas-body detail").fadeOut();
-    var mls_content =" "
-    try {
+  $("#off_MLSetups div.offcanvas-body detail").fadeOut(); //hide the preview body
+  let mlsetupFormat = typeof(textContent)
+  var mls_content = textContent;
+
+  switch (mlsetupFormat){
+    case "string":
       mls_content = JSON.parse(textContent,mlsContRevive);
-      mLsetup = new Mlsetup();
-      mLsetup.import(mls_content);
+    case "object":
+      
 
-      if (PARAMS.importSkip){
-        $("#TheMagicIsHere").click();
-      }else{
+      try{
+        mLsetup = new Mlsetup();
+        mLsetup.import(mls_content);
+
+        //create the import preview
         let test = $([uiPreviewMlsetup(mLsetup)].join("\n"));
         $(".mlpreviewBody").html(test)
-        off_MLSetup.show();
-        // focus on the exit button of the offcanvas
-        $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
+
+        if (PARAMS.importSkip){
+          $("#TheMagicIsHere").click();
+        }else{
+          off_MLSetup.show();
+          // focus on the exit button of the offcanvas
+          $("#off_MLSetups button[data-bs-dismiss='offcanvas']").focus();
+        }
+      }catch(error){
+        notifyMe(error);
       }
-    } catch (error) {
-      notifyMe(error);
-    }
+      break;
+    default:
+      notifyMe(`Strange format`)
   }
 }
 
@@ -2523,53 +2540,18 @@ function vacuumCleaner(on = true, ranges = false){
   //Cleanup all layers value
   if(!on){ c_opacity = 0.0; }
 
+  let indexSetup = getActiveMultilayerSetup();
+    /* openMlsetup.splice(indexSetup,1); */  
+  let mlsetup = MLSB.getMlsetup(indexSetup);
   aRanges.forEach(id =>{
-    if ($('#layeringsystem li').eq(id).attr("disabled")!="disabled"){
-      $('#layeringsystem li').eq(id).data({
-        mattile:'1.0',
-        labels:'(null_null) unused',
-        material:'base\\surfaces\\materials\\special\\unused.mltemplate',
-        opacity:c_opacity,
-        color:'null_null',
-        normal:'null',
-        roughin:'null',
-        roughout:'null',
-        metalin:'null',
-        metalout:'null',
-        offsetU:0.0,
-        offsetV:0.0,
-        mblend:'base\\surfaces\\microblends\\default.xbm',
-        mbtile:1.0,
-        mbcontrast:0.0,
-        mbnormal:1.0,
-        mboffu:0.0,
-        mboffv:0.0
-      });
-      $('#layeringsystem li').eq(id).attr({
-        "data-mattile":'1.0',
-        "data-labels":'(null_null) unused',
-        "data-material":'base\\surfaces\\materials\\special\\unused.mltemplate',
-        "data-opacity":String(c_opacity),
-        "data-color":'null_null',
-        "data-normal":'null',
-        "data-roughin":'null',
-        "data-roughout":'null',
-        "data-metalin":'null',
-        "data-metalout":'null',
-        "data-offsetU":'0.0',
-        "data-offsetV":'0.0',
-        "data-mblend":'base\\surfaces\\microblends\\default.xbm',
-        "data-mbtile":'1.0',
-        "data-mbcontrast":'0.0',
-        "data-mbnormal":'1.0',
-        "data-mboffu":'0.0',
-        "data-mboffv":'0.0'
-      });
+    if (!mlsetup.Layers[id].disabled){
+      mlsetup.reset(id);
+      if(!on){ mlsetup.Layers[id].opacity = 0.0; }
+      MLSB.updMlsetup(indexSetup,mlsetup,id)
     }
   })
-
-  $('#layeringsystem li').eq(0).data({opacity:1.0});
-  $('#layeringsystem li').eq(0).attr({"data-opacity":"1.0"});
+  convLayersMlsetup(mlsetup);
+  switchLayer();
 }
 
 
@@ -2587,6 +2569,7 @@ $("#TheMagicIsHere").click(function(){
     //Layer Cleanup for disabled layers
     //disabledLayers = 20 - mLsetup.Layers.length;
     disableLayers(20 - mLsetup.Layers.length);
+    
     //Convert mlsetup Layers to UI layers
     convLayersMlsetup(mLsetup);
     var nomefile  = $("#importTech").val()=="" ? $('#nametoexport').val() : $("#importTech").val().substring($("#importTech").val().lastIndexOf('\\')+1);
@@ -2594,7 +2577,6 @@ $("#TheMagicIsHere").click(function(){
     document.title = document.title.split('[')[0]+" ["+nomefile+"]";
 
     console.log(`%c- Imported ${nomefile} -`,"background-color:green;color:yellow;");
-    /* openMlsetup.push(mLsetup); */
 
     MLSB.addMlsetup(mLsetup);
 
@@ -2604,7 +2586,6 @@ $("#TheMagicIsHere").click(function(){
     $('#nametoexport').val(nomefile);
     $("#importTech").val("");
     $("#layeringsystem li.active").click();
-    //return
 	});
 
 $("select[name='exportVersion']").change(function(){
@@ -3705,6 +3686,10 @@ function applyValueInEditor(layersSelected){
     }).on("load", function (e) {
       const AppLoading = document.getElementById("Loading");
       AppLoading.showModal();
+    }).on('importMlsetup',function(ev){
+      if (ev.detail?.filecontent!=undefined){
+        passTheMlsetup(ev.detail?.filecontent)
+      }
     }).on('substanceLayer',function(ev){
       //In case i Need something
       const action = ev.detail?.action
@@ -3730,7 +3715,7 @@ function applyValueInEditor(layersSelected){
       setQuestion(options.message,options.action);
     })
     .on('limitLayers',function(ev,index){
-    //limit the number of active layers in the interface
+      //limit the number of active layers in the interface
       ev.preventDefault();
       if (MLSB.UI.substance){
         const sbUI =document.querySelector("substance-layer")

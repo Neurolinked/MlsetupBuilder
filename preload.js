@@ -200,12 +200,17 @@ ipcRenderer
   .on('preload:load_source', (event, jsoncontent, filename = "") => {
     //Load The files in the arguments
     var filecompletePath = document.querySelector("#nametoexport");
-    var textareaDummy = document.querySelector("#passaggio");
-    //pass from JSON Object to text
     filecompletePath.value = filename;
+    
+    window.dispatchEvent(new CustomEvent("importMlsetup",{detail:{
+      filecontent:JSON.stringify(jsoncontent)
+    }}));
+
+    /* var textareaDummy = document.querySelector("#passaggio");
+    //pass from JSON Object to text
     textareaDummy.value = JSON.stringify(jsoncontent)
     //fire the load events
-    document.querySelector("#importFromWkit").click();
+    document.querySelector("#importFromWkit").click(); */
   })
   .on('preload:dialog',(event,options)=>{
     window.dispatchEvent(new CustomEvent("setQuestion",{detail:options}));
