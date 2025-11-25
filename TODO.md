@@ -7,12 +7,17 @@
 - [x] Model DB rebuild
 - [ ] Custom Shader material normal blending
 - [ ] UI
+  - [ ] Rework contextual menu behaviours
   - [ ] Substance Painter-like new layer interface
+    - [ ] Mask Loading into images
   - [x] Display opacity on 3d IF optional (default false)
-    - [x] Enable/disable feature with shortcut Ctrl+O 
+    - [x] Enable/disable feature with shortcut Ctrl+O
 - [ ] Material Composer extension
   - [ ] Add Appearances Editor
 - [ ] Mlsetup autocompile in Wolvenkit project from raw to archive folder
+
+-- Not sure
+- [ ] Optional 3D viewport in the Editor
 
 ## Todo 1.6.8
 - [x] Packages upgrade
