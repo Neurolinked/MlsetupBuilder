@@ -43,6 +43,7 @@ class Layer {
 			normal : 1.0,
 			offset : { h:0.0, v:0.0}
 	}
+	#disabled = false
 
 	constructor(_tiles=1.0,_material='base\\surfaces\\materials\\special\\unused.mltemplate',_opacity=1.0,_color='null_null',_normal='null',_roughIn='null',_roughOut='null',_metalIn='null',_metalOut='null',_offsetU=0.0,_offsetV=0.0,_overrides='None',_mbFile='base\\surfaces\\microblends\\default.xbm',_mbTiles=1.0,_mbContrast=0.0,_mbNormal=1.0,_mbOffsetU=0.0,_mbOffsetV=0.0){
 		this.tiles= parseFloat(_tiles);
@@ -63,6 +64,14 @@ class Layer {
 		this.microblend.normal = parseFloat(_mbNormal),
 		this.microblend.offset.h = parseFloat(_mbOffsetU);
 		this.microblend.offset.v = parseFloat(_mbOffsetV);
+	}
+	get disabled(){
+		return this.#disabled;
+	}
+	set disabled(value=true){
+		if (typeof(value)=="boolean"){
+			this.#disabled=value;
+		}
 	}
 }
 
@@ -159,7 +168,7 @@ class Mlsetup {
 		var layeriteration = null
 		var i = 0;
     	var testMinVersion = Number(this.version[2]);
-    
+
 		switch (true){
 			case (testMinVersion>=2):
 				this.#file = mlsetupObject.Header.ArchiveFileName
@@ -170,7 +179,7 @@ class Mlsetup {
 					this.Layers[i].color=prop.colorScale;
 					this.Layers[i].material=prop.material.DepotPath;
 					this.Layers[i].tiles=prop?.matTile ? prop.matTile: 1;
-					this.Layers[i].microblend.tiles = prop.mbTile
+					this.Layers[i].microblend.tiles = prop?.mbTile >=0 ? prop?.mbTile : 1.0
 					this.Layers[i].metalIn=prop.metalLevelsIn
 					this.Layers[i].metalOut = prop.metalLevelsOut
 					this.Layers[i].microblend.file = prop.microblend.DepotPath
@@ -229,6 +238,7 @@ class Mlsetup {
 					this.Layers[i].microblend.tiles = prop.mbTile
 					this.Layers[i].metalIn=prop.metalLevelsIn
 					this.Layers[i].metalOut = prop.metalLevelsOut
+					this.Layers[i].microblend.tiles = prop?.mbTile >=0 ? prop.mbTile : 1.0
 					this.Layers[i].microblend.file = prop.microblend
 					this.Layers[i].microblend.contrast = prop.microblendContrast
 					this.Layers[i].microblend.normal = prop.microblendNormalStrength
