@@ -43,7 +43,6 @@ function getActiveMultilayerSetup(){
   return $("#MlSetupsList span.active").index();
 }
 
-
 function materialToKey(mltemplatefile){
   var keyName = null;
   for(const [name,material] of Object.entries(MLSB.Materials)){
@@ -52,6 +51,99 @@ function materialToKey(mltemplatefile){
     }
   }
   return keyName;
+}
+
+function uiMicroblenError(){ return "./images/_nopreview.gif"; }
+/**
+ * 
+ * @param {string} fullpath 
+ */
+function MBThumbImageFile(fullpath){
+  return fullpath.split("\\").reverse()[0].split(".")[0];
+}
+
+function buildMBImagePath(package, file){
+  if (package!="core"){
+    return `./images/mblend/${package.toLowerCase()}/${MBThumbImageFile(file)}.png`;
+  }
+  return `./images/${MBThumbImageFile(file)}.png`;
+}
+/**
+ * 
+ * @param {string} thumbnailPath path of the file image
+ */
+function uiMicroblendPreview(thumbnailPath){
+  if ($("#mb-preview").length==1){
+    $("#mb-preview").prop("src",thumbnailPath)
+      .on('error',
+      ()=>{ $("#mb-preview").prop("src",uiMicroblenError()); }
+    );
+  }
+}
+
+function uiGetMicroblendThumbSize(){
+  tempSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''))
+  return tempSize > 0 ? tempSize : 32;
+}
+
+function uiMicroblendGalleryScroll(){
+  $(`#substanceMBList picture.active`).parent().animate({scrollTop:$(`#substanceMBList picture.active`)[0].offsetTop},800);
+}
+/**
+ * 
+ * @param {string} uiPath The microblend path file
+ */
+function uiMicroblendScrollSelect(uiPath){
+  const path = uiPath.replaceAll("\\","\\\\")
+  $("#substanceMBList picture").removeClass("active");
+  let uiComponent = $(`#substanceMBList picture[data-path='${path}']`)
+  uiComponent.addClass("active");
+  uiMicroblendGalleryScroll()
+}
+
+function uiMicroblendReset(){
+  mbDefault = "base\\surfaces\\microblends\\default.xbm"
+  uiMicroblendScrollSelect(mbDefault)
+  uiMicroblendPreview(buildMBImagePath("core",mbDefault));
+  $("#mbInput, #mbSelect").val(mbDefault);
+}
+
+function uiMicroblendChange(e){
+  let mbValuePath = null
+  let mbPackage = null
+  switch (e.currentTarget?.id){
+    case 'mbInput':
+      mbValuePath=$("#mbInput").val();
+      $(`#mbSelect`).val(mbValuePath);
+      mbPackage = (MLSB.getMBlend(mbValuePath)).package;
+      uiMicroblendScrollSelect(mbValuePath);
+      break;
+    case "mbSelect":
+      mbValuePath=$("#mbSelect").val();
+      mbPackage = $("#mbSelect option:selected").data("package");
+      $("#mbInput").val(mbValuePath);
+      uiMicroblendScrollSelect(mbValuePath);
+      break;
+    default:
+      //another UI
+      if (e.currentTarget.tagName=="PICTURE"){
+        e.currentTarget.classList.add("active");
+        mbValuePath = e.currentTarget.dataset?.path;
+        mbPackage = e.currentTarget.dataset?.package;
+        if ((mbValuePath!=undefined) && (mbValuePath!=null)){
+          $(`#mbSelect, #mbInput`).val(mbValuePath);
+        }
+        uiMicroblendScrollSelect(mbValuePath);
+      }else{
+        console.log(e.target,e.currentTarget);
+        notifyMe("what fckn UI is moving this shit Choomba ?")
+      }
+      break;
+    }
+    if (mbPackage!=null){
+      let mbThumb = buildMBImagePath(mbPackage,mbValuePath);
+      uiMicroblendPreview(mbThumb);
+    }
 }
 
 function uiMicroblendSelect(microblendPath){
@@ -63,9 +155,7 @@ function uiMicroblendSelect(microblendPath){
     $("#mb-preview").prop("src",
       $(`#mbSelect option[value="${microblendPath}"]`).attr("data-thumbnail")
     ).on('error',
-      function() {
-       	$("#mb-preview").prop("src","./images/_nopreview.gif")
-      }
+      ()=>{ $("#mb-preview").prop("src","./images/_nopreview.gif"); }
     );
   }
 
@@ -369,28 +459,6 @@ Number.prototype.countDecimals = function () {
 
 const range = (start, stop, step = 1) =>  Array(Math.ceil((stop - start) / step)+1).fill(start).map((x, y) => x + y * step)
 
-function customMblendselect(ev){
-  var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
-
-  $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
-  $(this).addClass("MBactive");
-  let theoneselected = $(this).data('path');
-
-  $("#mbSelect option").removeAttr("selected")
-
-  let customMBdisplay = document.getElementById("cu_mu_display")
-  
-  customMBdisplay.scrollLeft = ($(`#cagetheCuMBlends li[data-path='${theoneselected.replaceAll('\\','\\\\')}']`).index() * (parseInt(mblendPrevSize) + 2))
-  
-  $("#mbSelect option").removeAttr("selected");
-  let mbZelected = $("#mbSelect option").filter(function() {
-     return $(this).val() === theoneselected;
-   });
-   
-  mbZelected.attr('selected', true).change();
-  $("#mbInput").val(theoneselected);
-}
-
 //Build the microblends gallery and compile the microblends select options
 async function abuildMB(microblendObj){
   if (typeof(microblendObj)=="object"){
@@ -401,23 +469,14 @@ async function abuildMB(microblendObj){
           var maxmicros = microblends.length
           var notfetched = 0;
           microblends.forEach((microblend)=>{
-            try{
-              fetch(`./images/${microblend.name}.png`)
-                .then((res)=>{
-                  //it means that the microblend is there
-                  $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/${microblend.name}.png');"  data-package='${package}' title='${microblend.name}' data-crypto="${CryptoJS.MD5(microblend.path)}" data-path='${microblend.path}' > </li>`);
-              }).catch((error)=>{
-                notfetched=notfetched+1;
-                $("#cagethemicroblends").append(`<li style="background-image:url('./images/thumbs/_nopreview.gif');"  data-package='${package}' title='${microblend.name}' data-crypto="${CryptoJS.MD5(microblend.path)}" data-path='${microblend.path}' > </li>`);
-              })
-            }catch(error){
-              notfetched=notfetched+1;
-              console.warn(error);
-            }
+            MLSB.putMBlend({path:microblend.path,package:package});
+            $("#substanceMBList section:nth-of-type(1)").append(`<picture title="${microblend.name.replaceAll("_"," ")}" data-package="core" data-path='${microblend.path}' ><img src='./images/thumbs/${microblend.name}.png'></picture>`);
             //Select selector
             $('#mbSelect optgroup[label="core"]').append(`<option data-package="core" data-thumbnail="./images/${microblend.name}.png" value="${microblend.path}" >${microblend.name}</option>`);
           })
 
+          $("#substanceMBList section picture").on("click",(e)=>{ uiMicroblendChange(e) });
+          
           var changedVersion = (sessionStorage.getItem("changedversion") === 'true' );
           //delay to wait all the fetches
           if (changedVersion=true){
@@ -433,6 +492,11 @@ async function abuildMB(microblendObj){
   }
 }
 
+function uiCleanMBLists(){
+  $("#mbHierarchy").html("");
+  $("#mbSelect optgroup:not([label='core'])").html("");
+}
+
 async function nubuildMB(microblendObj){
   if ((typeof(microblendObj)=="object" ) ) {
     
@@ -440,12 +504,10 @@ async function nubuildMB(microblendObj){
       var pkgName;
       var pkgList = document.getElementById('mbListPackages');
       /* Cleanup*/
+      uiCleanMBLists()
       pkgList.innerHTML="";
-      $("#mbHierarchy").html("");
-      $("#mbSelect optgroup:not([label='core'])").html("");
-      $("#mbSelect").val($("#mbSelect option:first").val()).change();
-      $("#cagetheCuMBlends").html("");
       /* Cleanup*/
+      var custMBList ='';
       microblendObj.packages.forEach((package)=>{
         pkgName = "";
         if (package.hasOwnProperty("name")){
@@ -453,26 +515,33 @@ async function nubuildMB(microblendObj){
             pkgList.innerHTML+="<option value='"+pkgName+"' />";
             $("#mbSelect").append("<optgroup label='"+pkgName+"'>");
             $("#mbHierarchy").append(`<details open><summary>${pkgName}</summary><ul class='list-group list-group-flush' data-package='${pkgName}' ></ul></details>`);
+            $("#substanceMBList section:nth-of-type(2)").append(`<div>${pkgName}</div>`);
         }
         if (package.hasOwnProperty("microblends")){
 
           var customMBlends = '';
+          
           package.microblends.forEach((microblend)=>{
-            let tmpName = microblend.path.split('.')[0].split("\\").reverse()[0];
+            MLSB.putMBlend({path:microblend.path,package:pkgName});
+
+            let tmpName = MBThumbImageFile(microblend.path)
+            //microblend.path.split('.')[0].split("\\").reverse()[0];
             let hash = microblend?.hash != undefined ? `data-hash='${microblend.hash}'` : "";
             
             $("#mbSelect optgroup[label='"+pkgName+"']").append(`<option data-package='${pkgName}' data-thumbnail='./images/mblend/${pkgName.toLowerCase()}/${tmpName}.png' value='${microblend.path}'>${tmpName}</option>`);
             
 
-            customMBlends += `<li style="background-image:url('./images/mblend/${pkgName.toLowerCase()}/thumbs/${tmpName}.png');" data-package='${pkgName}' data-path='${microblend.path}' title='${tmpName}' > </li>`;
+            /* customMBlends += `<li style="background-image:url('./images/mblend/${pkgName.toLowerCase()}/thumbs/${tmpName}.png');" data-package='${pkgName}' data-path='${microblend.path}' title='${tmpName}' > </li>`; */
 
             $("#mbHierarchy ul[data-package='"+pkgName+"']").append(`<li ${hash} data-path='${microblend.path}' class='list-group-item text-white p-1 pointer'><i class=' fa-solid fa-circle-minus text-danger'></i> ${tmpName}</li>`);
+
+            custMBList +=`<picture data-package='${pkgName}' data-path='${microblend.path}' title='${tmpName}' ><img src='./images/mblend/${pkgName.toLowerCase()}/${tmpName}.png'></picture>`;
           });
-          $("#cagetheCuMBlends").append(customMBlends);
-
-          $("#cagetheCuMBlends li").on("click",customMblendselect);
-
         }
+      })
+      $("#substanceMBList section:nth-of-type(2)").append(custMBList);
+      $("#substanceMBList picture").on("click",(e)=>{
+            uiMicroblendChange(e)
       })
     }
   }
@@ -567,7 +636,7 @@ async function abuildHairs(aHairs){
 
 function switchLegacyMat(material){
 	$("#materiaList li").removeClass("active");
-	$("#materiaList li[data-ref='"+material+"']").addClass("active");
+	$(`#materiaList li[data-ref='${material}']"`).addClass("active");
 }
 
 $(function(){
@@ -577,11 +646,25 @@ $(function(){
     hairDB = hairProfiles
     uiBuildHairs(hairDB)
   })
+
   //Get the microblends Json database
-  $.getJSON("./jsons/mbcore.json",function(microblendsList){
+  fetch(`./jsons/mbcore.json`)
+  .then(response => response.json())
+  .then((microblendsList)=>{
     coreMblends = microblendsList
     abuildMB(microblendsList)
   })
+  .catch((error)=>{
+    notifyMe(error);
+  })
+  /* try {
+    $.getJSON("./jsons/mbcore.json",function(microblendsList){
+      coreMblends = microblendsList
+      abuildMB(microblendsList)
+    })
+  } catch (error) {
+    notifyMe(error);
+  } */
   
   var Workspaces = {
     index: 0,
@@ -624,7 +707,7 @@ $(function(){
       $("#layer_settings").insertAfter($("#MlEditor"));
       $("#micropanel").insertAfter($("#layer_settings"));
       $("#materialDis").appendTo("#matdisplay > div:nth-child(1)");
-      $("#mb-preview").insertAfter("#MicroblendsLibrary");
+      $("#mb-preview").insertAfter("#substanceMBList");
       $("#Settings").appendTo("#modelsNavbar");
       $("#MatSelector").insertBefore("#appearanceSwitcher");
       $("#Mlswitcher").parent().removeAttr('open');
@@ -776,7 +859,6 @@ $(function(){
 	const materialsize = window.getComputedStyle(document.body).getPropertyValue('--matsizes').replace(/px/,'');
 
   //Building the list of microblends
-  //let buildmyMicroblends = abuildMB(coreMblends);
 
   var readCustomMicroblends = thePIT.getMuBlends();
 
@@ -1213,16 +1295,7 @@ $("#resetShades span.choose").click(function(){
 
   $("#modelTarget").val(MLSB.TreeD.lastModel);
   $("#materialTarget").val(MLSB.TreeD.lastModel.replace(/\.glb$/,".Material.json"));
-  
-  var openCloseMBlend = localStorage.getItem('customMicroblend_I');
-
-  if (openCloseMBlend){
-    $("#cu_mu_display").removeClass("d-none");
-    $("#btn_dis_cBlend svg").removeClass("fa-eye").addClass("fa-eye-slash");
-  }else{
-    $("#cu_mu_display").addClass("d-none");
-    $("#btn_dis_cBlend svg").removeClass("fa-eye-slash").addClass("fa-eye");
-  }
+  localStorage.removeItem("customMicroblend_I");
 
   if (lastExportFormat!=null){
     $("select[name='exportVersion']").val(String(lastExportFormat));
@@ -1635,7 +1708,7 @@ $("#resetShades span.choose").click(function(){
       (e.type=="focusout")
     ){
       $("#mbSelect option").removeAttr("selected");
-      uiMicroblendSelect($("#mbInput").val());
+      uiMicroblendChange(e)
     }
 	});
 
@@ -1646,7 +1719,7 @@ $("#resetShades span.choose").click(function(){
     }
 	}); */
 
-	$("#mbSelect").on('updateMblend',function(){
+	$("#mbSelect").on('updateMblend',function(event){
 		microblendPath = $("#mbInput").val();
     uiMicroblendSelect(microblendPath);
     /* 
@@ -1662,11 +1735,10 @@ $("#resetShades span.choose").click(function(){
 
 	//load a new texture to display as microblends and fille the name in the microblend file name
 	$("#mbSelect").change(function(event){
-      var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
-  		$("#mbInput").val($(this).val());
-			$("#mbInput").change();
+      //var mblendPrevSize = uiGetMicroblendThumbSize();
+      uiMicroblendChange(event);
 
-      if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
+/*       if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
         let MBName = $(this).val().split('.')[0].split("\\").reverse()[0]
 
   			$("#mb-preview").prop("src",$("#mbSelect option:selected").attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif"); console.log("rilevato errore");});
@@ -1683,23 +1755,21 @@ $("#resetShades span.choose").click(function(){
         })
 
         if (customSelected.length>0){
-          /*TODO Unify this portion that is executed in 2 part of the interface */
+          /*TODO Unify this portion that is executed in 2 part of the interface  /
           customSelected.addClass("MBactive");
           let customMBDisplay = document.getElementById("cu_mu_display")
           customMBDisplay.scrollLeft = ($(`#cagetheCuMBlends li[data-path='${$(this).val().replaceAll("\\","\\\\")}']`).index() * (mblendPrevSize+2))
         }
-  		}
+  		} */
 	});
 
 	//chage to a new microblend
 	$("#bg-changer").change(function(){	$("#mb-preview").prop("style","background-color:"+$(this).val());	});
   //reset css fx on microblend
   $("#resetMB").click(function(){
-		$("#mbInput").val("base\\surfaces\\microblends\\default.xbm").focusout();
-    $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass("MBactive");
-    $("#cagethemicroblends li[data-bs-original-title='default']").addClass("MBactive");
-    $("#microdisplay").scrollLeft($("#cagethemicroblends li[data-bs-original-title='default']").index()*($("#cagethemicroblends li[data-bs-original-title='default']").width()+2))
+    uiMicroblendReset();
 	});
+
   $("#cleanFX").click(function(){$("#mb-preview").removeClass('blend-lumi');});
   //apply luminosity on microblend preview
   $("#lumiFX").click(function(){$("#mb-preview").toggleClass("blend-lumi");});
@@ -1710,18 +1780,6 @@ $("#resetShades span.choose").click(function(){
 	  $(this).toggleClass("flip");
 	  $('i.fa-hand-point-down').toggleClass("fa-hand-point-up");
 	});
-
-  /* custom microblends behaviours*/
-  $("#btn_dis_cBlend").click(function(){
-    $("#btn_dis_cBlend svg").toggleClass("fa-eye fa-eye-slash");
-    if ($("#btn_dis_cBlend svg").hasClass("fa-eye-slash")){
-      $("#cu_mu_display").removeClass("d-none");
-    }else{
-      $("#cu_mu_display").addClass("d-none");
-    }
-    openCloseMBlend = !openCloseMBlend;
-    localStorage.setItem("customMicroblend_I",openCloseMBlend);
-  });
 	//Material libraries and search
 	var matToSearch=false;
 
@@ -1756,6 +1814,7 @@ $("#resetShades span.choose").click(function(){
 
   $("#layeringsystem li").mouseenter(function (e) {
     if (!MLSB.isReady()){return false;}
+    //TODO fix this shit that rely on the UI
     if ((parseFloat($(this).data('opacity')) > 0) && ($(this).attr("disabled") == undefined)) {
       let materialPath = $(this).data('material');
       let materialName = materialPath.split("\\").reverse()[0].split(".")[0]
@@ -1777,6 +1836,8 @@ $("#resetShades span.choose").click(function(){
       }
       $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
       //if the microblend is custom it has to build the attribute finding the right one
+      //console.log(MLSB.getMBlend(mblendPath));
+      //Here you can replace Code
 
       if ((coreMblends.packages.core.filter(el => el.name==mblendlName).length==1) || (mblendlName=='default')) {
         $("#currentMblend").attr("src", `images/${mblendlName}.png`);
@@ -2184,33 +2245,6 @@ $("#resetShades span.choose").click(function(){
      }
   })
 
-  $("body").on("click","#cagethemicroblends li",function(ev){
-    var mblendPrevSize = Number(window.getComputedStyle(document.documentElement).getPropertyValue('--mblendSize').replace(/px/,''));
-
-    $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass('MBactive');
-    $(this).addClass("MBactive");
-    let theoneselected = $(this).attr('title');
-    document.getElementById("microdisplay").scrollLeft = ($(`#cagethemicroblends li[title='${theoneselected}']`).index() * (mblendPrevSize+2))
-    $("#mbSelect option").removeAttr("selected")
-    let mbZelected = $("#mbSelect option").filter(function() { return $(this).text() === theoneselected;})
-    mbZelected.attr('selected', true);
-    $("#mbInput").val($(`#cagethemicroblends li[title='${theoneselected}']`).data("path"));
-    $("#mbInput").focusout();
-  });
-
-const scrollMBContainer = document.getElementById("microdisplay");
-const scrollCustMBContainer = document.getElementById("cu_mu_display");
-
-scrollMBContainer.addEventListener("wheel", (evt) => {
-    evt.preventDefault();
-    scrollMBContainer.scrollLeft += evt.deltaY;
-});
-
-scrollCustMBContainer.addEventListener("wheel", (evt) => {
-    evt.preventDefault();
-    scrollCustMBContainer.scrollLeft += evt.deltaY;
-});
-
 $("#layerRandomizer").click(function(){
 
     let max_blends = 5;
@@ -2488,6 +2522,7 @@ function vacuumCleaner(on = true, ranges = false){
   }
   //Cleanup all layers value
   if(!on){ c_opacity = 0.0; }
+
   aRanges.forEach(id =>{
     if ($('#layeringsystem li').eq(id).attr("disabled")!="disabled"){
       $('#layeringsystem li').eq(id).data({
@@ -2544,10 +2579,6 @@ function disableLayers(totalLayers){
   if (disabledLayers>0){
     $(`#layeringsystem li:nth-last-child(-n+${disabledLayers})`).attr('disabled','disabled');
   }
-}
-
-function UIMlsetup(){
-  
 }
 
 //----Button to load
@@ -3218,11 +3249,14 @@ unCooKonfirm.addEventListener("click", (event) => {
     navigator.clipboard.writeText(copyBle);
   });
 
+  //Update Post export of the microblends
   $("body").bind("updateMBlends",function(){
+    notifyMe("Waiting for microblend reloading",false);
     setTimeout(()=>{
-      $("#cagethemicroblends li").each((idx,elem)=>{
-        let styleToGet = $(elem).attr('style');
-        $(elem).attr('style',`background-image:${styleToGet.split(':')[1].replace('.png',`.png?${(new Date()).getTime()}`)}`);
+      $("#substanceMBList section:nth-child(1) picture img").each((index,image)=>{
+        let imageSource = image.src.split("?")[0];
+        let newName = `${imageSource}?${(new Date()).getTime()})}`
+        image.src = newName;
       });
     },10000);
   });

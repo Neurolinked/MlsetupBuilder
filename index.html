@@ -248,7 +248,7 @@
       <div v class="btn-group" role="group" aria-label="model info">
         <span id="withbones" class="text-layer2"><i class="fa-solid fa-bone fa-2x"></i> <i class="icon-normals fa-2x"></i></span>
       </div>
-      <div id="Settings">
+      <div id="Settings" class="me-3">
         <div id="SettingsSummary" class="d-flex justify-content-start border-bottom border-secondary"> </div>
         <div id="SettingsScroller" class="pe-1" ></div>
       </div>
@@ -509,30 +509,24 @@
 <!-- Microblend part-->
     <div id="micropanel" class="layer-2 ">
       <span class="d-block bg-normal text-black  p-2">&micro;blends</span>
-      <div class="input-group input-group-sm mb-1">
+      <div class="input-group input-group-sm">
         <input type="text" class="form-control  " id="mbInput" data-default="base\surfaces\microblends\default.xbm" value="base\surfaces\microblends\default.xbm" />
         <button class="btn btn-outline-danger " id="resetMB" data-toggle='tooltip' title="Reset to default microblend" type="button"><i class="fas fa-times"></i></button>
+        <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
       </div>
-      <div id="MicroblendsLibrary" class="my-2">
-        <span class="w-100  p-2" >Core &micro;blends</span>
-        <div id="microdisplay" class="layer-2 mx-2">
-          <div id="cagethemicroblends" tabindex="1">
-            <li style="background-image:url('./images/thumbs/default.png');" data-package='source' title="default" data-path="base\surfaces\microblends\default.xbm" data-crypto="fc4828e1eb8710e0cf83aa29bab51cd0" > </li>
-          </div>
-        </div>
+      <div class="p-2">
+        <select class="form-select " id="mbSelect" aria-label="microblends selection lists">
+          <optgroup label='core'>
+            <!-- <option data-package="source" data-thumbnail="./images/default.png" value="base\surfaces\microblends\default.xbm" selected >default</option> -->
+          </optgroup>
+        </select>
       </div>
-      <div id="CustMicroblendsGallery" class="my-2">
-          <div class="d-flex justify-content-between">
-            <span class=" d-block ps-2" >Custom &micro;blends </span>
-            <div class="btn-group btn-group-sm" role="group" aria-label="Custom microblends button">
-              <button type="button" id="btn_dis_cBlend" class="btn btn-outline-warning"><i class="fa-solid fa-eye-slash"></i></button>
-              <button type="button" data-bs-toggle="offcanvas" data-bs-target="#off-MLab" class="btn btn-outline-warning"><i class="fa-solid fa-puzzle-piece"></i></button>
-            </div>
-          </div>
-          <div id="cu_mu_display" class="layer-2 mx-2">
-            <div id="cagetheCuMBlends" ></div>
-          </div>
-        </div>
+      <div id="substanceMBList" class="mb-2 me-1">
+        <span class="d-block bg-normal">▹ Core</span>
+        <section></section>
+        <span class="d-block bg-normal">▹ Custom</span>
+        <section></section>
+      </div>
       <details open>
         <summary class="bg-normal text-black">&micro;blends Parameters</summary>
 
@@ -543,13 +537,7 @@
           </form>
         </nav>
 
-        <div class="p-2">
-          <select class="form-select " id="mbSelect" aria-label="microblends selection lists">
-            <optgroup label='core'>
-              <option data-package="source" data-thumbnail="./images/default.png" value="base\surfaces\microblends\default.xbm" selected >default</option>
-            </optgroup>
-          </select>
-        </div>
+        
         <div class="p-2">
           <div class="input-group input-group-sm layer-2 ">
             <div class="badge my-auto">Tiles</div> <input type="number" class="form-control  driven" id="mbTile" value="1.0" step="0.01"  min="0.01" max="150">
