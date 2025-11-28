@@ -1772,9 +1772,7 @@ $("#resetShades span.choose").click(function(){
 	//chage to a new microblend
 	$("#bg-changer").change(function(){	$("#mb-preview").prop("style","background-color:"+$(this).val());	});
   //reset css fx on microblend
-  $("#resetMB").click(function(){
-    uiMicroblendReset();
-	});
+  $("#resetMB").click(function(){ uiMicroblendReset(); });
 
   $("#cleanFX").click(function(){$("#mb-preview").removeClass('blend-lumi');});
   //apply luminosity on microblend preview
@@ -1911,8 +1909,6 @@ $("#resetShades span.choose").click(function(){
     $(`.colorSelector span[title='${colorObject.label}']`).addClass("active");
     $(".tint").prop('style',`background-color: oklab(from ${colorObject.style} l a b) !important;`);
     if ($(".cube.tint")){
-
-        //$(".cube.tint").attr("data-color",`red.${colorSelected.rgb[0]}\r\ngreen.${colorSelected.rgb[1]}\r\nblue.${colorSelected.rgb[2]}\r\n`)
         $(".cube.tint").attr("data-color",colorObject.percentageString)
     }
     $("#colorPntage").html(colorObject.percentageString);
@@ -2434,10 +2430,6 @@ $("#importTech").change(function(){
     fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
   }
   
-});
-
-$("#importFromWkit").click(function(){
-  passTheMlsetup( $("#passaggio").val());
 });
 
 function uiPreviewMlsetup(mlsetup){
