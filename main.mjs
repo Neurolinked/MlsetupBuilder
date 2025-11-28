@@ -118,7 +118,7 @@ const schema = {
 					value: 2.0
 				}
 			},
-			skipImport:false,
+			skipImport:true,
 			switchTransparency:true,
 			sortLevels:false
 		}
@@ -268,7 +268,7 @@ const preferences = new Store({schema,
 			store.set('editorCfg.sortLevels',false);
 		},
 		'1.6.9': store=>{
-			
+			store.set('editorCfg.skipImport',true);
 		}
 	}
 });

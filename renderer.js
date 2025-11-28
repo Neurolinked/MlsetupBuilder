@@ -38,7 +38,7 @@ const PARAMS = {
 	mbBackColor: '#000000',
 	threeDUI:true,	//parameter to make optional the 3d view port
 	sortLevels:false,
-	importSkip: false,
+	importSkip: true,
 	modelDebug:false,
 	textureDebug:false,
 	forceMaterialHighlight :false,
