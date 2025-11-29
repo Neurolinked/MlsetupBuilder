@@ -136,6 +136,7 @@ EDLayer.addBinding(PARAMS,'EDLayerMaxTiles',{min:0.01,max:1000,step:0.01,label:'
   $("#layerTile, [data-control='#layerTile']").prop('max',PARAMS.EDLayerMaxTiles).trigger('change');
 });
 
+
 const EDMblend = TDtabManager.pages[2].addFolder({
   title:'Microblends'
 });
@@ -151,6 +152,14 @@ EDMblend.addBinding(PARAMS,'EDMaxNormal',{min:0.01,max:20,step:0.01,label:'Max N
   //Change the values in the interface
   $("#mbNorm, [data-control='#mbNorm']").prop('max',PARAMS.EDMaxNormal).trigger('change');
 });
+
+//Randomizer config
+const EDRandomize = TDtabManager.pages[2].addFolder({
+  title:'Randomizer'
+});
+
+EDRandomize.addBinding(PARAMS,'randTurnOnOff',{label:'Turn On & Off layers'})
+EDRandomize.addBinding(PARAMS,'randUBlend',{label:'Wild randomize µBlends'})
 
 const EDAdvSetup = TDtabManager.pages[2].addFolder({
   title:'Advanced Setup'
@@ -171,8 +180,6 @@ EDAdvSetup.addBinding(PARAMS, 'forceMaterialHighlight',{label:'Material highligh
 });
 EDAdvSetup.addBlade({view: 'separator'});
 EDAdvSetup.addBinding(PARAMS, 'showImgOffSet',{label:'Export render with offsets data'}).on('change',(ev)=>{});
-
-
 
 TDtabManager.pages[2].addBlade({
   view: 'buttongrid',

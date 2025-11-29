@@ -77,7 +77,9 @@ const PARAMS = {
 	bkgColors:'#120202',
 	switchTransparency:true,
 	showImgOffSet:false,
-	listSubmeshes:{}
+	listSubmeshes:{},
+	randTurnOnOff:false,
+	randUBlend:false
 };
 
 /**Optimize Reading from configuration */
