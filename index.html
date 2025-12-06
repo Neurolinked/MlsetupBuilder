@@ -336,14 +336,20 @@
     <button class="btn btn-outline-warning" type="button" id="actAll-Layer"   data-bs-placement="bottom" title="Activate all layers">Refill layers</button>
   </div>
   <div class="text-center bg-layer2 m-2 p-1 rounded">
-    <input id="layerRandomCfg" class="form-control form-control-sm  border border-warning bg-layer0" type="search" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
-    <div class="btn-toolbar justify-content-between mt-2" role="toolbar" aria-label="Toolbar actions for layers">
+    <div class="input-group input-group-sm randomGroup">
+      <input id="layerRandomCfg" class="form-control form-control-sm  border border-warning bg-layer0" type="search" placeholder="Ex. 0-19 or 0,2,7-13" aria-label="models searcher" />
+      <button type="button" class="btn btn-outline-primary" id="wipe-layer"  title="Wipe"><i class="fas fa-eraser"></i> wipe</button>
+      <button type="button" class="btn btn-outline-primary" id="wash-layers" title="Clean"><i class="fas fa-soap"></i> clean</button>
+      <button type="button" class="btn btn-outline-warning" id="layerRandomizer" title="Randomize layers"><i class="fas fa-random"></i> random</button>
+    </div>
+
+    <!-- <div class="btn-toolbar justify-content-between mt-2" role="toolbar" aria-label="Toolbar actions for layers">
       <div class="btn-group btn-group-sm btn-tiny" role="group" aria-label="Layer Clean/wiping Actions">
          <button type="button" class="btn btn-outline-primary" id="wipe-layer"><i class="fas fa-eraser"></i> wipe</button>
          <button type="button" class="btn btn-outline-primary" id="wash-layers"><i class="fas fa-soap"></i> clean</a></button>
        </div>
        <div class="btn-group btn-group-sm btn-tiny" role="group" aria-label="Randomizer tools">
-         <button type="button" class="btn btn-outline-warning" id="layerRandomizer"   title="Randomize layers"><i class="fas fa-random"></i> random</button>
+         <button type="button" class="btn btn-outline-warning" id="layerRandomizer"  title="Randomize layers"><i class="fas fa-random"></i> random</button>
          <div class="btn-group dropend" role="group">
            <button id="dropRandOpt" type="button" class="btn btn-sm btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Option setting for the randomizer"  data-bs-auto-close="outside"><i class="fas fa-cogs"></i> </button>
              <div id="randOptbody" aria-labelledby="dropRandOpt" class="dropdown-menu bg-layer1 border border-warning p-2" style="width:22rem;">
@@ -359,7 +365,7 @@
          </div>
         </div>
     </div>
-    <div class="input-group input-group-sm m-1 " role="group" aria-label="Layers randomizer"> </div>
+    <div class="input-group input-group-sm m-1 " role="group" aria-label="Layers randomizer"> </div> -->
   </div>
   <div class="twoColGrid">
     <div class="layer-2 m-2"><span class="badge w-100  "> Ratio </span>
