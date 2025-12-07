@@ -2340,15 +2340,15 @@ $("#layerRandomizer").click(function(){
       }
       tLayer.material = MLSB.Materials[materialselect].file
       
-      tLayer.colorLabel = getMaterialRandomColor(materialselect)
-      tLayer.color = MLSB.Materials[materialselect].colors.list[tLayer.colorLabel]
+      tLayer.color = getMaterialRandomColor(materialselect)
+      var sbcolor = MLSB.Materials[materialselect].colors.list[tLayer.color]
 
       $(el).data({
         "opacity":tLayer.opacity,
-        "labels":"("+tLayer.color+") "+materialselect,
+        "labels":`(${tLayer.color}) ${materialselect}`,
         "material":tLayer.material,
         "mattile":tLayer.tiles,
-        "color":tLayer.colorLabel,
+        "color":tLayer.color,
         "mbtile":tLayer.microblend.tiles,
         "mbcontrast":tLayer.microblend.contrast,
         "mbtile":tLayer.microblend.tiles,
@@ -2357,10 +2357,10 @@ $("#layerRandomizer").click(function(){
 
       $(el).attr({
         "data-opacity":tLayer.opacity,
-        "data-labels":"("+tLayer.colorLabel+") "+materialselect,
+        "data-labels": `(${tLayer.color}) ${materialselect}`,
         "data-material":tLayer.material,
         "data-mattile":tLayer.tiles,
-        "data-color":tLayer.colorLabel,
+        "data-color":tLayer.color,
         "data-mbtile":tLayer.microblend.tiles,
         "data-mbcontrast":tLayer.microblend.contrast,
         "data-mblend":tLayer.microblend.file,
@@ -2371,7 +2371,7 @@ $("#layerRandomizer").click(function(){
         material: tLayer.material,
         opacity:tLayer.opacity,
         microblend: buildMBImagePath((MLSB.getMBlend(tLayer.microblend.file)).package,tLayer.microblend.file),
-        color:tLayer.color
+        color: sbcolor
       })
       MLSB.updMLLayer(activeMlSetup,idx,tLayer);
     })
