@@ -46,6 +46,20 @@ function rangesFix(rangeString){
                     .replace(/,{2,}/g,',')
                     .replace(/\-{2,}/g,'-');
 }
+/**
+ * 
+ * @param {String} materialName
+ * @returns {Number}
+ */
+function getMaterialColorLength(materialName){
+  return (Object.keys(MLSB.Materials[materialName].colors.list).length)
+}
+
+function getMaterialRandomColor(materialName){
+  var indexList = getMaterialColorLength(materialName) - 1
+  var randColor = Math.floor((Math.random() * indexList));
+  return (Object.keys(MLSB.Materials[materialName].colors.list))[randColor];
+}
 
 function getActiveMultilayerSetup(){
   return $("#MlSetupsList span.active").index();
@@ -169,6 +183,10 @@ function uiMicroblendSelect(microblendPath){
 
 }
 
+function updateSubstanceUI(substanceUIChanges){
+  const sbUI = document.querySelector("substance-layer");
+  sbUI.dispatchEvent(new CustomEvent("update",{detail:substanceUIChanges}));
+}
 
 function orderLevelsRough(a,b){
   //The format is [label,[value,value]]
@@ -936,7 +954,7 @@ $(function(){
 
     //CTRL + SHIFT + A
     if (ctrl && shift && (key=='KeyA')){
-      $("#applytoMyLayer").click();
+      applyToLayer();
     }
 
     if (ctrl && (key=='KeyO')){
@@ -1256,7 +1274,7 @@ $("#resetShades span.choose").click(function(){
         		$("#matInput").val("base\\surfaces\\materials\\special\\unused.mltemplate");//clean the material
         		//$("#layerOpacity").val("1.0").change();//zeroing the opacity
         		$("#layerColor").val("null_null");//color replace
-        		$("#applytoMyLayer").click(); //trigger the application to layer
+        		applyToLayer(); //$("#applytoMyLayer").click(); //trigger the application to layer
       			$("#layeringsystem li.active").click() //reselect the layer to updates the material
         	}
           break;
@@ -2252,10 +2270,10 @@ $("#layerRandomizer").click(function(){
     let max_blends = 5;
     let layblend;
 		//get options
-		var turnOnOff = $("#rndOnOff").prop('checked'); //can the randomized set opacity to e from 0 ?
-		var rndMBlend = $("#rndMbWild").prop('checked');
+		var turnOnOff = PARAMS.randTurnOnOff; //can the randomized set opacity to e from 0 ?
+		var rndMBlend = PARAMS.randUBlend;
 		//get active layers to be randomized
-		var layerSactive = $("#layeringsystem li:not([disabled])").length;
+		
     var subjectlayer
 		var layerfilter = $("#layerRandomCfg").val();
     var affectedByRand = [...Array(20).keys()];
@@ -2300,6 +2318,8 @@ $("#layerRandomizer").click(function(){
       layblend = 1 + Math.floor(Math.random() * (numerocicle-4))
     }
 
+    const activeMlSetup = getActiveMultilayerSetup()
+    
     subjectlayer.each((idx,el)=>{
       let tLayer = new Layer();
 
@@ -2308,7 +2328,6 @@ $("#layerRandomizer").click(function(){
       }else{
         tLayer.opacity = (parseFloat(Math.random()*0.99) + parseFloat(0.01)).toFixed(2);
       }
-
 
       tLayer.tiles = (Math.random() * 15).toFixed(2);
       tLayer.microblend.tiles = (Math.random() * 15).toFixed(2);
@@ -2320,16 +2339,16 @@ $("#layerRandomizer").click(function(){
         tLayer.microblend.file = microblenda[Math.floor(Math.random() * microblenda.length)].value
       }
       tLayer.material = MLSB.Materials[materialselect].file
-      //tLayer.material = materialJson.filter(mat => mat.text == materialselect)[0].a_attr['data-val'];
-      tLayer.color = MLSB.Materials[materialselect].colors.list[Math.floor(Math.random() * (MLSB.Materials[materialselect].colors.list.length - 1))]
-      //tLayer.color = ml_randomized[materialselect].overrides.colorScale[Math.floor(Math.random() * (ml_randomized[materialselect].overrides.colorScale.length - 1))].n;
+      
+      tLayer.colorLabel = getMaterialRandomColor(materialselect)
+      tLayer.color = MLSB.Materials[materialselect].colors.list[tLayer.colorLabel]
 
       $(el).data({
         "opacity":tLayer.opacity,
         "labels":"("+tLayer.color+") "+materialselect,
         "material":tLayer.material,
         "mattile":tLayer.tiles,
-        "color":tLayer.color,
+        "color":tLayer.colorLabel,
         "mbtile":tLayer.microblend.tiles,
         "mbcontrast":tLayer.microblend.contrast,
         "mbtile":tLayer.microblend.tiles,
@@ -2338,14 +2357,23 @@ $("#layerRandomizer").click(function(){
 
       $(el).attr({
         "data-opacity":tLayer.opacity,
-        "data-labels":"("+tLayer.color+") "+materialselect,
+        "data-labels":"("+tLayer.colorLabel+") "+materialselect,
         "data-material":tLayer.material,
         "data-mattile":tLayer.tiles,
-        "data-color":tLayer.color,
+        "data-color":tLayer.colorLabel,
         "data-mbtile":tLayer.microblend.tiles,
         "data-mbcontrast":tLayer.microblend.contrast,
         "data-mblend":tLayer.microblend.file,
       });
+
+      updateSubstanceUI({
+        layer:idx,
+        material: tLayer.material,
+        opacity:tLayer.opacity,
+        microblend: buildMBImagePath((MLSB.getMBlend(tLayer.microblend.file)).package,tLayer.microblend.file),
+        color:tLayer.color
+      })
+      MLSB.updMLLayer(activeMlSetup,idx,tLayer);
     })
 
     $("#layeringsystem li.active").click();
@@ -2358,7 +2386,7 @@ $("#layerRandomizer").click(function(){
   		$("#matInput").val("base\\surfaces\\materials\\special\\unused.mltemplate");//clean the material
   		$("#layerOpacity").val("0.0").change();//zeroing the opacity
   		$("#layerColor").val("null_null");//color replace
-  		$("#applytoMyLayer").click(); //trigger the application to layer
+  		applyToLayer();//$("#applytoMyLayer").click(); //trigger the application to layer
 			$("#layeringsystem li.active").click() //reselect the layer to updates the material
   	}
   });
