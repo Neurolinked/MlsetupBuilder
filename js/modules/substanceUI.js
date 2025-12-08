@@ -1,6 +1,8 @@
 class SubstanceLayer extends HTMLElement {
     length = 20;
     selected = null;
+    whiteMask = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAD0lEQVR4AWL6DwVMDFAAAAAA//8tCooDAAAABklEQVQDAGvcB/1Sm89eAAAAAElFTkSuQmCC";
+    blackMask = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4AWJiYGD4D8IgBpBmYAAAAAD//7vS9wEAAAAGSURBVAMAGDACA6ybwrYAAAAASUVORK5CYII=";
     
     constructor(length){
         super();
@@ -75,6 +77,12 @@ class SubstanceLayer extends HTMLElement {
 
     setMask(index,imageData){
         //TODO implement mask loading
+        if (imageData==null){
+            var resultMask = this.blackMask;
+            if (index==0){ resultMask = this.whiteMask}
+            this.shadowRoot.querySelector(`div.wrapper:nth-child(${index + 1}) .mask`).src = resultMask;
+            return
+        }
         console.log(imagedata);
     }
     /**
@@ -153,6 +161,7 @@ class SubstanceLayer extends HTMLElement {
                 this.setMaterial(index,"unused");
                 this.setOpacity(index,1.0);
                 this.setColor(index);
+                this.setMask(index,null);
             }
         })
     }
@@ -192,6 +201,7 @@ class SubstanceLayer extends HTMLElement {
         
         const maskImg = document.createElement("img");
         maskImg.setAttribute("class", "mask");
+        maskImg.src = this.blackMask;
         
         const materialImg = document.createElement("img");
         materialImg.setAttribute("class", "material");
@@ -248,6 +258,7 @@ class SubstanceLayer extends HTMLElement {
                 border: 1px solid var(--bs-secondary);
                 display:grid;
                 grid-template-columns: 3ch var(--layersize) var(--layersize) var(--layersize) var(--layersize) 1fr 2ch;
+                column-gap: 1px;
 
                 &[disabled]{
                     opacity:20%;
@@ -262,12 +273,17 @@ class SubstanceLayer extends HTMLElement {
 
                 & > .colorswatch,
                 & > img {
+                    position:relative;
                     aspect-ratio:1/1;
                     height:var(--layersize);
                     border:none;
                     &.microblend{
                         background-color:black;
                     }
+                }
+                
+                & > .mask{
+                    
                 }
 
                 & > .colorswatch{
@@ -384,7 +400,13 @@ class SubstanceLayer extends HTMLElement {
                     element.classList.remove("selected");
                 }
             })
-        })
+        });
+
+        this.addEventListener("masksReset",(e)=>{
+            for (i=0;i<20;i++){
+                this.setMask(i,null);
+            }
+        });
 
         this.addEventListener("update",(e)=>{
             if (e.detail.hasOwnProperty("material")){
@@ -453,6 +475,7 @@ class SubstanceLayer extends HTMLElement {
                 enclosure.appendChild(wrapper.cloneNode(true));
             }
             enclosure.childNodes[0].classList.add("active")
+            this.setMask(0,null)
         }
     }
 }
