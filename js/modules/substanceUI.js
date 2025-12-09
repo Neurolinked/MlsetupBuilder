@@ -288,8 +288,10 @@ class SubstanceLayer extends HTMLElement {
 
                 & > .colorswatch{
                     font-size:.75rem;
-                    padding-left:.2rem;
+                    padding-left:.5rem;
+                    padding-top:.2rem;
                     text-shadow: 0 1px 3px black;
+                    box-sizing: border-box;
                 }
                 
                 & > .opacityMeter{
