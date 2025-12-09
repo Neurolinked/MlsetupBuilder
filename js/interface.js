@@ -333,10 +333,7 @@ function UIMlLayer(mlLayer,k){
 function convLayersMlsetup(mlsetupTarget){
   if (mlsetupTarget instanceof Mlsetup){
     var size = mlsetupTarget.Layers.length;
-    if (MLSB.UI.substance){
-      const sbUI =document.querySelector("substance-layer")
-      sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:size}}))
-    }
+    updateSubstanceUI("disable",{layers:size})
     for(k=0;k<size;k++){
       UIMlLayer(mlsetupTarget.Layers[k],k);
     }
@@ -1657,6 +1654,9 @@ $("#resetShades span.choose").click(function(){
       }).catch((error)=>{
         notifyMe(error);
       }).finally(()=>{
+        const mlsetupImport = document.getElementById("importTech");
+        mlsetupImport.addEventListener("change", handleMlSetupImport);
+
         loadingwin.close();
         MLSB.initialized();
         //set the default material
@@ -2447,7 +2447,7 @@ $("#importLink").click(function(ev){
 });
 
 //----File Auto Loader
-$("#importTech").change(function(){
+/* $("#importTech").change(function(){
 	var fr=new FileReader(); //new reading Object
 	fr.onload=function(){
     mlSetupContent = fr.result;
@@ -2458,7 +2458,7 @@ $("#importTech").change(function(){
     fr.readAsText($("#importTech")[0].files[0]); //Read as a text file
   }
   
-});
+}); */
 
 function uiPreviewMlsetup(mlsetup){
   templateCode = "<details {open} style='color:rgba(255,255,255,calc({opacity} + 0.3 ));'><summary >{i} {material|short}</summary><div class='row g-0'><div class='col-md-3'><img src='./images/{microblend|short}.png' class='img-fluid float-end rounded-0 me-1' width='64' ><img width='64' src='./images/material/{material|short}.jpg' data-ref='{material}' class='img-fluid float-end rounded-0' ></div><div class='col-md-9'><div class='card-body p-0'><ul><li>Opacity {opacity}</li><li>Tiles {tiles}</li><li>colorScale {color}</li></ul></div></div></div></details>";
@@ -2500,6 +2500,15 @@ function passTheMlsetup(textContent=""){
     default:
       notifyMe(`Strange format`)
   }
+}
+
+function handleMlSetupImport(){
+  var fr=new FileReader(); //new reading Object
+	fr.onload=function(){
+    mlSetupContent = fr.result;
+    passTheMlsetup(fr.result);
+  }
+  fr.readAsText(this.files[0]); //Read as a text file
 }
 
 /*fix for mlsetup version .7*/
