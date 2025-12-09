@@ -64,13 +64,14 @@ class Layer {
 		this.microblend.normal = parseFloat(_mbNormal),
 		this.microblend.offset.h = parseFloat(_mbOffsetU);
 		this.microblend.offset.v = parseFloat(_mbOffsetV);
+		this.#disabled = false
 	}
 	get disabled(){
 		return this.#disabled;
 	}
-	set disabled(value=true){
-		if (typeof(value)=="boolean"){
-			this.#disabled=value;
+	set disabled(val=true){
+		if (typeof(val)=="boolean"){
+			this.#disabled = val;
 		}
 	}
 }
@@ -103,6 +104,14 @@ class Mlsetup {
 	 */
 	reset(layer=0){
 		this.Layers[layer] = new Layer()
+	}
+
+	disable(size){
+		for (let i=19;i>=(size-1);i--){
+			if (this.Layers[i]!=undefined){
+				this.Layers[i].disabled = true
+			}
+		}	
 	}
 
 	/**
