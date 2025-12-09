@@ -275,6 +275,16 @@ function getMaterialColor(materialFile,colorCode="null_null"){
   return color
 }
 
+/**
+ * This will update every input connected controller
+ */
+function updateFriendsUI(){
+  $(".friendo").each((idx,elm)=>{
+    let reference = $(elm).data("control")
+    $(elm).val($(reference).val());
+  });
+}
+
 function UIMlLayer(mlLayer,k){
   //Set both UI
   const sbUI =document.querySelector("substance-layer")
@@ -3600,6 +3610,7 @@ function applyValueInEditor(layersSelected){
   $("#mbSelect").trigger('change');
   $("#mbOffV").val(layersSelected.microblend.offset.v).trigger("change");
   //$("#maskLayer").attr("value",MLSB.Editor.layerSelected);
+  updateFriendsUI();
 }
 
   function switchLayer(source=null){
