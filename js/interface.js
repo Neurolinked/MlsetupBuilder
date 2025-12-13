@@ -183,6 +183,27 @@ function uiMicroblendSelect(microblendPath){
 
 }
 
+
+
+/**
+ * 
+ * @param {string} material //material Name
+ * @param {string} microblend //microblend Name
+ * @param {string} colorCode //string in CDPR color code null_null 000000_null
+ * @param {array} color //array of 3 float values for colors
+ */
+function UIFloatLayerDataCompile(material,microblend,microblendThumbnail,colorCode,color){
+  try {
+    $("#floatLayer div.colDisplayer").css("background-color",
+       `#${tinycolor.fromRatio({ r: color[0], g: color[1], b: color[2] }).toHex()}`);
+    $("#currentMat").attr("src", `images/material/${material}.jpg`);
+    $("#currentMblend").attr("src", microblendThumbnail);
+    $("#floatLayer footer").html(`<strong>M:</strong> ${material}<br><strong>&micro;b:</strong> ${microblend}<br><strong>C:</strong> ${colorCode}`)
+  } catch (error) {
+    notifyMe(error);
+  }
+}
+
 function updateSubstanceUI(substanceUIChanges){
   const sbUI = document.querySelector("substance-layer");
   sbUI.dispatchEvent(new CustomEvent("update",{detail:substanceUIChanges}));
@@ -1756,45 +1777,12 @@ $("#resetShades span.choose").click(function(){
 	$("#mbSelect").on('updateMblend',function(event){
 		microblendPath = $("#mbInput").val();
     uiMicroblendSelect(microblendPath);
-    /* 
-		if ($(`#mbSelect option[value="${test}"]`).length==0){
-			$("#mb-preview").prop("src","./images/_nopreview.gif");
-		}else{
-			//if ($("#mbSelect option[value='"+$("#mbInput").val()+"']").attr("data-thumbnail")!== undefined){
-  			$("#mb-preview").prop("src",$(`#mbSelect option[value="${test}"]`).attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif")});
-  		//}
-		} */
 		$("#mbInput").change();
 	})
 
 	//load a new texture to display as microblends and fille the name in the microblend file name
 	$("#mbSelect").change(function(event){
-      //var mblendPrevSize = uiGetMicroblendThumbSize();
       uiMicroblendChange(event);
-
-/*       if ($("#mbSelect option:selected").attr("data-thumbnail")!== undefined){
-        let MBName = $(this).val().split('.')[0].split("\\").reverse()[0]
-
-  			$("#mb-preview").prop("src",$("#mbSelect option:selected").attr("data-thumbnail")).on('error', function() { 	$("#mb-preview").prop("src","./images/_nopreview.gif"); console.log("rilevato errore");});
-
-        $("#cagethemicroblends li, #cagetheCuMBlends li").removeClass("MBactive");
-
-        if ($("#cagethemicroblends li[title='"+MBName+"']")){
-          $("#cagethemicroblends li[title='"+MBName+"']").addClass("MBactive");
-          document.getElementById("microdisplay").scrollLeft = ($(`#cagethemicroblends li[title='${MBName}']`).index() * (mblendPrevSize+2))
-        }
-
-        let customSelected = $("#cagetheCuMBlends li").filter(function(el) {
-           return $(this).data('path') === $("#mbSelect").val();
-        })
-
-        if (customSelected.length>0){
-          /*TODO Unify this portion that is executed in 2 part of the interface  /
-          customSelected.addClass("MBactive");
-          let customMBDisplay = document.getElementById("cu_mu_display")
-          customMBDisplay.scrollLeft = ($(`#cagetheCuMBlends li[data-path='${$(this).val().replaceAll("\\","\\\\")}']`).index() * (mblendPrevSize+2))
-        }
-  		} */
 	});
 
 	//chage to a new microblend
@@ -1844,50 +1832,32 @@ $("#resetShades span.choose").click(function(){
       $("#floatLayer").css({ "left": `${(mouseX + 30)}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090 });
   });
 
+
   $("#layeringsystem li").mouseenter(function (e) {
     if (!MLSB.isReady()){return false;}
     //TODO fix this shit that rely on the UI
-    if ((parseFloat($(this).data('opacity')) > 0) && ($(this).attr("disabled") == undefined)) {
-      let materialPath = $(this).data('material');
-      let materialName = materialPath.split("\\").reverse()[0].split(".")[0]
-      let mblendPath = $(this).data('mblend');
-      let mblendlName = mblendPath.split("\\").reverse()[0].split(".")[0]
-      let colormaterial
-      switch ($(this).data('color')) {
-        case '000000_null':
-          colormaterial = {v:[0,0,0]};
-          break;
-        case 'ffffff_null':
-          colormaterial = {v:[255,255,255] };
-          break;
-        default:
-          if ((MLSB.Materials[materialName]?.colors)!=undefined){
-            colormaterial = MLSB.Materials[materialName].colors.list[$(this).data('color')]
-          }
-          break;
-      }
-      $("#currentMat").attr("src", `images/material/${materialName}.jpg`);
-      //if the microblend is custom it has to build the attribute finding the right one
-      //console.log(MLSB.getMBlend(mblendPath));
-      //Here you can replace Code
+    let indexSetup = getActiveMultilayerSetup();
+    /* openMlsetup.splice(indexSetup,1); */
+    mlsetup = MLSB.getMlsetup(indexSetup);
 
-      if ((coreMblends.packages.core.filter(el => el.name==mblendlName).length==1) || (mblendlName=='default')) {
-        $("#currentMblend").attr("src", `images/${mblendlName}.png`);
-      }else{
-        let dummyMblend = $("#cagetheCuMBlends").find($(`li[title='${mblendlName}']`));
+    let currentLayerIndex = $(e.currentTarget).index()
+    let currentLayer = mlsetup.Layers[currentLayerIndex];
+
+    if (
+        (currentLayer.opacity>0) &&
+        ($(this).attr("disabled") == undefined)
+        ){
+
+        let materialName = getMaterialFromFile(currentLayer.material)
+        let colormaterial = MLSB.Materials[materialName].colors.list[currentLayer.color]
+
+        let mbPackage = (MLSB.getMBlend(currentLayer.microblend.file)).package;
+        let mbThumb = buildMBImagePath(mbPackage,currentLayer.microblend.file);
+        let mblendName = MBThumbImageFile(currentLayer.microblend.file)
         
-        if (dummyMblend.length==1){
-          let bg = $(dummyMblend).css('background-image');
-          bg = bg.replace('url(','').replace(')','').replace(/\"/gi, "").replace("/thumbs","");
-          $("#currentMblend").attr("src", bg);
-        }
-      }
-      
-      $("#floatLayer div.colDisplayer").attr("title", $(this).data('color'));
-      $("#floatLayer div.colDisplayer").css("background-color", `#${tinycolor.fromRatio({ r: colormaterial[0], g: colormaterial[1], b: colormaterial[2] }).toHex()}`);
-      //$("#floatLayer div.colDisplayer").css("background-color", `#${tinycolor.fromRatio({ r: colormaterial.v[0], g: colormaterial.v[1], b: colormaterial.v[2] }).toHex()}`);
-      $("#floatLayer footer").html(`<strong>M:</strong> ${materialName}<br><strong>&micro;b:</strong> ${mblendlName}<br><strong>C:</strong> ${$(this).data('color')}`)
-      $("#floatLayer").removeClass('d-none');
+        //Not elegant code, but still better then before
+        UIFloatLayerDataCompile(materialName,mblendName,mbThumb,currentLayer.color,colormaterial)
+        $("#floatLayer").removeClass('d-none');
     }
   });
 
@@ -3621,7 +3591,6 @@ function applyValueInEditor(layersSelected){
     uiActivateLayer()
     applyValueInEditor(layersSelected);
     //change the mask in the ui
-    
     $("#thacanvas").trigger("switchLayer");
   }
 
