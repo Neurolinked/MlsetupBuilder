@@ -1827,10 +1827,15 @@ $("#resetShades span.choose").click(function(){
 
   //mousemove and mouseout event over layers
   $("#layeringsystem li").mousemove(function(e){
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      $("#floatLayer").css({ "left": `${(mouseX + 30)}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090 });
+    let positionElementData = e.currentTarget.getBoundingClientRect()
+       mouseY = Math.floor(positionElementData.top + positionElementData.height)
+       mouseX = Math.floor(positionElementData.left)
+      /* mouseX = e.clientX;
+      mouseY = e.clientY; */
+      $("#floatLayer").css({ "left": `${(mouseX - 12 )}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090 });
   });
+
+  $("#layeringsystem").bind("mousewheel",function(e){ $("#floatLayer").addClass("d-none"); });
 
 
   $("#layeringsystem li").mouseenter(function (e) {
@@ -1862,9 +1867,7 @@ $("#resetShades span.choose").click(function(){
   });
 
 
-  $("#layeringsystem li").mouseout(function (e) {
-    $("#floatLayer").addClass('d-none');
-  });
+  $("#layeringsystem li").mouseout(function (e) { $("#floatLayer").addClass('d-none'); });
 
 	$("body").on("mousemove","#materiaList li",function(e){
       var nuPos = $(e.target).offset();
