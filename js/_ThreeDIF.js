@@ -185,6 +185,10 @@ var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 
 var materialLegacy = new THREE.MeshStandardMaterial({color:0xFF0000,side:THREE.DoubleSide,depthWrite :false,visible:true,transparent:false,alphaTest:0.05,name:"MLSBlegacy"});
 
+function chainError(err) {
+  return Promise.reject(err)
+};
+
 function string2arraybuffer(str) {
 	var buf = new ArrayBuffer(str.length); // 2 bytes for each char
 	var bufView = new Uint8Array(buf);
@@ -1162,6 +1166,7 @@ async function ProcessStackTextures(){
 		.then(()=>{
 			//clearTexturePanel();
 			//textureDock.forEach((elm, index)=>{	
+				
 			//}) 
 		}).catch((error)=>{
 			notifyMe(error);
@@ -1303,7 +1308,9 @@ async function ProcessStackTextures(){
 			if (textureDock[index].shader.userData?.type=='hair'){
 				console.log(`hair shader`);
 			}
-		})
+		}),(rejected)=>{
+			console.log(rejected);
+		}
 	}).then(()=>{
 		$("#thacanvas").trigger("switchMlayer");
 	}).catch((error)=>{
@@ -1650,7 +1657,7 @@ function LoadMaterials(path){
 			resolve();
 		} catch (error) {
 			notifyMe(error,true);
-			reject();
+			reject("No Material file");
 		}
 		
 	} );
@@ -1831,7 +1838,7 @@ $("#thacanvas").on("mouseover",function(event){
 	var materialFile = fileModel.replace(/\.glb$/,'.Material.json')
 	
 	//console.log(TDengine.scene);
-	cleanScene().
+	/* cleanScene().
 	then((ev)=>{
 		MLSBConfig.then((config)=>{
 			actualExtension=config.maskformat;
@@ -1850,13 +1857,36 @@ $("#thacanvas").on("mouseover",function(event){
 				}).catch((error)=>{
 					notifyMe(`LoadModel ${error}`);
 				})
+			},
+			(ev)=>{
+				notifyMe(ev);
 			}).catch((error)=>{
 				notifyMe(`LoadMaterials ${error}`);
 			})
 		}).catch((error)=>{
 			notifyMe(`LoadScene ${error}`);
 		});
-	});
+	}); */
+
+	cleanScene().then(()=>{ return MLSBConfig})
+		.then((config)=>{actualExtension=config.maskformat;},chainError)
+		.then(()=>{return LoadMaterials(materialFile);},chainError)
+		.then(()=>{
+			firstModelLoaded=true;
+			$("#layeringsystem li").removeClass("active");
+			$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
+			return LoadModel(fileModel);
+			}
+			,chainError)
+		.then(()=>{
+			firstModelLoaded=true;
+			return LoadStackTextures();
+			}
+			,chainError)
+		.catch((error)=>{
+			notifyMe(`LoadScene ${error}`);
+		});
+		
 }).on('changeBg',function(ev){
 	$("#thacanvas").css("background-color",PARAMS.bkgColors);
 }).on('loadMaterials',function(ev){

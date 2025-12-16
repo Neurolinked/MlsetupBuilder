@@ -970,7 +970,8 @@ ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 							/* if (whereLoadFrom.match(new RegExp(/.+\.glb$/))){
 								mainWindow.webContents.send('preload:request_uncook');
 							} */
-							mainWindow.webContents.send('preload:dialog',{message:"File not found, do you want to try uncook the file now ?",action:'uncook'})
+							mainWindow.webContents.send('preload:dialog',{
+								message:`File not found<p><span class="badge badge-secondary">${whereLoadFrom}</span><p>Do you want to try uncook the file now ?`,action:'uncook'})
 						}else{
 							event.reply('preload:logEntry', 'File found in the Last Mod Folder, Yay!')
 						}
@@ -989,10 +990,10 @@ ipcMain.on('main:asyncReadFile',(event,percorso,flags,no_repo)=>{
 						event.reply('preload:logEntry', 'Missing file - '+whereLoadFrom,true)
 					}
 					contenutofile = ""
-					if (whereLoadFrom.match(new RegExp(/.+\.glb$/)) || whereLoadFrom.match(new RegExp(/.+\.Material\.json$/)) ){
+					if (whereLoadFrom.match(new RegExp(/.+\.glb$/))  ){
 						mainWindow.webContents.send('preload:dialog',
 							{
-								message:"File not found, do you want to try uncook the file now ?",
+								message:`File not found<p><span class="badge badge-secondary">${whereLoadFrom}</span><p>Do you want to try uncook the file now ?`,
 								action:'uncook'
 							})
 					}else if (whereLoadFrom.match( new RegExp(/.+masksset.+$/) ) ){
