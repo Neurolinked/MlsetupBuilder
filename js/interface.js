@@ -74,6 +74,23 @@ function materialToKey(mltemplatefile){
   }
   return keyName;
 }
+/**
+ * 
+ * @param {string} material Material name without any extension
+ * @param {object} position contains coordinates
+ * @param {number} position.x x coordinate for positioning
+ * @param {number} position.y y coordinate for positioning
+ */
+function UISetFloatMaterial(material,position){
+  $("#floatMat").css({
+    "left":`${position.x}px`,
+    "top":`${position.y}px`,
+    "background":`url(images/material/${material}.jpg) 0 0 no-repeat`,
+    "z-index":1090,
+    "background-size": "128px,128px"
+  });
+  $("#floatMat").removeClass('d-none');
+}
 
 function uiMicroblenError(){ return "./images/_nopreview.gif"; }
 /**
@@ -1873,8 +1890,7 @@ $("#resetShades span.choose").click(function(){
       var nuPos = $(e.target).offset();
       mouseX = e.clientX;
       mouseY = e.clientY;
-			$("#floatMat").css({"left":(nuPos.left - 132) + "px","top":(mouseY - 64)+"px","z-index":1090,"background":"url(images/material/"+$(this).data('ref')+".jpg) 0 0 no-repeat","background-size":" 128px,128px"});
-			$("#floatMat").removeClass('d-none');
+      UISetFloatMaterial($(this).data('ref'),{x:(nuPos.left - 132),y:(mouseY - 64)})
 		}
 	);
 
