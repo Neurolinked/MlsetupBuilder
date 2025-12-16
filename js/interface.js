@@ -468,7 +468,7 @@ const remoteCouch = false
 var notifications = 0;
 //var materialJSON = new MaterialBuffer();
 var uncookMyFile = false;
-var MLSBConfig = thePIT.RConfig();
+const MLSBConfig = thePIT.RConfig();
 var textureformat = ''
 var maxTexturePlayer = 0;
 
@@ -734,14 +734,6 @@ $(function(){
   .catch((error)=>{
     notifyMe(error);
   })
-  /* try {
-    $.getJSON("./jsons/mbcore.json",function(microblendsList){
-      coreMblends = microblendsList
-      abuildMB(microblendsList)
-    })
-  } catch (error) {
-    notifyMe(error);
-  } */
   
   var Workspaces = {
     index: 0,
@@ -3612,10 +3604,7 @@ function applyValueInEditor(layersSelected){
 }
 
   function switchLayer(source=null){
-    //let activeMLTab = getActiveMultilayerSetup();
-
     let layersSelected = MLSB.getMllayer(MLSB.Editor.activeMlsetup);
-    //TODO Here we need to solve things and make a chart to understand better how to unravel things
     uiActivateLayer()
     applyValueInEditor(layersSelected);
     //change the mask in the ui
@@ -3625,85 +3614,9 @@ function applyValueInEditor(layersSelected){
   $("#layeringsystem li").click(function(e){
     
 		if (!$(this).attr("disabled")){
-
       MLSB.Editor.layerSelected = $(this).index();
       switchLayer();
       return;
-      
-
-      //activate the new one only if isn't disabled
-			$('#layeringsystem li').removeClass('active notsync');
-      //sync with the mask paint editor
-      $("#masksPanel li.active").removeClass("active");
-      $("#masksPanel li").eq(MLSB.Editor.layerSelected).addClass("active");
-			$(this).addClass('active');
-			$("#maskLayer").attr("value",$(this).text());
-      //if the model is already loaded it fires the event to load the masks
-      //in the event if the layer selected is over the maximum layers
-      //it load the 0 masks for security
-      if ($("#modelTarget").attr('loaded')=='true'){
-  			let fireTxLoad = document.getElementById('maskLayer');
-  			fireTxLoad.dispatchEvent(TextureLoad);
-      }
-
-      //setup the chosen colors for the layer
-      //Load the layers infor into the fields
-      let materialByClick = String($(this).data("material")).replace(/^.*[\\\/]/, '').split('.')[0];
-			semaphoreCLKmBlend=true;
-			//Reset material Library 1.5.99
-			$("#cagemLibrary > div").removeClass("active");
-			$("#cagemLibrary > div[data-ref='"+materialByClick+"']").addClass("active");
-			switchLegacyMat(materialByClick);
-			//$("#materialChoser").attr('src','./images/material/'+materialByClick+'.jpg');
-      drawMaterial(materialByClick); //draw the material in the canvas
-
-			slideMaterials($("#cagemLibrary > div.active").index());
-
-			$("#materialSummary").html(materialByClick);
-      /* ColorChange before the switch */
-      //if (MLSB.Materials[])
-      if (MLSB.Materials[materialByClick]){
-        if (!MLSB.Materials[materialByClick]?.colors.list[$(this).data("color")]){
-          $(this).data("color",MLSB.Materials[materialByClick]?.colors.default);
-        }
-      }
-      $("#layerColor").val($(this).data("color"));
-			/*trigger the material change */
-      $("#cagemLibrary > div[data-ref='"+materialByClick+"']").click();
-
-      //Setup the inputs
-
-      if ( (($(this).data("color")=="000000_null") || ($(this).data("color")=="ffffff_null")) && (!$("#BWAdd").is(":checked")) ){
-        $( "#BWAdd" ).click();
-      }
-
-      //$("#layerColor").val($(this).data("color"));
-      $("#matInput").val($(this).data("material"));
-      $("#layerTile").val($(this).data("mattile")).change();
-      $("#layerOpacity").val($(this).data("opacity")).change();
-      checkOpacityLayer();
-
-      $("#layerNormal").val(String($(this).data("normal")));
-      $("#layerRoughIn").val(String($(this).data("roughin")));
-      $("#layerRoughOut").val(String($(this).data("roughout")));
-      $("#layerMetalIn").val(String($(this).data("metalin")));
-      $("#layerMetalOut").val(String($(this).data("metalout")));
-      $("#layerOffU").val($(this).data("offsetu"));
-      $("#layerOffV").val($(this).data("offsetv"));
-      //Microblend section
-      $("#mbInput").val($(this).data("mblend")).change();
-      $("#mbTile").val($(this).data("mbtile")).change();
-      $("#mbCont").val($(this).data("mbcontrast")).change();
-      $("#mbNorm").val($(this).data("mbnormal")).change();
-      $("#mbOffU").val($(this).data("mboffu"));
-      $("#mbOffV").val($(this).data("mboffv"));
-
-			let  ricercacolore = $(this).data("color");
-      $("#cagecolors span").removeClass("active");
-			$("#cagecolors span[title='"+ricercacolore+"']").addClass("active").click();
-			$("#mbInput").focusout(); //fires up the change of material blending preview
-      $("#mbSelect").trigger('change');
-      $("#thacanvas").trigger("renderMaterial",materialByClick);
 		}
 	});
 
@@ -3748,7 +3661,7 @@ function applyValueInEditor(layersSelected){
     })
     .on('setQuestion',function(ev){
       let options = ev.detail;
-      console.log(options);
+      console.log(ev,options);
       setQuestion(options.message,options.action);
     })
     .on('limitLayers',function(ev,index){
