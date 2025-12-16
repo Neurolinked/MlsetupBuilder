@@ -397,10 +397,25 @@ box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px
 #legacyMaterial ul li.active{background-color:var(--bs-secondary);}
 
 #floatMat{background-color: var(--bs-layer0);border: 1px solid var(--bs-secondary);width:128px;height:128px;background:url(images/material/unused.jpg) 0 0 no-repeat;background-size: 128px,128px;}
-#floatLayer{background-color: var(--bs-layer0);border: 1px solid var(--bs-secondary);width: 332px;height: 200px;}
-#floatLayer div.colDisplayer{width:64px;height:128px;vertical-align: top;}
-#floatLayer footer{font-size: .85rem;}
-#floatLayer footer strong{color:var(--active-sel);}
+#floatLayer{
+  background-color: var(--bs-layer0);
+  border: 1px solid var(--bs-secondary);
+  width: 332px;
+  height: 200px;
+  z-index: 1090;
+  
+  & div.colDisplayer{
+    width:64px;
+    height:128px;
+    vertical-align: top;
+  }
+  & footer {
+    font-size: .85rem;
+    & strong{
+      color:var(--active-sel);
+    }
+  }
+}
 
 #v-pills-sMesh .nav-link{color:var(--bs-info) !important;}
 #v-pills-sMesh .nav-link.active, #v-pills-sMesh .show>.nav-link{color:black !important;background-color: var(--bs-info)!important;}

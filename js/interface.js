@@ -74,6 +74,10 @@ function materialToKey(mltemplatefile){
   }
   return keyName;
 }
+
+function UIpositionFloatLayer(position){
+  $("#floatLayer").css({ "left": `${position.x}px`, "top": `${position.y}px` });
+}
 /**
  * 
  * @param {string} material Material name without any extension
@@ -204,18 +208,20 @@ function uiMicroblendSelect(microblendPath){
 
 /**
  * 
- * @param {string} material //material Name
- * @param {string} microblend //microblend Name
- * @param {string} colorCode //string in CDPR color code null_null 000000_null
- * @param {array} color //array of 3 float values for colors
+ * @param {object} update //material Name
+ * @param {string} update.material //material Name
+ * @param {string} update.microblend //microblend Name
+ * @param {string} update.mbthumbnail //microblend Name
+ * @param {string} update.colorCode //string in CDPR color code null_null 000000_null
+ * @param {array} update.color //array of 3 float values for colors
  */
-function UIFloatLayerDataCompile(material,microblend,microblendThumbnail,colorCode,color){
+function UIFloatLayerDataCompile(update){
   try {
     $("#floatLayer div.colDisplayer").css("background-color",
-       `#${tinycolor.fromRatio({ r: color[0], g: color[1], b: color[2] }).toHex()}`);
-    $("#currentMat").attr("src", `images/material/${material}.jpg`);
-    $("#currentMblend").attr("src", microblendThumbnail);
-    $("#floatLayer footer").html(`<strong>M:</strong> ${material}<br><strong>&micro;b:</strong> ${microblend}<br><strong>C:</strong> ${colorCode}`)
+       `#${tinycolor.fromRatio({ r: update.color[0], g: update.color[1], b: update.color[2] }).toHex()}`);
+    $("#currentMat").attr("src", `images/material/${update.material}.jpg`);
+    $("#currentMblend").attr("src", update.mbthumbnail);
+    $("#floatLayer footer").html(`<strong>M:</strong> ${update.material}<br><strong>&micro;b:</strong> ${update.microblend}<br><strong>C:</strong> ${update.colorCode}`)
   } catch (error) {
     notifyMe(error);
   }
@@ -1847,9 +1853,7 @@ $("#resetShades span.choose").click(function(){
     let positionElementData = e.currentTarget.getBoundingClientRect()
        mouseY = Math.floor(positionElementData.top + positionElementData.height)
        mouseX = Math.floor(positionElementData.left)
-      /* mouseX = e.clientX;
-      mouseY = e.clientY; */
-      $("#floatLayer").css({ "left": `${(mouseX - 12 )}px`, "top": `${(mouseY + 10)}px`, "z-index": 1090 });
+       UIpositionFloatLayer({x:(mouseX - 12),y:(mouseY + 10)})
   });
 
   $("#layeringsystem").bind("mousewheel",function(e){ $("#floatLayer").addClass("d-none"); });
@@ -1865,22 +1869,27 @@ $("#resetShades span.choose").click(function(){
     let currentLayerIndex = $(e.currentTarget).index()
     let currentLayer = mlsetup.Layers[currentLayerIndex];
 
-    if (
-        (currentLayer.opacity>0) &&
-        ($(this).attr("disabled") == undefined)
-        ){
-
-        let materialName = getMaterialFromFile(currentLayer.material)
-        let colormaterial = MLSB.Materials[materialName].colors.list[currentLayer.color]
-
-        let mbPackage = (MLSB.getMBlend(currentLayer.microblend.file)).package;
-        let mbThumb = buildMBImagePath(mbPackage,currentLayer.microblend.file);
-        let mblendName = MBThumbImageFile(currentLayer.microblend.file)
-        
-        //Not elegant code, but still better then before
-        UIFloatLayerDataCompile(materialName,mblendName,mbThumb,currentLayer.color,colormaterial)
-        $("#floatLayer").removeClass('d-none');
+    if (mlsetup.Layers.length <= currentLayerIndex){
+      $("#floatLayer").addClass('d-none');
+      return;
     }
+
+    let materialName = getMaterialFromFile(currentLayer.material)
+    let colormaterial = MLSB.Materials[materialName].colors.list[currentLayer.color]
+
+    let mbPackage = (MLSB.getMBlend(currentLayer.microblend.file)).package;
+    let mbThumb = buildMBImagePath(mbPackage,currentLayer.microblend.file);
+    let mblendName = MBThumbImageFile(currentLayer.microblend.file)
+    
+    //Not elegant code, but still better then before
+    UIFloatLayerDataCompile({
+      material: materialName,
+      microblend: mblendName,
+      mbthumbnail: mbThumb,
+      colorCode:currentLayer.color,
+      color: colormaterial
+    })
+    $("#floatLayer").removeClass('d-none');
   });
 
 
@@ -1891,8 +1900,8 @@ $("#resetShades span.choose").click(function(){
       mouseX = e.clientX;
       mouseY = e.clientY;
       UISetFloatMaterial($(this).data('ref'),{x:(nuPos.left - 132),y:(mouseY - 64)})
-		}
-	);
+      $("#floatMat").removeClass('d-none');
+		});
 
 	$("#materiaList").mouseout(function(e){ $("#floatMat").addClass('d-none'); });
 
