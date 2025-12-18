@@ -963,7 +963,7 @@ async function _getFileContent(textureObj){
 			
 			
 			if (textureObj.maptype!='mlmask'){
-				pushTexturetoPanel(realTexturePath, textureObj.info.width, textureObj.info.height,textureObj.maptype);
+				pushTexturetoPanel(realTexturePath, textureObj.info.width, textureObj.info.height,textureObj.maptype,textureObj.shader);
 			}
 			
 

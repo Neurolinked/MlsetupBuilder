@@ -155,7 +155,15 @@ function clearTexturePanel(){
     $("#listTextures").html("");
 }
 
-function pushTexturetoPanel(filename, width, height,type="diffuse"){
+function pushShadertoPanel(shaderName){
+	if (!document.getElementById(`shad_${shaderName}`)){
+		$("#listTextures").append(`<details id="shad_${shaderName}"><summary>${shaderName.replaceAll("_"," ")}</summary></details>`);
+	}
+}
+
+
+function pushTexturetoPanel(filename, width, height,type="diffuse",shaderName="unused"){
+	//pushShadertoPanel(shaderName);
 	if (!document.getElementById(filename)){
 		$("#listTextures").append(`<span>${type}</span>`);
 		if (width == height){
