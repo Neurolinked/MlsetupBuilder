@@ -185,6 +185,18 @@ var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 
 var materialLegacy = new THREE.MeshStandardMaterial({color:0xFF0000,side:THREE.DoubleSide,depthWrite :false,visible:true,transparent:false,alphaTest:0.05,name:"MLSBlegacy"});
 
+function sceneLoaded(){
+	if (TDengine.scene==null){ return false }
+	if (!TDengine.scene.hasOwnProperty("children")){ return false }
+	let hasScene = false;
+	TDengine.scene.children.forEach((elm)=>{
+		if (!hasScene){
+			if ((elm?.name=="Scene") && (elm.type=="Group")){hasScene=true}
+		}
+	})
+	return hasScene;
+}
+
 function chainError(err) {
   return Promise.reject(err)
 };
@@ -549,6 +561,12 @@ function updateUvTransform() {
 	if (materialStack[selected].metalnessMap?.isTexture){
 		materialStack[selected].metalnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
 		materialStack[selected].metalnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+	}
+	if (materialStack[selected].hasOwnProperty("normalMaterialMap")){
+		if (materialStack[selected]?.normalMaterialMap.isTexture){
+			materialStack[selected].normalMaterialMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
+			materialStack[selected].normalMaterialMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+		}
 	}
 }
 
@@ -1906,7 +1924,7 @@ $("#thacanvas").on("mouseover",function(event){
 		$(window).trigger("limitLayers",materialStack[selected].userData.layers);
 	}
 }).on('renderMaterial',function(ev,layerMaterial){
-	if (firstModelLoaded){
+	if (sceneLoaded()){
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
@@ -1921,6 +1939,9 @@ $("#thacanvas").on("mouseover",function(event){
 		}
 
 		var offset = calcOffset(repVal,offset_h,offset_v);
+		matrixTransform.offsetX = offset.x
+		matrixTransform.offsetY = offset.y
+		matrixTransform.repeat = repVal
 
 		if ((layerMaterial.hasOwnProperty('diffuse')) && (layerMaterial?.diffuse?.texture!='' || layerMaterial?.diffuse?.texture!=null)){
 			if (PARAMS.textureDebug){
@@ -1934,7 +1955,7 @@ $("#thacanvas").on("mouseover",function(event){
 			if (myTex?.length==1){
 				//there was it, map it
 				materialStack[selected].map = textureStack[C_diffuse];
-				updateUvTransform()
+				//updateUvTransform()
 				materialStack[selected].needsUpdate = true;
 			}else{
 				
@@ -2040,7 +2061,8 @@ $("#thacanvas").on("mouseover",function(event){
 
 					var texProm = _getFileContent(textureDock[tInd])
 						.then((texturePromised)=>{
-							genDataTexture(texturePromised,textureDock[tInd],C_metal).then((response)=>{
+							return genDataTexture(texturePromised,textureDock[tInd],C_metal);
+						}).then((response)=>{
 								if (PARAMS.textureDebug){console.log(textureStack[C_metal])}
 
 								materialStack[selected].metalnessMap = textureStack[C_metal]
@@ -2048,9 +2070,6 @@ $("#thacanvas").on("mouseover",function(event){
 								materialStack[selected].metalnessMap.flipY = flippingdipping;
 								materialStack[selected].metalnessMap.offset=offset;
 								materialStack[selected].metalnessMap.needsUpdate =true
-							}).catch((err)=>{
-								notifyMe(`genDataTexture: ${error}`);
-							});
 						}).catch((error)=>{
 							console.log(layerMaterial.metal.texture);
 							notifyMe(error.message);
@@ -2064,32 +2083,35 @@ $("#thacanvas").on("mouseover",function(event){
 			}
 		}
 		/**normal management */
-		/* 
+		
 		// load the material normal
 		if (layerMaterial.hasOwnProperty('normal')) {
+			//TODO continue in rendermaterial and blend material + core model normals
+			console.log(layerMaterial.normal.texture);
+			
 			var myTex = textureDock.filter(elm=>elm.file==layerMaterial.normal.texture);
 			let C_normal = CryptoJS.MD5(layerMaterial.normal.texture).toString();
 
 			if (myTex?.length==1){
 				console.warn(`Found texture, still not loaded`);
 			}else{
+				
 				let test = retDefTexture(layerMaterial.normal.texture,selected,"normal");
 				let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.normal.texture)
 				var texProm = _getFileContent(textureDock[tInd])
 				.then((texturePromised)=>{
-					
-					genDataTexture(texturePromised,textureDock[tInd],C_normal).then((response)=>{
-						if (PARAMS.textureDebug){console.log(textureStack[C_normal])}
-					}).catch((err)=>{
-						notifyMe(`genDataTexture: ${error}`);
-					});
+					//return genDataTexture(texturePromised,textureDock[tInd],C_normal);
+				})
+				.then((response)=>{
+					//TODO texture read, to continue you have to plug it into the shader and 
+					//if (PARAMS.textureDebug){console.log(textureStack[C_normal])}
 				}).catch((error)=>{
 					if (PARAMS.textureDebug){console.log(layerMaterial.normal.texture)}
 					notifyMe(error.message);
 					console.error('error #%d',error)
 				})
-			}
-		} */
+			} 
+		}
 	}
 }).on("texOffset",function(ev,source='layer'){
 	var tileMul = parseFloat($("#layerTile").prev("[data-mul]").data("mul"))
