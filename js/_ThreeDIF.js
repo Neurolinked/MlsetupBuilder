@@ -2119,7 +2119,7 @@ $("#thacanvas").on("mouseover",function(event){
 	var offsetX = parseFloat(source =='ui' ? $("#layerOffU").val() : mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4);
 	var offsetY = parseFloat(source =='ui' ? $("#layerOffV").val() : mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4);
 
-	if (firstModelLoaded){
+	if (sceneLoaded()){
 		var offset = calcOffset(tileValue,offsetX,offsetY) //new THREE.Vector2(h,(v==-0 ? 0 : v));
 		matrixTransform.repeat = tileValue
 		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
@@ -2127,7 +2127,7 @@ $("#thacanvas").on("mouseover",function(event){
 		updateUvTransform()
 	}
 }).on("texTiled",function(ev,source='layer'){
-	if (firstModelLoaded){
+	if (sceneLoaded()){
 		var tileValue = mLsetup.Layers[MLSB.Editor.layerSelected].tiles;
 		if (source == 'ui'){
 			tileValue = $("#layerTile").val();
@@ -2147,7 +2147,7 @@ $("#thacanvas").on("mouseover",function(event){
 		materialStack[selected].needsUpdate = true;
 	}
 }).on('switchLayer',function(ev,layer=0){
-	if (firstModelLoaded){
+	if (sceneLoaded()){
 		
 		//Used to switch the mask layer used on the multilayer material
 		let selected = activeMLayer();
@@ -2316,7 +2316,7 @@ $("#thacanvas").on("mouseover",function(event){
 		materialStack[selected].side = PARAMS.oneside ? THREE.FrontSide: THREE.DoubleSide;
 	}
 }).on('switchAlpha',function(event){
-	if (firstModelLoaded){
+	if (sceneLoaded()){
 		let selected = activeMLayer();
 
 		if (PARAMS.switchTransparency){
@@ -2352,7 +2352,7 @@ $("#thacanvas").on("mouseover",function(event){
 }).on('changeColor',function(ev, color){
 	//change the color ONLY if a layer is selected
 	try{
-		if (firstModelLoaded){
+		if (sceneLoaded()){
 			let selected = activeMLayer();
 			materialStack[selected].setValues({color:new THREE.Color(color)});
 		}
