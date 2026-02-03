@@ -591,9 +591,11 @@
     <!--End of the New Editor-->
   </div>
   <div class="tab-pane fade " id="nav-material" role="tabpanel" aria-labelledby="pills-material-tab" tabindex="-1">
-    <ul>
-      
-    </ul>
+    <canvas id="normalMerge" width="300" height="300"></canvas>
+    <div class="d-flex" style="height:calc(100vh - 7rem);">
+      <textarea id="vertexShader" class="form-control form-control-sm w-50 m-1 h-25" disabled></textarea>
+      <textarea id="fragmentShader" class="form-control form-control-sm w-50 m-1 h-25" disabled></textarea>
+    </div>
   </div>
   <div class="tab-pane fade " id="nav-appearance" role="tabpanel" aria-labelledby="pills-appearance-tab" tabindex="-1">
     <input id="MBAFinder" class="form-control" type="search" placeholder="Search in the MaterialBufferArray list" aria-label="Search in the MaterialBufferArray list">
