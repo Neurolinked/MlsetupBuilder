@@ -5,10 +5,12 @@
 - [ ] Huge Code cleanup
   - [ ] Better format performance for in-memory textures
 - [x] Model DB rebuild
-- [ ] Custom Shader material normal blending
+- Three.js Engine
+  - [ ] Customize Shader material form normal and detail blending
+  - [ ] Update 3d window ration when reloading the scene;
 - [ ] UI
-  - [ ] Rework contextual menu behaviours
-  - [ ] Substance Painter-like new layer interface
+  - [x] Rework contextual menu behaviours
+  - [x] Substance Painter-like new layer interface
     - [ ] Mask Loading into images
   - [x] Display opacity on 3d IF optional (default false)
     - [x] Enable/disable feature with shortcut Ctrl+O
