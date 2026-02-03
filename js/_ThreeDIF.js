@@ -43,7 +43,6 @@ if (window.Worker) {
 				paintDatas(datas[0],datas[1],datas[2],'maskPainter',THREE.RGBAFormat);
 				break;
 			case 'gradientApply':
-				
 				break;
 			case 'alphaFix':
 				console.log(alphaFix);
@@ -51,17 +50,27 @@ if (window.Worker) {
 			case 'paint':
 				clearCanvas(datas[3]);
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
-				let textureMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
+				let textureMD5Code = getEncodedFileName((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
+				let oldUserData = textureStack[textureMD5Code].userData?.type
 				textureStack[textureMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
 				textureStack[textureMD5Code].minFilter = THREE.LinearFilter;
 				textureStack[textureMD5Code].magFilter = THREE.LinearFilter;
 				textureStack[textureMD5Code].needsUpdate = true
+				textureStack[textureMD5Code].userData.type = oldUserData;
+				if (textureStack[textureMD5Code].userData?.type=="globalnormal"){
+					paintDatas(
+						datas[0],
+						datas[1],
+						datas[2],
+						"normalMerge",
+						THREE.RGBAFormat);
+				}
 				materialStack[datas[4]].normalMap = textureStack[textureMD5Code];
 				materialStack[datas[4]].normalMap.needsUpdate = true;
 				break;
 			case 'rough':
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
-				let roughMD5Code = CryptoJS.MD5((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
+				let roughMD5Code = getEncodedFileName((datas[3]).replace(/\.(dds|png)$/g,".xbm"));
 				textureStack[roughMD5Code] = new THREE.DataTexture(datas[0],datas[1],datas[2]);
 				textureStack[roughMD5Code].minFilter = THREE.LinearFilter;
 				textureStack[roughMD5Code].magFilter = THREE.LinearFilter;
@@ -168,6 +177,13 @@ var TDengine = {
 	UVMapcanvas: document.getElementById('UVMapMe'),
 	time: new THREE.Clock()
 }
+const TDNormalMerger ={
+	scene: null,
+	renderer:null,
+	canvas:null,
+	camera:null,
+	plane:null
+}
 
 const MDLloader = new GLTFLoader(); //Loading .glb files
 
@@ -185,6 +201,30 @@ var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 
 var materialLegacy = new THREE.MeshStandardMaterial({color:0xFF0000,side:THREE.DoubleSide,depthWrite :false,visible:true,transparent:false,alphaTest:0.05,name:"MLSBlegacy"});
 
+var normalMerger
+
+var loader = new THREE.FileLoader();
+loader.load('./shaders/mergeNormal.vert.glsl', function (vertexShader) {
+    loader.load('./shaders/mergeNormal.frag.glsl', function (fragmentShader) {
+        normalMerger = new THREE.ShaderMaterial({
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            uniforms: {
+				globalnormal: { type: "t", value:FlatNORM},
+				detailnormal: { type: "t", value:FlatNORM},
+				globalnormalScale: { type: "f", value:1.0},
+				detailnormalScale: { type: "f", value:1.0},
+				tiles: { type: "f", value:1.0},
+				offset: {type:"v", value:[0.0,0.0]}
+			},
+			glslVersion:THREE.GLSL1
+        });
+		TDNormalMerger.plane.material = normalMerger
+		TDNormalMerger.plane.material.needsUpdate=true;
+    });
+})
+
+
 function sceneLoaded(){
 	if (TDengine.scene==null){ return false }
 	if (!TDengine.scene.hasOwnProperty("children")){ return false }
@@ -195,6 +235,25 @@ function sceneLoaded(){
 		}
 	})
 	return hasScene;
+}
+
+/**
+ * 
+ * @param {*} filename String with the filename to list all unique files
+ * @returns an encoded string
+ */
+function getEncodedFileName(filename){
+	return CryptoJS.MD5(filename).toString();
+}
+
+function setNormalMergeCanvasSize(squaresize=300){
+	const squareCheck = parseInt(squaresize);
+	if (!((squareCheck>0) && (squareCheck < 4096))){
+		squaresize=300;
+	}
+	let normalMergeCanvas = document.getElementById("normalMerge")
+	normalMergeCanvas.setAttribute("width",squaresize)
+	normalMergeCanvas.setAttribute("height",squaresize)
 }
 
 function chainError(err) {
@@ -217,41 +276,47 @@ function activeMLayer(){
 	return multilayerSelect;
 }
 
+function isGREY(textureFile){
+	return ((textureFile=="engine\\textures\\editor\\grey.xbm") ||
+	(textureFile=="base\\surfaces\\materials\\default\\gray.xbm"));
+}
+
+function isWHITE(textureFile){
+	return ((textureFile=="engine\\textures\\editor\\white.xbm") || 
+		(textureFile=="engine\\textures\\editor\\small_white.xbm") ||
+		(textureFile=="base\\surfaces\\materials\\default\\white.xbm"));
+}
+
+function isBLACK(textureFile){
+	return ((textureFile=="engine\\textures\\editor\\black.xbm")||
+	(textureFile=="base\\surfaces\\materials\\default\\black.xbm"));
+}
+
 function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
-	if ((mapName=="engine\\textures\\editor\\black.xbm")||
-	(mapName=="base\\surfaces\\materials\\default\\black.xbm")){
-		return 0.0;
-	}
-	if ((mapName=="engine\\textures\\editor\\grey.xbm") ||
-	(mapName=="base\\surfaces\\materials\\default\\gray.xbm")){
-		return 0.5;
-	}
-	if (
-		(mapName=="engine\\textures\\editor\\white.xbm") || 
-		(mapName=="engine\\textures\\editor\\small_white.xbm") ||
-		(mapName=="base\\surfaces\\materials\\default\\white.xbm")
-		) {
-		return 1.0;
-	}
+	if (isBLACK(mapName)) { return 0.0; }
+	if (isGREY(mapName))  { return 0.5; }
+	if (isWHITE(mapName)) { return 1.0; }
 	return -1.0;
 }
 
 function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="default",type="diffuse"){
 	// kind of listed maps
-	type = ((type=="diffuse") || (type=="normal") || (type=="metal") || (type=="rough") || (type=="roughness") || (type=="alpha")  || (type=="emissive") || (type=="mlmask") ) ? type : "diffuse";
+	type = ((type=="diffuse") || (type=="normal") || (type=="normaldetail") || (type=="metal") || (type=="rough") || (type=="roughness") || (type=="alpha")  || (type=="emissive") || (type=="mlmask") ) ? type : "diffuse";
 	if (PARAMS.debugTexture) {console.log("retDefTexture: ", mapName,type)}
 	
 	switch (mapName){
+		case "base\\surfaces\\materials\\default\\black.xbm":
 		case "engine\\textures\\editor\\black.xbm":
 			return BLACK;
 			break;
+		case "base\\surfaces\\materials\\default\\white.xbm":
 		case "engine\\textures\\small_white.xbm":
 		case "engine\\textures\\editor\\white.xbm":
 			return WHITE;
 			break;
 		case "engine\\textures\\editor\\normal.xbm":
 			return FlatNORM;
-			break;
+			break; 
 		default:
 			if (mapName!="engine\\textures\\editor\\grey.xbm"){
 				if (textureDock.filter(elm=>elm.file==mapName).length<=0){
@@ -353,84 +418,88 @@ function retUVMapData(_2dContext,selected,size){
 }
 
 function paintDatas(textureData,w,h,target,format){
-	var opCanvas = {
-		dom : document.getElementById(target),
-		context : null,
-		width: 0,
-		height:0
+	try{
+		var opCanvas = {
+			dom : document.getElementById(target),
+			context : null,
+			width: 0,
+			height:0
+		}
+	
+		if (textureData == undefined){
+			textureData = ERROR.image.data
+			w=ERROR.image.width
+			h=ERROR.image.height
+			format = THREE.RGBAFormat
+		}
+	
+		opCanvas.width = opCanvas.dom.getAttribute("width");
+		opCanvas.height = opCanvas.dom.getAttribute("height");
+		opCanvas.context = opCanvas.dom.getContext('2d',{ willReadFrequently: true });
+		opCanvas.context.reset();
+		opCanvas.context.setTransform(1, 0, 0, 1, 0, 0);
+	
+		var oc = document.createElement('canvas');
+		oc.width=w;
+		oc.height=h;
+		var octx = oc.getContext('2d');
+		var imageData = octx.createImageData(w,h);
+		var k=0;
+	
+		switch (format) {
+			case THREE.LuminanceFormat:
+			case THREE.RedFormat:
+				for (let i = 0; i < imageData.data.length; i += 4) {
+					// Modify pixel data
+					imageData.data[i] = textureData[k];  // R value
+					imageData.data[i + 1] =  textureData[k]    // G value
+					imageData.data[i + 2] =  textureData[k]  // B value
+					imageData.data[i + 3] = 255;  // A value
+					k++;
+				}
+				break;
+			case THREE.RGFormat:
+				for (let i = 0; i < imageData.data.length; i += 4) {
+					// Modify pixel data
+					imageData.data[i] = textureData[k];  // R value
+					imageData.data[i + 1] =  textureData[k+1]    // G value
+					imageData.data[i + 2] =  0;  // B value
+					imageData.data[i + 3] = 255;  // A value
+					k+=2;
+				}
+				break;
+			case THREE.RGBFormat:
+				for (let i = 0; i < imageData.data.length; i += 4) {
+					// Modify pixel data
+					imageData.data[i] = textureData[k];  // R value
+					imageData.data[i + 1] =  textureData[k+1]    // G value
+					imageData.data[i + 2] =  textureData[k+2]  // B value
+					imageData.data[i + 3] = 255;  // A value
+					k+=3;
+				}
+				break;
+			case THREE.RGBAFormat:
+				for (let i = 0; i < imageData.data.length; i++) {
+					// Modify pixel data
+					imageData.data[i] = textureData[i]; // every value
+				}
+				break;
+		}
+	
+		octx.putImageData(imageData,0,0,0,0,w,h);
+		if (w==h){
+			opCanvas.context.scale(opCanvas.width/w,opCanvas.height/h)
+		}else if (w>h){
+			opCanvas.context.scale(opCanvas.width/w,opCanvas.width/w)
+		}else if (h>w){
+			opCanvas.context.scale(opCanvas.height/h,opCanvas.height/h)
+		}
+		opCanvas.context.drawImage(oc,0,0,w,h);
+	
+		oc.remove();
+	}catch (error){
+		notifyMe(`${error} : -> ${target}`);
 	}
-
-	if (textureData == undefined){
-		textureData = ERROR.image.data
-		w=ERROR.image.width
-		h=ERROR.image.height
-		format = THREE.RGBAFormat
-	}
-
-	opCanvas.width = opCanvas.dom.getAttribute("width");
-	opCanvas.height = opCanvas.dom.getAttribute("height");
-	opCanvas.context = opCanvas.dom.getContext('2d',{ willReadFrequently: true });
-	opCanvas.context.reset();
-	opCanvas.context.setTransform(1, 0, 0, 1, 0, 0);
-
-	var oc = document.createElement('canvas');
-	oc.width=w;
-	oc.height=h;
-	var octx = oc.getContext('2d');
-	var imageData = octx.createImageData(w,h);
-	var k=0;
-
-	switch (format) {
-		case THREE.LuminanceFormat:
-		case THREE.RedFormat:
-			for (let i = 0; i < imageData.data.length; i += 4) {
-				// Modify pixel data
-				imageData.data[i] = textureData[k];  // R value
-				imageData.data[i + 1] =  textureData[k]    // G value
-				imageData.data[i + 2] =  textureData[k]  // B value
-				imageData.data[i + 3] = 255;  // A value
-				k++;
-			}
-			break;
-		case THREE.RGFormat:
-			for (let i = 0; i < imageData.data.length; i += 4) {
-				// Modify pixel data
-				imageData.data[i] = textureData[k];  // R value
-				imageData.data[i + 1] =  textureData[k+1]    // G value
-				imageData.data[i + 2] =  0;  // B value
-				imageData.data[i + 3] = 255;  // A value
-				k+=2;
-			}
-			break;
-		case THREE.RGBFormat:
-			for (let i = 0; i < imageData.data.length; i += 4) {
-				// Modify pixel data
-				imageData.data[i] = textureData[k];  // R value
-				imageData.data[i + 1] =  textureData[k+1]    // G value
-				imageData.data[i + 2] =  textureData[k+2]  // B value
-				imageData.data[i + 3] = 255;  // A value
-				k+=3;
-			}
-			break;
-		case THREE.RGBAFormat:
-			for (let i = 0; i < imageData.data.length; i++) {
-				// Modify pixel data
-				imageData.data[i] = textureData[i]; // every value
-			}
-			break;
-	}
-
-	octx.putImageData(imageData,0,0,0,0,w,h);
-	if (w==h){
-		opCanvas.context.scale(opCanvas.width/w,opCanvas.height/h)
-	}else if (w>h){
-		opCanvas.context.scale(opCanvas.width/w,opCanvas.width/w)
-	}else if (h>w){
-		opCanvas.context.scale(opCanvas.height/h,opCanvas.height/h)
-	}
-	opCanvas.context.drawImage(oc,0,0,w,h);
-
-	oc.remove();
 }
 
 function genTexture(color,size=16){
@@ -454,6 +523,14 @@ function genTexture(color,size=16){
 		}
 	}
 	return false;
+}
+
+function getCanvasSize(ThreejsObject){
+	var canvas = ThreejsObject.renderer.domElement
+	var size = parseInt(canvas.getAttribute("width"))
+	ThreejsObject.renderer.setSize(size,size);
+    ThreejsObject.camera.aspect =size/size;
+    ThreejsObject.camera.updateProjectionMatrix();
 }
 
 function resize() {
@@ -521,7 +598,7 @@ window.addEventListener('resize', function() {  resized = true;  });// resize ev
 
 
 const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
-const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0,5 ) ),4,4);
+const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0.5) ),4,4);
 const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
 const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
 const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
@@ -546,27 +623,53 @@ $("#takeashot").click(function(ev){
 	animate();
 });
 
+function getOffsetValues(){
+	var offset_h=0, offset_v = 0;
 
-function updateUvTransform() {
-	if (PARAMS.textureDebug){console.log(matrixTransform)}
-	let selected = activeMLayer();
-	if (materialStack[selected].map?.isTexture){
-		materialStack[selected].map.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
-		materialStack[selected].map.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+	if (mLsetup.Layers[MLSB.Editor.layerSelected].offsetU!==undefined){
+
+		offset_h =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetU==null ? $("#layerOffU").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4)
+		offset_v =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetV==null ? $("#layerOffV").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4)
+	}else{
+		offset_h = $("#layerOffU").val();
+		offset_v = $("#layerOffV").val();
 	}
-	if (materialStack[selected].roughnessMap?.isTexture){
-		materialStack[selected].roughnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
-		materialStack[selected].roughnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
-	}
-	if (materialStack[selected].metalnessMap?.isTexture){
-		materialStack[selected].metalnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
-		materialStack[selected].metalnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
-	}
-	if (materialStack[selected].hasOwnProperty("normalMaterialMap")){
-		if (materialStack[selected]?.normalMaterialMap.isTexture){
-			materialStack[selected].normalMaterialMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
-			materialStack[selected].normalMaterialMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+	return [offset_h , offset_v];
+}
+
+function updateUvTransform(material=null) {
+	
+	try {
+		
+		if (PARAMS.textureDebug){console.log(matrixTransform)}
+		let selected = activeMLayer();
+		if (materialStack[selected].map?.isTexture){
+			materialStack[selected].map.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
+			materialStack[selected].map.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
 		}
+		if (materialStack[selected].roughnessMap?.isTexture){
+			materialStack[selected].roughnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
+			materialStack[selected].roughnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+		}
+		if (materialStack[selected].metalnessMap?.isTexture){
+			materialStack[selected].metalnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
+			materialStack[selected].metalnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
+		}
+		if (PARAMS.normalMerger){
+			normalMerger.uniforms.tiles.value = matrixTransform.repeat;
+			normalMerger.uniforms.offset.value = [matrixTransform.offsetX, matrixTransform.offsetY];
+		}else{
+			if (materialStack[selected].userData?.detailNormalMap==undefined){
+				console.error("no detail normal map")
+			}else{
+				materialStack[selected].userData.detailNormalMap.repeat.set(matrixTransform.repeat, matrixTransform.repeat)
+				materialStack[selected].userData.detailNormalMap.offset.set(matrixTransform.offsetX, matrixTransform.offsetY)
+				materialStack[selected].userData.detailNormalMap.updateMatrix();
+				materialStack[selected].userData.detailNormalTransform = materialStack[selected].userData.detailNormalMap.matrix;
+			}
+		}
+	} catch (error) {
+		console.error(error);
 	}
 }
 
@@ -590,6 +693,25 @@ function init() {
         toneMapping : THREE.ACESFilmicToneMapping,
         toneMappingExposure : 1.25
     });
+
+	TDNormalMerger.scene = new THREE.Scene();
+	TDNormalMerger.canvas = document.getElementById("normalMerge");
+	TDNormalMerger.camera = new THREE.OrthographicCamera(
+		-1, // left
+		1, // right
+		1, // top
+		-1, // bottom
+		-1, // near,
+		1, // far
+	);
+	TDNormalMerger.renderer = new THREE.WebGLRenderer({
+		canvas: TDNormalMerger.canvas,
+        antialias:true,
+		gammaFactor : 2.2,
+		preserveDrawingBuffer: true
+	});
+	TDNormalMerger.plane = new THREE.PlaneGeometry(2, 2);
+	TDNormalMerger.scene.add(new THREE.Mesh(TDNormalMerger.plane, normalMerger));
 
 	if (window.innerHeight-80<512){
 		TDengine.renderer.setSize(renderwidth,renderwidth);
@@ -642,28 +764,59 @@ function init() {
     animate();
 }
 
-function animate() {
-    if (resized) resize()
+/**
+ * 
+ */
+function resetDetailNormal(){
+	var ctxr = document.getElementById('normalMerge');
+	let selected = activeMLayer();
+	if (materialStack[selected].normapMap?.isTexture){
+		materialStack[selected].normapMap.dispose();
+	}
+	materialStack[selected].normapMap = new THREE.CanvasTexture(ctxr);
+	materialStack[selected].normapMap.wrapS = materialStack[selected].normapMap.wrapT = THREE.RepeatWrapping;
+	materialStack[selected].normapMap.needsUpdate = true;
+}
 
+function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
+    return needResize;
+}
+
+function animate() {
+    if (resized) {
+		resize();
+	}
+	
     if (!paintMask3D){
 		TDengine.control.autoRotate = PARAMS.rotation;
 		TDengine.control.autoRotateSpeed = PARAMS.speed;
 	}else{
 		TDengine.control.autoRotate = false;
 	}
-
+	
     if (control_reset){
 		control_reset = false;
 		TDengine.MainCanvas.position.set(0,1,-7);
 	}else{
 		TDengine.control.update();
 	}
-
+	
 	if (control_side){
 		control_side=false;
 	}
-
+	
     TDengine.renderer.render(TDengine.scene, TDengine.camera);
+	if ((normalMerger!=undefined) && (normalMerger!=null)){
+		getCanvasSize(TDNormalMerger)
+		TDNormalMerger.renderer.render(TDNormalMerger.scene, TDNormalMerger.camera);
+	}
 
     if(getImageData == true){
 		let a = document.getElementById('takeashot');
@@ -675,9 +828,8 @@ function animate() {
 				MH:mLsetup.Layers[MLSB.Editor.layerSelected].microblend.offset.h,
 				MV:mLsetup.Layers[MLSB.Editor.layerSelected].microblend.offset.v
 			}
-			console.log(textsets);
 		}
-			imgDataShot = TDengine.renderer.domElement.toDataURL('image/png');
+		imgDataShot = TDengine.renderer.domElement.toDataURL('image/png');
 		
 
 		getImageData = false;
@@ -689,9 +841,7 @@ function animate() {
 		}
 	}
 	
-
 	requestAnimationFrame(animate);
-	
 }
 
 //String to bufferArray
@@ -867,9 +1017,8 @@ async function pngResolve(dataURI,textureObj){
 			img.addEventListener('load', () => {
 				gl.drawImage(img,0,0,info.width,info.height); // Or at whatever offset you like
 				var imageData = gl.getImageData(0, 0, info.width,info.height)
-				if (textureObj.maptype=='normal'){
-				var gammaCorrection = 2.2;
-					
+				if ((textureObj.maptype=='normal') || (textureObj.maptype=='normaldetail')){
+					var gammaCorrection = 2.2 //2.2;
 					for (var i = 0; i < imageData.data.length; i += 4) {
 						imageData.data[i] = 255 * Math.pow((imageData.data[i] / 255), gammaCorrection);
 						imageData.data[i+1] = 255 * Math.pow((imageData.data[i+1] / 255), gammaCorrection);
@@ -1022,7 +1171,7 @@ async function _getFileContent(textureObj){
  *  * @param {Number} TextureStackIndex index of the texture in textureStack array
  * @returns nothing
  */
-function  genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
+function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 	return new Promise((resolve, reject)=>{
 		try {
 			var THREEFormat = THREE.RGBAFormat //Default format for PNGs
@@ -1063,17 +1212,18 @@ function  genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 
 			switch (DockTexture.maptype) {
 				case 'normal':
-					imgWorker.postMessage([
+					/* imgWorker.postMessage([
 						'normalFix',
 						TexturePromise, 
 						DockTexture.info.width, 
 						DockTexture.info.height, 
 						target,
 						DockTexture.shader
-					]);
+					]); */
 					break;
 				case 'roughness':
-					console.warn(`roughness worker on`)
+					console.warn(`roughness worker on`);
+					
 					imgWorker.postMessage([
 						'roughnessSwap',
 						TexturePromise, 
@@ -1104,7 +1254,7 @@ function  genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 function MapTextures(textureObj){
 	try {
 		if (textureObj.hasOwnProperty("file") && textureObj.hasOwnProperty("shader") && textureObj.hasOwnProperty("maptype") && textureObj.hasOwnProperty("entries")){
-			var textureMD5Code = CryptoJS.MD5(textureObj.file);
+			var textureMD5Code = getEncodedFileName(textureObj.file);
 			var returntexture = textureStack[textureMD5Code]===undefined ? ERROR : textureStack[textureMD5Code];
 			if (PARAMS.textureDebug){
 				console.log(`Mapping texture`)
@@ -1136,6 +1286,9 @@ function MapTextures(textureObj){
 						materialStack[toMap.shader].alphaMap = returntexture
 						materialStack[toMap.shader].alphaMap.needsUpdate = true;
 						break;
+					case "normaldetail":
+						materialStack[toMap.shader].userData.detailNormalMap = returntexture
+						materialStack[toMap.shader].uniforms.detailNormalMap.value.needsUpdate = true;
 				}
 			})
 		}else{
@@ -1223,7 +1376,7 @@ async function ProcessStackTextures(){
 
 			if (textureDock[index].file.match(/\.mlmask$/)){ target='maskPainter' } //change the default Canvas target
 
-			let textureIndex = CryptoJS.MD5(textureDock[index].file)
+			let textureIndex = getEncodedFileName(textureDock[index].file)
 
 			var THREEFormat = getTHREEFormat(textureDock[index]) //Default format for PNGs
 
@@ -1366,7 +1519,7 @@ function codeMaterials(materialEntry,_materialName){
 			}
 			
 			if (materialEntry?.Data.hasOwnProperty('NormalTexture')){
-				let nmMD5Code = CryptoJS.MD5(materialEntry.Data.NormalTexture)
+				let nmMD5Code = getEncodedFileName(materialEntry.Data.NormalTexture)
 				decalConfig.normalMap = retDefTexture(materialEntry.Data.NormalTexture,_materialName,"normal");
 			}
 
@@ -1418,6 +1571,7 @@ function codeMaterials(materialEntry,_materialName){
 
 			if (materialEntry.Data.hasOwnProperty('Normal')){
 				rbaseConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
+				rbaseConfig.normalScale =  parseFloat(materialEntry.Data.NormalStrength).toPrecision(2);
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Roughness')){
@@ -1426,7 +1580,7 @@ function codeMaterials(materialEntry,_materialName){
 			}
 
 			if (materialEntry.Data.hasOwnProperty('Metalness')){
-				rbaseConfig.metalnessMap =retDefTexture(materialEntry.Data.Metalness,_materialName,"metalness");
+				rbaseConfig.metalnessMap = retDefTexture(materialEntry.Data.Metalness,_materialName,"metalness");
 				rbaseConfig.metalness = materialEntry.Data.MetalnessScale
 			}
 			
@@ -1438,9 +1592,17 @@ function codeMaterials(materialEntry,_materialName){
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
 			var Mlayer = stdMaterial.clone()
-
+			Mlayer.map=GRAY;
 			Mlayer.name = _materialName;
+
 			Mlayer.defines.MLSBInspect = false;
+			Mlayer.defines.USE_DETAILNORMAL = true;
+
+			Mlayer.userData.detailNormalScale = 1.0;
+			Mlayer.userData.detailNormalMap = FlatNORM;
+			Mlayer.userData.detailNormalMap.updateMatrix();
+			Mlayer.userData.detailNormalTransform =  Mlayer.userData.detailNormalMap.matrix;
+
 			/**
 			 * 
 			 RoughLevel and MetalLevel are
@@ -1448,34 +1610,166 @@ function codeMaterials(materialEntry,_materialName){
 			 the param 0 is the multiply part
 			 the param 1 is the add components
 			 */
+
+			/*
+			 * 
+			 * https://github.com/mrdoob/three.js/tree/dev/src/renderers/shaders/ShaderChunk 
+			 */
 			Mlayer.onBeforeCompile = (shader)=>{
 				shader.uniforms.roughLevel = {value:new THREE.Vector2(1,0)};
 				shader.uniforms.metalLevel = {value:new THREE.Vector2(0,1)};
-				shader.uniforms.detailNormalMap = {value: FlatNORM };
-				shader.uniforms.detailNormalScale = {value:new THREE.Vector2(1,1)};
+				shader.uniforms.detailNormalScale = {value:Mlayer.userData.detailNormalScale};
+				shader.uniforms.detailNormalMap = {value: Mlayer.userData.detailNormalMap};
+				shader.uniforms.detailNormalTransform = {value: new THREE.Matrix3(Mlayer.userData.detailNormalTransform)};
+			
+				/** VERTEX SHADER for global and detail normals */
+				let vertexElementCode = document.getElementById("vertexShader");
+				let fragmentElementCode = document.getElementById("fragmentShader");
+
+				/*TODO push materials normal into detailNormalMap and use the detailNormalMapScale power  */
+				/** FRAGMENT SHADER form global and detail normals
+				 * default space for normals is TangentSpace NormalMap
+				 */
+				/**
+				 * //Texture Blending in HSL
+	float3 blend_linear(float4 n1, float4 n2)
+	{
+		float3 r = (n1 + n2)*2 - 2;
+		return normalize(r);
+	}
+
+	float3 blend_overlay(float4 n1, float4 n2)
+	{
+		n1 = n1*4 - 2;
+		float4 a = n1 >= 0 ? -1 : 1;
+		float4 b = n1 >= 0 ?  1 : 0;
+		n1 =  2*a + n1;
+		n2 = n2*a + b;
+		float3 r = n1*n2 - a;
+		return normalize(r);
+	}
+
+	float3 blend_pd(float4 n1, float4 n2)
+	{
+		n1 = n1*2 - 1;
+		n2 = n2.xyzz*float4(2, 2, 2, 0) + float4(-1, -1, -1, 0);
+		float3 r = n1.xyz*n2.z + n2.xyw*n1.z;
+		return normalize(r);
+	}
+
+	float3 blend_whiteout(float4 n1, float4 n2)
+	{
+		n1 = n1*2 - 1;
+		n2 = n2*2 - 1;
+		float3 r = float3(n1.xy + n2.xy, n1.z*n2.z);
+		return normalize(r);
+	}
+
+	float3 blend_udn(float4 n1, float4 n2)
+	{
+		float3 c = float3(2, 1, 0);
+		float3 r;
+		r = n2*c.yyz + n1.xyz;
+		r =  r*c.xxx -  c.xxy;
+		return normalize(r);
+	}
+
+	float3 blend_rnm(float4 n1, float4 n2)
+	{
+		float3 t = n1.xyz*float3( 2,  2, 2) + float3(-1, -1,  0);
+		float3 u = n2.xyz*float3(-2, -2, 2) + float3( 1,  1, -1);
+		float3 r = t*dot(t, u) - u*t.z;
+		return normalize(r);
+	}
+
+	float3 blend_unity(float4 n1, float4 n2)
+	{
+		n1 = n1.xyzz*float4(2, 2, 2, -2) + float4(-1, -1, -1, 1);
+		n2 = n2*2 - 1;
+		float3 r;
+		r.x = dot(n1.zxx,  n2.xyz);
+		r.y = dot(n1.yzy,  n2.xyz);
+		r.z = dot(n1.xyw, -n2.xyz);
+		return normalize(r);
+	}
+				 */
+				//console.log(shader.vertexShader);
+				/* shader.vertexShader = shader.vertexShader
+				.replace(`#include <uv_pars_vertex>`,
+	`#include <uv_pars_vertex>\nuniform mat3 detailNormalTransform;\nvarying vec2 detailNormalUV;`
+				)
+				.replace(`#include <uv_vertex>`,
+	`#include <uv_vertex>
+	detailNormalUV = ( detailNormalTransform * vec3( uv, 1 ) ).xy;
+	`); */
+
+
+	vertexElementCode.value = PARAMS.normalMerger ? normalMerger.vertexShader: shader.vertexShader;
+
+				/* .replace(`#include <clipping_planes_pars_fragment>`,
+	`#include <clipping_planes_pars_fragment>
+		vec3 reconstruct_normal(vec2 rg_channels) {
+		// Decompress the red and green channels from the [0, 1] texture range 
+		// to the view-space [-1, 1] range.
+		vec2 normal_xy = rg_channels * 2.0 - 1.0;
+
+		// Calculate the blue channel (Z component) using the Pythagorean theorem.
+		// The vector is normalized, so x^2 + y^2 + z^2 = 1.
+		float normal_z = sqrt(1.0 - dot(normal_xy, normal_xy));
+
+		// Combine the channels to form the final normal vector.
+		return vec3(normal_xy, normal_z);
+	}
+	`) */
+
+				shader.fragmentShader = shader.fragmentShader
+	.replace("#define STANDARD",
+		"#define STANDARD\nuniform sampler2D detailNormalMap;\nuniform float detailNormalScale;\n")
+	.replace(`#include <normal_fragment_maps>`,
+	`
+	vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
+	mapN.xy *= normalScale;
+	
+	vec3 DN = texture2D( detailNormalMap , vMapUv ).xyz;
+    DN.xy *= .8;
+	float z = sqrt(1.0 - dot(DN.rg, DN.rg));
+	DN = vec3(DN.rg, z) * 2.0 - 1.0;
+
+	normal = normalize(tbn * normalize(vec3(mapN.xy + DN.xy , mapN.z)));
+	//normal = normalize(tbn * mapN);
+	`
+	)
+	.replace(`#include <roughnessmap_fragment>`,
+		`float roughnessFactor = roughness;
+		#ifdef USE_ROUGHNESSMAP
+			vec4 texelRoughness = texture2D( roughnessMap, vRoughnessMapUv ).rgba;
+			// reads channel G, compatible with a combined OcclusionRoughnessMetallic (RGB) texture
+			roughnessFactor *= texelRoughness.g;
+		#endif
+		`)
+	
+			
+					//normal = normalize( tbn * mapN );
 				shader.fragmentShader = shader.fragmentShader
 					.replace(
 						`#include <color_fragment>`,
-						`#include <color_fragment>
-						vec4 colorInspect = vec4(1,0,0,1);
-						#ifdef MLSBInspect
-							diffuseColor = colorInspect;
-						#else
-							diffuseColor = diffuseColor;
-						#endif`);
-					//.replace(``,``);
-
-				/* console.log(shader.uniforms) */
-				/* shader.fragmentShader = shader.fragmentShader.replace(
-					`#include <normal_fragment_maps>`,
-					`#include <normal_fragment_maps>
-						uniform sampler2D detailNormalMap;
-						uniform vec2 detailNormalScale;
-					`
-				); */
-				//console.log(shader.fragmentShader);
+	`#include <color_fragment>
+	vec4 colorInspect = vec4(1,0,0,1);
+	#ifdef MLSBInspect
+		diffuseColor = colorInspect;
+	#else
+		diffuseColor = diffuseColor;
+	#endif`);
+				
+				fragmentElementCode.value = PARAMS.normalMerger ? normalMerger.fragmentShader: shader.fragmentShader;
 			}
-			Mlayer.userData={name:_materialName,type:'multilayer'};
+			/**
+			 * MeshStandardNodeMaterial
+			 * var globalNormal = new THREE.NormalNode( );
+			 * var materialNode = new THREE.NormalNode( );
+			 * r = normalize(float3(n1.xy + n2.xy, n1.z));
+			 */
+			Mlayer.userData={name:_materialName,type:'multilayer',GlobalNormal:null};
 
 			if (PARAMS.switchTransparency){
 				//activate transparency not, maskAlpha
@@ -1497,21 +1791,21 @@ function codeMaterials(materialEntry,_materialName){
 			}
 
 			if (materialEntry?.Data.hasOwnProperty('GlobalNormal')){
-				var normMD5Code = CryptoJS.MD5(materialEntry.Data.GlobalNormal)
+				var normMD5Code = getEncodedFileName(materialEntry.Data.GlobalNormal)
+				Mlayer.userData.GlobalNormal = normMD5Code;
+				
 				if (textureStack[normMD5Code]===undefined){
-					
-					//textureStack[normMD5Code] = getTexture(materialEntry.Data.GlobalNormal,NORMAL,_materialName)
 					textureStack[normMD5Code] = retDefTexture(materialEntry.Data.GlobalNormal,_materialName,"normal");
 					textureStack[normMD5Code].wrapS = THREE.RepeatWrapping
 					textureStack[normMD5Code].wrapT = THREE.RepeatWrapping
-					Mlayer.normalMap = textureStack[normMD5Code];
-					Mlayer.normalMap.needsUpdate = true;
-				}else{
-					Mlayer.normalMap = textureStack[normMD5Code];
-					Mlayer.normalMap.needsUpdate = true;
+					textureStack[normMD5Code].userData.type="globalnormal";
 				}
+
+				Mlayer.normalMap = textureStack[normMD5Code];
 			}else{
 				Mlayer.normalMap = FlatNORM;
+			}
+			if (Mlayer.hasOwnProperty("normalMap")){
 				Mlayer.normalMap.needsUpdate = true;
 			}
 			Mlayer.needsUpdate = true;
@@ -1734,6 +2028,7 @@ function LoadModel(path){
 								if (!child.userData.hasOwnProperty('materialNames')){
 									notifyMe(`Need a MaterialName for {child.name}`)
 								}else{
+									//child.material = normalMerger;
 									child.material = materialStack[child.userData?.materialNames[0]];
 								}
 								child.material.needsUpdate=true;
@@ -1750,7 +2045,6 @@ function LoadModel(path){
 						child.visible = true;
 					}
 				})
-
 				//Autocentering
 				var helper = new THREE.BoxHelper(glbscene.scene);
 
@@ -1830,6 +2124,24 @@ function calcOffset(tiles,h,v){
 	return new THREE.Vector2(horizontal,vertical)
 }
 
+/**
+ * TODO Still not used
+ * @param {object} material 
+ * @returns 
+ */
+function composeMultilayerMaterial(material){
+	const defaultMaterial = {
+		color: new THREE.Color( 1, 0 ,0 ),
+		map: GRAY,
+		metalnessMap:GRAY,
+		roughnessMap:GRAY,
+		normalDetailMap:FlatNORM,
+	};
+	const materialObj = defaultMaterial;
+
+	return materialObj;
+}
+
 $("#thacanvas").on("mouseover",function(event){
 	//is shift is pressed change the material, if it's release put it back
 	if (MLSB.Key.shiftPress){
@@ -1886,13 +2198,20 @@ $("#thacanvas").on("mouseover",function(event){
 		});
 	}); */
 
-	cleanScene().then(()=>{ return MLSBConfig})
+	cleanScene()
+		.then(()=>{
+			 //check the size of the window
+			 resize();
+			})
+		.then(()=>{ return MLSBConfig})
 		.then((config)=>{actualExtension=config.maskformat;},chainError)
 		.then(()=>{return LoadMaterials(materialFile);},chainError)
 		.then(()=>{
 			firstModelLoaded=true;
 			$("#layeringsystem li").removeClass("active");
 			$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
+			TDNormalMerger.scene.children[0].material = normalMerger;
+			TDNormalMerger.scene.children[0].material.needsUpdate = true;
 			return LoadModel(fileModel);
 			}
 			,chainError)
@@ -1928,15 +2247,9 @@ $("#thacanvas").on("mouseover",function(event){
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
-		let offset_h =0, offset_v = 0
-		if (mLsetup.Layers[MLSB.Editor.layerSelected].offsetU!==undefined){
+		var offset_h, offset_v
 
-			offset_h =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetU==null ? $("#layerOffU").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetU).toPrecision(4)
-			offset_v =  parseFloat(mLsetup.Layers[MLSB.Editor.layerSelected].offsetV==null ? $("#layerOffV").val(): mLsetup.Layers[MLSB.Editor.layerSelected].offsetV).toPrecision(4)
-		}else{
-			offset_h = $("#layerOffU").val();
-			offset_v = $("#layerOffV").val();
-		}
+		[offset_h, offset_v] = getOffsetValues();
 
 		var offset = calcOffset(repVal,offset_h,offset_v);
 		matrixTransform.offsetX = offset.x
@@ -1949,13 +2262,12 @@ $("#thacanvas").on("mouseover",function(event){
 			}
 			//find is the file was already loaded somewhere and reuse-it
 			var myTex = textureDock.filter(elm=>elm.file==layerMaterial.diffuse.texture);
-			let C_diffuse = CryptoJS.MD5(layerMaterial.diffuse.texture).toString();
+			let C_diffuse = getEncodedFileName(layerMaterial.diffuse.texture).toString();
 			//Repeating of the textures
 
 			if (myTex?.length==1){
 				//there was it, map it
 				materialStack[selected].map = textureStack[C_diffuse];
-				//updateUvTransform()
 				materialStack[selected].needsUpdate = true;
 			}else{
 				
@@ -1974,8 +2286,6 @@ $("#thacanvas").on("mouseover",function(event){
 
 							materialStack[selected].map = textureStack[C_diffuse]
 							materialStack[selected].map.wrapS = materialStack[selected].map.wrapT = THREE.RepeatWrapping;
-							updateUvTransform()
-							/* materialStack[selected].map.needsUpdate =true */
 							materialStack[selected].map.needsUpdate=true;
 						}).catch((error)=>{
 							notifyMe(error.message);
@@ -1998,7 +2308,7 @@ $("#thacanvas").on("mouseover",function(event){
 				//custom map
 				//find is the file was already loaded somewhere and reuse-it
 				var myTex = textureDock.filter(elm=>elm.file==layerMaterial.roughness.texture);
-				let C_rough = CryptoJS.MD5(layerMaterial.roughness.texture).toString();
+				let C_rough = getEncodedFileName(layerMaterial.roughness.texture).toString();
 				
 				if (myTex?.length==1){
 					//there was it, map it
@@ -2013,15 +2323,13 @@ $("#thacanvas").on("mouseover",function(event){
 
 					var texProm = _getFileContent(textureDock[tInd])
 						.then((texturePromised)=>{
-							genDataTexture(texturePromised,textureDock[tInd],C_rough).then((response)=>{
-								if (PARAMS.textureDebug){console.log(textureStack[C_rough])}
-								materialStack[selected].roughnessMap = textureStack[C_rough]
-								materialStack[selected].roughnessMap.offset=offset;
-								materialStack[selected].roughnessMap.repeat.set(repVal,repVal);
-								materialStack[selected].roughnessMap.needsUpdate =true
-							}).catch((err)=>{
-								notifyMe(`genDataTexture: ${error}`);
-							});
+							return genDataTexture(texturePromised,textureDock[tInd],C_rough)
+						}).then((response)=>{
+							if (PARAMS.textureDebug){console.log(textureStack[C_rough])}
+							materialStack[selected].roughnessMap = textureStack[C_rough]
+							materialStack[selected].roughnessMap.offset=offset;
+							materialStack[selected].roughnessMap.repeat.set(repVal,repVal);
+							materialStack[selected].roughnessMap.needsUpdate =true
 						}).catch((error)=>{
 							notifyMe(error.message);
 							console.error('error #%d',error)
@@ -2029,31 +2337,25 @@ $("#thacanvas").on("mouseover",function(event){
 				}
 			}else{
 				materialStack[selected].roughnessMap = retDefTexture(layerMaterial.roughness.texture);
-				materialStack[selected].roughnessMap.repeat.set(repVal,repVal);
 				materialStack[selected].roughnessMap.flipY = flippingdipping;
-				materialStack[selected].roughnessMap.offset=offset;
 				materialStack[selected].roughnessMap.needsUpdate =true
 			}
 		}
 		/**metallness management */
 		if (layerMaterial.hasOwnProperty('metal')) {
-			//it has roughness with a texture
+			//it has metallness with a texture
 			let test = checkMaps(layerMaterial.metal.texture);
 			//retDefTexture
 			if (test < 0){
 				//custom map
 				//find is the file was already loaded somewhere and reuse-it
 				var myTex = textureDock.filter(elm=>elm.file==layerMaterial.metal.texture);
-				let C_metal = CryptoJS.MD5(layerMaterial.metal.texture).toString();
+				let C_metal = getEncodedFileName(layerMaterial.metal.texture).toString();
 				
 				if (myTex?.length==1){
 					//there was it, map it
 					materialStack[selected].metalnessMap = textureStack[C_metal];
-					
-					materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
-
 					materialStack[selected].metalnessMap.flipY = flippingdipping;
-					materialStack[selected].metalnessMap.offset=offset;
 					materialStack[selected].metalnessMap.needsUpdate =true
 				}else{
 					test = retDefTexture(layerMaterial.metal.texture,selected,"metal");
@@ -2066,9 +2368,9 @@ $("#thacanvas").on("mouseover",function(event){
 								if (PARAMS.textureDebug){console.log(textureStack[C_metal])}
 
 								materialStack[selected].metalnessMap = textureStack[C_metal]
-								materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
+								//materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
 								materialStack[selected].metalnessMap.flipY = flippingdipping;
-								materialStack[selected].metalnessMap.offset=offset;
+								//materialStack[selected].metalnessMap.offset=offset;
 								materialStack[selected].metalnessMap.needsUpdate =true
 						}).catch((error)=>{
 							console.log(layerMaterial.metal.texture);
@@ -2078,33 +2380,48 @@ $("#thacanvas").on("mouseover",function(event){
 				}
 			}else{
 				materialStack[selected].metalnessMap = retDefTexture(layerMaterial.metal.texture);
-				materialStack[selected].metalnessMap.repeat.set(repVal,repVal);
 				materialStack[selected].metalnessMap.needsUpdate =true
 			}
 		}
 		/**normal management */
-		
+		if (PARAMS.normalMerger){
+			setNormalMergeCanvasSize(materialStack[selected].normalMap.source.data.width);
+		}
 		// load the material normal
 		if (layerMaterial.hasOwnProperty('normal')) {
 			//TODO continue in rendermaterial and blend material + core model normals
-			console.log(layerMaterial.normal.texture);
-			
 			var myTex = textureDock.filter(elm=>elm.file==layerMaterial.normal.texture);
-			let C_normal = CryptoJS.MD5(layerMaterial.normal.texture).toString();
+			let C_normal = getEncodedFileName(layerMaterial.normal.texture);
 
 			if (myTex?.length==1){
-				console.warn(`Found texture, still not loaded`);
+				materialStack[selected].detailnormal = textureStack[C_normal];
+				materialStack[selected].detailnormal.needsUpdate =true
 			}else{
 				
-				let test = retDefTexture(layerMaterial.normal.texture,selected,"normal");
+				let test = retDefTexture(layerMaterial.normal.texture,selected,"normaldetail");
+
 				let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.normal.texture)
+				console.log(selected,layerMaterial.normal.texture);
 				var texProm = _getFileContent(textureDock[tInd])
 				.then((texturePromised)=>{
-					//return genDataTexture(texturePromised,textureDock[tInd],C_normal);
+					return genDataTexture(texturePromised,textureDock[tInd],C_normal);
 				})
 				.then((response)=>{
+					//paintDatas(textureStack[C_normal].data)
+					//normalMerge
 					//TODO texture read, to continue you have to plug it into the shader and 
-					//if (PARAMS.textureDebug){console.log(textureStack[C_normal])}
+					if (PARAMS.textureDebug){console.log(textureStack[C_normal])}
+					if (PARAMS.normalMerger){
+						normalMerger.uniforms.globalnormal.value = textureStack[materialStack[selected].userData.GlobalNormal];
+						normalMerger.uniforms.detailnormal.value = textureStack[C_normal];
+						normalMerger.uniforms.globalnormal.value.needsUpdate = true;
+						normalMerger.uniforms.detailnormal.value.needsUpdate = true;
+					}else{
+						materialStack[selected].userData.detailNormalMap = FlatNORM;
+						materialStack[selected].userData.detailNormalMap = textureStack[C_normal];
+						materialStack[selected].userData.detailNormalMap.needsUpdate =true;
+					}
+
 				}).catch((error)=>{
 					if (PARAMS.textureDebug){console.log(layerMaterial.normal.texture)}
 					notifyMe(error.message);
@@ -2112,6 +2429,10 @@ $("#thacanvas").on("mouseover",function(event){
 				})
 			} 
 		}
+		if (PARAMS.normalMerger){
+			resetDetailNormal()
+		}
+		updateUvTransform();
 	}
 }).on("texOffset",function(ev,source='layer'){
 	var tileMul = parseFloat($("#layerTile").prev("[data-mul]").data("mul"))
@@ -2159,7 +2480,7 @@ $("#thacanvas").on("mouseover",function(event){
 						var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
 						if (myMask?.length==1){
 							//var LAYER = 
-							let nameMask = CryptoJS.MD5(materialStack[selected].mask).toString()
+							let nameMask = getEncodedFileName(materialStack[selected].mask).toString()
 							
 							try{
 								if (myMask[0].hasOwnProperty("info")){
@@ -2374,7 +2695,7 @@ $("#thacanvas").on("mouseover",function(event){
 		materialStack[selected].normalMap.needsUpdate = true;
 	}
 }).on('playTexture',function(event,texture){
-	var dummyMd5 = CryptoJS.MD5(texture.replace(/\.(dds|png)$/g,".xbm"));
+	var dummyMd5 = getEncodedFileName(texture.replace(/\.(dds|png)$/g,".xbm"));
 	var imgDatas = textureStack[dummyMd5]
 	paintDatas(imgDatas.image.data,imgDatas.image.width,imgDatas.image.height,'texturePlayer',imgDatas.format);
 }).on('mousedown',function(event){

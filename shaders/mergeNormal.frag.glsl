@@ -19,21 +19,10 @@ vec3 reconstruct_normal(vec2 rg_channels) {
 }
 
 void main() {
-
-    //vec3 GN = texture2D(globalnormal, vUv).xyz;
-    //GN.rg *= globalnormalScale;
-    //GN = reconstruct_normal(GN.rg);
-    //GN = GN * .5 + .5;
-
-    //vec3 DN = texture2D(detailnormal, newUV).xyz;
-    //vec3 recalcDN = reconstruct_normal(DN.rg)
-    //DN = DN * .5 + .5;
-    //DN.rg *= detailnormalScale;
-    //DN = reconstruct_normal(DN.rg);
     //expand the normal map
     vec3 GN = texture2D(globalnormal,vUv).xyz * 2.0 -1.0;
     GN.xy *= globalnormalScale;
-    vec3 DN = texture2D(detailnormal,vUv).xyz *2.0 -1.0;
+    vec3 DN = texture2D(detailnormal,newUV).xyz *2.0 -1.0;
     DN.xy *= detailnormalScale;
 
     vec3 normal = normalize(vec3(GN.xy + DN.xy , GN.z));
