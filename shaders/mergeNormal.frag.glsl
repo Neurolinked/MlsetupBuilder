@@ -5,6 +5,10 @@ uniform sampler2D detailnormal;
 uniform float globalnormalScale;
 uniform float detailnormalScale;
 
+uniform sampler2D layerMask1;
+uniform sampler2D mBlend1;
+uniform float mBlendContrast1;
+
 vec3 reconstruct_normal(vec2 rg_channels) {
     // Decompress the red and green channels from the [0, 1] texture range 
     // to the view-space [-1, 1] range.
@@ -18,11 +22,21 @@ vec3 reconstruct_normal(vec2 rg_channels) {
     return vec3(normal_xy, normal_z);
 }
 
+vec3 mBlendContrastExecute(vec3 texA,vec3 texB,float contrast){
+    // linear burn formula per wikipedia
+    linearburn = texA + texB -1.0f;
+    // use mbcontrast to lerp between mlmask and linearburn
+    blend = lerp(linearburn, texA, contrast);
+    // this is how contrast is generated
+    result = blend * (1.0f / contrast);
+    return result;
+}
+
 void main() {
     //expand the normal map
-    vec3 GN = texture2D(globalnormal,vUv).xyz * 2.0 -1.0;
+    vec3 GN = texture2D(globalnormal,vUv).xyz * 2.0 - 1.0;
     GN.xy *= globalnormalScale;
-    vec3 DN = texture2D(detailnormal,newUV).xyz *2.0 -1.0;
+    vec3 DN = texture2D(detailnormal,newUV).xyz *2.0 - 1.0;
     DN.xy *= detailnormalScale;
 
     vec3 normal = normalize(vec3(GN.xy + DN.xy , GN.z));
