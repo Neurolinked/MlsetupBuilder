@@ -658,6 +658,7 @@ function updateUvTransform(material=null) {
 		if (PARAMS.normalMerger){
 			normalMerger.uniforms.tiles.value = matrixTransform.repeat;
 			normalMerger.uniforms.offset.value = [matrixTransform.offsetX, matrixTransform.offsetY];
+			normalMerger.uniformsNeedUpdate = true
 		}else{
 			if (materialStack[selected].userData?.detailNormalMap==undefined){
 				console.error("no detail normal map")
@@ -771,11 +772,11 @@ function resetDetailNormal(){
 	var ctxr = document.getElementById('normalMerge');
 	let selected = activeMLayer();
 	if (materialStack[selected].normapMap?.isTexture){
-		materialStack[selected].normapMap.dispose();
+		materialStack[selected].normapMap = null;
 	}
-	materialStack[selected].normapMap = new THREE.CanvasTexture(ctxr);
-	materialStack[selected].normapMap.wrapS = materialStack[selected].normapMap.wrapT = THREE.RepeatWrapping;
+	materialStack[selected].normapMap = new THREE.CanvasTexture(ctxr,THREE.RepeatWrapping,THREE.RepeatWrapping);
 	materialStack[selected].normapMap.needsUpdate = true;
+	console.log(materialStack[selected].normapMap)
 }
 
 function resizeRendererToDisplaySize(renderer) {
@@ -1900,7 +1901,20 @@ function codeMaterials(materialEntry,_materialName){
 	return materialNone;
 }
 
-function LoadMaterials(path){
+/**
+ * ensure assets are loaded in memory.
+ * @param {string} DBmaterial key label of the material you're going to load
+ */
+function LoadMaterial(DBmaterial){
+	return new Promise((resolve,reject)=>{
+		//check and load  every texture needed
+		console.log(DBmaterial);
+
+		resolve(true);
+	})
+}
+
+function LoadMaterialsJson(path){
 	return new Promise((resolve,reject)=>{
 		path = path.replaceAll(/\//g,'\\'); //setup the right path to be requested
 		var tempMaterial=null;
@@ -2166,37 +2180,6 @@ $("#thacanvas").on("mouseover",function(event){
 	//cleanScene();
 
 	var materialFile = fileModel.replace(/\.glb$/,'.Material.json')
-	
-	//console.log(TDengine.scene);
-	/* cleanScene().
-	then((ev)=>{
-		MLSBConfig.then((config)=>{
-			actualExtension=config.maskformat;
-		}).then((ev)=>{
-			LoadMaterials(materialFile)
-			.then((ev)=>{
-				firstModelLoaded=true;
-				$("#layeringsystem li").removeClass("active");
-				$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
-
-				LoadModel(fileModel)
-				.then((ev)=>{
-					//load deferred textures in the textureDock
-					LoadStackTextures();
-					firstModelLoaded=true;
-				}).catch((error)=>{
-					notifyMe(`LoadModel ${error}`);
-				})
-			},
-			(ev)=>{
-				notifyMe(ev);
-			}).catch((error)=>{
-				notifyMe(`LoadMaterials ${error}`);
-			})
-		}).catch((error)=>{
-			notifyMe(`LoadScene ${error}`);
-		});
-	}); */
 
 	cleanScene()
 		.then(()=>{
@@ -2205,7 +2188,7 @@ $("#thacanvas").on("mouseover",function(event){
 			})
 		.then(()=>{ return MLSBConfig})
 		.then((config)=>{actualExtension=config.maskformat;},chainError)
-		.then(()=>{return LoadMaterials(materialFile);},chainError)
+		.then(()=>{return LoadMaterialsJson(materialFile);},chainError)
 		.then(()=>{
 			firstModelLoaded=true;
 			$("#layeringsystem li").removeClass("active");
@@ -2244,6 +2227,17 @@ $("#thacanvas").on("mouseover",function(event){
 	}
 }).on('renderMaterial',function(ev,layerMaterial){
 	if (sceneLoaded()){
+		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
+
+		//when everything is loaded then we proceed
+		materialIsLoaded
+			.then((isLoaded)=>{
+				console.log("material Loaded")
+			}).catch((error)=>{
+				console.warn(`An error happened, reset to default:${error}`)
+			}).finally(()=>{
+				console.log("continue")
+			});
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
@@ -2394,14 +2388,18 @@ $("#thacanvas").on("mouseover",function(event){
 			let C_normal = getEncodedFileName(layerMaterial.normal.texture);
 
 			if (myTex?.length==1){
-				materialStack[selected].detailnormal = textureStack[C_normal];
-				materialStack[selected].detailnormal.needsUpdate =true
+				if (PARAMS.normalMerger){
+					normalMerger.uniforms.globalnormal.value = textureStack[materialStack[selected].userData.GlobalNormal];
+					normalMerger.uniforms.detailnormal.value.dispose();
+				}else{
+					materialStack[selected].detailnormal = textureStack[C_normal];
+					materialStack[selected].detailnormal.needsUpdate =true
+				}
 			}else{
 				
 				let test = retDefTexture(layerMaterial.normal.texture,selected,"normaldetail");
 
 				let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.normal.texture)
-				console.log(selected,layerMaterial.normal.texture);
 				var texProm = _getFileContent(textureDock[tInd])
 				.then((texturePromised)=>{
 					return genDataTexture(texturePromised,textureDock[tInd],C_normal);
@@ -2414,6 +2412,7 @@ $("#thacanvas").on("mouseover",function(event){
 					if (PARAMS.normalMerger){
 						normalMerger.uniforms.globalnormal.value = textureStack[materialStack[selected].userData.GlobalNormal];
 						normalMerger.uniforms.detailnormal.value = textureStack[C_normal];
+						//normalMerger.uniforms.detailnormalScale.value = 0.2;
 						normalMerger.uniforms.globalnormal.value.needsUpdate = true;
 						normalMerger.uniforms.detailnormal.value.needsUpdate = true;
 					}else{
@@ -2433,6 +2432,7 @@ $("#thacanvas").on("mouseover",function(event){
 			resetDetailNormal()
 		}
 		updateUvTransform();
+		materialStack[selected].needsUpdate = true
 	}
 }).on("texOffset",function(ev,source='layer'){
 	var tileMul = parseFloat($("#layerTile").prev("[data-mul]").data("mul"))
@@ -2446,6 +2446,9 @@ $("#thacanvas").on("mouseover",function(event){
 		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
 		matrixTransform.offsetY = parseFloat(offset.y).toPrecision(4)
 		updateUvTransform()
+		if (PARAMS.normalMerger){
+			resetDetailNormal()
+		}
 	}
 }).on("texTiled",function(ev,source='layer'){
 	if (sceneLoaded()){
