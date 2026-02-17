@@ -24,11 +24,11 @@ vec3 reconstruct_normal(vec2 rg_channels) {
 
 vec3 mBlendContrastExecute(vec3 texA,vec3 texB,float contrast){
     // linear burn formula per wikipedia
-    linearburn = texA + texB -1.0f;
+    vec3 linearburn = texA + texB -1.0f;
     // use mbcontrast to lerp between mlmask and linearburn
-    blend = lerp(linearburn, texA, contrast);
+    vec3 blend = mix(linearburn, texA, contrast);
     // this is how contrast is generated
-    result = blend * (1.0f / contrast);
+    vec3 result = blend * (1.0f / contrast);
     return result;
 }
 
