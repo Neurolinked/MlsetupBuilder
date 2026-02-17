@@ -5,7 +5,6 @@ import { Color } from 'color';
 import { MathUtils } from 'mathutils';
 import { GLTFLoader } from 'gltf';
 
-var firstModelLoaded = false;
 var flippingdipping = thePIT.RConfig('flipmasks');
 var flipdipNorm = thePIT.RConfig('flipnorm');
 var flipcheck = document.getElementById("flipMask");
@@ -109,6 +108,7 @@ const NORMAL = 'normalMap';
 
 var materialStack = new Array();
 var materialSet = new Set();
+
 var textureStack = new Array();
 var textureDock = new Array();
 var texturePromise = new Array();
@@ -1090,7 +1090,7 @@ async function _getFileContent(textureObj){
 				maxMasksPR.then((result)=>{
 					materialStack[textureObj.shader].userData.layers = result
 				}).catch((error)=>{
-					console.log(error)
+					notifyMe(error);
 					materialStack[textureObj.shader].userData.layers = 0
 				}).finally((e)=>{
 					//only the selected one will decide the number of layers
@@ -1902,16 +1902,61 @@ function codeMaterials(materialEntry,_materialName){
 }
 
 /**
+ * 
+ * @param {string} DBmaterial key name of the material
+ */
+function mapMaterialTextures(DBmaterial){
+	var TextureList = []
+	for(const[key,props] of Object.entries(MLSB.Materials[DBmaterial])){
+		if (props.hasOwnProperty('texture')){
+			TextureList.push({id:getEncodedFileName(props.texture),file:props.texture,maptype:key})
+		}
+	}
+	return TextureList;
+}
+
+/**
  * ensure assets are loaded in memory.
  * @param {string} DBmaterial key label of the material you're going to load
  */
-function LoadMaterial(DBmaterial){
+function LoadMaterial(DBmaterial,checkTextures=true){
 	return new Promise((resolve,reject)=>{
 		//check and load  every texture needed
-		console.log(DBmaterial);
+		if (typeof(checkTextures)!="boolean"){
+			checkTextures = true;
+		}
+		//return an array of objects describing the textures
+		var textureList = mapMaterialTextures(DBmaterial);
 
-		resolve(true);
-	})
+		if (checkTextures){
+			/**
+			 * check presence of an already loaded texture
+			 * if the check is jumped, all textures will be reloaded
+			 */
+			textureList.forEach((texture,index)=>{
+				if ((textureDock.filter((tex)=>tex.file==texture.file)).length > 0){
+					textureList.splice(index,1);
+				}
+			});
+
+		}
+		/*
+		Use the reduce on the textureList to load all the files
+		*/
+		textureList.reduce((previousPromise,nextID)=>{
+			return previousPromise.then(()=>{
+				return _getFileContent(nextID).then((textureContent)=>{
+					nextID.content=textureContent;
+				})
+			});
+		},Promise.resolve())
+		.then(()=>{
+			resolve(textureList)
+		}).catch((error)=>{
+			notifyMe(error);
+			reject([]);
+		})
+	});
 }
 
 function LoadMaterialsJson(path){
@@ -2190,16 +2235,16 @@ $("#thacanvas").on("mouseover",function(event){
 		.then((config)=>{actualExtension=config.maskformat;},chainError)
 		.then(()=>{return LoadMaterialsJson(materialFile);},chainError)
 		.then(()=>{
-			firstModelLoaded=true;
 			$("#layeringsystem li").removeClass("active");
 			$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
-			TDNormalMerger.scene.children[0].material = normalMerger;
-			TDNormalMerger.scene.children[0].material.needsUpdate = true;
+			if (PARAMS.normalMerger){
+				TDNormalMerger.scene.children[0].material = normalMerger;
+				TDNormalMerger.scene.children[0].material.needsUpdate = true;
+			}
 			return LoadModel(fileModel);
 			}
 			,chainError)
 		.then(()=>{
-			firstModelLoaded=true;
 			return LoadStackTextures();
 			}
 			,chainError)
@@ -2227,17 +2272,18 @@ $("#thacanvas").on("mouseover",function(event){
 	}
 }).on('renderMaterial',function(ev,layerMaterial){
 	if (sceneLoaded()){
-		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
 
+		/* const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
 		//when everything is loaded then we proceed
 		materialIsLoaded
-			.then((isLoaded)=>{
-				console.log("material Loaded")
+			.then((materialTexture)=>{
+				//textureDock = [...textureDock, ...materialTexture]
 			}).catch((error)=>{
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
-				console.log("continue")
-			});
+				//Apply the texture
+			}); */
+
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
@@ -2433,6 +2479,7 @@ $("#thacanvas").on("mouseover",function(event){
 		}
 		updateUvTransform();
 		materialStack[selected].needsUpdate = true
+		console.log(TDengine.scene)
 	}
 }).on("texOffset",function(ev,source='layer'){
 	var tileMul = parseFloat($("#layerTile").prev("[data-mul]").data("mul"))
@@ -2478,7 +2525,7 @@ $("#thacanvas").on("mouseover",function(event){
 
 		if (materialStack[selected]!=undefined){
 			if (materialStack[selected].hasOwnProperty("mask")){
-				var test = _getFileContent({file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
+				var test = _getFileContent({id:getEncodedFileName(layerMaterial),file:layerMaterial,maptype:'mlmask',shader:selected})
 					.then((result)=>{
 						var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
 						if (myMask?.length==1){
