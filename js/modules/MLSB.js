@@ -73,6 +73,20 @@ class MLSBEditor {
             return searchedMaterial;
     }
 
+    getMaterialTexturesPath(materialName=this.TreeD.lastMaterial){
+        var textureList = [];
+        var materialObj = this.Materials[materialName]
+        for (const[key,value] of Object.entries(materialObj)){
+            console.log(typeof(value),key);
+            if (typeof(value)=='object'){
+                if (value.hasOwnProperty("texture")){
+                    textureList.push({type:key, path:value.texture})
+                }
+            }
+        }
+        return textureList;
+    }
+
     getMlsetup(index){
         return this.MlSetups[index];
     }
