@@ -86,7 +86,6 @@ const PARAMS = {
 /**Optimize Reading from configuration */
 var _editorCfg = thePIT.RConfig('editorCfg')
 	_editorCfg.then((configuration)=>{
-		console.log(configuration);
 		PARAMS.importSkip = configuration?.skipImport;
 		PARAMS.switchTransparency = configuration?.switchTransparency;
 		PARAMS.sortLevels = configuration?.sortLevels;
