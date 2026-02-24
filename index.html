@@ -40,10 +40,13 @@
   <!--Tiny color libraries  --><script src="./js/tinycolor.js" type="text/javascript" data-source='https://github.com/bgrins/TinyColor'></script>
   <!--oklab converter--><script src="./js/oklab.js" type="text/javascript" data-source='https://github.com/antimatter15/rgb-lab/tree/master'></script>
   <!-- Fabric.js http://fabricjs.com/ --><script src="./js/fabric.min.js" type="text/javascript" data-source='http://fabricjs.com/'></script>
+  <!--"three": "./public/three/build/three.module.min.js",-->
   <script type="importmap" nonce="Meow">
     {
       "imports": {
-        "three": "./public/three/build/three.module.min.js",
+        "three": "./public/three/build/three.webgpu.min.js",
+        "three/webgpu": "./public/three/build/three.webgpu.min.js",
+        "three/tsl": "../public/three/build/three.tsl.min.js",
         "orbit": "./public/three/examples/jsm/controls/OrbitControls.js",
         "fog": "./public/three/src/scenes/Fog.js",
         "color": "./public/three/src/math/Color.js",

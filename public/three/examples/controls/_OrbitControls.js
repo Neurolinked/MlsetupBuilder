@@ -83,7 +83,6 @@ const _EPS = 0.000001;
  * ```
  *
  * @augments Controls
- * @three_import import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
  */
 class OrbitControls extends Controls {
 
@@ -91,7 +90,7 @@ class OrbitControls extends Controls {
 	 * Constructs a new controls instance.
 	 *
 	 * @param {Object3D} object - The object that is managed by the controls.
-	 * @param {?HTMLElement} domElement - The HTML element used for event listeners.
+	 * @param {?HTMLDOMElement} domElement - The HTML element used for event listeners.
 	 */
 	constructor( object, domElement = null ) {
 
@@ -391,8 +390,6 @@ class OrbitControls extends Controls {
 		 */
 		this.zoom0 = this.object.zoom;
 
-		this._cursorStyle = 'auto';
-
 		// the target DOM element for key events
 		this._domElementKeyEvents = null;
 
@@ -464,34 +461,6 @@ class OrbitControls extends Controls {
 
 	}
 
-	/**
-	 * Defines the visual representation of the cursor.
-	 *
-	 * @type {('auto'|'grab')}
-	 * @default 'auto'
-	 */
-	set cursorStyle( type ) {
-
-		this._cursorStyle = type;
-
-		if ( type === 'grab' ) {
-
-			this.domElement.style.cursor = 'grab';
-
-		} else {
-
-			this.domElement.style.cursor = 'auto';
-
-		}
-
-	}
-
-	get cursorStyle() {
-
-		return this._cursorStyle;
-
-	}
-
 	connect( element ) {
 
 		super.connect( element );
@@ -512,8 +481,8 @@ class OrbitControls extends Controls {
 	disconnect() {
 
 		this.domElement.removeEventListener( 'pointerdown', this._onPointerDown );
-		this.domElement.ownerDocument.removeEventListener( 'pointermove', this._onPointerMove );
-		this.domElement.ownerDocument.removeEventListener( 'pointerup', this._onPointerUp );
+		this.domElement.removeEventListener( 'pointermove', this._onPointerMove );
+		this.domElement.removeEventListener( 'pointerup', this._onPointerUp );
 		this.domElement.removeEventListener( 'pointercancel', this._onPointerUp );
 
 		this.domElement.removeEventListener( 'wheel', this._onMouseWheel );
@@ -571,7 +540,7 @@ class OrbitControls extends Controls {
 	 * Adds key event listeners to the given DOM element.
 	 * `window` is a recommended argument for using this method.
 	 *
-	 * @param {HTMLElement} domElement - The DOM element
+	 * @param {HTMLDOMElement} domElement - The DOM element
 	 */
 	listenToKeyEvents( domElement ) {
 
@@ -621,67 +590,6 @@ class OrbitControls extends Controls {
 		this.update();
 
 		this.state = _STATE.NONE;
-
-	}
-
-	/**
-	 * Programmatically pan the camera.
-	 *
-	 * @param {number} deltaX - The horizontal pan amount in pixels.
-	 * @param {number} deltaY - The vertical pan amount in pixels.
-	 */
-	pan( deltaX, deltaY ) {
-
-		this._pan( deltaX, deltaY );
-		this.update();
-
-	}
-
-	/**
-	 * Programmatically dolly in (zoom in for perspective camera).
-	 *
-	 * @param {number} dollyScale - The dolly scale factor.
-	 */
-	dollyIn( dollyScale ) {
-
-		this._dollyIn( dollyScale );
-		this.update();
-
-	}
-
-	/**
-	 * Programmatically dolly out (zoom out for perspective camera).
-	 *
-	 * @param {number} dollyScale - The dolly scale factor.
-	 */
-	dollyOut( dollyScale ) {
-
-		this._dollyOut( dollyScale );
-		this.update();
-
-	}
-
-	/**
-	 * Programmatically rotate the camera left (around the vertical axis).
-	 *
-	 * @param {number} angle - The rotation angle in radians.
-	 */
-	rotateLeft( angle ) {
-
-		this._rotateLeft( angle );
-		this.update();
-
-	}
-
-	/**
-	 * Programmatically rotate the camera up (around the horizontal axis).
-	 *
-	 * @param {number} angle - The rotation angle in radians.
-	 */
-	rotateUp( angle ) {
-
-		this._rotateUp( angle );
-		this.update();
 
 	}
 
@@ -1549,8 +1457,8 @@ function onPointerDown( event ) {
 
 		this.domElement.setPointerCapture( event.pointerId );
 
-		this.domElement.ownerDocument.addEventListener( 'pointermove', this._onPointerMove );
-		this.domElement.ownerDocument.addEventListener( 'pointerup', this._onPointerUp );
+		this.domElement.addEventListener( 'pointermove', this._onPointerMove );
+		this.domElement.addEventListener( 'pointerup', this._onPointerUp );
 
 	}
 
@@ -1569,12 +1477,6 @@ function onPointerDown( event ) {
 	} else {
 
 		this._onMouseDown( event );
-
-	}
-
-	if ( this._cursorStyle === 'grab' ) {
-
-		this.domElement.style.cursor = 'grabbing';
 
 	}
 
@@ -1606,18 +1508,12 @@ function onPointerUp( event ) {
 
 			this.domElement.releasePointerCapture( event.pointerId );
 
-			this.domElement.ownerDocument.removeEventListener( 'pointermove', this._onPointerMove );
-			this.domElement.ownerDocument.removeEventListener( 'pointerup', this._onPointerUp );
+			this.domElement.removeEventListener( 'pointermove', this._onPointerMove );
+			this.domElement.removeEventListener( 'pointerup', this._onPointerUp );
 
 			this.dispatchEvent( _endEvent );
 
 			this.state = _STATE.NONE;
-
-			if ( this._cursorStyle === 'grab' ) {
-
-				this.domElement.style.cursor = 'grab';
-
-			}
 
 			break;
 

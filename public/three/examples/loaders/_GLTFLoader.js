@@ -66,12 +66,11 @@ import {
 	InstancedBufferAttribute
 } from 'three';
 import { toTrianglesDrawMode } from '../utils/BufferGeometryUtils.js';
-import { clone } from '../utils/SkeletonUtils.js';
 
 /**
  * A loader for the glTF 2.0 format.
  *
- * [glTF](https://www.khronos.org/gltf/) (GL Transmission Format) is an [open format specification]{@link https://github.com/KhronosGroup/glTF/tree/main/specification/2.0)
+ * [glTF]{@link https://www.khronos.org/gltf/} (GL Transmission Format) is an [open format specification]{@link https://github.com/KhronosGroup/glTF/tree/main/specification/2.0}
  * for efficient delivery and loading of 3D content. Assets may be provided either in JSON (.gltf) or binary (.glb)
  * format. External files store textures (.jpg, .png) and additional binary data (.bin). A glTF asset may deliver
  * one or more scenes, including meshes, materials, textures, skins, skeletons, morph targets, animations, lights,
@@ -92,7 +91,6 @@ import { clone } from '../utils/SkeletonUtils.js';
  * - KHR_materials_unlit
  * - KHR_materials_volume
  * - KHR_mesh_quantization
- * - KHR_meshopt_compression
  * - KHR_lights_punctual
  * - KHR_texture_basisu
  * - KHR_texture_transform
@@ -101,10 +99,8 @@ import { clone } from '../utils/SkeletonUtils.js';
  * - EXT_mesh_gpu_instancing
  *
  * The following glTF 2.0 extension is supported by an external user plugin:
- * - [KHR_materials_variants](https://github.com/takahirox/three-gltf-extensions)
- * - [MSFT_texture_dds](https://github.com/takahirox/three-gltf-extensions)
- * - [KHR_animation_pointer](https://github.com/needle-tools/three-animation-pointer)
- * - [NEEDLE_progressive](https://github.com/needle-tools/gltf-progressive)
+ * - [KHR_materials_variants]{@link https://github.com/takahirox/three-gltf-extensions}
+ * - [MSFT_texture_dds]{@link https://github.com/takahirox/three-gltf-extensions}
  *
  * ```js
  * const loader = new GLTFLoader();
@@ -119,7 +115,6 @@ import { clone } from '../utils/SkeletonUtils.js';
  * ```
  *
  * @augments Loader
- * @three_import import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
  */
 class GLTFLoader extends Loader {
 
@@ -230,13 +225,7 @@ class GLTFLoader extends Loader {
 
 		this.register( function ( parser ) {
 
-			return new GLTFMeshoptCompression( parser, EXTENSIONS.EXT_MESHOPT_COMPRESSION );
-
-		} );
-
-		this.register( function ( parser ) {
-
-			return new GLTFMeshoptCompression( parser, EXTENSIONS.KHR_MESHOPT_COMPRESSION );
+			return new GLTFMeshoptCompression( parser );
 
 		} );
 
@@ -415,7 +404,7 @@ class GLTFLoader extends Loader {
 	}
 
 	/**
-	 * Parses the given glTF data and returns the resulting group.
+	 * Parses the given FBX data and returns the resulting group.
 	 *
 	 * @param {string|ArrayBuffer} data - The raw glTF data.
 	 * @param {string} path - The URL base path.
@@ -607,20 +596,6 @@ function GLTFRegistry() {
 /********** EXTENSIONS ***********/
 /*********************************/
 
-function getMaterialExtension( parser, materialIndex, extensionName ) {
-
-	const materialDef = parser.json.materials[ materialIndex ];
-
-	if ( materialDef.extensions && materialDef.extensions[ extensionName ] ) {
-
-		return materialDef.extensions[ extensionName ];
-
-	}
-
-	return null;
-
-}
-
 const EXTENSIONS = {
 	KHR_BINARY_GLTF: 'KHR_binary_glTF',
 	KHR_DRACO_MESH_COMPRESSION: 'KHR_draco_mesh_compression',
@@ -643,7 +618,6 @@ const EXTENSIONS = {
 	EXT_TEXTURE_WEBP: 'EXT_texture_webp',
 	EXT_TEXTURE_AVIF: 'EXT_texture_avif',
 	EXT_MESHOPT_COMPRESSION: 'EXT_meshopt_compression',
-	KHR_MESHOPT_COMPRESSION: 'KHR_meshopt_compression',
 	EXT_MESH_GPU_INSTANCING: 'EXT_mesh_gpu_instancing'
 };
 
@@ -858,13 +832,20 @@ class GLTFMaterialsEmissiveStrengthExtension {
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
 
-		if ( extension.emissiveStrength !== undefined ) {
+			return Promise.resolve();
 
-			materialParams.emissiveIntensity = extension.emissiveStrength;
+		}
+
+		const emissiveStrength = materialDef.extensions[ this.name ].emissiveStrength;
+
+		if ( emissiveStrength !== undefined ) {
+
+			materialParams.emissiveIntensity = emissiveStrength;
 
 		}
 
@@ -892,19 +873,29 @@ class GLTFMaterialsClearcoatExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
 
 		if ( extension.clearcoatFactor !== undefined ) {
 
@@ -914,7 +905,7 @@ class GLTFMaterialsClearcoatExtension {
 
 		if ( extension.clearcoatTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'clearcoatMap', extension.clearcoatTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'clearcoatMap', extension.clearcoatTexture ) );
 
 		}
 
@@ -926,13 +917,13 @@ class GLTFMaterialsClearcoatExtension {
 
 		if ( extension.clearcoatRoughnessTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'clearcoatRoughnessMap', extension.clearcoatRoughnessTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'clearcoatRoughnessMap', extension.clearcoatRoughnessTexture ) );
 
 		}
 
 		if ( extension.clearcoatNormalTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'clearcoatNormalMap', extension.clearcoatNormalTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'clearcoatNormalMap', extension.clearcoatNormalTexture ) );
 
 			if ( extension.clearcoatNormalTexture.scale !== undefined ) {
 
@@ -968,17 +959,27 @@ class GLTFMaterialsDispersionExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const extension = materialDef.extensions[ this.name ];
 
 		materialParams.dispersion = extension.dispersion !== undefined ? extension.dispersion : 0;
 
@@ -1006,19 +1007,29 @@ class GLTFMaterialsIridescenceExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
 
 		if ( extension.iridescenceFactor !== undefined ) {
 
@@ -1028,7 +1039,7 @@ class GLTFMaterialsIridescenceExtension {
 
 		if ( extension.iridescenceTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'iridescenceMap', extension.iridescenceTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'iridescenceMap', extension.iridescenceTexture ) );
 
 		}
 
@@ -1058,7 +1069,7 @@ class GLTFMaterialsIridescenceExtension {
 
 		if ( extension.iridescenceThicknessTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'iridescenceThicknessMap', extension.iridescenceThicknessTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'iridescenceThicknessMap', extension.iridescenceThicknessTexture ) );
 
 		}
 
@@ -1086,23 +1097,33 @@ class GLTFMaterialsSheenExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
 
 		materialParams.sheenColor = new Color( 0, 0, 0 );
 		materialParams.sheenRoughness = 0;
 		materialParams.sheen = 1;
+
+		const extension = materialDef.extensions[ this.name ];
 
 		if ( extension.sheenColorFactor !== undefined ) {
 
@@ -1119,13 +1140,13 @@ class GLTFMaterialsSheenExtension {
 
 		if ( extension.sheenColorTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'sheenColorMap', extension.sheenColorTexture, SRGBColorSpace ) );
+			pending.push( parser.assignTexture( materialParams, 'sheenColorMap', extension.sheenColorTexture, SRGBColorSpace ) );
 
 		}
 
 		if ( extension.sheenRoughnessTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'sheenRoughnessMap', extension.sheenRoughnessTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'sheenRoughnessMap', extension.sheenRoughnessTexture ) );
 
 		}
 
@@ -1154,19 +1175,29 @@ class GLTFMaterialsTransmissionExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
 
 		if ( extension.transmissionFactor !== undefined ) {
 
@@ -1176,7 +1207,7 @@ class GLTFMaterialsTransmissionExtension {
 
 		if ( extension.transmissionTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'transmissionMap', extension.transmissionTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'transmissionMap', extension.transmissionTexture ) );
 
 		}
 
@@ -1204,25 +1235,35 @@ class GLTFMaterialsVolumeExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
 
 		materialParams.thickness = extension.thicknessFactor !== undefined ? extension.thicknessFactor : 0;
 
 		if ( extension.thicknessTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'thicknessMap', extension.thicknessTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'thicknessMap', extension.thicknessTexture ) );
 
 		}
 
@@ -1255,17 +1296,27 @@ class GLTFMaterialsIorExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const extension = materialDef.extensions[ this.name ];
 
 		materialParams.ior = extension.ior !== undefined ? extension.ior : 1.5;
 
@@ -1293,25 +1344,35 @@ class GLTFMaterialsSpecularExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
 
 		materialParams.specularIntensity = extension.specularFactor !== undefined ? extension.specularFactor : 1.0;
 
 		if ( extension.specularTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'specularIntensityMap', extension.specularTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'specularIntensityMap', extension.specularTexture ) );
 
 		}
 
@@ -1320,7 +1381,7 @@ class GLTFMaterialsSpecularExtension {
 
 		if ( extension.specularColorTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'specularColorMap', extension.specularColorTexture, SRGBColorSpace ) );
+			pending.push( parser.assignTexture( materialParams, 'specularColorMap', extension.specularColorTexture, SRGBColorSpace ) );
 
 		}
 
@@ -1349,25 +1410,35 @@ class GLTFMaterialsBumpExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
 
 		materialParams.bumpScale = extension.bumpFactor !== undefined ? extension.bumpFactor : 1.0;
 
 		if ( extension.bumpTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'bumpMap', extension.bumpTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'bumpMap', extension.bumpTexture ) );
 
 		}
 
@@ -1395,19 +1466,29 @@ class GLTFMaterialsAnisotropyExtension {
 
 	getMaterialType( materialIndex ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		return extension !== null ? MeshPhysicalMaterial : null;
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
 
 	}
 
 	extendMaterialParams( materialIndex, materialParams ) {
 
-		const extension = getMaterialExtension( this.parser, materialIndex, this.name );
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
 
-		if ( extension === null ) return Promise.resolve();
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
 
 		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
 
 		if ( extension.anisotropyStrength !== undefined ) {
 
@@ -1423,7 +1504,7 @@ class GLTFMaterialsAnisotropyExtension {
 
 		if ( extension.anisotropyTexture !== undefined ) {
 
-			pending.push( this.parser.assignTexture( materialParams, 'anisotropyMap', extension.anisotropyTexture ) );
+			pending.push( parser.assignTexture( materialParams, 'anisotropyMap', extension.anisotropyTexture ) );
 
 		}
 
@@ -1499,6 +1580,7 @@ class GLTFTextureWebPExtension {
 
 		this.parser = parser;
 		this.name = EXTENSIONS.EXT_TEXTURE_WEBP;
+		this.isSupported = null;
 
 	}
 
@@ -1527,7 +1609,46 @@ class GLTFTextureWebPExtension {
 
 		}
 
-		return parser.loadTextureImage( textureIndex, extension.source, loader );
+		return this.detectSupport().then( function ( isSupported ) {
+
+			if ( isSupported ) return parser.loadTextureImage( textureIndex, extension.source, loader );
+
+			if ( json.extensionsRequired && json.extensionsRequired.indexOf( name ) >= 0 ) {
+
+				throw new Error( 'THREE.GLTFLoader: WebP required by asset but unsupported.' );
+
+			}
+
+			// Fall back to PNG or JPEG.
+			return parser.loadTexture( textureIndex );
+
+		} );
+
+	}
+
+	detectSupport() {
+
+		if ( ! this.isSupported ) {
+
+			this.isSupported = new Promise( function ( resolve ) {
+
+				const image = new Image();
+
+				// Lossy test image. Support for lossy images doesn't guarantee support for all
+				// WebP images, unfortunately.
+				image.src = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+
+				image.onload = image.onerror = function () {
+
+					resolve( image.height === 1 );
+
+				};
+
+			} );
+
+		}
+
+		return this.isSupported;
 
 	}
 
@@ -1546,6 +1667,7 @@ class GLTFTextureAVIFExtension {
 
 		this.parser = parser;
 		this.name = EXTENSIONS.EXT_TEXTURE_AVIF;
+		this.isSupported = null;
 
 	}
 
@@ -1574,7 +1696,44 @@ class GLTFTextureAVIFExtension {
 
 		}
 
-		return parser.loadTextureImage( textureIndex, extension.source, loader );
+		return this.detectSupport().then( function ( isSupported ) {
+
+			if ( isSupported ) return parser.loadTextureImage( textureIndex, extension.source, loader );
+
+			if ( json.extensionsRequired && json.extensionsRequired.indexOf( name ) >= 0 ) {
+
+				throw new Error( 'THREE.GLTFLoader: AVIF required by asset but unsupported.' );
+
+			}
+
+			// Fall back to PNG or JPEG.
+			return parser.loadTexture( textureIndex );
+
+		} );
+
+	}
+
+	detectSupport() {
+
+		if ( ! this.isSupported ) {
+
+			this.isSupported = new Promise( function ( resolve ) {
+
+				const image = new Image();
+
+				// Lossy test image.
+				image.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAABcAAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQAMAAAAABNjb2xybmNseAACAAIABoAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAAB9tZGF0EgAKCBgABogQEDQgMgkQAAAAB8dSLfI=';
+				image.onload = image.onerror = function () {
+
+					resolve( image.height === 1 );
+
+				};
+
+			} );
+
+		}
+
+		return this.isSupported;
 
 	}
 
@@ -1589,9 +1748,9 @@ class GLTFTextureAVIFExtension {
  */
 class GLTFMeshoptCompression {
 
-	constructor( parser, name ) {
+	constructor( parser ) {
 
-		this.name = name;
+		this.name = EXTENSIONS.EXT_MESHOPT_COMPRESSION;
 		this.parser = parser;
 
 	}
@@ -2135,7 +2294,7 @@ class GLTFCubicSplineInterpolant extends Interpolant {
 
 }
 
-const _quaternion = new Quaternion();
+const _q = new Quaternion();
 
 class GLTFCubicSplineQuaternionInterpolant extends GLTFCubicSplineInterpolant {
 
@@ -2143,7 +2302,7 @@ class GLTFCubicSplineQuaternionInterpolant extends GLTFCubicSplineInterpolant {
 
 		const result = super.interpolate_( i1, t0, t, t1 );
 
-		_quaternion.fromArray( result ).normalize().toArray( result );
+		_q.fromArray( result ).normalize().toArray( result );
 
 		return result;
 
@@ -2294,7 +2453,7 @@ function addUnknownExtensionsToUserData( knownExtensions, object, objectDef ) {
 /**
  *
  * @private
- * @param {Object3D|Material|BufferGeometry|Object|AnimationClip} object
+ * @param {Object3D|Material|BufferGeometry|Object} object
  * @param {GLTF.definition} gltfDef
  */
 function assignExtrasToUserData( object, gltfDef ) {
@@ -2578,7 +2737,7 @@ class GLTFParser {
 		let isFirefox = false;
 		let firefoxVersion = - 1;
 
-		if ( typeof navigator !== 'undefined' && typeof navigator.userAgent !== 'undefined' ) {
+		if ( typeof navigator !== 'undefined' ) {
 
 			const userAgent = navigator.userAgent;
 
@@ -2861,7 +3020,7 @@ class GLTFParser {
 	 * @private
 	 * @param {string} type
 	 * @param {number} index
-	 * @return {Promise<Object3D|Material|Texture|AnimationClip|ArrayBuffer|Object>}
+	 * @return {Promise<Object3D|Material|THREE.Texture|AnimationClip|ArrayBuffer|Object>}
 	 */
 	getDependency( type, index ) {
 
@@ -3201,7 +3360,7 @@ class GLTFParser {
 	 *
 	 * @private
 	 * @param {number} textureIndex
-	 * @return {Promise<?Texture>}
+	 * @return {Promise<THREE.Texture|null>}
 	 */
 	loadTexture( textureIndex ) {
 
@@ -3938,7 +4097,7 @@ class GLTFParser {
 	 *
 	 * @private
 	 * @param {number} cameraIndex
-	 * @return {Promise<Camera>|undefined}
+	 * @return {Promise<THREE.Camera>}
 	 */
 	loadCamera( cameraIndex ) {
 
@@ -4131,11 +4290,7 @@ class GLTFParser {
 
 			}
 
-			const animation = new AnimationClip( animationName, undefined, tracks );
-
-			assignExtrasToUserData( animation, animationDef );
-
-			return animation;
+			return new AnimationClip( animationName, undefined, tracks );
 
 		} );
 
@@ -4232,28 +4387,6 @@ class GLTFParser {
 			for ( let i = 0, il = children.length; i < il; i ++ ) {
 
 				node.add( children[ i ] );
-
-			}
-
-			// Reconstruct pivot from container pattern created by GLTFExporter
-			// The container has position+pivot, rotation, scale; child has -pivot offset and mesh
-			if ( node.userData.pivot !== undefined && children.length > 0 ) {
-
-				const pivot = node.userData.pivot;
-				const pivotChild = children[ 0 ];
-
-				// Set pivot on container and adjust transforms
-				node.pivot = new Vector3().fromArray( pivot );
-
-				// Adjust container position: stored as position + pivot, so subtract pivot
-				node.position.x -= pivot[ 0 ];
-				node.position.y -= pivot[ 1 ];
-				node.position.z -= pivot[ 2 ];
-
-				// Remove the child's -pivot offset since pivot now handles it
-				pivotChild.position.set( 0, 0, 0 );
-
-				delete node.userData.pivot;
 
 			}
 
@@ -4395,11 +4528,6 @@ class GLTFParser {
 
 				parser.associations.set( node, {} );
 
-			} else if ( nodeDef.mesh !== undefined && parser.meshCache.refs[ nodeDef.mesh ] > 1 ) {
-
-				const mapping = parser.associations.get( node );
-				parser.associations.set( node, { ...mapping } );
-
 			}
 
 			parser.associations.get( node ).nodes = nodeIndex;
@@ -4448,20 +4576,7 @@ class GLTFParser {
 
 			for ( let i = 0, il = nodes.length; i < il; i ++ ) {
 
-				const node = nodes[ i ];
-
-				// If the node already has a parent, it means it's being reused across multiple scenes.
-				// Clone it to avoid the second scene's add() removing it from the first scene.
-				// See: https://github.com/mrdoob/three.js/issues/27993
-				if ( node.parent !== null ) {
-
-					scene.add( clone( node ) );
-
-				} else {
-
-					scene.add( node );
-
-				}
+				scene.add( nodes[ i ] );
 
 			}
 

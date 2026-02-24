@@ -1,3 +1,6 @@
+var flippingdipping = thePIT.RConfig('flipmasks');
+var flipdipNorm = thePIT.RConfig('flipnorm');
+
 import * as THREE from 'three';
 import { OrbitControls } from 'orbit';
 import { Fog } from 'fog';
@@ -5,8 +8,51 @@ import { Color } from 'color';
 import { MathUtils } from 'mathutils';
 import { GLTFLoader } from 'gltf';
 
-var flippingdipping = thePIT.RConfig('flipmasks');
-var flipdipNorm = thePIT.RConfig('flipnorm');
+var TDengine = {
+	camera: null,
+    control:null,
+    lights:{
+		ambient:null,
+        point:[]
+    },
+	getScreenshot:false,
+	gpupanel:null,
+	isPainting:false,
+	MainCanvas: null,
+	renderer: null,
+	resetControl:false,
+	resetPosition:[0.01,0.7,0.07],
+	scene: null,
+	stats:null,
+	time: new THREE.Timer(),
+	UVMapcanvas: document.getElementById('UVMapMe'),
+}
+
+const TDNormalMerger = {
+	camera:null,
+	canvas:null,
+	plane:null,
+	renderer:null,
+	scene: null,
+}
+
+const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
+const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0.5) ),4,4);
+const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
+const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
+const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
+BLACK.userData = {name:"black"};
+GRAY.userData={name:"gray"};
+WHITE.userData={name:"white"};
+FlatNORM.userData={name:"normal"};
+ERROR.userData={name:"error"};
+
+BLACK.wrapS = BLACK.wrapT = THREE.RepeatWrapping;
+GRAY.wrapS = GRAY.wrapT = THREE.RepeatWrapping;
+WHITE.wrapS = WHITE.wrapT = THREE.RepeatWrapping;
+FlatNORM.wrapS = FlatNORM.wrapT = THREE.RepeatWrapping;
+ERROR.wrapS = ERROR.wrapT = THREE.RepeatWrapping;
+
 var flipcheck = document.getElementById("flipMask");
 
 var actualExtension = 'dds';
@@ -104,8 +150,6 @@ if (window.Worker) {
     }
 }
 
-const NORMAL = 'normalMap';
-
 var materialStack = new Array();
 var materialSet = new Set();
 
@@ -155,41 +199,19 @@ const materialTypeCheck = {
 	]
 }
 
-var paintMask3D = false;
-var control_reset = false;
-var control_side = false;
-var getImageData = false;
-var imgDataShot = null;
-var delta = null;
-
-var TDengine = {
-    scene: null,
-    renderer: null,
-    MainCanvas: null,
-    camera: null,
-    control:null,
-    lights:{
-        ambient:null,
-        point:[]
-    },
-	stats:null,
-	gpupanel:null,
-	UVMapcanvas: document.getElementById('UVMapMe'),
-	time: new THREE.Clock()
-}
-const TDNormalMerger ={
-	scene: null,
-	renderer:null,
-	canvas:null,
-	camera:null,
-	plane:null
-}
-
+//var control_side = false;
 const MDLloader = new GLTFLoader(); //Loading .glb files
 
 var materialGlass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
 
 var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide, visible:true}); //this will substitute the problematic single multilayer material
+var nodeMaterial = new THREE.MeshStandardNodeMaterial({
+	alphaMap:WHITE,
+	color:0x808080,
+	lights:true,
+	map:WHITE,
+	name:'vanilla'
+});
 
 var materialHair = new THREE.MeshStandardMaterial({color:0xBB000B,opacity:.9,side:THREE.DoubleSide,depthTest:true});
 var materialBASE = new THREE.MeshStandardMaterial({color:0x0000FF,transparent:true, alphaTest:0.05,side:THREE.DoubleSide,depthWrite :false,visible:true});
@@ -596,30 +618,12 @@ const renderwidth = Number(getComputedStyle(document.documentElement).getPropert
 let resized = false; //semaphore for resizing behaviour
 window.addEventListener('resize', function() {  resized = true;  });// resize event listener
 
-
-const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
-const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0.5) ),4,4);
-const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
-const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
-const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
-BLACK.userData = {name:"black"};
-GRAY.userData={name:"gray"};
-WHITE.userData={name:"white"};
-FlatNORM.userData={name:"normal"};
-ERROR.userData={name:"error"};
-
-BLACK.wrapS = BLACK.wrapT = THREE.RepeatWrapping;
-GRAY.wrapS = GRAY.wrapT = THREE.RepeatWrapping;
-WHITE.wrapS = WHITE.wrapT = THREE.RepeatWrapping;
-FlatNORM.wrapS = FlatNORM.wrapT = THREE.RepeatWrapping;
-ERROR.wrapS = ERROR.wrapT = THREE.RepeatWrapping;
-
 const debugTexture = new THREE.TextureLoader().load( 'images/system/uv_grid_opengl.jpg');
 debugTexture.wrapS = debugTexture.wrapT = THREE.RepeatWrapping;
 
 //screenshotSaver
 $("#takeashot").click(function(ev){
-	getImageData = true;
+	TDengine.getScreenshot = true;
 	animate();
 });
 
@@ -660,7 +664,7 @@ function updateUvTransform(material=null) {
 			normalMerger.uniforms.offset.value = [matrixTransform.offsetX, matrixTransform.offsetY];
 			normalMerger.uniformsNeedUpdate = true
 		}else{
-			if (materialStack[selected].userData?.detailNormalMap==undefined){
+			if (materialStack[selected].userData.detailNormalMap===undefined){
 				console.error("no detail normal map")
 			}else{
 				materialStack[selected].userData.detailNormalMap.repeat.set(matrixTransform.repeat, matrixTransform.repeat)
@@ -678,13 +682,13 @@ function updateUvTransform(material=null) {
 //INIT
 init();
 
-function init() {
+async function init() {
 	TDengine.scene = new THREE.Scene();
     TDengine.MainCanvas = document.getElementById('thacanvas');
 	//TDengine.MainCanvas.setAttribute('data-engine',THREE.REVISION);
     notifyMe(`Three.js engine r.${THREE.REVISION}`,false);
 
-    TDengine.renderer = new THREE.WebGLRenderer({
+/*     TDengine.renderer = new THREE.WebGLRenderer({
         canvas:TDengine.MainCanvas,
         alpha:true, 
         antialias:true,
@@ -693,7 +697,14 @@ function init() {
         outputEncoding : THREE.sRGBEncoding,
         toneMapping : THREE.ACESFilmicToneMapping,
         toneMappingExposure : 1.25
-    });
+    }); */
+	
+	TDengine.renderer = new THREE.WebGPURenderer({
+		alpha:true,
+		antialias:true,
+		canvas:TDengine.MainCanvas,
+	})
+	await TDengine.renderer.init();
 
 	TDNormalMerger.scene = new THREE.Scene();
 	TDNormalMerger.canvas = document.getElementById("normalMerge");
@@ -705,11 +716,9 @@ function init() {
 		-1, // near,
 		1, // far
 	);
-	TDNormalMerger.renderer = new THREE.WebGLRenderer({
+	TDNormalMerger.renderer = new THREE.WebGPURenderer({
 		canvas: TDNormalMerger.canvas,
-        antialias:true,
-		gammaFactor : 2.2,
-		preserveDrawingBuffer: true
+        antialias:true
 	});
 	TDNormalMerger.plane = new THREE.PlaneGeometry(2, 2);
 	TDNormalMerger.scene.add(new THREE.Mesh(TDNormalMerger.plane, normalMerger));
@@ -730,7 +739,7 @@ function init() {
     TDengine.control.autoRotateSpeed = PARAMS.speed;
     TDengine.control.enableDamping = true;
     TDengine.control.enablePan = true;
-    TDengine.control.target.set(0.01,0.7,0.07);
+    TDengine.control.target.set(...TDengine.resetPosition);
     
     //lights declaration
     //TDengine.lights.ambient = new THREE.AmbientLight( PARAMS.A_light_color,PARAMS.A_light_pow ); // soft white light ambientlight.intensity=1;
@@ -762,7 +771,9 @@ function init() {
 
     //TDengine.scene.add( TDengine.lights.ambient );
     TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
-    animate();
+
+	animate();
+	//TDengine.control.addEventListener('change', animate);
 }
 
 /**
@@ -795,31 +806,35 @@ function animate() {
 		resize();
 	}
 	
-    if (!paintMask3D){
+	/**
+	 * 
+	 */
+    if (!TDengine.isPainting){
 		TDengine.control.autoRotate = PARAMS.rotation;
 		TDengine.control.autoRotateSpeed = PARAMS.speed;
 	}else{
 		TDengine.control.autoRotate = false;
 	}
 	
-    if (control_reset){
-		control_reset = false;
-		TDengine.MainCanvas.position.set(0,1,-7);
+    if (TDengine.resetControl){
+		TDengine.resetControl = false;
+		TDengine.MainCanvas.position.set(TDengine.resetPosition);
 	}else{
 		TDengine.control.update();
 	}
 	
-	if (control_side){
+/* 	if (control_side){
 		control_side=false;
-	}
+	} */
 	
     TDengine.renderer.render(TDengine.scene, TDengine.camera);
-	if ((normalMerger!=undefined) && (normalMerger!=null)){
+	/* if ((normalMerger!=undefined) && (normalMerger!=null)){
 		getCanvasSize(TDNormalMerger)
 		TDNormalMerger.renderer.render(TDNormalMerger.scene, TDNormalMerger.camera);
-	}
+	} */
 
-    if(getImageData == true){
+    if(TDengine.getScreenshot == true){
+		TDengine.getScreenshot = false;
 		let a = document.getElementById('takeashot');
 		if (PARAMS.showImgOffSet){
 			let cvs = TDengine.renderer.getContext("2d");
@@ -830,10 +845,9 @@ function animate() {
 				MV:mLsetup.Layers[MLSB.Editor.layerSelected].microblend.offset.v
 			}
 		}
-		imgDataShot = TDengine.renderer.domElement.toDataURL('image/png');
+		let imgDataShot = TDengine.renderer.domElement.toDataURL('image/png');
 		
 
-		getImageData = false;
 		a.href = imgDataShot;
 		if ($("#modelTarget").val()==""){
 			a.download = `screen_${ new Date().valueOf()}.png`;
@@ -1228,7 +1242,7 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 					imgWorker.postMessage([
 						'roughnessSwap',
 						TexturePromise, 
-						DockTexture.info.width, 
+						materialStack[selected].userData?.detailNormalMap.info.width, 
 						DockTexture.info.height, 
 						target,
 						DockTexture.shader
@@ -1288,8 +1302,10 @@ function MapTextures(textureObj){
 						materialStack[toMap.shader].alphaMap.needsUpdate = true;
 						break;
 					case "normaldetail":
-						materialStack[toMap.shader].userData.detailNormalMap = returntexture
-						materialStack[toMap.shader].uniforms.detailNormalMap.value.needsUpdate = true;
+						if (materialStack[toMap.shader].userData.hasOwnProperty("detailNormalMap")){
+							materialStack[toMap.shader].userData.detailNormalMap = returntexture
+							materialStack[toMap.shader].uniforms.detailNormalMap.value.needsUpdate = true;
+						}
 				}
 			})
 		}else{
@@ -1592,7 +1608,7 @@ function codeMaterials(materialEntry,_materialName){
 
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
-			var Mlayer = stdMaterial.clone()
+			var Mlayer = stdMaterial.clone() //nodeMaterial.clone()
 			Mlayer.map=GRAY;
 			Mlayer.name = _materialName;
 
@@ -2273,16 +2289,17 @@ $("#thacanvas").on("mouseover",function(event){
 }).on('renderMaterial',function(ev,layerMaterial){
 	if (sceneLoaded()){
 
-		/* const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
+		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
 		//when everything is loaded then we proceed
 		materialIsLoaded
 			.then((materialTexture)=>{
-				//textureDock = [...textureDock, ...materialTexture]
+				textureDock = [...textureDock, ...materialTexture]
 			}).catch((error)=>{
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
 				//Apply the texture
-			}); */
+				
+			});
 
 		let selected = activeMLayer();
 		//check if the material Has a diffuse map
