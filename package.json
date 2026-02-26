@@ -33,6 +33,7 @@
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@tweakpane/plugin-essentials": "^0.2.1",
     "electron": "^39.0.0",
+    "three": "^0.183.1",
     "tweakpane": "^4.0.5"
   }
 }

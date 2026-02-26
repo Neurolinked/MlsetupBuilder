@@ -2,6 +2,7 @@ var flippingdipping = thePIT.RConfig('flipmasks');
 var flipdipNorm = thePIT.RConfig('flipnorm');
 
 import * as THREE from 'three';
+import { texture, uv } from 'three/tsl';
 import { OrbitControls } from 'orbit';
 import { Fog } from 'fog';
 import { Color } from 'color';
@@ -205,6 +206,8 @@ const MDLloader = new GLTFLoader(); //Loading .glb files
 var materialGlass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
 
 var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide, visible:true}); //this will substitute the problematic single multilayer material
+
+
 var nodeMaterial = new THREE.MeshStandardNodeMaterial({
 	alphaMap:WHITE,
 	color:0x808080,
