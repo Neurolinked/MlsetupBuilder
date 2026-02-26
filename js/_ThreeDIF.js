@@ -704,6 +704,7 @@ async function init() {
 		antialias:true,
 		canvas:TDengine.MainCanvas,
 	})
+	TDengine.renderer.setPixelRatio( window.devicePixelRatio );
 	await TDengine.renderer.init();
 
 	TDNormalMerger.scene = new THREE.Scene();
@@ -728,7 +729,6 @@ async function init() {
 	}else{
 		TDengine.renderer.setSize(renderwidth, window.innerHeight-80);
 	}
-	TDengine.renderer.setPixelRatio( window.devicePixelRatio );
 
     TDengine.camera = new THREE.PerspectiveCamera(15,renderwidth/(window.innerHeight-80),PARAMS.cameraNear,PARAMS.cameraFar);
     TDengine.camera.position.set(0.0,-0.4,-8);
@@ -769,7 +769,6 @@ async function init() {
 	gridHelper.position.x = 0;
 	TDengine.scene.add( gridHelper ) */
 
-    //TDengine.scene.add( TDengine.lights.ambient );
     TDengine.scene.fog = new THREE.Fog( PARAMS.fogcolor, PARAMS.fognear,PARAMS.fogfar);
 
 	animate();
@@ -1209,14 +1208,14 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 					}
 		
 					textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height, THREEFormat);
-					textureStack[TextureStackIndex].anisotropy = TDengine.renderer.capabilities.getMaxAnisotropy();
+					//textureStack[TextureStackIndex].anisotropy = TDengine.renderer.capabilities.getMaxAnisotropy();
 				}
 			}else if (DockTexture.info.format=='PNG'){
 				textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height,THREEFormat);
 			}
 			textureStack[TextureStackIndex].wrapS=THREE.RepeatWrapping;
 			textureStack[TextureStackIndex].wrapT=THREE.RepeatWrapping;
-			textureStack[TextureStackIndex].anisotropy = TDengine.renderer.capabilities.getMaxAnisotropy();
+			//textureStack[TextureStackIndex].anisotropy = TDengine.renderer.capabilities.getMaxAnisotropy();
 
 			paintDatas(TexturePromise,
 				DockTexture.info.width,
@@ -1242,7 +1241,7 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 					imgWorker.postMessage([
 						'roughnessSwap',
 						TexturePromise, 
-						materialStack[selected].userData?.detailNormalMap.info.width, 
+						DockTexture.info.width, 
 						DockTexture.info.height, 
 						target,
 						DockTexture.shader
