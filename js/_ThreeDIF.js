@@ -2,7 +2,7 @@ var flippingdipping = thePIT.RConfig('flipmasks');
 var flipdipNorm = thePIT.RConfig('flipnorm');
 
 import * as THREE from 'three';
-import { texture, uv } from 'three/tsl';
+import {texture, uv } from 'three/tsl';
 import { OrbitControls } from 'orbit';
 import { Fog } from 'fog';
 import { Color } from 'color';
@@ -203,10 +203,14 @@ const materialTypeCheck = {
 //var control_side = false;
 const MDLloader = new GLTFLoader(); //Loading .glb files
 
-var materialGlass = new THREE.MeshPhysicalMaterial({  roughness: 0.2,   transmission: 1, thickness: 0.005});
+var materialGlass = new THREE.MeshPhysicalMaterial({
+	ior:1,
+	roughness: 0.2,
+	transmission: .92,
+	thickness: 0.025
+});
 
 var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide, visible:true}); //this will substitute the problematic single multilayer material
-
 
 var nodeMaterial = new THREE.MeshStandardNodeMaterial({
 	alphaMap:WHITE,
@@ -789,7 +793,6 @@ function resetDetailNormal(){
 	}
 	materialStack[selected].normapMap = new THREE.CanvasTexture(ctxr,THREE.RepeatWrapping,THREE.RepeatWrapping);
 	materialStack[selected].normapMap.needsUpdate = true;
-	console.log(materialStack[selected].normapMap)
 }
 
 function resizeRendererToDisplaySize(renderer) {
@@ -1610,7 +1613,7 @@ function codeMaterials(materialEntry,_materialName){
 
 
 		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
-			var Mlayer = stdMaterial.clone() //nodeMaterial.clone()
+			var Mlayer = nodeMaterial.clone() //stdMaterial.clone() //nodeMaterial.clone()
 			Mlayer.map=GRAY;
 			Mlayer.name = _materialName;
 
@@ -1969,6 +1972,7 @@ function LoadMaterial(DBmaterial,checkTextures=true){
 			});
 		},Promise.resolve())
 		.then(()=>{
+			console.log(`resolved ${DBmaterial}`);
 			resolve(textureList)
 		}).catch((error)=>{
 			notifyMe(error);
@@ -2266,6 +2270,9 @@ $("#thacanvas").on("mouseover",function(event){
 			return LoadStackTextures();
 			}
 			,chainError)
+		.then(()=>{
+			return LoadMaterial("unused");
+		},chainError)
 		.catch((error)=>{
 			notifyMe(`LoadScene ${error}`);
 		});
@@ -2295,12 +2302,11 @@ $("#thacanvas").on("mouseover",function(event){
 		//when everything is loaded then we proceed
 		materialIsLoaded
 			.then((materialTexture)=>{
-				textureDock = [...textureDock, ...materialTexture]
+				textureDock = [...textureDock, ...materialTexture];
 			}).catch((error)=>{
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
 				//Apply the texture
-				
 			});
 
 		let selected = activeMLayer();
@@ -2544,7 +2550,11 @@ $("#thacanvas").on("mouseover",function(event){
 
 		if (materialStack[selected]!=undefined){
 			if (materialStack[selected].hasOwnProperty("mask")){
-				var test = _getFileContent({id:getEncodedFileName(layerMaterial),file:layerMaterial,maptype:'mlmask',shader:selected})
+				var test = _getFileContent({
+					id:getEncodedFileName(materialStack[selected].mask),
+					file:materialStack[selected].mask,
+					maptype:'mlmask',
+					shader:selected})
 					.then((result)=>{
 						var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
 						if (myMask?.length==1){
