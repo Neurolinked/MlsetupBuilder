@@ -2223,6 +2223,10 @@ function composeMultilayerMaterial(material){
 	return materialObj;
 }
 
+function materialUV(tiles,offsetx,offsety){
+	return uv().mul(tiles).add([offsetx,offsety]);
+}
+
 $("#thacanvas").on("mouseover",function(event){
 	//is shift is pressed change the material, if it's release put it back
 	if (MLSB.Key.shiftPress){
@@ -2245,7 +2249,7 @@ $("#thacanvas").on("mouseover",function(event){
 	Load the Models and Apply Materials
 	*/
 	//cleanScene();
-
+	
 	var materialFile = fileModel.replace(/\.glb$/,'.Material.json')
 
 	cleanScene()
