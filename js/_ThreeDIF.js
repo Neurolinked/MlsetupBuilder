@@ -2223,20 +2223,53 @@ function composeMultilayerMaterial(material){
 	return materialObj;
 }
 
-function materialUV(tiles,offsetx,offsety){
+function resetTextureKind(kind,selected){
+	switch (kind){
+		case 'diffuse':
+			materialStack[selected].map = GRAY;
+			break;
+		case 'metal':
+			materialStack[selected].metalnessMap = BLACK;
+			break;
+		case 'roughness':
+			materialStack[selected].roughnessMap = WHITE;
+			break;
+		case 'normal':
+			//TODO reseet detailNormal #materialMap;
+			break;
+	}
+}
+
+/**
+ * 
+ * @param {string} attribute material property to look into
+ * @param {object} material material Object
+ */
+function materialCheckAttribute(attribute,material){
+	if (!material.hasOwnProperty(attribute)){
+		return false
+	}
+	if (!material[attribute].hasOwnProperty("texture")){
+		return false
+	}
+	if ((material[attribute].texture=='') ||
+		(material[attribute].texture==null)){
+		return false
+	}
+	return material[attribute].texture;
+}
+
+function materialLayerUV(tiles,offsetx,offsety){
 	return uv().mul(tiles).add([offsetx,offsety]);
 }
 
 $("#thacanvas").on("mouseover",function(event){
 	//is shift is pressed change the material, if it's release put it back
-	if (MLSB.Key.shiftPress){
-	}
+	if (MLSB.Key.shiftPress){}
 }).on("mouseout",function(event){
 	//only when mouseout occur
 	TDengine.scene.traverse(oggetti=>{
-		if ((oggetti.type=="SkinnedMesh") && (oggetti.material.name=='MLSBlegacy')){
-			console.log(oggetti);
-		}
+		if ((oggetti.type=="SkinnedMesh") && (oggetti.material.name=='MLSBlegacy')){ console.log(oggetti);}
 	})
 }).on('loadScene',function(event,fileModel){
 	/*
@@ -2303,7 +2336,8 @@ $("#thacanvas").on("mouseover",function(event){
 	if (sceneLoaded()){
 
 		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
-		//when everything is loaded then we proceed
+		let selected = activeMLayer();
+		/* //when everything is loaded then we proceed
 		materialIsLoaded
 			.then((materialTexture)=>{
 				textureDock = [...textureDock, ...materialTexture];
@@ -2311,9 +2345,40 @@ $("#thacanvas").on("mouseover",function(event){
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
 				//Apply the texture
-			});
 
-		let selected = activeMLayer();
+				const textureKinds = ['diffuse','roughness','metal','normal'];
+				var materialTextureFile = null;
+				
+
+				textureKinds.forEach((kind,id)=>{
+					if (materialTextureFile = materialCheckAttribute(kind,layerMaterial)){
+						if (PARAMS.textureDebug){
+							console.log(materialTextureFile)
+						}
+						
+						if (checkMaps(materialTextureFile)<0){
+							let Cr_texture = getEncodedFileName(materialTextureFile).toString();
+							let tInd = textureDock.findIndex((elm) => elm.id==Cr_texture);
+
+							if (textureDock[tInd]!=undefined){
+								console.log(textureDock[tInd]);
+							}else{
+								resetTextureKind(kind,selected);
+							}
+						}else{
+							resetTextureKind(kind,selected);
+						}
+					}else{
+						if (PARAMS.textureDebug){
+							console.log(layerMaterial,kind)
+						}
+						resetTextureKind(kind,selected);
+					}
+				});
+
+				materialStack[selected].map.needsUpdate=true;
+			}); */
+		//return
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
 		var offset_h, offset_v
