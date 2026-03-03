@@ -29,10 +29,10 @@
     "sharp": "^0.34.3"
   },
   "devDependencies": {
-    "@electron/packager": "^18.4.0",
+    "@electron/packager": "^18.4.4",
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "electron": "^39.0.0",
+    "electron": "^40.6.1",
     "three": "^0.183.1",
     "tweakpane": "^4.0.5"
   }
