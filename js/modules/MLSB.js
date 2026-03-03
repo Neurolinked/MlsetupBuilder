@@ -192,4 +192,53 @@ class MLSBEditor {
         }
         return true
     }
+
+    getShaderType(shaderMaterialFile){
+        if ([
+            "base\\materials\\mesh_decal.mt",
+            "base\\materials\\mesh_decal_emissive.mt",
+            "base\\materials\\vehicle_mesh_decal.mt",
+            "base\\materials\\mesh_decal_double_diffuse.mt",
+            "base\\materials\\mesh_decal_parallax.mt",
+            "base\\materials\\mesh_decal_gradientmap_recolor.mt"
+            ].includes(shaderMaterialFile)){return "decals"}
+
+        if ([
+            "base\\fx\\_shaders\\mesh_decal__blackbody.mt",
+                "base\\fx\\shaders\\parallaxscreen.mt",
+                "base\\materials\\vehicle_lights.mt",
+                "base\\fx\\shaders\\device_diode.mt",
+                "base\\fx\\_shaders\\holo_mask.mt",
+                "base\\fx\\shaders\\hologram.mt",
+                "base\\fx\\shaders\\emissive_basic_transparent.mt",
+                "base\\fx\\shaders\\metal_base_glitter.mt"
+            ].includes(shaderMaterialFile)){return "fx"}
+        
+        if ([
+            "base\\materials\\glass.mt",
+            "base\\materials\\glass_onesided.mt",
+            "base\\materials\\vehicle_glass"
+            ].includes(shaderMaterialFile)){return "glass"}
+
+        if ([
+            "base\\materials\\hair.mt",
+            "base\\characters\\common\\hair\\textures\\hair_profiles\\_master__long.mi"
+            ].includes(shaderMaterialFile)){return "hair"}
+
+        if ([
+            "engine\\materials\\metal_base.remt"
+            ].includes(shaderMaterialFile)){return "metal_base"}
+        
+            if ([
+            "engine\\materials\\multilayered.mt",
+            "base\\materials\\vehicle_destr_blendshape.mt",
+            "base\\fx\\_shaders\\sandevistan_multilayer.mt"
+            ].includes(shaderMaterialFile)){return "multilayer"}
+
+            if ([
+            "base\\materials\\skin.mt",
+            ].includes(shaderMaterialFile)){return "skin"}
+
+            return "unknown";
+        }
 }
