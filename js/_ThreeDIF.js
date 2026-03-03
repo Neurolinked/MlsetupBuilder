@@ -1822,7 +1822,7 @@ function LoadMaterialsJson(path){
 						idx = materialJSON.findIndex(material)
 						
 						if (entry = materialJSON.find(material)){
-							if (materialTypeCheck.multilayer.includes(entry.MaterialTemplate)){
+							if (MLSB.getShaderType(entry.MaterialTemplate)=="multilayer"){
 								multilayerSwitch+= materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
 
 								multilayerMaskMenu += materialJSON.codeMaterial(idx,`<li><a class="dropdown-item" href="#" data-multilayer="${idx}" >$_MATERIALFULLNAME</a></li>`);
