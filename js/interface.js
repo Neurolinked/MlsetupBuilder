@@ -3769,11 +3769,7 @@ function applyValueInEditor(layersSelected){
     var idx = materialJSON.findIndex(material);
     if (idx >=0){
       if (entry = materialJSON.find(material)){
-        if ([
-          "engine\\materials\\multilayered.mt",
-          "base\\materials\\vehicle_destr_blendshape.mt",
-          "base\\fx\\_shaders\\sandevistan_multilayer.mt"
-          ].includes(entry.MaterialTemplate)){
+        if (MLSB.getShaderType(entry.MaterialTemplate)=="multilayer"){
 
           var uiMultilayerSwitch = materialJSON.codeMaterial(idx,`<div class="form-check"><label for="mlt_$_MATERIALID" class="form-check-label" >$_MATERIALNAME</label><input class="form-check-input" type="radio" id="mlt_$_MATERIALID" name="multilayerSel" data-material="$_MATERIALFULLNAME" value="$_MATERIALID"></div>`);
 
