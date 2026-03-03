@@ -29,14 +29,6 @@ var TDengine = {
 	UVMapcanvas: document.getElementById('UVMapMe'),
 }
 
-const TDNormalMerger = {
-	camera:null,
-	canvas:null,
-	plane:null,
-	renderer:null,
-	scene: null,
-}
-
 const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
 const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0.5) ),4,4);
 const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
@@ -196,7 +188,6 @@ const materialTypeCheck = {
 		],
 	skin: [
 		"base\\materials\\skin.mt",
-
 	]
 }
 
@@ -230,7 +221,7 @@ var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 
 var materialLegacy = new THREE.MeshStandardMaterial({color:0xFF0000,side:THREE.DoubleSide,depthWrite :false,visible:true,transparent:false,alphaTest:0.05,name:"MLSBlegacy"});
 
-var normalMerger
+/* var normalMerger
 
 var loader = new THREE.FileLoader();
 loader.load('./shaders/mergeNormal.vert.glsl', function (vertexShader) {
@@ -251,7 +242,7 @@ loader.load('./shaders/mergeNormal.vert.glsl', function (vertexShader) {
 		TDNormalMerger.plane.material = normalMerger
 		TDNormalMerger.plane.material.needsUpdate=true;
     });
-})
+}) */
 
 
 function sceneLoaded(){
@@ -666,19 +657,13 @@ function updateUvTransform(material=null) {
 			materialStack[selected].metalnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
 			materialStack[selected].metalnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
 		}
-		if (PARAMS.normalMerger){
-			normalMerger.uniforms.tiles.value = matrixTransform.repeat;
-			normalMerger.uniforms.offset.value = [matrixTransform.offsetX, matrixTransform.offsetY];
-			normalMerger.uniformsNeedUpdate = true
+		if (materialStack[selected].userData.detailNormalMap===undefined){
+			console.error("no detail normal map")
 		}else{
-			if (materialStack[selected].userData.detailNormalMap===undefined){
-				console.error("no detail normal map")
-			}else{
-				materialStack[selected].userData.detailNormalMap.repeat.set(matrixTransform.repeat, matrixTransform.repeat)
-				materialStack[selected].userData.detailNormalMap.offset.set(matrixTransform.offsetX, matrixTransform.offsetY)
-				materialStack[selected].userData.detailNormalMap.updateMatrix();
-				materialStack[selected].userData.detailNormalTransform = materialStack[selected].userData.detailNormalMap.matrix;
-			}
+			materialStack[selected].userData.detailNormalMap.repeat.set(matrixTransform.repeat, matrixTransform.repeat)
+			materialStack[selected].userData.detailNormalMap.offset.set(matrixTransform.offsetX, matrixTransform.offsetY)
+			materialStack[selected].userData.detailNormalMap.updateMatrix();
+			materialStack[selected].userData.detailNormalTransform = materialStack[selected].userData.detailNormalMap.matrix;
 		}
 	} catch (error) {
 		console.error(error);
@@ -713,23 +698,6 @@ async function init() {
 	})
 	TDengine.renderer.setPixelRatio( window.devicePixelRatio );
 	await TDengine.renderer.init();
-
-	TDNormalMerger.scene = new THREE.Scene();
-	TDNormalMerger.canvas = document.getElementById("normalMerge");
-	TDNormalMerger.camera = new THREE.OrthographicCamera(
-		-1, // left
-		1, // right
-		1, // top
-		-1, // bottom
-		-1, // near,
-		1, // far
-	);
-	TDNormalMerger.renderer = new THREE.WebGPURenderer({
-		canvas: TDNormalMerger.canvas,
-        antialias:true
-	});
-	TDNormalMerger.plane = new THREE.PlaneGeometry(2, 2);
-	TDNormalMerger.scene.add(new THREE.Mesh(TDNormalMerger.plane, normalMerger));
 
 	if (window.innerHeight-80<512){
 		TDengine.renderer.setSize(renderwidth,renderwidth);
@@ -782,19 +750,6 @@ async function init() {
 	//TDengine.control.addEventListener('change', animate);
 }
 
-/**
- * 
- */
-function resetDetailNormal(){
-	var ctxr = document.getElementById('normalMerge');
-	let selected = activeMLayer();
-	if (materialStack[selected].normapMap?.isTexture){
-		materialStack[selected].normapMap = null;
-	}
-	materialStack[selected].normapMap = new THREE.CanvasTexture(ctxr,THREE.RepeatWrapping,THREE.RepeatWrapping);
-	materialStack[selected].normapMap.needsUpdate = true;
-}
-
 function resizeRendererToDisplaySize(renderer) {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -833,10 +788,6 @@ function animate() {
 	} */
 	
     TDengine.renderer.render(TDengine.scene, TDengine.camera);
-	/* if ((normalMerger!=undefined) && (normalMerger!=null)){
-		getCanvasSize(TDNormalMerger)
-		TDNormalMerger.renderer.render(TDNormalMerger.scene, TDNormalMerger.camera);
-	} */
 
     if(TDengine.getScreenshot == true){
 		TDengine.getScreenshot = false;
@@ -1519,405 +1470,260 @@ async function LoadStackTextures(){
 	return workdone;
 }
 
+
+
+function encodeDecals(materialEntry,_materialName){
+	var Rdecal = materialBASE.clone();
+	var decalConfig = {name:_materialName,userData:{type:'decal'},color:0xFFFFFF,transparent:true,alphaTest:0.05, side:THREE.DoubleSide, depthWrite :true}
+	
+	//Decal Textures
+	if (materialEntry.Data.hasOwnProperty('DiffuseTexture')){
+		//MD5 the name of the file to load or import it
+		decalConfig.map = retDefTexture(materialEntry.Data.DiffuseTexture,_materialName,"diffuse");
+	}
+
+	if ('UseNormalAlphaTex' in materialEntry?.Data){
+		if (materialEntry.Data.UseNormalAlphaTex > 0 ){
+			decalConfig.alphaTest = 0.02;
+			decalConfig.alphaMap = retDefTexture(materialEntry.Data.NormalAlphaTex,_materialName,"normal");
+		}
+	}
+	
+	if (materialEntry?.Data.hasOwnProperty('NormalTexture')){
+		let nmMD5Code = getEncodedFileName(materialEntry.Data.NormalTexture)
+		decalConfig.normalMap = retDefTexture(materialEntry.Data.NormalTexture,_materialName,"normal");
+	}
+
+	if (materialEntry?.Data.hasOwnProperty('MetalnessTexture')){
+		decalConfig.metalnessMap =retDefTexture(materialEntry.Data.MetalnessTexture,_materialName,"metalness");
+		decalConfig.metalness = materialEntry.Data.MetalnessScale
+	}
+
+	if (materialEntry?.Data.hasOwnProperty('RoughnessTexture')){
+		decalConfig.roughnessMap = retDefTexture(materialEntry.Data.RoughnessTexture,_materialName,"roughness");
+		decalConfig.roughnessMap.needsUpdate = true
+		decalConfig.roughness = materialEntry.Data.RoughnessScale
+	}
+	
+	//Color over textures
+	if (materialEntry.Data.hasOwnProperty('DiffuseColor')){
+		decalConfig.color = new THREE.Color(`rgb(${materialEntry.Data.DiffuseColor.Red},${materialEntry.Data.DiffuseColor.Green},${materialEntry.Data.DiffuseColor.Blue})`);
+		decalConfig.opacity = (materialEntry.Data.DiffuseColor.Alpha/255)
+	}
+
+	if (materialEntry.Data.hasOwnProperty('DiffuseAlpha')){
+		decalConfig.alphaTest=materialEntry.Data.DiffuseAlpha;
+	}
+	
+	decalConfig.name=_materialName;
+	Rdecal.setValues(decalConfig);
+	return Rdecal
+}
+
+function encodeMetalbase(materialEntry,_materialName){
+	var Rbase = materialBASE.clone();
+	var rbaseConfig = {name:_materialName,userData:{type:'metal'},side:THREE.DoubleSide}
+
+	if (materialEntry.Data.hasOwnProperty('AlphaThreshold')){
+		rbaseConfig.opacity = materialEntry.Data.AlphaThreshold;
+	}
+	//Texture information
+	if (materialEntry.Data.hasOwnProperty('BaseColor')){
+		rbaseConfig.map = retDefTexture(materialEntry.Data.BaseColor,_materialName,"diffuse");
+	}
+	//Color applyed over textures
+	if (materialEntry.Data.hasOwnProperty('BaseColorScale')){
+		rbaseConfig.color = new THREE.Color().setRGB(
+			parseFloat(materialEntry.Data.BaseColorScale.X),
+			parseFloat(materialEntry.Data.BaseColorScale.Y),
+			parseFloat(materialEntry.Data.BaseColorScale.Z))
+	}
+
+	if (materialEntry.Data.hasOwnProperty('Normal')){
+		rbaseConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
+		rbaseConfig.normalScale =  parseFloat(materialEntry.Data.NormalStrength).toPrecision(2);
+	}
+
+	if (materialEntry.Data.hasOwnProperty('Roughness')){
+		rbaseConfig.roughnessMap = retDefTexture(materialEntry.Data.Roughness,_materialName,"roughness");
+		rbaseConfig.roughness = materialEntry.Data.RoughnessScale
+	}
+
+	if (materialEntry.Data.hasOwnProperty('Metalness')){
+		rbaseConfig.metalnessMap = retDefTexture(materialEntry.Data.Metalness,_materialName,"metalness");
+		rbaseConfig.metalness = materialEntry.Data.MetalnessScale
+	}
+	
+	Rbase.setValues(rbaseConfig);
+	Rbase.normalMap.needsUpdate = true;
+	return Rbase
+}
+
+function encodeMultilayer(materialEntry,_materialName){
+	var Mlayer = nodeMaterial.clone() //stdMaterial.clone() //nodeMaterial.clone()
+	Mlayer.map=GRAY;
+	Mlayer.name = _materialName;
+
+	Mlayer.defines.MLSBInspect = false;
+	Mlayer.defines.USE_DETAILNORMAL = true;
+
+	Mlayer.userData.detailNormalScale = 1.0;
+	Mlayer.userData.detailNormalMap = FlatNORM;
+	Mlayer.userData.detailNormalMap.updateMatrix();
+	Mlayer.userData.detailNormalTransform =  Mlayer.userData.detailNormalMap.matrix;
+
+	
+	Mlayer.userData={name:_materialName,type:'multilayer',GlobalNormal:null};
+
+	if (PARAMS.switchTransparency){
+		//activate transparency not, maskAlpha
+		Mlayer.transparent=true
+		Mlayer.alphaTest=0.0
+	}else{
+		//go back to mask the material with alphaTest Value
+		Mlayer.transparent=false
+		Mlayer.alphaTest=PARAMS.maskChannel
+	}
+	//Mlayer.transparent=true;
+	//Mlayer.alphaTest = PARAMS.maskChannel;
+	if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
+		
+		//name of the Actual layer textures to be loaded will be stored
+		Mlayer.alphaMap = retDefTexture(materialEntry.Data.MultilayerMask,_materialName,"mlmask");
+		Mlayer.alphaMap.needsUpdate = true;
+		Mlayer.mask = materialEntry.Data.MultilayerMask;
+	}
+
+	if (materialEntry?.Data.hasOwnProperty('GlobalNormal')){
+		var normMD5Code = getEncodedFileName(materialEntry.Data.GlobalNormal)
+		Mlayer.userData.GlobalNormal = normMD5Code;
+		
+		if (textureStack[normMD5Code]===undefined){
+			textureStack[normMD5Code] = retDefTexture(materialEntry.Data.GlobalNormal,_materialName,"normal");
+			textureStack[normMD5Code].wrapS = THREE.RepeatWrapping
+			textureStack[normMD5Code].wrapT = THREE.RepeatWrapping
+			textureStack[normMD5Code].userData.type="globalnormal";
+		}
+
+		Mlayer.normalMap = textureStack[normMD5Code];
+	}else{
+		Mlayer.normalMap = FlatNORM;
+	}
+	if (Mlayer.hasOwnProperty("normalMap")){
+		Mlayer.normalMap.needsUpdate = true;
+	}
+	Mlayer.needsUpdate = true;
+	return Mlayer
+}
+
+function encodeFX(materialEntry,_materialName){
+	let actualMaterial = lambertType.clone();
+	let fxConfig = {name:_materialName,userData:{type:'fx'},color:0xFFFFFF};
+
+	if (materialEntry?.Data.hasOwnProperty('Emissive')){
+		fxConfig.emissiveIntensity = parseFloat(materialEntry?.Data.Emissive);
+	}
+	if (materialEntry?.Data.hasOwnProperty('EmissiveColor')){
+		fxConfig.emissive = new THREE.Color(`rgb(${materialEntry.Data.EmissiveColor.Red},${materialEntry.Data.EmissiveColor.Green},${materialEntry.Data.EmissiveColor.Blue})`)
+	}
+
+	actualMaterial.setValues(fxConfig);
+	return actualMaterial;
+}
+
+function encodeGlass(materialEntry,_materialName){
+	var glassMe = materialGlass.clone();
+	glassMe.setValues({name:_materialName});
+	return glassMe
+}
+
+function encodeHair(materialEntry,_materialName){
+	var configHair = {name:_materialName};
+	var actualMaterial = materialHair.clone();
+	
+	if (materialEntry?.Data.hasOwnProperty('Strand_Gradient')){
+		configHair.map = retDefTexture(materialEntry.Data.Strand_Gradient,_materialName,"diffuse");
+		configHair.map.needsUpdate = true;
+	}
+
+	if (materialEntry?.Data.hasOwnProperty('Strand_Alpha')){
+		configHair.alphaMap = retDefTexture(materialEntry.Data.Strand_Alpha,_materialName,"alpha");
+		configHair.alphaTest = 0.03;
+		configHair.alphaMap.needsUpdate = true;
+	}
+	/* if (materialEntry?.Data.hasOwnProperty('Strand_ID')){
+
+	} */
+	actualMaterial.setValues(configHair);
+	return actualMaterial;
+}
+
+function encodeSkin(materialEntry,_materialName){
+	var skin = stdMaterial.clone();
+	var skinConfig = {name:_materialName,userData:{type:'skin'},color:0xFFDABE};
+
+	//console.warn('skin',materialEntry,'skin');
+
+	if (materialEntry?.Data.hasOwnProperty('TintColor')){
+		skinConfig.color = new THREE.Color(`rgb(${materialEntry.Data.TintColor.Red},${materialEntry.Data.TintColor.Green},${materialEntry.Data.TintColor.Blue})`);
+		skinConfig.opacity = parseFloat(materialEntry.Data.TintColor.Alpha/255);
+	}
+	
+	if (materialEntry?.Data.hasOwnProperty('Albedo')){
+		skinConfig.map = retDefTexture(materialEntry.Data.Albedo,_materialName,"diffuse");
+		skinConfig.map.needsUpdate = true;
+	}
+
+	if (materialEntry.Data.hasOwnProperty('Normal')){
+		skinConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
+		skinConfig.normalScale= new THREE.Vector2(0,materialEntry.Data.DetailNormalInfluence);
+		skinConfig.normalMap.needsUpdate = true
+	}
+
+	if (materialEntry.Data.hasOwnProperty('Roughness')){
+
+		skinConfig.roughnessMap = retDefTexture(materialEntry.Data.roughnessMap,_materialName,"roughness");
+		skinConfig.roughnessMap.needsUpdate =true;
+		skinConfig.metalnessMap = skinConfig.roughnessMap;
+	}
+
+	skin.setValues(skinConfig);
+	return skin;
+}
+
+
 function codeMaterials(materialEntry,_materialName){
 	if (materialEntry.hasOwnProperty('MaterialTemplate')){
-		//switching the code based on the type of the material
-		if (materialTypeCheck.decals.includes(materialEntry.MaterialTemplate)){
-
-			var Rdecal = materialBASE.clone();
-			var decalConfig = {name:_materialName,userData:{type:'decal'},color:0xFFFFFF,transparent:true,alphaTest:0.05, side:THREE.DoubleSide, depthWrite :true}
-			
-			//Decal Textures
-			if (materialEntry.Data.hasOwnProperty('DiffuseTexture')){
-				//MD5 the name of the file to load or import it
-				decalConfig.map = retDefTexture(materialEntry.Data.DiffuseTexture,_materialName,"diffuse");
-			}
-
-			if ('UseNormalAlphaTex' in materialEntry?.Data){
-				if (materialEntry.Data.UseNormalAlphaTex > 0 ){
-					decalConfig.alphaTest = 0.02;
-					decalConfig.alphaMap = retDefTexture(materialEntry.Data.NormalAlphaTex,_materialName,"normal");
-				}
-			}
-			
-			if (materialEntry?.Data.hasOwnProperty('NormalTexture')){
-				let nmMD5Code = getEncodedFileName(materialEntry.Data.NormalTexture)
-				decalConfig.normalMap = retDefTexture(materialEntry.Data.NormalTexture,_materialName,"normal");
-			}
-
-			if (materialEntry?.Data.hasOwnProperty('MetalnessTexture')){
-				decalConfig.metalnessMap =retDefTexture(materialEntry.Data.MetalnessTexture,_materialName,"metalness");
-				decalConfig.metalness = materialEntry.Data.MetalnessScale
-			}
-
-			if (materialEntry?.Data.hasOwnProperty('RoughnessTexture')){
-				decalConfig.roughnessMap = retDefTexture(materialEntry.Data.RoughnessTexture,_materialName,"roughness");
-				decalConfig.roughnessMap.needsUpdate = true
-				decalConfig.roughness = materialEntry.Data.RoughnessScale
-			}
-			
-			//Color over textures
-			if (materialEntry.Data.hasOwnProperty('DiffuseColor')){
-				decalConfig.color = new THREE.Color(`rgb(${materialEntry.Data.DiffuseColor.Red},${materialEntry.Data.DiffuseColor.Green},${materialEntry.Data.DiffuseColor.Blue})`);
-				decalConfig.opacity = (materialEntry.Data.DiffuseColor.Alpha/255)
-			}
-
-			if (materialEntry.Data.hasOwnProperty('DiffuseAlpha')){
-				decalConfig.alphaTest=materialEntry.Data.DiffuseAlpha;
-			}
-			
-			decalConfig.name=_materialName;
-			Rdecal.setValues(decalConfig);
-			return Rdecal
+		var shaderToMapName = MLSB.getShaderType(materialEntry.MaterialTemplate);
+		switch (shaderToMapName){
+			case "multilayer":
+				return encodeMultilayer(materialEntry,_materialName);
+				break;
+			case "metal_base":
+				return encodeMetalbase(materialEntry,_materialName);
+				break;
+			case "decals":
+				return encodeDecals(materialEntry,_materialName);
+				break;
+			case "fx":
+				return encodeFX(materialEntry,_materialName);
+				break;
+			case "glass":
+				return encodeGlass(materialEntry,_materialName);
+				break;
+			case "hair":
+				return encodeHair(materialEntry,_materialName);
+				break;
+			case "skin":
+				return encodeSkin(materialEntry,_materialName);
+				break;	
+			case "unknown":
+				return materialNone;
+				break;
+			default:
+				return materialNoneToCode;
+				break;
 		}
-
-		if (materialTypeCheck.metal_base.includes(materialEntry.MaterialTemplate)){
-
-			var Rbase = materialBASE.clone();
-			var rbaseConfig = {name:_materialName,userData:{type:'metal'},side:THREE.DoubleSide}
-
-			if (materialEntry.Data.hasOwnProperty('AlphaThreshold')){
-				rbaseConfig.opacity = materialEntry.Data.AlphaThreshold;
-			}
-			//Texture information
-			if (materialEntry.Data.hasOwnProperty('BaseColor')){
-				rbaseConfig.map = retDefTexture(materialEntry.Data.BaseColor,_materialName,"diffuse");
-			}
-			//Color applyed over textures
-			if (materialEntry.Data.hasOwnProperty('BaseColorScale')){
-				rbaseConfig.color = new THREE.Color().setRGB(
-					parseFloat(materialEntry.Data.BaseColorScale.X),
-					parseFloat(materialEntry.Data.BaseColorScale.Y),
-					parseFloat(materialEntry.Data.BaseColorScale.Z))
-			}
-
-			if (materialEntry.Data.hasOwnProperty('Normal')){
-				rbaseConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
-				rbaseConfig.normalScale =  parseFloat(materialEntry.Data.NormalStrength).toPrecision(2);
-			}
-
-			if (materialEntry.Data.hasOwnProperty('Roughness')){
-				rbaseConfig.roughnessMap = retDefTexture(materialEntry.Data.Roughness,_materialName,"roughness");
-				rbaseConfig.roughness = materialEntry.Data.RoughnessScale
-			}
-
-			if (materialEntry.Data.hasOwnProperty('Metalness')){
-				rbaseConfig.metalnessMap = retDefTexture(materialEntry.Data.Metalness,_materialName,"metalness");
-				rbaseConfig.metalness = materialEntry.Data.MetalnessScale
-			}
-			
-			Rbase.setValues(rbaseConfig);
-			Rbase.normalMap.needsUpdate = true;
-			return Rbase
-		}
-
-
-		if (materialTypeCheck.multilayer.includes(materialEntry.MaterialTemplate)){
-			var Mlayer = nodeMaterial.clone() //stdMaterial.clone() //nodeMaterial.clone()
-			Mlayer.map=GRAY;
-			Mlayer.name = _materialName;
-
-			Mlayer.defines.MLSBInspect = false;
-			Mlayer.defines.USE_DETAILNORMAL = true;
-
-			Mlayer.userData.detailNormalScale = 1.0;
-			Mlayer.userData.detailNormalMap = FlatNORM;
-			Mlayer.userData.detailNormalMap.updateMatrix();
-			Mlayer.userData.detailNormalTransform =  Mlayer.userData.detailNormalMap.matrix;
-
-			/**
-			 * 
-			 RoughLevel and MetalLevel are
-			 multiply-add parameter
-			 the param 0 is the multiply part
-			 the param 1 is the add components
-			 */
-
-			/*
-			 * 
-			 * https://github.com/mrdoob/three.js/tree/dev/src/renderers/shaders/ShaderChunk 
-			 */
-			Mlayer.onBeforeCompile = (shader)=>{
-				shader.uniforms.roughLevel = {value:new THREE.Vector2(1,0)};
-				shader.uniforms.metalLevel = {value:new THREE.Vector2(0,1)};
-				shader.uniforms.detailNormalScale = {value:Mlayer.userData.detailNormalScale};
-				shader.uniforms.detailNormalMap = {value: Mlayer.userData.detailNormalMap};
-				shader.uniforms.detailNormalTransform = {value: new THREE.Matrix3(Mlayer.userData.detailNormalTransform)};
-			
-				/** VERTEX SHADER for global and detail normals */
-				let vertexElementCode = document.getElementById("vertexShader");
-				let fragmentElementCode = document.getElementById("fragmentShader");
-
-				/*TODO push materials normal into detailNormalMap and use the detailNormalMapScale power  */
-				/** FRAGMENT SHADER form global and detail normals
-				 * default space for normals is TangentSpace NormalMap
-				 */
-				/**
-				 * //Texture Blending in HSL
-	float3 blend_linear(float4 n1, float4 n2)
-	{
-		float3 r = (n1 + n2)*2 - 2;
-		return normalize(r);
-	}
-
-	float3 blend_overlay(float4 n1, float4 n2)
-	{
-		n1 = n1*4 - 2;
-		float4 a = n1 >= 0 ? -1 : 1;
-		float4 b = n1 >= 0 ?  1 : 0;
-		n1 =  2*a + n1;
-		n2 = n2*a + b;
-		float3 r = n1*n2 - a;
-		return normalize(r);
-	}
-
-	float3 blend_pd(float4 n1, float4 n2)
-	{
-		n1 = n1*2 - 1;
-		n2 = n2.xyzz*float4(2, 2, 2, 0) + float4(-1, -1, -1, 0);
-		float3 r = n1.xyz*n2.z + n2.xyw*n1.z;
-		return normalize(r);
-	}
-
-	float3 blend_whiteout(float4 n1, float4 n2)
-	{
-		n1 = n1*2 - 1;
-		n2 = n2*2 - 1;
-		float3 r = float3(n1.xy + n2.xy, n1.z*n2.z);
-		return normalize(r);
-	}
-
-	float3 blend_udn(float4 n1, float4 n2)
-	{
-		float3 c = float3(2, 1, 0);
-		float3 r;
-		r = n2*c.yyz + n1.xyz;
-		r =  r*c.xxx -  c.xxy;
-		return normalize(r);
-	}
-
-	float3 blend_rnm(float4 n1, float4 n2)
-	{
-		float3 t = n1.xyz*float3( 2,  2, 2) + float3(-1, -1,  0);
-		float3 u = n2.xyz*float3(-2, -2, 2) + float3( 1,  1, -1);
-		float3 r = t*dot(t, u) - u*t.z;
-		return normalize(r);
-	}
-
-	float3 blend_unity(float4 n1, float4 n2)
-	{
-		n1 = n1.xyzz*float4(2, 2, 2, -2) + float4(-1, -1, -1, 1);
-		n2 = n2*2 - 1;
-		float3 r;
-		r.x = dot(n1.zxx,  n2.xyz);
-		r.y = dot(n1.yzy,  n2.xyz);
-		r.z = dot(n1.xyw, -n2.xyz);
-		return normalize(r);
-	}
-				 */
-				//console.log(shader.vertexShader);
-				/* shader.vertexShader = shader.vertexShader
-				.replace(`#include <uv_pars_vertex>`,
-	`#include <uv_pars_vertex>\nuniform mat3 detailNormalTransform;\nvarying vec2 detailNormalUV;`
-				)
-				.replace(`#include <uv_vertex>`,
-	`#include <uv_vertex>
-	detailNormalUV = ( detailNormalTransform * vec3( uv, 1 ) ).xy;
-	`); */
-
-
-	vertexElementCode.value = PARAMS.normalMerger ? normalMerger.vertexShader: shader.vertexShader;
-
-				/* .replace(`#include <clipping_planes_pars_fragment>`,
-	`#include <clipping_planes_pars_fragment>
-		vec3 reconstruct_normal(vec2 rg_channels) {
-		// Decompress the red and green channels from the [0, 1] texture range 
-		// to the view-space [-1, 1] range.
-		vec2 normal_xy = rg_channels * 2.0 - 1.0;
-
-		// Calculate the blue channel (Z component) using the Pythagorean theorem.
-		// The vector is normalized, so x^2 + y^2 + z^2 = 1.
-		float normal_z = sqrt(1.0 - dot(normal_xy, normal_xy));
-
-		// Combine the channels to form the final normal vector.
-		return vec3(normal_xy, normal_z);
-	}
-	`) */
-
-				shader.fragmentShader = shader.fragmentShader
-	.replace("#define STANDARD",
-		"#define STANDARD\nuniform sampler2D detailNormalMap;\nuniform float detailNormalScale;\n")
-	.replace(`#include <normal_fragment_maps>`,
-	`
-	vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
-	mapN.xy *= normalScale;
-	
-	vec3 DN = texture2D( detailNormalMap , vMapUv ).xyz;
-    DN.xy *= .8;
-	float z = sqrt(1.0 - dot(DN.rg, DN.rg));
-	DN = vec3(DN.rg, z) * 2.0 - 1.0;
-
-	normal = normalize(tbn * normalize(vec3(mapN.xy + DN.xy , mapN.z)));
-	//normal = normalize(tbn * mapN);
-	`
-	)
-	.replace(`#include <roughnessmap_fragment>`,
-		`float roughnessFactor = roughness;
-		#ifdef USE_ROUGHNESSMAP
-			vec4 texelRoughness = texture2D( roughnessMap, vRoughnessMapUv ).rgba;
-			// reads channel G, compatible with a combined OcclusionRoughnessMetallic (RGB) texture
-			roughnessFactor *= texelRoughness.g;
-		#endif
-		`)
-	
-			
-					//normal = normalize( tbn * mapN );
-				shader.fragmentShader = shader.fragmentShader
-					.replace(
-						`#include <color_fragment>`,
-	`#include <color_fragment>
-	vec4 colorInspect = vec4(1,0,0,1);
-	#ifdef MLSBInspect
-		diffuseColor = colorInspect;
-	#else
-		diffuseColor = diffuseColor;
-	#endif`);
-				
-				fragmentElementCode.value = PARAMS.normalMerger ? normalMerger.fragmentShader: shader.fragmentShader;
-			}
-			/**
-			 * MeshStandardNodeMaterial
-			 * var globalNormal = new THREE.NormalNode( );
-			 * var materialNode = new THREE.NormalNode( );
-			 * r = normalize(float3(n1.xy + n2.xy, n1.z));
-			 */
-			Mlayer.userData={name:_materialName,type:'multilayer',GlobalNormal:null};
-
-			if (PARAMS.switchTransparency){
-				//activate transparency not, maskAlpha
-				Mlayer.transparent=true
-				Mlayer.alphaTest=0.0
-			}else{
-				//go back to mask the material with alphaTest Value
-				Mlayer.transparent=false
-				Mlayer.alphaTest=PARAMS.maskChannel
-			}
-			//Mlayer.transparent=true;
-			//Mlayer.alphaTest = PARAMS.maskChannel;
-			if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
-				
-				//name of the Actual layer textures to be loaded will be stored
-				Mlayer.alphaMap = retDefTexture(materialEntry.Data.MultilayerMask,_materialName,"mlmask");
-				Mlayer.alphaMap.needsUpdate = true;
-				Mlayer.mask = materialEntry.Data.MultilayerMask;
-			}
-
-			if (materialEntry?.Data.hasOwnProperty('GlobalNormal')){
-				var normMD5Code = getEncodedFileName(materialEntry.Data.GlobalNormal)
-				Mlayer.userData.GlobalNormal = normMD5Code;
-				
-				if (textureStack[normMD5Code]===undefined){
-					textureStack[normMD5Code] = retDefTexture(materialEntry.Data.GlobalNormal,_materialName,"normal");
-					textureStack[normMD5Code].wrapS = THREE.RepeatWrapping
-					textureStack[normMD5Code].wrapT = THREE.RepeatWrapping
-					textureStack[normMD5Code].userData.type="globalnormal";
-				}
-
-				Mlayer.normalMap = textureStack[normMD5Code];
-			}else{
-				Mlayer.normalMap = FlatNORM;
-			}
-			if (Mlayer.hasOwnProperty("normalMap")){
-				Mlayer.normalMap.needsUpdate = true;
-			}
-			Mlayer.needsUpdate = true;
-			return Mlayer
-		}
-
-		if (materialTypeCheck.fx.includes(materialEntry.MaterialTemplate)){
-			
-			let actualMaterial = lambertType.clone();
-			let fxConfig = {name:_materialName,userData:{type:'fx'},color:0xFFFFFF};
-
-			if (materialEntry?.Data.hasOwnProperty('Emissive')){
-				fxConfig.emissiveIntensity = parseFloat(materialEntry?.Data.Emissive);
-			}
-			if (materialEntry?.Data.hasOwnProperty('EmissiveColor')){
-				fxConfig.emissive = new THREE.Color(`rgb(${materialEntry.Data.EmissiveColor.Red},${materialEntry.Data.EmissiveColor.Green},${materialEntry.Data.EmissiveColor.Blue})`)
-			}
-
-			actualMaterial.setValues(fxConfig);
-			return actualMaterial;
-		}
-
-		if (materialTypeCheck.hair.includes(materialEntry.MaterialTemplate)){
-			var configHair = {name:_materialName};
-			var actualMaterial = materialHair.clone();
-			
-
-			if (materialEntry?.Data.hasOwnProperty('Strand_Gradient')){
-				configHair.map = retDefTexture(materialEntry.Data.Strand_Gradient,_materialName,"diffuse");
-				configHair.map.needsUpdate = true;
-			}
-
- 			if (materialEntry?.Data.hasOwnProperty('Strand_Alpha')){
-				configHair.alphaMap = retDefTexture(materialEntry.Data.Strand_Alpha,_materialName,"alpha");
-				configHair.alphaTest = 0.03;
-				configHair.alphaMap.needsUpdate = true;
-			}
-
-			if (materialEntry?.Data.hasOwnProperty('Strand_ID')){
-
-			}
-			
-			//console.log(configHair);
-
-			actualMaterial.setValues(configHair);
-			return actualMaterial;
-		}
-
-
-		if (materialTypeCheck.skin.includes(materialEntry.MaterialTemplate)){
-
-			var skin = stdMaterial.clone();
-			var skinConfig = {name:_materialName,userData:{type:'skin'},color:0xFFDABE};
-
-			//console.warn('skin',materialEntry,'skin');
-
-			if (materialEntry?.Data.hasOwnProperty('TintColor')){
-				skinConfig.color = new THREE.Color(`rgb(${materialEntry.Data.TintColor.Red},${materialEntry.Data.TintColor.Green},${materialEntry.Data.TintColor.Blue})`);
-				skinConfig.opacity = parseFloat(materialEntry.Data.TintColor.Alpha/255);
-			}
-			
-			if (materialEntry?.Data.hasOwnProperty('Albedo')){
-				skinConfig.map = retDefTexture(materialEntry.Data.Albedo,_materialName,"diffuse");
-				skinConfig.map.needsUpdate = true;
-			}
-
-			if (materialEntry.Data.hasOwnProperty('Normal')){
-				skinConfig.normalMap = retDefTexture(materialEntry.Data.Normal,_materialName,"normal");
-				skinConfig.normalScale= new THREE.Vector2(0,materialEntry.Data.DetailNormalInfluence);
-				skinConfig.normalMap.needsUpdate = true
-			}
-
-			if (materialEntry.Data.hasOwnProperty('Roughness')){
-
-				skinConfig.roughnessMap = retDefTexture(materialEntry.Data.roughnessMap,_materialName,"roughness");
-				skinConfig.roughnessMap.needsUpdate =true;
-				skinConfig.metalnessMap = skinConfig.roughnessMap;
-			}
-
-			skin.setValues(skinConfig);
-			return skin;
-		}
-
-		if (materialTypeCheck.glass.includes(materialEntry.MaterialTemplate)){
-			var glassMe = materialGlass.clone();
-			glassMe.setValues({name:_materialName});
-			return glassMe
-		}
-
-		return materialNoneToCode;
 	}
 	return materialNone;
 }
@@ -2109,7 +1915,6 @@ function LoadModel(path){
 								if (!child.userData.hasOwnProperty('materialNames')){
 									notifyMe(`Need a MaterialName for {child.name}`)
 								}else{
-									//child.material = normalMerger;
 									child.material = materialStack[child.userData?.materialNames[0]];
 								}
 								child.material.needsUpdate=true;
@@ -2296,10 +2101,6 @@ $("#thacanvas").on("mouseover",function(event){
 		.then(()=>{
 			$("#layeringsystem li").removeClass("active");
 			$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
-			if (PARAMS.normalMerger){
-				TDNormalMerger.scene.children[0].material = normalMerger;
-				TDNormalMerger.scene.children[0].material.needsUpdate = true;
-			}
 			return LoadModel(fileModel);
 			}
 			,chainError)
@@ -2517,10 +2318,7 @@ $("#thacanvas").on("mouseover",function(event){
 				materialStack[selected].metalnessMap.needsUpdate =true
 			}
 		}
-		/**normal management */
-		if (PARAMS.normalMerger){
-			setNormalMergeCanvasSize(materialStack[selected].normalMap.source.data.width);
-		}
+
 		// load the material normal
 		if (layerMaterial.hasOwnProperty('normal')) {
 			//TODO continue in rendermaterial and blend material + core model normals
@@ -2528,13 +2326,8 @@ $("#thacanvas").on("mouseover",function(event){
 			let C_normal = getEncodedFileName(layerMaterial.normal.texture);
 
 			if (myTex?.length==1){
-				if (PARAMS.normalMerger){
-					normalMerger.uniforms.globalnormal.value = textureStack[materialStack[selected].userData.GlobalNormal];
-					normalMerger.uniforms.detailnormal.value.dispose();
-				}else{
-					materialStack[selected].detailnormal = textureStack[C_normal];
-					materialStack[selected].detailnormal.needsUpdate =true
-				}
+				materialStack[selected].detailnormal = textureStack[C_normal];
+				materialStack[selected].detailnormal.needsUpdate =true
 			}else{
 				
 				let test = retDefTexture(layerMaterial.normal.texture,selected,"normaldetail");
@@ -2549,17 +2342,10 @@ $("#thacanvas").on("mouseover",function(event){
 					//normalMerge
 					//TODO texture read, to continue you have to plug it into the shader and 
 					if (PARAMS.textureDebug){console.log(textureStack[C_normal])}
-					if (PARAMS.normalMerger){
-						normalMerger.uniforms.globalnormal.value = textureStack[materialStack[selected].userData.GlobalNormal];
-						normalMerger.uniforms.detailnormal.value = textureStack[C_normal];
-						//normalMerger.uniforms.detailnormalScale.value = 0.2;
-						normalMerger.uniforms.globalnormal.value.needsUpdate = true;
-						normalMerger.uniforms.detailnormal.value.needsUpdate = true;
-					}else{
-						materialStack[selected].userData.detailNormalMap = FlatNORM;
-						materialStack[selected].userData.detailNormalMap = textureStack[C_normal];
-						materialStack[selected].userData.detailNormalMap.needsUpdate =true;
-					}
+
+					materialStack[selected].userData.detailNormalMap = FlatNORM;
+					materialStack[selected].userData.detailNormalMap = textureStack[C_normal];
+					materialStack[selected].userData.detailNormalMap.needsUpdate =true;
 
 				}).catch((error)=>{
 					if (PARAMS.textureDebug){console.log(layerMaterial.normal.texture)}
@@ -2567,9 +2353,6 @@ $("#thacanvas").on("mouseover",function(event){
 					console.error('error #%d',error)
 				})
 			} 
-		}
-		if (PARAMS.normalMerger){
-			resetDetailNormal()
 		}
 		updateUvTransform();
 		materialStack[selected].needsUpdate = true
@@ -2587,9 +2370,6 @@ $("#thacanvas").on("mouseover",function(event){
 		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
 		matrixTransform.offsetY = parseFloat(offset.y).toPrecision(4)
 		updateUvTransform()
-		if (PARAMS.normalMerger){
-			resetDetailNormal()
-		}
 	}
 }).on("texTiled",function(ev,source='layer'){
 	if (sceneLoaded()){
