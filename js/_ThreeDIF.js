@@ -2,7 +2,7 @@ var flippingdipping = thePIT.RConfig('flipmasks');
 var flipdipNorm = thePIT.RConfig('flipnorm');
 
 import * as THREE from 'three';
-import {texture, uv } from 'three/tsl';
+import {texture, uv, vec2,uniform } from 'three/tsl';
 import { OrbitControls } from 'orbit';
 import { Fog } from 'fog';
 import { Color } from 'color';
@@ -31,7 +31,10 @@ var TDengine = {
 
 const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
 const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0.5) ),4,4);
-const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1, 1 ,1 ) ),4,4);
+const WHITE = new THREE.DataTexture(
+	genTexture(new THREE.Color( 1.0, 1.0 ,1.0 ) ),4,4
+);
+
 const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
 const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
 BLACK.userData = {name:"black"};
@@ -150,47 +153,6 @@ var textureStack = new Array();
 var textureDock = new Array();
 var texturePromise = new Array();
 
-const materialTypeCheck = {
-	decals: [
-		"base\\materials\\mesh_decal.mt",
-		"base\\materials\\mesh_decal_emissive.mt",
-		"base\\materials\\vehicle_mesh_decal.mt",
-		"base\\materials\\mesh_decal_double_diffuse.mt",
-		"base\\materials\\mesh_decal_parallax.mt",
-		"base\\materials\\mesh_decal_gradientmap_recolor.mt"
-		],
-	fx:[
-		"base\\fx\\_shaders\\mesh_decal__blackbody.mt",
-		"base\\fx\\shaders\\parallaxscreen.mt",
-		"base\\materials\\vehicle_lights.mt",
-		"base\\fx\\shaders\\device_diode.mt",
-		"base\\fx\\_shaders\\holo_mask.mt",
-		"base\\fx\\shaders\\hologram.mt",
-		"base\\fx\\shaders\\emissive_basic_transparent.mt",
-		"base\\fx\\shaders\\metal_base_glitter.mt"
-	],
-	glass: [
-		"base\\materials\\glass.mt",
-		"base\\materials\\glass_onesided.mt",
-		"base\\materials\\vehicle_glass"
-		],
-	hair: [
-		"base\\materials\\hair.mt",
-		"base\\characters\\common\\hair\\textures\\hair_profiles\\_master__long.mi"
-		],
-	metal_base : [
-		"engine\\materials\\metal_base.remt"
-		],
-	multilayer : [
-		"engine\\materials\\multilayered.mt",
-		"base\\materials\\vehicle_destr_blendshape.mt",
-		"base\\fx\\_shaders\\sandevistan_multilayer.mt"
-		],
-	skin: [
-		"base\\materials\\skin.mt",
-	]
-}
-
 //var control_side = false;
 const MDLloader = new GLTFLoader(); //Loading .glb files
 
@@ -204,10 +166,10 @@ var materialGlass = new THREE.MeshPhysicalMaterial({
 var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.DoubleSide, visible:true}); //this will substitute the problematic single multilayer material
 
 var nodeMaterial = new THREE.MeshStandardNodeMaterial({
-	alphaMap:WHITE,
+	alphaMap:0x808080,
 	color:0x808080,
 	lights:true,
-	map:WHITE,
+	map:GRAY,
 	name:'vanilla'
 });
 
@@ -322,8 +284,9 @@ function checkMaps(mapName="engine\\textures\\editor\\black.xbm"){
 function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="default",type="diffuse"){
 	// kind of listed maps
 	type = ((type=="diffuse") || (type=="normal") || (type=="normaldetail") || (type=="metal") || (type=="rough") || (type=="roughness") || (type=="alpha")  || (type=="emissive") || (type=="mlmask") ) ? type : "diffuse";
+
 	if (PARAMS.debugTexture) {console.log("retDefTexture: ", mapName,type)}
-	
+
 	switch (mapName){
 		case "base\\surfaces\\materials\\default\\black.xbm":
 		case "engine\\textures\\editor\\black.xbm":
@@ -345,6 +308,7 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="de
 					let tInd = textureDock.findIndex((elm) => elm.file==mapName)
 					textureDock[tInd].entries.push({maptype:type,shader:material});
 				}
+				if (type=="normal"){return FlatNORM;}
 			}
 			return GRAY;
 	}
@@ -657,14 +621,14 @@ function updateUvTransform(material=null) {
 			materialStack[selected].metalnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
 			materialStack[selected].metalnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
 		}
-		if (materialStack[selected].userData.detailNormalMap===undefined){
+		/* if (materialStack[selected].userData.detailNormalMap===undefined){
 			console.error("no detail normal map")
 		}else{
 			materialStack[selected].userData.detailNormalMap.repeat.set(matrixTransform.repeat, matrixTransform.repeat)
 			materialStack[selected].userData.detailNormalMap.offset.set(matrixTransform.offsetX, matrixTransform.offsetY)
 			materialStack[selected].userData.detailNormalMap.updateMatrix();
 			materialStack[selected].userData.detailNormalTransform = materialStack[selected].userData.detailNormalMap.matrix;
-		}
+		} */
 	} catch (error) {
 		console.error(error);
 	}
@@ -1560,6 +1524,7 @@ function encodeMetalbase(materialEntry,_materialName){
 }
 
 function encodeMultilayer(materialEntry,_materialName){
+	console.log(materialEntry);
 	var Mlayer = nodeMaterial.clone() //stdMaterial.clone() //nodeMaterial.clone()
 	Mlayer.map=GRAY;
 	Mlayer.name = _materialName;
@@ -1609,10 +1574,16 @@ function encodeMultilayer(materialEntry,_materialName){
 	}else{
 		Mlayer.normalMap = FlatNORM;
 	}
+
+	if (materialEntry?.Data.hasOwnProperty('GlobalNormalIntensity')){
+		Mlayer.normalScale = new THREE.Vector2(parseFloat(materialEntry?.Data.GlobalNormalIntensity).toPrecision(3));
+	}
+
 	if (Mlayer.hasOwnProperty("normalMap")){
 		Mlayer.normalMap.needsUpdate = true;
 	}
 	Mlayer.needsUpdate = true;
+	console.log(Mlayer);
 	return Mlayer
 }
 
@@ -2105,12 +2076,16 @@ $("#thacanvas").on("mouseover",function(event){
 			}
 			,chainError)
 		.then(()=>{
+			return LoadMaterial("unused");
+		},chainError)
+		.then(()=>{
 			return LoadStackTextures();
 			}
 			,chainError)
 		.then(()=>{
-			return LoadMaterial("unused");
-		},chainError)
+			//Apply materials with offsets and tiling
+			}
+			,chainError)
 		.catch((error)=>{
 			notifyMe(`LoadScene ${error}`);
 		});
@@ -2141,7 +2116,7 @@ $("#thacanvas").on("mouseover",function(event){
 		/* //when everything is loaded then we proceed
 		materialIsLoaded
 			.then((materialTexture)=>{
-				textureDock = [...textureDock, ...materialTexture];
+				textureStack = [...textureStack, ...materialTexture];
 			}).catch((error)=>{
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
