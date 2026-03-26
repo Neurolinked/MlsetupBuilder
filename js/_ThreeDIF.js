@@ -1,8 +1,8 @@
 var flippingdipping = thePIT.RConfig('flipmasks');
 var flipdipNorm = thePIT.RConfig('flipnorm');
 
-import * as THREE from 'three';
-import {texture, uv, vec2,uniform } from 'three/tsl';
+import * as THREE from 'three/webgpu';
+import {texture, uv, color, float, vec2, uniform } from 'three/tsl';
 import { OrbitControls } from 'orbit';
 import { Fog } from 'fog';
 import { Color } from 'color';
@@ -29,14 +29,22 @@ var TDengine = {
 	UVMapcanvas: document.getElementById('UVMapMe'),
 }
 
+function materialUV(tiles, multiplier=1.0){
+	var uvTiling = multiplier * parseFloat(tiles).toPrecision(4);
+	return uv().mul( uvTiling ).toVar()
+}
+
+const uvScaled = materialUV(1.0);
+
+var colorMutable = new THREE.Color(.5,.5,.5)
+const layerColor = uniform( colorMutable );
+
 const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
 const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0.5) ),4,4);
-const WHITE = new THREE.DataTexture(
-	genTexture(new THREE.Color( 1.0, 1.0 ,1.0 ) ),4,4
-);
-
+const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1.0, 1.0 ,1.0 ) ),4,4);
 const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
 const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
+
 BLACK.userData = {name:"black"};
 GRAY.userData={name:"gray"};
 WHITE.userData={name:"white"};
@@ -167,10 +175,9 @@ var stdMaterial = new THREE.MeshStandardMaterial({color:0x808080, side:THREE.Dou
 
 var nodeMaterial = new THREE.MeshStandardNodeMaterial({
 	alphaMap:0x808080,
-	color:0x808080,
 	lights:true,
-	map:GRAY,
-	name:'vanilla'
+	name:'vanilla',
+	side:THREE.DoubleSide
 });
 
 var materialHair = new THREE.MeshStandardMaterial({color:0xBB000B,opacity:.9,side:THREE.DoubleSide,depthTest:true});
@@ -182,29 +189,6 @@ var materialNoneToCode = new THREE.MeshLambertMaterial({color:0x808080,emissive:
 var materialNone = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 
 var materialLegacy = new THREE.MeshStandardMaterial({color:0xFF0000,side:THREE.DoubleSide,depthWrite :false,visible:true,transparent:false,alphaTest:0.05,name:"MLSBlegacy"});
-
-/* var normalMerger
-
-var loader = new THREE.FileLoader();
-loader.load('./shaders/mergeNormal.vert.glsl', function (vertexShader) {
-    loader.load('./shaders/mergeNormal.frag.glsl', function (fragmentShader) {
-        normalMerger = new THREE.ShaderMaterial({
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            uniforms: {
-				globalnormal: { type: "t", value:FlatNORM},
-				detailnormal: { type: "t", value:FlatNORM},
-				globalnormalScale: { type: "f", value:1.0},
-				detailnormalScale: { type: "f", value:1.0},
-				tiles: { type: "f", value:1.0},
-				offset: {type:"v", value:[0.0,0.0]}
-			},
-			glslVersion:THREE.GLSL1
-        });
-		TDNormalMerger.plane.material = normalMerger
-		TDNormalMerger.plane.material.needsUpdate=true;
-    });
-}) */
 
 
 function sceneLoaded(){
@@ -226,16 +210,6 @@ function sceneLoaded(){
  */
 function getEncodedFileName(filename){
 	return CryptoJS.MD5(filename).toString();
-}
-
-function setNormalMergeCanvasSize(squaresize=300){
-	const squareCheck = parseInt(squaresize);
-	if (!((squareCheck>0) && (squareCheck < 4096))){
-		squaresize=300;
-	}
-	let normalMergeCanvas = document.getElementById("normalMerge")
-	normalMergeCanvas.setAttribute("width",squaresize)
-	normalMergeCanvas.setAttribute("height",squaresize)
 }
 
 function chainError(err) {
@@ -325,6 +299,7 @@ function getUVSubmeshIndex(sons){
 	}
 	return checked;
 }
+
 function retUVMapData(_2dContext,selected,size){
 	return new Promise((resolve,reject)=>{
 		try {
@@ -533,45 +508,51 @@ function resize() {
 
 function cleanScene(){
 	return new Promise((resolve,reject)=>{
-		clearTexturePanel(); // UI/UX interface
-		clearCanvas('texturePlayer');
+		try {
+			clearTexturePanel(); // UI/UX interface
+			clearCanvas('texturePlayer');
 
-		var groupdisposeID = [];
-		var groupObj = null;
+			var groupdisposeID = [];
+			var groupObj = null;
 
-		materialSet.clear();
+			materialSet.clear();
 
-		materialStack.forEach((material) => { material.dispose() });
-		materialStack=[];
+			materialStack.forEach((material) => { material.dispose() });
+			materialStack=[];
 
-		textureStack.forEach((element) => {element.dispose()});
-		textureStack=[];
-		//the Dock loading of textures
-		textureDock=[];
+			textureStack.forEach((element) => {element.dispose()});
+			textureStack=[];
+			//the Dock loading of textures
+			textureDock=[];
 
-		TDengine.scene.traverse(oggetti=>{
-			if (oggetti.isMesh){
-				if (oggetti.material!==undefined){
-					oggetti.material.dispose(); //Remove materials
+			TDengine.scene.traverse(oggetti=>{
+				if (oggetti.isMesh){
+					if (oggetti.material!==undefined){
+						oggetti.material.dispose(); //Remove materials
+					}
+					oggetti.geometry.dispose(); //Remove geometry
 				}
-				oggetti.geometry.dispose(); //Remove geometry
-			}
-			if (oggetti.isGroup){
-				groupdisposeID.push(oggetti.uuid);
-			}
-		})
+				if (oggetti.isGroup){
+					groupdisposeID.push(oggetti.uuid);
+				}
+			})
 
-		if (groupdisposeID.length > 0){
-			groupdisposeID.forEach((gruppo,i)=>{
-				groupObj = TDengine.scene.getObjectByProperty( 'uuid', gruppo )
-				TDengine.scene.remove(groupObj);
-			});
+			if (groupdisposeID.length > 0){
+				groupdisposeID.forEach((gruppo,i)=>{
+					groupObj = TDengine.scene.getObjectByProperty( 'uuid', gruppo )
+					TDengine.scene.remove(groupObj);
+				});
+			}
+
+			PARAMS.listSubmeshes = {};
+			document.getElementById("tweakContainer").dispatchEvent(new Event("cleanMeshes"));
+			
+			resolve(true);
+		} catch (error) {
+			notifyMe(error);
+			reject(false);
 		}
-
-		PARAMS.listSubmeshes = {};
-		document.getElementById("tweakContainer").dispatchEvent(new Event("cleanMeshes"));
 		
-		resolve(true);
 	})
 }
 
@@ -1525,20 +1506,28 @@ function encodeMetalbase(materialEntry,_materialName){
 
 function encodeMultilayer(materialEntry,_materialName){
 	console.log(materialEntry);
-	var Mlayer = nodeMaterial.clone() //stdMaterial.clone() //nodeMaterial.clone()
-	Mlayer.map=GRAY;
+	var Mlayer = stdMaterial.clone();
+	//var Mlayer = nodeMaterial.clone();
+	//Mlayer.map=GRAY;
 	Mlayer.name = _materialName;
-
+	
 	Mlayer.defines.MLSBInspect = false;
 	Mlayer.defines.USE_DETAILNORMAL = true;
+	
+	Mlayer.userData={
+		detailNormalScale : 1.0,
+		detailNormalMap : FlatNORM,
+		name:_materialName,
+		type:'multilayer',
+		GlobalNormal:null,
+		map : WHITE,
+		color : layerColor
+	};
 
-	Mlayer.userData.detailNormalScale = 1.0;
-	Mlayer.userData.detailNormalMap = FlatNORM;
 	Mlayer.userData.detailNormalMap.updateMatrix();
 	Mlayer.userData.detailNormalTransform =  Mlayer.userData.detailNormalMap.matrix;
 
-	
-	Mlayer.userData={name:_materialName,type:'multilayer',GlobalNormal:null};
+	//Mlayer.colorNode = texture(Mlayer.userData.map).mul(Mlayer.userData.color);
 
 	if (PARAMS.switchTransparency){
 		//activate transparency not, maskAlpha
@@ -1552,10 +1541,11 @@ function encodeMultilayer(materialEntry,_materialName){
 	//Mlayer.transparent=true;
 	//Mlayer.alphaTest = PARAMS.maskChannel;
 	if (materialEntry?.Data.hasOwnProperty('MultilayerMask')){
-		
+		Mlayer.opacityNode = float(1.0);
+		Mlayer.transparent = false;
 		//name of the Actual layer textures to be loaded will be stored
-		Mlayer.alphaMap = retDefTexture(materialEntry.Data.MultilayerMask,_materialName,"mlmask");
-		Mlayer.alphaMap.needsUpdate = true;
+		/* Mlayer.alphaMap = retDefTexture(materialEntry.Data.MultilayerMask,_materialName,"mlmask");
+		Mlayer.alphaMap.needsUpdate = true; */
 		Mlayer.mask = materialEntry.Data.MultilayerMask;
 	}
 
@@ -1583,7 +1573,6 @@ function encodeMultilayer(materialEntry,_materialName){
 		Mlayer.normalMap.needsUpdate = true;
 	}
 	Mlayer.needsUpdate = true;
-	console.log(Mlayer);
 	return Mlayer
 }
 
@@ -2165,7 +2154,6 @@ $("#thacanvas").on("mouseover",function(event){
 		matrixTransform.offsetX = offset.x
 		matrixTransform.offsetY = offset.y
 		matrixTransform.repeat = repVal
-
 		if ((layerMaterial.hasOwnProperty('diffuse')) && (layerMaterial?.diffuse?.texture!='' || layerMaterial?.diffuse?.texture!=null)){
 			if (PARAMS.textureDebug){
 				console.log(layerMaterial)
@@ -2363,6 +2351,9 @@ $("#thacanvas").on("mouseover",function(event){
 		var actualMaterial = MLSB.getMaterial();
 		var repChange = actualMaterial.xTiles * parseFloat(tileValue).toPrecision(4);
 		matrixTransform.repeat = parseFloat(repChange).toPrecision(4);
+
+		uvTiles = matrixTransform.repeat
+
 		updateUvTransform()
 		materialStack[selected].needsUpdate = true;
 	}
@@ -2578,6 +2569,8 @@ $("#thacanvas").on("mouseover",function(event){
 	try{
 		if (sceneLoaded()){
 			let selected = activeMLayer();
+			//Mlayer.colorNode = texture(WHITE).mul(color(0x808080));
+			//layerColor.value.set(0x00ff00);
 			materialStack[selected].setValues({color:new THREE.Color(color)});
 		}
 	}catch(error){
