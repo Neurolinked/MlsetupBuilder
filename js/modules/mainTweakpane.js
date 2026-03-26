@@ -180,7 +180,6 @@ EDAdvSetup.addBinding(PARAMS, 'forceMaterialHighlight',{label:'Material highligh
 });
 EDAdvSetup.addBlade({view: 'separator'});
 EDAdvSetup.addBinding(PARAMS, 'showImgOffSet',{label:'Export render with offsets data'}).on('change',(ev)=>{});
-EDAdvSetup.addBinding(PARAMS, 'normalMerger',{label:'Use Normal Merger'}).on('change',(ev)=>{});
 
 TDtabManager.pages[2].addBlade({
   view: 'buttongrid',

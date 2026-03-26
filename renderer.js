@@ -79,8 +79,7 @@ const PARAMS = {
 	showImgOffSet:false,
 	listSubmeshes:{},
 	randTurnOnOff:false,
-	randUBlend:false,
-	normalMerger:false
+	randUBlend:false
 };
 
 /**Optimize Reading from configuration */
