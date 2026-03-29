@@ -1977,7 +1977,7 @@ $("#resetShades span.choose").click(function(){
 
       uiApplyColor(colorSelected);
       //trigger color change
-      $("#thacanvas").trigger('changeColor', [colorSelected.style] );
+      $("#thacanvas").trigger('changeColor', [colorSelected] );
     });
   }
 
