@@ -2,7 +2,18 @@ var flippingdipping = thePIT.RConfig('flipmasks');
 var flipdipNorm = thePIT.RConfig('flipnorm');
 
 import * as THREE from 'three/webgpu';
-import {texture, uv, color, float, vec2, uniform } from 'three/tsl';
+
+import {
+	texture,
+	color,
+	float,
+	Fn,
+	materialColor,
+	uniform,
+	uv,
+	vec3,
+ } from 'three/tsl';
+
 import { OrbitControls } from 'orbit';
 import { Fog } from 'fog';
 import { Color } from 'color';
@@ -29,6 +40,41 @@ var TDengine = {
 	UVMapcanvas: document.getElementById('UVMapMe'),
 }
 
+function squareTexture(options){
+	var texture = false;
+	if (!options.hasOwnProperty("size")){
+		options.size = 4;
+	}
+
+	if ((!options.hasOwnProperty("color")) || (!Array.isArray(options.color))){
+		options.color = [1,0,0];
+	}
+	texture = new THREE.DataTexture(genTexture(new THREE.Color( ...options.color ) ),options.size,options.size)
+	if (options.hasOwnProperty("name")){
+		texture.name=String(options.name);
+	}
+	texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+	return texture;
+}
+
+const BLACK = squareTexture({size:4,color:[0,0,0],name:'black'});
+const GRAY = squareTexture({size:4,color:[0.5,0.5,0.5],name:'gray'});
+const WHITE = squareTexture({size:4,color:[1,1,1],name:'white'});
+const FlatNORM = squareTexture({size:4,color:[0.47,0.47,1.0],name:'white'}); 
+const ERROR = squareTexture({name:'error'});
+
+
+const layerTexture = texture(WHITE);
+var layerColor = color(new THREE.Color(0x808080));
+
+const mLayerColor = Fn( ( { material, geometry, object } ) => {
+	if (PARAMS.forceMaterialHighlight){
+		return vec3(1.0, 0.0, 0.0);
+	}
+	return materialColor.mul(layerColor);
+});
+
+
 function materialUV(tiles, multiplier=1.0){
 	var uvTiling = multiplier * parseFloat(tiles).toPrecision(4);
 	return uv().mul( uvTiling ).toVar()
@@ -36,26 +82,7 @@ function materialUV(tiles, multiplier=1.0){
 
 const uvScaled = materialUV(1.0);
 
-var colorMutable = new THREE.Color(.5,.5,.5)
-const layerColor = uniform( colorMutable );
 
-const BLACK = new THREE.DataTexture(genTexture(new THREE.Color( 0, 0 ,0 ) ),4,4);
-const GRAY = new THREE.DataTexture(genTexture(new THREE.Color( 0.5, 0.5 ,0.5) ),4,4);
-const WHITE = new THREE.DataTexture(genTexture(new THREE.Color( 1.0, 1.0 ,1.0 ) ),4,4);
-const FlatNORM = new THREE.DataTexture(genTexture(new THREE.Color( 0.47, 0.47 ,1 )),4,4);
-const ERROR = new THREE.DataTexture(genTexture(new THREE.Color( 1, 0 ,0 )),4,4);
-
-BLACK.userData = {name:"black"};
-GRAY.userData={name:"gray"};
-WHITE.userData={name:"white"};
-FlatNORM.userData={name:"normal"};
-ERROR.userData={name:"error"};
-
-BLACK.wrapS = BLACK.wrapT = THREE.RepeatWrapping;
-GRAY.wrapS = GRAY.wrapT = THREE.RepeatWrapping;
-WHITE.wrapS = WHITE.wrapT = THREE.RepeatWrapping;
-FlatNORM.wrapS = FlatNORM.wrapT = THREE.RepeatWrapping;
-ERROR.wrapS = ERROR.wrapT = THREE.RepeatWrapping;
 
 var flipcheck = document.getElementById("flipMask");
 
@@ -286,10 +313,6 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="de
 			}
 			return GRAY;
 	}
-}
-
-function isNodeMaterial(shader){
-	return (shader?.type.search(/Node/)>=0);
 }
 
 function getUVSubmeshIndex(sons){
@@ -986,7 +1009,7 @@ function MapTextures(textureObj){
 			textureObj.entries.forEach((toMap)=>{
 
 				let type = materialStack[toMap.shader].userData.type
-				let isNode = isNodeMaterial(materialStack[toMap.shader])
+				let isNode = materialStack[toMap.shader]?.isNodeMaterial
 
 				switch (toMap.maptype) {
 					case "mlmask":
@@ -1323,7 +1346,6 @@ function encodeMultilayer(materialEntry,_materialName){
 	Mlayer.name = _materialName;
 	
 	Mlayer.defines.MLSBInspect = false;
-	Mlayer.defines.USE_DETAILNORMAL = true;
 	
 	Mlayer.userData={
 		detailNormalScale : 1.0,
@@ -1331,14 +1353,13 @@ function encodeMultilayer(materialEntry,_materialName){
 		name:_materialName,
 		type:'multilayer',
 		GlobalNormal:null,
-		map : WHITE,
-		color : layerColor
+		layerColor : color(new THREE.Color(0x00FF00))
 	};
 
 	Mlayer.userData.detailNormalMap.updateMatrix();
 	Mlayer.userData.detailNormalTransform =  Mlayer.userData.detailNormalMap.matrix;
 
-	//Mlayer.colorNode = texture(Mlayer.userData.map).mul(Mlayer.userData.color);
+	Mlayer.colorNode = mLayerColor(); //texture(Mlayer.userData.map).mul(Mlayer.userData.color);
 
 	if (PARAMS.switchTransparency){
 		//activate transparency not, maskAlpha
@@ -1661,7 +1682,6 @@ function LoadModel(path){
 
 			MDLloader.parse( modelstring ,'', ( glbscene ) => {
 				glbscene.scene.traverse( function ( child ) {
-					
 					if (child.type=="Bone"){
 						//Boned ||= true;
 						MLSB.TreeD.model.bones = true;
@@ -1687,6 +1707,12 @@ function LoadModel(path){
 								if (!child.userData.hasOwnProperty('materialNames')){
 									notifyMe(`Need a MaterialName for {child.name}`)
 								}else{
+
+									if (materialStack[child.userData?.materialNames[0]].userData.type=='multilayer'){
+										child.userData.multilayer=true
+									}else{
+										child.userData.multilayer=false
+									}
 									child.material = materialStack[child.userData?.materialNames[0]];
 								}
 								child.material.needsUpdate=true;
@@ -1910,6 +1936,7 @@ $("#thacanvas").on("mouseover",function(event){
 		$(window).trigger("limitLayers",materialStack[selected].userData.layers);
 	}
 }).on('renderMaterial',function(ev,layerMaterial){
+	return
 	if (sceneLoaded()){
 
 		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
@@ -2273,7 +2300,6 @@ $("#thacanvas").on("mouseover",function(event){
 	}
 }).on('hairColorSwitch',function(ev,profile){
 	console.log(profile)
-	
 }).on('updCamera',function(ev){
 	if (PARAMS.cameraNear > PARAMS.cameraFar){
 		PARAMS.cameraFar = PARAMS.cameraNear+1;
@@ -2376,12 +2402,21 @@ $("#thacanvas").on("mouseover",function(event){
 	if (materialStack[selected]){
 		materialStack[selected].setValues({opacity:opacity});
 	}
-}).on('changeColor',function(ev, color){
+}).on('changeColor',function(ev, _color){
 	//change the color ONLY if a layer is selected
 	try{
 		if (sceneLoaded()){
 			let selected = activeMLayer();
-			materialStack[selected].setValues({color:new THREE.Color(color)});
+			if (materialStack[selected]?.isNodeMaterial){
+				console.log(layerColor);
+				layerColor = color(new THREE.Color(..._color.rgb));
+				debugger
+				console.log(layerColor);
+				materialStack[selected].colorNode.needsUpdate = true;
+				//materialStack[selected].userData.layerColor.value = color(new THREE.Color(_color.rgb));
+			}else{
+				materialStack[selected].setValues({color:new THREE.Color(_color.style)});
+			}
 		}
 	}catch(error){
 		notifyMe(error);
