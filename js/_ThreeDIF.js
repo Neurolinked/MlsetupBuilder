@@ -54,6 +54,8 @@ function squareTexture(options){
 		texture.name=String(options.name);
 	}
 	texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+	texture.needsUpdate=true;
+	
 	return texture;
 }
 
@@ -65,13 +67,15 @@ const ERROR = squareTexture({name:'error'});
 
 
 const layerTexture = texture(WHITE);
-var layerColor = color(new THREE.Color(0x808080));
+var layerColor = uniform(color(new THREE.Color(0x808080)));
 
 const mLayerColor = Fn( ( { material, geometry, object } ) => {
+	console.log(material.userData.layerColor);
 	if (PARAMS.forceMaterialHighlight){
-		return vec3(1.0, 0.0, 0.0);
+		layerColor.value.set([0,1,0]);
+		return layerColor;
 	}
-	return materialColor.mul(layerColor);
+	return material.userData.diffuseTexture.mul(material.userData.layerColor);
 });
 
 
@@ -1340,8 +1344,8 @@ function encodeMetalbase(materialEntry,_materialName){
 }
 
 function encodeMultilayer(materialEntry,_materialName){
-	var Mlayer = stdMaterial.clone();
-	//var Mlayer = nodeMaterial.clone();
+	//var Mlayer = stdMaterial.clone();
+	var Mlayer = nodeMaterial.clone();
 	//Mlayer.map=GRAY;
 	Mlayer.name = _materialName;
 	
@@ -1353,7 +1357,8 @@ function encodeMultilayer(materialEntry,_materialName){
 		name:_materialName,
 		type:'multilayer',
 		GlobalNormal:null,
-		layerColor : color(new THREE.Color(0x00FF00))
+		layerColor : uniform(color(new THREE.Color(0x00FF00))),
+		diffuseTexture : texture(WHITE)
 	};
 
 	Mlayer.userData.detailNormalMap.updateMatrix();
@@ -2408,12 +2413,7 @@ $("#thacanvas").on("mouseover",function(event){
 		if (sceneLoaded()){
 			let selected = activeMLayer();
 			if (materialStack[selected]?.isNodeMaterial){
-				console.log(layerColor);
-				layerColor = color(new THREE.Color(..._color.rgb));
-				debugger
-				console.log(layerColor);
-				materialStack[selected].colorNode.needsUpdate = true;
-				//materialStack[selected].userData.layerColor.value = color(new THREE.Color(_color.rgb));
+				materialStack[selected].userData.layerColor.value.set(..._color.rgb);
 			}else{
 				materialStack[selected].setValues({color:new THREE.Color(_color.style)});
 			}
