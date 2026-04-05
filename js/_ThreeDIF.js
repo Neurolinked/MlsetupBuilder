@@ -1800,6 +1800,14 @@ function composeMultilayerMaterial(material){
 	return materialObj;
 }
 
+function TSLsetTextureKind(texture,kind,selected){
+	switch (kind){
+		case 'diffuse':
+			materialStack[selected].userData.diffuseTexture = texture;
+			materialStack[selected].userData.diffuseTexture.needsUpdate = true;
+			break;
+	}	
+}
 function TSLresetTextureKind(kind,selected){
 	switch (kind){
 		case 'diffuse':
@@ -2117,6 +2125,7 @@ $("#thacanvas").on("mouseover",function(event){
 		//when everything is loaded then we proceed
 		materialIsLoaded
 			.then((materialTexture)=>{
+				console.log(materialStack[selected].userData.diffuseTexture)
 				textureStack = [...textureStack, ...materialTexture];
 			}).catch((error)=>{
 				console.warn(`An error happened, reset to default:${error}`)
@@ -2134,11 +2143,10 @@ $("#thacanvas").on("mouseover",function(event){
 						
 						if (checkMaps(materialTextureFile)<0){
 							let Cr_texture = getEncodedFileName(materialTextureFile).toString();
-							let tInd = textureDock.findIndex((elm) => elm.id==Cr_texture);
+							let tInd = textureStack.findIndex((elm) => elm.id==Cr_texture);
 
-							if (textureDock[tInd]!=undefined){
-								console.log(`Not found`);
-								console.log(textureDock[tInd]);
+							if (textureStack[tInd]!=undefined){
+								TSLsetTextureKind(textureStack[tInd],kind,selected)
 							}else{
 								TSLresetTextureKind(kind,selected);
 							}
