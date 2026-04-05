@@ -70,12 +70,11 @@ const layerTexture = texture(WHITE);
 var layerColor = uniform(color(new THREE.Color(0x808080)));
 
 const mLayerColor = Fn( ( { material, geometry, object } ) => {
-	console.log(material.userData.layerColor);
 	if (PARAMS.forceMaterialHighlight){
 		layerColor.value.set([0,1,0]);
 		return layerColor;
 	}
-	return material.userData.diffuseTexture.mul(material.userData.layerColor);
+	return texture(material.userData.diffuseTexture).mul(material.userData.layerColor);
 });
 
 
@@ -633,14 +632,6 @@ function updateUvTransform(material=null) {
 			materialStack[selected].metalnessMap.offset.set( matrixTransform.offsetX, matrixTransform.offsetY )
 			materialStack[selected].metalnessMap.repeat.set( matrixTransform.repeat, matrixTransform.repeat )
 		}
-		/* if (materialStack[selected].userData.detailNormalMap===undefined){
-			console.error("no detail normal map")
-		}else{
-			materialStack[selected].userData.detailNormalMap.repeat.set(matrixTransform.repeat, matrixTransform.repeat)
-			materialStack[selected].userData.detailNormalMap.offset.set(matrixTransform.offsetX, matrixTransform.offsetY)
-			materialStack[selected].userData.detailNormalMap.updateMatrix();
-			materialStack[selected].userData.detailNormalTransform = materialStack[selected].userData.detailNormalMap.matrix;
-		} */
 	} catch (error) {
 		console.error(error);
 	}
@@ -789,28 +780,6 @@ function animate() {
 	}
 	
 	requestAnimationFrame(animate);
-}
-
-/**
- * Load an image from a given URL
- * @param {ArrayBuffer} textureData dataview of the image datas
- * @param {Number} width size in pixel of the image width
- * @param {Number} height size in pixel of the image height
- * @returns {Uint8Array} RGBA channels ArrayBuffer of the texture
- */
-function rebuildText(textureData, width, height){
-	var defSize = (width*height)*4;
-	var imageData = new Uint8Array(defSize);
-	var k=0;
-	for (let i = 0; i < defSize; i += 4) {
-		// Modify pixel data
-		imageData[i] = textureData[k];  // R value
-		imageData[i + 1] = textureData[k]    // G value
-		imageData[i + 2] = textureData[k]  // B value
-		imageData[i + 3] = 255;  // A value
-		k++;
-	}
-	return imageData;
 }
 
 
@@ -1358,7 +1327,7 @@ function encodeMultilayer(materialEntry,_materialName){
 		type:'multilayer',
 		GlobalNormal:null,
 		layerColor : uniform(color(new THREE.Color(0x00FF00))),
-		diffuseTexture : texture(WHITE)
+		diffuseTexture : WHITE
 	};
 
 	Mlayer.userData.detailNormalMap.updateMatrix();
@@ -1831,6 +1800,23 @@ function composeMultilayerMaterial(material){
 	return materialObj;
 }
 
+function TSLresetTextureKind(kind,selected){
+	switch (kind){
+		case 'diffuse':
+			materialStack[selected].userData.diffuseTexture = GRAY;
+			break;
+		/* case 'metal':
+			materialStack[selected].userData.metalMap.value.set(BLACK);
+			break;
+		case 'roughness':
+			materialStack[selected].userData.roughnessMap.value.set(WHITE);
+			break;
+		case 'normal':
+			//TODO reseet detailNormal #materialMap;
+			break; */
+	}
+}
+
 function resetTextureKind(kind,selected){
 	switch (kind){
 		case 'diffuse':
@@ -1940,54 +1926,11 @@ $("#thacanvas").on("mouseover",function(event){
 	if (materialStack[selected]?.userData.hasOwnProperty("layers")){
 		$(window).trigger("limitLayers",materialStack[selected].userData.layers);
 	}
-}).on('renderMaterial',function(ev,layerMaterial){
-	return
+}).on('renderLegacy',function(ev,layerMaterial){
 	if (sceneLoaded()){
-
-		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
+		console.log(layerMaterial);
 		let selected = activeMLayer();
-		/* //when everything is loaded then we proceed
-		materialIsLoaded
-			.then((materialTexture)=>{
-				textureStack = [...textureStack, ...materialTexture];
-			}).catch((error)=>{
-				console.warn(`An error happened, reset to default:${error}`)
-			}).finally(()=>{
-				//Apply the texture
-
-				const textureKinds = ['diffuse','roughness','metal','normal'];
-				var materialTextureFile = null;
-				
-
-				textureKinds.forEach((kind,id)=>{
-					if (materialTextureFile = materialCheckAttribute(kind,layerMaterial)){
-						if (PARAMS.textureDebug){
-							console.log(materialTextureFile)
-						}
-						
-						if (checkMaps(materialTextureFile)<0){
-							let Cr_texture = getEncodedFileName(materialTextureFile).toString();
-							let tInd = textureDock.findIndex((elm) => elm.id==Cr_texture);
-
-							if (textureDock[tInd]!=undefined){
-								console.log(textureDock[tInd]);
-							}else{
-								resetTextureKind(kind,selected);
-							}
-						}else{
-							resetTextureKind(kind,selected);
-						}
-					}else{
-						if (PARAMS.textureDebug){
-							console.log(layerMaterial,kind)
-						}
-						resetTextureKind(kind,selected);
-					}
-				});
-
-				materialStack[selected].map.needsUpdate=true;
-			}); */
-		//return
+		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
 		//check if the material Has a diffuse map
 		var repVal = layerMaterial?.xTiles * parseFloat($("#layerTile").val());
 		var offset_h, offset_v
@@ -2164,6 +2107,54 @@ $("#thacanvas").on("mouseover",function(event){
 		updateUvTransform();
 		materialStack[selected].needsUpdate = true
 		console.log(TDengine.scene)
+	}
+}).on('renderMaterial',function(ev,layerMaterial){
+	
+	if (sceneLoaded()){
+		let selected = activeMLayer();
+		const materialIsLoaded = LoadMaterial(MLSB.TreeD.lastMaterial)
+		
+		//when everything is loaded then we proceed
+		materialIsLoaded
+			.then((materialTexture)=>{
+				textureStack = [...textureStack, ...materialTexture];
+			}).catch((error)=>{
+				console.warn(`An error happened, reset to default:${error}`)
+			}).finally(()=>{
+				//Apply the texture
+				const textureKinds = ['diffuse'];
+				//const textureKinds = ['diffuse','roughness','metal','normal'];
+				var materialTextureFile = null;
+
+				textureKinds.forEach((kind,id)=>{
+					if (materialTextureFile = materialCheckAttribute(kind,layerMaterial)){
+						if (PARAMS.textureDebug){
+							console.log(materialTextureFile)
+						}
+						
+						if (checkMaps(materialTextureFile)<0){
+							let Cr_texture = getEncodedFileName(materialTextureFile).toString();
+							let tInd = textureDock.findIndex((elm) => elm.id==Cr_texture);
+
+							if (textureDock[tInd]!=undefined){
+								console.log(`Not found`);
+								console.log(textureDock[tInd]);
+							}else{
+								TSLresetTextureKind(kind,selected);
+							}
+						}else{
+							TSLresetTextureKind(kind,selected);
+						}
+					}else{
+						if (PARAMS.textureDebug){
+							console.log(layerMaterial,kind)
+						}
+						TSLresetTextureKind(kind,selected);
+					}
+				});
+			materialStack[selected].userData.diffuseTexture.needsUpdate=true;
+			//materialStack[selected].needsUpdate=true;
+		});
 	}
 }).on("texOffset",function(ev,source='layer'){
 	var tileMul = parseFloat($("#layerTile").prev("[data-mul]").data("mul"))

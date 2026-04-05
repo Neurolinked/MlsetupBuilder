@@ -1,3 +1,25 @@
+/**
+ * Load an image from a given URL
+ * @param {ArrayBuffer} textureData dataview of the image datas
+ * @param {Number} width size in pixel of the image width
+ * @param {Number} height size in pixel of the image height
+ * @returns {Uint8Array} RGBA channels ArrayBuffer of the texture
+ */
+function rebuildText(textureData, width, height){
+	var defSize = (width*height)*4;
+	var imageData = new Uint8Array(defSize);
+	var k=0;
+	for (let i = 0; i < defSize; i += 4) {
+		// Modify pixel data
+		imageData[i] = textureData[k];  // R value
+		imageData[i + 1] = textureData[k]    // G value
+		imageData[i + 2] = textureData[k]  // B value
+		imageData[i + 3] = 255;  // A value
+		k++;
+	}
+	return imageData;
+}
+
 //Texture binary data operations
 //String to bufferArray
 function str2ab(str) {
