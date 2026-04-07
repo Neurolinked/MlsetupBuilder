@@ -1382,6 +1382,22 @@ function encodeMultilayer(materialEntry,_materialName){
 	return Mlayer
 }
 
+function encodeParallax(shader,caller){
+	if (shader.Data.hasOwnProperty("ParalaxTexture")){
+		var paralaxID = getEncodedFileName(shader.Data.ParalaxTexture);
+		if (textureStack[paralaxID]===undefined){
+			textureStack[paralaxID] = retDefTexture(shader.Data.ParalaxTexture,shader.name,"parallax");
+			textureStack[paralaxID].wrapS = THREE.RepeatWrapping
+			textureStack[paralaxID].wrapT = THREE.RepeatWrapping
+			textureStack[paralaxID].userData.type="parallax";
+			caller.userData.ParallaxTX = textureStack[paralaxID]
+		}else{
+			caller.userData.ParallaxTX = textureStack[paralaxID]
+		}
+	}
+	return caller;
+}
+
 function encodeFX(materialEntry,_materialName){
 	let actualMaterial = lambertType.clone();
 	let fxConfig = {name:_materialName,userData:{type:'fx'},color:0xFFFFFF};
@@ -1392,7 +1408,11 @@ function encodeFX(materialEntry,_materialName){
 	if (materialEntry?.Data.hasOwnProperty('EmissiveColor')){
 		fxConfig.emissive = new THREE.Color(`rgb(${materialEntry.Data.EmissiveColor.Red},${materialEntry.Data.EmissiveColor.Green},${materialEntry.Data.EmissiveColor.Blue})`)
 	}
-	
+
+	if (materialEntry.MaterialTemplate=="base\\fx\\shaders\\parallaxscreen.mt"){
+		fxConfig = encodeParallax(materialEntry,fxConfig);
+	}
+
 	console.log(materialEntry);
 	actualMaterial.setValues(fxConfig);
 	return actualMaterial;
