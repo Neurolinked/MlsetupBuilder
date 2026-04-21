@@ -159,7 +159,17 @@ function getImageInfo(binaryData){
 
 		if (PARAMS.textureDebug){console.log(textureMessage)}
 
-		return {width:pngWidth,height:pngHeight,format:'PNG', colorType:pngColorType,bytes:pngBit,compress:pngCompression,filter:pngFilter,Ilaced:pngInterlaced,channels:pngchannels}
+		return {
+			width:pngWidth,
+			height:pngHeight,
+			format:'PNG',
+			colorType:pngColorType,
+			bytes:pngBit,
+			compress:pngCompression,
+			filter:pngFilter,
+			Ilaced:pngInterlaced,
+			channels:pngchannels
+		}
 	}else{
 		console.warn(`${binaryData.slice(0,4)} format`)
 		return {width:0,height:0,format:'Unknown'};
