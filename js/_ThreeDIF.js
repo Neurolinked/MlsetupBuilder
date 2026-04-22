@@ -64,12 +64,13 @@ const GRAY = squareTexture({size:4,color:[0.5,0.5,0.5],name:'gray'});
 const WHITE = squareTexture({size:4,color:[1,1,1],name:'white'});
 const FlatNORM = squareTexture({size:4,color:[0.47,0.47,1.0],name:'white'}); 
 const ERROR = squareTexture({name:'error'});
+const DEFD = squareTexture({size:4,color:[0.4921875,0.5,1.0],name:'default'});
 
 
 const layerTexture = texture(WHITE);
 var layerColor = uniform(color(new THREE.Color(0x808080)));
 
-const mLayerColor = Fn( ( { material, geometry, object } ) => {
+const tslMultilayerColor = Fn( ( { material, geometry, object } ) => {
 	if (PARAMS.forceMaterialHighlight){
 		layerColor.value.set([0,1,0]);
 		return layerColor;
@@ -77,6 +78,22 @@ const mLayerColor = Fn( ( { material, geometry, object } ) => {
 	return texture(material.userData.diffuseTexture).mul(material.userData.layerColor);
 });
 
+/**
+ *  placeholder for normal Mixing
+ */
+const tslGDNormals = Fn(( { material, geometry, object } ) => {
+	console.log(Object.keys(material.userData.detailNormalMap))
+	return texture(FlatNORM);
+})
+
+/**
+ * Webgl wanted the green channel for the roughness, i was swapping red and green channels
+ * to get it in the workers
+ * 
+ */
+const tslRoughness = Fn(( { material, geometry, object } ) => {
+	return texture(material.userData.roughnessTexture).rrr;
+})
 
 function materialUV(tiles, multiplier=1.0){
 	var uvTiling = multiplier * parseFloat(tiles).toPrecision(4);
@@ -84,8 +101,6 @@ function materialUV(tiles, multiplier=1.0){
 }
 
 const uvScaled = materialUV(1.0);
-
-
 
 var flipcheck = document.getElementById("flipMask");
 
@@ -104,7 +119,6 @@ if (window.Worker) {
     imgWorker = new Worker('js/workers/imgWork.js');
   
     imgWorker.onmessage = (event) =>{
-
 		var command, datas
 		[command, ...datas] = event.data;
 		//console.log(command,datas);
@@ -161,7 +175,6 @@ if (window.Worker) {
 				let offset_v = (-1 *  mLsetup.Layers[MLSB.Editor.layerSelected].offsetV) * repVal
 
 				var offset = new THREE.Vector2(offset_h,offset_v);
-				console.log(datas[4]);
 
 				materialStack[datas[4]].roughnessMap = textureStack[roughMD5Code];
 
@@ -301,9 +314,13 @@ function retDefTexture(mapName="engine\\textures\\editor\\grey.xbm",material="de
 		case "engine\\textures\\editor\\white.xbm":
 			return WHITE;
 			break;
+		case "base\\surfaces\\materials\\default\\default_n.xbm":
 		case "engine\\textures\\editor\\normal.xbm":
 			return FlatNORM;
 			break; 
+		case "base\\surfaces\\materials\\default\\default_d.xbm":
+			return DEFD;
+			break;
 		default:
 			if (mapName!="engine\\textures\\editor\\grey.xbm"){
 				if (textureDock.filter(elm=>elm.file==mapName).length<=0){
@@ -550,7 +567,11 @@ function cleanScene(){
 			materialStack.forEach((material) => { material.dispose() });
 			materialStack=[];
 
-			textureStack.forEach((element) => {element.dispose()});
+			textureStack.forEach((element) => {
+				if (element.hasOwnProperty(dispose)){
+					element.dispose()
+				}
+			});
 			textureStack=[];
 			//the Dock loading of textures
 			textureDock=[];
@@ -614,6 +635,23 @@ function getOffsetValues(){
 	return [offset_h , offset_v];
 }
 
+function tslUpdateUVTransform(){
+	try {
+		if (PARAMS.textureDebug){console.log(matrixTransform)}
+		let selected = activeMLayer();
+		if (materialStack[selected].userData.diffuseTexture?.isTexture){
+			materialStack[selected].userData
+				.diffuseTexture.offset
+					.set( matrixTransform.offsetX, matrixTransform.offsetY )
+			materialStack[selected].userData
+				.diffuseTexture.repeat
+					.set( matrixTransform.repeat, matrixTransform.repeat )
+		}
+	} catch (error) {
+		console.error(`TSL upd UV : ${error}`);
+	}
+}
+
 function updateUvTransform(material=null) {
 	
 	try {
@@ -663,6 +701,7 @@ async function init() {
 		antialias:true,
 		canvas:TDengine.MainCanvas,
 	})
+	
 	TDengine.renderer.setPixelRatio( window.devicePixelRatio );
 	await TDengine.renderer.init();
 
@@ -846,13 +885,13 @@ async function _getFileContent(textureObj){
 					if (PARAMS.textureDebug){console.log("no Info Property")}
 				}
 			}
-			
+
+			textureObj.info.Tformat = getTHREEFormat(textureObj);
 			
 			if (textureObj.maptype!='mlmask'){
 				pushTexturetoPanel(realTexturePath, textureObj.info.width, textureObj.info.height,textureObj.maptype,textureObj.shader);
 			}
 			
-
 			if (textureObj.info?.format=='DDS'){
 
 				var test = ddsResolve(textureResult,textureObj.info)
@@ -890,7 +929,9 @@ async function _getFileContent(textureObj){
  *  * @param {Number} TextureStackIndex index of the texture in textureStack array
  * @returns nothing
  */
-function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
+function genDataTexture(TexturePromise,DockTexture){
+	var TextureStackIndex = getEncodedFileName(DockTexture.file).toString();
+
 	return new Promise((resolve, reject)=>{
 		try {
 			var THREEFormat = THREE.RGBAFormat //Default format for PNGs
@@ -918,10 +959,13 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 			}else if (DockTexture.info.format=='PNG'){
 				textureStack[TextureStackIndex] = new THREE.DataTexture(TexturePromise, DockTexture.info.width, DockTexture.info.height,THREEFormat);
 			}
+
+			DockTexture.format = THREEFormat;
 			textureStack[TextureStackIndex].wrapS=THREE.RepeatWrapping;
 			textureStack[TextureStackIndex].wrapT=THREE.RepeatWrapping;
 			//textureStack[TextureStackIndex].anisotropy = TDengine.renderer.capabilities.getMaxAnisotropy();
-
+			//textureStack[TextureStackIndex].userData.file = DockTexture.file
+			//TODO BAD practice after generating painting inside here is wrong
 			paintDatas(TexturePromise,
 				DockTexture.info.width,
 				DockTexture.info.height,
@@ -929,6 +973,7 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 				THREEFormat
 			)
 
+			//TODO BAD practice after launch postmessages and MapTextures
 			switch (DockTexture.maptype) {
 				case 'normal':
 					/* imgWorker.postMessage([
@@ -941,6 +986,7 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 					]); */
 					break;
 				case 'roughness':
+					break;
 					console.warn(`roughness worker on`);
 					
 					imgWorker.postMessage([
@@ -953,7 +999,9 @@ function genDataTexture(TexturePromise,DockTexture,TextureStackIndex){
 					]);
 					break;
 				default:
-					MapTextures(DockTexture)
+					//Has to be removed 
+					break;
+					//MapTextures(DockTexture)
 					break;
 			}
 
@@ -979,9 +1027,9 @@ function MapTextures(textureObj){
 				console.log(`Mapping texture`)
 				console.log(textureObj);
 			}
-			textureObj.entries.forEach((toMap)=>{
 
-				let type = materialStack[toMap.shader].userData.type
+			textureObj.entries.forEach((toMap)=>{
+				let type = materialStack[toMap.shader]?.userData.type
 				let isNode = materialStack[toMap.shader]?.isNodeMaterial
 
 				switch (toMap.maptype) {
@@ -1021,6 +1069,8 @@ function MapTextures(textureObj){
 			throw new Error('The texture object lack information');
 		}
 	} catch (error) {
+		console.log(textureObj);
+		console.log(`MapTextures ${error}`);
 		notifyMe(`MapTextures ${error}`)
 	}
 }
@@ -1094,7 +1144,6 @@ async function ProcessStackTextures(){
 	
 
 	Promise.allSettled(texturePromise).then((res)=>{
-		
 		res.forEach((elm,index)=>{
 			if (elm.status=='rejected'){return}
 
@@ -1174,7 +1223,7 @@ async function ProcessStackTextures(){
 							layer: MLSB.Editor.layerSelected
 						}
 					]); */
-					MapTextures(textureDock[index])
+					//MapTextures(textureDock[index])
 					break;
 				case 'normal':
 					imgWorker.postMessage([
@@ -1212,6 +1261,8 @@ async function ProcessStackTextures(){
 		$("#thacanvas").trigger("switchMlayer");
 	}).catch((error)=>{
 		notifyMe(`ProcessStackTextures ${error}`);
+	}).finally(()=>{
+
 	})
 }
 /*
@@ -1326,14 +1377,16 @@ function encodeMultilayer(materialEntry,_materialName){
 		name:_materialName,
 		type:'multilayer',
 		GlobalNormal:null,
-		layerColor : uniform(color(new THREE.Color(0x00FF00))),
-		diffuseTexture : WHITE
+		layerColor : uniform(color(new THREE.Color(0x808080))),
+		diffuseTexture : WHITE,
+		roughnessTexture : WHITE,
+		UVtiles: uniform(1.0),
 	};
 
 	Mlayer.userData.detailNormalMap.updateMatrix();
 	Mlayer.userData.detailNormalTransform =  Mlayer.userData.detailNormalMap.matrix;
 
-	Mlayer.colorNode = mLayerColor(); //texture(Mlayer.userData.map).mul(Mlayer.userData.color);
+	Mlayer.colorNode = tslMultilayerColor(); //texture(Mlayer.userData.map).mul(Mlayer.userData.color);
 
 	if (PARAMS.switchTransparency){
 		//activate transparency not, maskAlpha
@@ -1386,7 +1439,7 @@ function encodeParallax(shader,caller){
 	if (shader.Data.hasOwnProperty("ParalaxTexture")){
 		var paralaxID = getEncodedFileName(shader.Data.ParalaxTexture);
 		if (textureStack[paralaxID]===undefined){
-			textureStack[paralaxID] = retDefTexture(shader.Data.ParalaxTexture,shader.name,"parallax");
+			textureStack[paralaxID] = retDefTexture(shader.Data.ParalaxTexture,shader.Name,"parallax");
 			textureStack[paralaxID].wrapS = THREE.RepeatWrapping
 			textureStack[paralaxID].wrapT = THREE.RepeatWrapping
 			textureStack[paralaxID].userData.type="parallax";
@@ -1552,7 +1605,6 @@ function LoadMaterial(DBmaterial,checkTextures=true){
 					textureList.splice(index,1);
 				}
 			});
-
 		}
 		/*
 		Use the reduce on the textureList to load all the files
@@ -1565,11 +1617,23 @@ function LoadMaterial(DBmaterial,checkTextures=true){
 			});
 		},Promise.resolve())
 		.then(()=>{
+			//TODO we need to generate the datatextures, at now it only compile a
+			// list with the content of the file, but it doesn't rebuild the
+			//paint material Textures
+			return new Promise((resolve,reject)=>{
+				textureList.forEach((texture)=>{
+					genDataTexture(texture.content,texture)
+				})
+				resolve(true);
+			})
+		}).then(()=>{
 			console.log(`resolved ${DBmaterial}`);
 			resolve(textureList)
 		}).catch((error)=>{
 			notifyMe(error);
 			reject([]);
+		}).finally(()=>{
+			console.log(textureStack);
 		})
 	});
 }
@@ -1823,11 +1887,13 @@ function composeMultilayerMaterial(material){
 function TSLsetTextureKind(texture,kind,selected){
 	switch (kind){
 		case 'diffuse':
+			console.log("setting texture diffuse to",texture)
 			materialStack[selected].userData.diffuseTexture = texture;
-			materialStack[selected].userData.diffuseTexture.needsUpdate = true;
+			materialStack[selected].userData.diffuseTexture.needsUpdate=true;
 			break;
-	}	
+	}
 }
+
 function TSLresetTextureKind(kind,selected){
 	switch (kind){
 		case 'diffuse':
@@ -1993,7 +2059,7 @@ $("#thacanvas").on("mouseover",function(event){
 							notifyMe(`There was a problem loading the texture ${layerMaterial.diffuse.texture}`)
 							return
 						}
-						genDataTexture(texturePromised,textureDock[tInd],C_diffuse).then((response)=>{
+						genDataTexture(texturePromised,textureDock[tInd]).then((response)=>{
 							if (PARAMS.textureDebug){console.log(textureStack[C_diffuse])}
 							//repVal = layerMaterial.xTiles * parseFloat($("#layerTile").val())
 
@@ -2036,7 +2102,7 @@ $("#thacanvas").on("mouseover",function(event){
 
 					var texProm = _getFileContent(textureDock[tInd])
 						.then((texturePromised)=>{
-							return genDataTexture(texturePromised,textureDock[tInd],C_rough)
+							return genDataTexture(texturePromised,textureDock[tInd])
 						}).then((response)=>{
 							if (PARAMS.textureDebug){console.log(textureStack[C_rough])}
 							materialStack[selected].roughnessMap = textureStack[C_rough]
@@ -2076,7 +2142,7 @@ $("#thacanvas").on("mouseover",function(event){
 
 					var texProm = _getFileContent(textureDock[tInd])
 						.then((texturePromised)=>{
-							return genDataTexture(texturePromised,textureDock[tInd],C_metal);
+							return genDataTexture(texturePromised,textureDock[tInd]);
 						}).then((response)=>{
 								if (PARAMS.textureDebug){console.log(textureStack[C_metal])}
 
@@ -2099,7 +2165,7 @@ $("#thacanvas").on("mouseover",function(event){
 
 		// load the material normal
 		if (layerMaterial.hasOwnProperty('normal')) {
-			//TODO continue in rendermaterial and blend material + core model normals
+			//TODO continue in - and blend material + core model normals
 			var myTex = textureDock.filter(elm=>elm.file==layerMaterial.normal.texture);
 			let C_normal = getEncodedFileName(layerMaterial.normal.texture);
 
@@ -2113,7 +2179,7 @@ $("#thacanvas").on("mouseover",function(event){
 				let tInd = textureDock.findIndex((elm) => elm.file==layerMaterial.normal.texture)
 				var texProm = _getFileContent(textureDock[tInd])
 				.then((texturePromised)=>{
-					return genDataTexture(texturePromised,textureDock[tInd],C_normal);
+					return genDataTexture(texturePromised,textureDock[tInd]);
 				})
 				.then((response)=>{
 					//paintDatas(textureStack[C_normal].data)
@@ -2145,8 +2211,8 @@ $("#thacanvas").on("mouseover",function(event){
 		//when everything is loaded then we proceed
 		materialIsLoaded
 			.then((materialTexture)=>{
-				console.log(materialStack[selected].userData.diffuseTexture)
-				textureStack = [...textureStack, ...materialTexture];
+				textureDock = [...textureDock, ...materialTexture];
+				//textureStack = [...textureStack, ...materialTexture];
 			}).catch((error)=>{
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
@@ -2154,34 +2220,34 @@ $("#thacanvas").on("mouseover",function(event){
 				const textureKinds = ['diffuse'];
 				//const textureKinds = ['diffuse','roughness','metal','normal'];
 				var materialTextureFile = null;
-
 				textureKinds.forEach((kind,id)=>{
 					if (materialTextureFile = materialCheckAttribute(kind,layerMaterial)){
 						if (PARAMS.textureDebug){
 							console.log(materialTextureFile)
 						}
-						
 						if (checkMaps(materialTextureFile)<0){
 							let Cr_texture = getEncodedFileName(materialTextureFile).toString();
-							let tInd = textureStack.findIndex((elm) => elm.id==Cr_texture);
+							let tInd = textureDock.findIndex((elm) => elm.id==Cr_texture);
 
-							if (textureStack[tInd]!=undefined){
-								TSLsetTextureKind(textureStack[tInd],kind,selected)
+							if (textureStack[Cr_texture]!=undefined){
+								TSLsetTextureKind(textureStack[Cr_texture],kind,selected)
 							}else{
+								console.info(`reset texture for ${MLSB.TreeD.lastMaterial}`)
 								TSLresetTextureKind(kind,selected);
 							}
 						}else{
+							console.info(`reset texture for ${MLSB.TreeD.lastMaterial}`)
 							TSLresetTextureKind(kind,selected);
 						}
 					}else{
 						if (PARAMS.textureDebug){
 							console.log(layerMaterial,kind)
 						}
+						console.info(`reset texture for ${MLSB.TreeD.lastMaterial}`)
 						TSLresetTextureKind(kind,selected);
 					}
 				});
-			materialStack[selected].userData.diffuseTexture.needsUpdate=true;
-			//materialStack[selected].needsUpdate=true;
+				materialStack[selected].needsUpdate=true;
 		});
 	}
 }).on("texOffset",function(ev,source='layer'){
@@ -2195,9 +2261,11 @@ $("#thacanvas").on("mouseover",function(event){
 		matrixTransform.repeat = tileValue
 		matrixTransform.offsetX = parseFloat(offset.x).toPrecision(4)
 		matrixTransform.offsetY = parseFloat(offset.y).toPrecision(4)
-		updateUvTransform()
+		tslUpdateUVTransform();
+		//updateUvTransform()
 	}
 }).on("texTiled",function(ev,source='layer'){
+	//TODO FIX this
 	if (sceneLoaded()){
 		var tileValue = mLsetup.Layers[MLSB.Editor.layerSelected].tiles;
 		if (source == 'ui'){
@@ -2215,10 +2283,8 @@ $("#thacanvas").on("mouseover",function(event){
 		var repChange = actualMaterial.xTiles * parseFloat(tileValue).toPrecision(4);
 		matrixTransform.repeat = parseFloat(repChange).toPrecision(4);
 
-		uvTiles = matrixTransform.repeat
-
-		updateUvTransform()
-		materialStack[selected].needsUpdate = true;
+		let uvTiles = matrixTransform.repeat
+		tslUpdateUVTransform();
 	}
 }).on('switchLayer',function(ev,layer=0){
 	if (sceneLoaded()){
