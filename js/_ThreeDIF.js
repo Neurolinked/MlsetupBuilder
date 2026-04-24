@@ -78,6 +78,7 @@ const tslMultilayerColor = Fn( ( { material, geometry, object } ) => {
 	return texture(material.userData.diffuseTexture).mul(material.userData.layerColor);
 });
 
+
 /**
  *  placeholder for normal Mixing
  */
@@ -92,7 +93,8 @@ const tslGDNormals = Fn(( { material, geometry, object } ) => {
  * 
  */
 const tslRoughness = Fn(( { material, geometry, object } ) => {
-	return texture(material.userData.roughnessTexture).rrr;
+	let RFactor = uniform(material.userData.roughnessScale)
+	return texture(material.userData.roughnessTexture).mul(RFactor);
 })
 
 function materialUV(tiles, multiplier=1.0){
@@ -645,6 +647,14 @@ function tslUpdateUVTransform(){
 					.set( matrixTransform.offsetX, matrixTransform.offsetY )
 			materialStack[selected].userData
 				.diffuseTexture.repeat
+					.set( matrixTransform.repeat, matrixTransform.repeat )
+		}
+		if (materialStack[selected].userData.roughnessTexture?.isTexture){
+			materialStack[selected].userData
+				.roughnessTexture.offset
+					.set( matrixTransform.offsetX, matrixTransform.offsetY )
+			materialStack[selected].userData
+				.roughnessTexture.repeat
 					.set( matrixTransform.repeat, matrixTransform.repeat )
 		}
 	} catch (error) {
@@ -1380,6 +1390,7 @@ function encodeMultilayer(materialEntry,_materialName){
 		layerColor : uniform(color(new THREE.Color(0x808080))),
 		diffuseTexture : WHITE,
 		roughnessTexture : WHITE,
+		roughnessScale : 1.0,
 		UVtiles: uniform(1.0),
 	};
 
@@ -1387,6 +1398,7 @@ function encodeMultilayer(materialEntry,_materialName){
 	Mlayer.userData.detailNormalTransform =  Mlayer.userData.detailNormalMap.matrix;
 
 	Mlayer.colorNode = tslMultilayerColor(); //texture(Mlayer.userData.map).mul(Mlayer.userData.color);
+	Mlayer.roughnessNode = tslRoughness();
 
 	if (PARAMS.switchTransparency){
 		//activate transparency not, maskAlpha
@@ -1601,6 +1613,7 @@ function LoadMaterial(DBmaterial,checkTextures=true){
 			 * if the check is jumped, all textures will be reloaded
 			 */
 			textureList.forEach((texture,index)=>{
+				console.log(texture);
 				if ((textureDock.filter((tex)=>tex.file==texture.file)).length > 0){
 					textureList.splice(index,1);
 				}
@@ -1633,7 +1646,7 @@ function LoadMaterial(DBmaterial,checkTextures=true){
 			notifyMe(error);
 			reject([]);
 		}).finally(()=>{
-			console.log(textureStack);
+			//console.log(textureStack);
 		})
 	});
 }
@@ -1884,12 +1897,16 @@ function composeMultilayerMaterial(material){
 	return materialObj;
 }
 
-function TSLsetTextureKind(texture,kind,selected){
+function TSLsetTextureKind(texture,kind,selected){	
 	switch (kind){
 		case 'diffuse':
-			console.log("setting texture diffuse to",texture)
+			//console.log("setting texture diffuse to",texture)
 			materialStack[selected].userData.diffuseTexture = texture;
 			materialStack[selected].userData.diffuseTexture.needsUpdate=true;
+			break;
+		case 'roughness':
+			materialStack[selected].userData.roughnessTexture = texture;
+			materialStack[selected].userData.roughnessTexture.needsUpdate=true;
 			break;
 	}
 }
@@ -1899,11 +1916,11 @@ function TSLresetTextureKind(kind,selected){
 		case 'diffuse':
 			materialStack[selected].userData.diffuseTexture = GRAY;
 			break;
+		case 'roughness':
+			materialStack[selected].userData.roughnessTexture = WHITE;
+			break;
 		/* case 'metal':
 			materialStack[selected].userData.metalMap.value.set(BLACK);
-			break;
-		case 'roughness':
-			materialStack[selected].userData.roughnessMap.value.set(WHITE);
 			break;
 		case 'normal':
 			//TODO reseet detailNormal #materialMap;
@@ -2217,7 +2234,7 @@ $("#thacanvas").on("mouseover",function(event){
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
 				//Apply the texture
-				const textureKinds = ['diffuse'];
+				const textureKinds = ['diffuse','roughness'];
 				//const textureKinds = ['diffuse','roughness','metal','normal'];
 				var materialTextureFile = null;
 				textureKinds.forEach((kind,id)=>{
