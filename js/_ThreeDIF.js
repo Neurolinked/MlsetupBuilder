@@ -1131,8 +1131,9 @@ function getTHREEFormat(textureObject){
  * to the right shader
  */
 async function ProcessStackTextures(){
-	
-	//systemLoadTextures(textureDock);
+	var textForMe = textureDock.map((x)=> x.file);
+
+	systemLoadTextures(textForMe);
 
 	texturePromise = textureDock.map((x)=>{return _getFileContent(x)});
 
@@ -2295,10 +2296,7 @@ $("#thacanvas").on("mouseover",function(event){
 		//when everything is loaded then we proceed
 		materialIsLoaded
 			.then((materialTexture)=>{
-				console.log(textureDock)
 				textureDock = [...textureDock, ...materialTexture];
-				debugger
-				console.log(textureDock);
 			}).catch((error)=>{
 				console.warn(`An error happened, reset to default:${error}`)
 			}).finally(()=>{
