@@ -1133,7 +1133,11 @@ function getTHREEFormat(textureObject){
 async function ProcessStackTextures(){
 	var textForMe = textureDock.map((x)=> x.file);
 
-	systemLoadTextures(textForMe);
+	systemLoadTextures(textForMe).then((result)=>{
+		console.log(result);
+	}).catch((error)=>{
+		notifyMe(error);
+	});
 
 	texturePromise = textureDock.map((x)=>{return _getFileContent(x)});
 
@@ -1651,8 +1655,6 @@ function systemLoadTextures(textureList, forceLoad=false){
 	 * If forceLoad is true, the textures will be replaces
 	 */
 	if (forceLoad===false){textureList = purgeTextureList(textureList);}
-	
-	console.log(textureList);
 
 	return new Promise((resolve,reject)=>{
 		resolve(resultant);
