@@ -3428,11 +3428,15 @@ unCooKonfirm.addEventListener("click", (event) => {
 
   $("#re-selectModel").click(async function(ev){
     ev.preventDefault();
-    let getAFile = await thePIT.chooseAFile($("#manageModels input[name='modelsName']").val(),"glb").then((result)=>{
+    let getAFile = await thePIT.chooseAFile($("#manageModels input[name='modelsName']").val(),"glb")
+      .then((result)=>{
       thePIT.RConfig('paths.depot')
         .then((conf)=>{
-          let _custModelName = result.replace(conf,'').replaceAll(`\\`,`/`);
-          $("#manageModels input[name='modelsName']").val(_custModelName);
+          result = result ?? ""; //null coalescing
+          if (result!=""){
+            let _custModelName = result.replace(conf,'').replaceAll(`\\`,`/`);
+            $("#manageModels input[name='modelsName']").val(_custModelName);
+          }
         }).catch((error)=>{
           notifyMe(error);
         })
