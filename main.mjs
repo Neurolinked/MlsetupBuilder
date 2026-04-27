@@ -873,6 +873,7 @@ async function AfileRead(userpath,flags,noRepo){
 			if (err) {
 				if (err.code=='ENOENT'){
 					if (hasDepot){
+						whereLoadFrom = path.join(modPath,userpath)
 						mainWindow.webContents.send('preload:logEntry', `Missing file - ${whereLoadFrom}`,true);
 						mainWindow.webContents.send('preload:logEntry',`Trying in the last Mod Folder`);
 
