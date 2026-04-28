@@ -221,3 +221,13 @@ fetch(`${jsonsFolder}/cliModelsDB.json`)
 function opacityCheck(value){
 	return PARAMS.opacityPreview ? Number(value) : 1.0;
 }
+
+function array_Intersection(A,B){
+	if (!((Array.isArray(A)) && (Array.isArray(B)))){ return false }
+	return A.filter(x => B.includes(x));
+}
+
+function array_Difference(A,B){
+	if (!((Array.isArray(A)) && (Array.isArray(B)))){ return false }
+	return A.filter(x=>!B.includes(x))
+}
