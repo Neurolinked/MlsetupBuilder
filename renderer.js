@@ -117,7 +117,7 @@ var materialJSON = new MaterialBuffer();
 function notifyMe(message, warning = true){
 	let Data = new Date(Date.now());
 	if (typeof(message)=='object'){
-		console.log(message);
+		console.log("notifyMe:",message);
 	}
 	if (warning){
 	  $("#NotificationCenter .offcanvas-body").prepend('<span class="text-error">[ '+Data.toLocaleString('en-GB', { timeZone: 'UTC' })+' ] ' + message+"</span><br>");
