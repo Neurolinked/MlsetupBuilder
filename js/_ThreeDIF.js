@@ -216,8 +216,17 @@ if (window.Worker) {
     }
 }
 
+function resetStackMasks(){
+	var newstack = new Array(20);
+	newstack.fill(BLACK);
+	newstack[0]=WHITE;
+	return newstack
+}
+
 var materialStack = new Array();
 var materialSet = new Set();
+
+var MLMasks = resetStackMasks();
 
 var textureStack = new Array();
 var textureDock = new Array();
@@ -850,6 +859,47 @@ function animate() {
 	requestAnimationFrame(animate);
 }
 
+function encodePng(textureData){
+	return "data:image/png;base64," + btoa(textureData);
+}
+
+/**
+ * It open the file, read the content create texture and add info
+ */
+async function _getTextureContent(filename){
+	return new Promise((resolve,reject)=>{
+		if (PARAMS.textureDebug){
+			console.log(`request _getTextureContent`,textureObj);
+		}
+		var TexturePath = (filename).replace('.xbm',`.${textureformat}`)
+		var fileInfo
+		var theTextureContent = thePIT.OpenStream(TexturePath,'binary');
+		//await file reading
+		theTextureContent
+			.then((textureResult)=>{
+				fileInfo = getImageInfo(textureResult);
+				fileInfo.Tformat = calcTHREEFormat(fileInfo);
+
+				if (fileInfo.format=='DDS'){
+					return ddsResolve(textureResult,fileInfo);
+				}else if (fileInfo.format=='PNG'){
+					/* var encodedData = btoa(textureResult);
+					var dataURI = "data:image/png;base64," + encodedData; */
+					/*
+					TODO need to be fixed because it search for the TextureObj
+					 to know if it's a normal or normalDetail texture and 
+					 correct the gamma*/
+					return pngResolve(encodePng(dataURI),fileInfo)
+				}
+		}).then((filecontent)=>{
+			//TODO need to be reconstructed the file
+			resolve({data:filecontent,info:fileInfo});
+		}).catch((error)=>{
+			reject(false)
+			notifyMe(`_getTextureContent ${error}`);
+		});
+	})
+}
 
 //Get texture file content to be processed
 async function _getFileContent(textureObj){
@@ -915,7 +965,7 @@ async function _getFileContent(textureObj){
 					if (PARAMS.textureDebug){console.log("no Info Property")}
 				}
 			}
-
+			
 			textureObj.info.Tformat = getTHREEFormat(textureObj);
 			
 			if (textureObj.maptype!='mlmask'){
@@ -1054,8 +1104,7 @@ function MapTextures(textureObj){
 			var textureMD5Code = getEncodedFileName(textureObj.file);
 			var returntexture = textureStack[textureMD5Code]===undefined ? ERROR : textureStack[textureMD5Code];
 			if (PARAMS.textureDebug){
-				console.log(`Mapping texture`)
-				console.log(textureObj);
+				console.log(`Mapping texture`,textureObj);
 			}
 
 			textureObj.entries.forEach((toMap)=>{
@@ -1105,6 +1154,31 @@ function MapTextures(textureObj){
 	}
 }
 
+/**
+ * Duplicate refactored of getTHREEFormat
+ * @param {object} info contains all images info
+ * @returns 
+ */
+function calcTHREEFormat(info){
+	var format = THREE.RGBAFormat;
+	if (info?.format=='DDS'){
+		if (info?.bytes!=16){
+			switch (info?.channels) {
+				case 1:
+					format = THREE.RedFormat
+					break;
+				case 2:
+					format = THREE.RGFormat;
+					break;
+				case 3:
+					format = THREE.RGBFormat;
+					break;
+			}
+		}
+	}
+	return format;
+}
+
 function getTHREEFormat(textureObject){
 	var result = THREE.RGBAFormat;
 	if (textureObject?.info.format=='DDS'){
@@ -1132,12 +1206,20 @@ function getTHREEFormat(textureObject){
  */
 async function ProcessStackTextures(){
 	var textForMe = textureDock.map((x)=> x.file);
+	
+	console.log(textForMe);
 
-	systemLoadTextures(textForMe).then((result)=>{
+	systemLoadTextures(textForMe)
+	.then((result)=>{
 		console.log(result);
 	}).catch((error)=>{
 		notifyMe(error);
-	});
+	}).finally(()=>{
+		/*
+		Go to the TextureStack verify new files and paint the texture datas in
+		the Maps > Textures pane
+		*/
+	})
 
 	texturePromise = textureDock.map((x)=>{return _getFileContent(x)});
 
@@ -1262,10 +1344,6 @@ async function ProcessStackTextures(){
 				default:
 					MapTextures(textureDock[index])
 					break;
-			}
-			
-			if (textureDock[index].shader.userData?.type=='hair'){
-				console.log(`hair shader`);
 			}
 		}),(rejected)=>{
 			console.log(rejected);
@@ -1654,9 +1732,9 @@ function systemLoadTextures(textureList, forceLoad=false){
 	 * Check for already loaded textures to be removed from the list
 	 * If forceLoad is true, the textures will be replaces
 	 */
-	if (forceLoad===false){textureList = purgeTextureList(textureList);}
+	if (forceLoad===false){ textureList = purgeTextureList(textureList); }
 
-	return new Promise((resolve,reject)=>{
+	return new Promise((resolve, reject)=>{
 		resolve(resultant);
 	});
 }
