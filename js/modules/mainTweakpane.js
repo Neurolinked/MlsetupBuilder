@@ -170,7 +170,7 @@ EDAdvSetup.addBinding(PARAMS,'ForceZeroOpacity',{label:'Force Layer 0 opacity to
 EDAdvSetup.addBinding(PARAMS,'mbBackColor',{label:"µB background color"}).on('change',(ev)=>{
   $(window).trigger("changeMBBackground");
 });
-EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {$("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);});
+/* EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {$("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);}); */
 EDAdvSetup.addBinding(PARAMS, 'importSkip',{label:'Skip Import Preview'}).on('change',(ev)=>{});
 EDAdvSetup.addBinding(PARAMS, 'sortLevels',{label:'Sort Rough-Metal'}).on('change',(ev)=>{});
 EDAdvSetup.addBinding(PARAMS, 'modelDebug',{label:'Model debug'}).on('change',(ev)=>{});
