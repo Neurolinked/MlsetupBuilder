@@ -2188,9 +2188,9 @@ $("#resetShades span.choose").click(function(){
 			}
   }
   
-	$("#layerOpacity").on("change, input",()=>{
+	$("#layerOpacity").on("change, input",(e)=>{
     checkOpacityLayer();
-    $("#thacanvas").trigger("changeOpacity", opacityCheck($(this).val()) );
+    $("#thacanvas").trigger("changeOpacity", opacityCheck($("#layerOpacity").val()) );
   });
 
 	$("#materialModal").on('show.bs.modal',function(){
