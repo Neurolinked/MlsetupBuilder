@@ -62,7 +62,7 @@ TDtabManager.pages[0].addBinding(PARAMS, 'wireframes',{label:'Display wireframes
 });
 
 TDtabManager.pages[0].addBinding(PARAMS, 'switchTransparency',{label:'Transparent vs MaskAlpha'}).on('change',(ev)=>{
-  $("#thacanvas").trigger('switchAlpha');
+  //$("#thacanvas").trigger('switchAlpha');
 });
 TDtabManager.pages[0].addBinding(PARAMS, 'maskChannel',{min:0.0,max:1.0, step:0.01, label:'Mask layer opacity\n(only 3d viewport)'}).on('change',(ev)=>{
   $("#thacanvas").trigger('maskAlpha');
