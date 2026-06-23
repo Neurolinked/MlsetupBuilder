@@ -172,6 +172,7 @@ EDAdvSetup.addBinding(PARAMS,'mbBackColor',{label:"µB background color"}).on('c
 });
 /* EDAdvSetup.addBinding(PARAMS,'maskBlur',{label:'Blur texture masks',min:0,max:100,step:1}).on('change',(ev) => {$("#thacanvas").trigger('blurMask',[PARAMS.maskBlur]);}); */
 EDAdvSetup.addBinding(PARAMS, 'importSkip',{label:'Skip Import Preview'}).on('change',(ev)=>{});
+EDAdvSetup.addBinding(PARAMS, 'appareanceSkipRequest',{label:'Skip Appearance select'}).on('change',(ev)=>{});
 EDAdvSetup.addBinding(PARAMS, 'sortLevels',{label:'Sort Rough-Metal'}).on('change',(ev)=>{});
 EDAdvSetup.addBinding(PARAMS, 'modelDebug',{label:'Model debug'}).on('change',(ev)=>{});
 EDAdvSetup.addBinding(PARAMS, 'textureDebug',{label:'Texture debug'}).on('change',(ev)=>{});
@@ -211,6 +212,7 @@ TDtabManager.pages[2].addBlade({
           }
         },
         skipImport:PARAMS.importSkip,
+        appareanceSkipRequest:PARAMS.appareanceSkipRequest,
         switchTransparency:PARAMS.switchTransparency,
         sortLevels:PARAMS.sortLevels
       }

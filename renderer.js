@@ -39,6 +39,7 @@ const PARAMS = {
 	threeDUI:true,	//parameter to make optional the 3d view port
 	sortLevels:false,
 	importSkip: true,
+	appareanceSkipRequest: true,
 	modelDebug:false,
 	textureDebug:false,
 	forceMaterialHighlight :false,
@@ -86,6 +87,7 @@ const PARAMS = {
 var _editorCfg = thePIT.RConfig('editorCfg')
 	_editorCfg.then((configuration)=>{
 		PARAMS.importSkip = configuration?.skipImport;
+		PARAMS.appareanceSkipRequest = configuration?.appareanceSkipRequest;
 		PARAMS.switchTransparency = configuration?.switchTransparency;
 		PARAMS.sortLevels = configuration?.sortLevels;
 	}).catch((error)=>{

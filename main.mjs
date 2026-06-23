@@ -119,6 +119,7 @@ const schema = {
 				}
 			},
 			skipImport:true,
+			appareanceSkipRequest:true,
 			switchTransparency:true,
 			sortLevels:false
 		}
@@ -128,7 +129,7 @@ var itMigrate = false;
 
 const wolvenkitPrefFile = path.join(app.getPath('appData'),'REDModding/WolvenKit/config.json');
 
-const preferences = new Store({schema,
+const preferences = new Store({schema,accessPropertiesByDotNotation:true,
 	beforeEachMigration: (store, context) => {
 		//migration incoming
 		log.info(`[main-config] migrate from ${context.fromVersion} → ${context.toVersion}`)
@@ -157,6 +158,7 @@ const preferences = new Store({schema,
 						}
 					},
 					skipImport:false,
+					appareanceSkipRequest:true,
 					switchTransparency:true,
 					sortLevels:false
 				}
@@ -170,6 +172,9 @@ const preferences = new Store({schema,
 		}
 		if (!store.has("editorCfg.skipImport")){
 			store.set('editorCfg.skipImport',false);
+		}
+		if (!store.has("editorCfg.appareanceSkipRequest")){
+			store.set('editorCfg.appareanceSkipRequest',true);
 		}
 		if (store.has("pathfix")){
 			store.delete('pathfix')
@@ -269,6 +274,9 @@ const preferences = new Store({schema,
 		},
 		'1.6.9': store=>{
 			store.set('editorCfg.skipImport',true);
+		},
+		'1.6.9-a1': store => {
+			store.set('editorCfg.appareanceSkipRequest',true);
 		}
 	}
 });
@@ -1209,6 +1217,7 @@ ipcMain.on('main:saveStore',(event, arg) => {
 		preferences.set('editorCfg.mblend.contrast.value',arg.editorCfg.mblend.contrast.value);
 		preferences.set('editorCfg.mblend.normal.value',arg.editorCfg.mblend.normal.value);
 		preferences.set('editorCfg.skipImport',arg.editorCfg.skipImport);
+		preferences.set('editorCfg.appareanceSkipRequest',arg.editorCfg.appareanceSkipRequest);
 		preferences.set('editorCfg.switchTransparency',arg.editorCfg.switchTransparency);
 		preferences.set('editorCfg.sortLevels',arg.editorCfg.sortLevels);
 	}else{
