@@ -1176,6 +1176,25 @@ THE SOFTWARE.</p>
       <button>Close</button>
     </form>
   </dialog>
+  <dialog id="appearanceDialogWindow" class="border border-secondary rounded bg-layer0">
+    <header class="modal-header pb-3">
+      <h5 class="modal-title text-primary">Do you want to choose a specific Appearance ?</h5>
+    </header>
+    <form>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="radiowindowAppearance" id="radiowindowAppearanceNO" value="false" checked>
+        <label class="form-check-label" for="radiowindowAppearanceNO">
+          No, Load the first Appearance <span class="badge"></span>
+        </label>
+      </div>
+      <div class="form-check">
+        <label class="form-check-label" for="radiowindowAppearanceYES">Choose an appearance</label>
+        <input class="form-check-input" type="radio" name="radiowindowAppearance" id="radiowindowAppearanceYES" value="true">
+      </div>
+      <select class="form-select" name="radiowindowAppearanceChoice" size="5"><option></option></select>
+      <button class="btn btn-sm btn-warning mt-3" type="submit">Confirm</button>
+    </form>
+  </dialog>
   <style type="text/css">
     .tp-lstv:has(> select[size]){
       & .tp-lstv_s[size]{

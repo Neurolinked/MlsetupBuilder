@@ -109,9 +109,9 @@ const tslMultilayerOpacity = Fn(({material}) => {
 /**
  *  placeholder for normal Mixing
  */
-const tslGDNormals = Fn(( { material, geometry, object } ) => {
-	return normalMap(material.userData.detailNormalMap.mul(float(material.userData.detailNormalScale)));
-	return normalMap(material.userData.globalNormalTexture);
+const tslGDNormals = Fn(( { material } ) => {
+	console.log(material.userData.detailNormalScale)
+	return normalMap(material.userData.detailNormalMap, float(material.userData.detailNormalScale));
 })
 
 /**
@@ -185,8 +185,8 @@ if (window.Worker) {
 						"normalMerge",
 						THREE.RGBAFormat);
 				}
-				materialStack[datas[4]].normalMap = textureStack[textureMD5Code];
-				materialStack[datas[4]].normalMap.needsUpdate = true;
+				/* materialStack[datas[4]].normalMap = textureStack[textureMD5Code];
+				materialStack[datas[4]].normalMap.needsUpdate = true; */
 				break;
 			case 'rough':
 				paintDatas(datas[0],datas[1],datas[2],datas[3],THREE.RGBAFormat);
@@ -1339,28 +1339,28 @@ async function ProcessStackTextures(){
 					//MapTextures(textureDock[index])
 					break;
 				case 'normal':
-					imgWorker.postMessage([
+					/* imgWorker.postMessage([
 						'normalFix',
 						elm.value, 
 						textureDock[index].info.width, 
 						textureDock[index].info.height, 
 						target,
 						textureDock[index].shader
-					]);
+					]); */
 					break;
 				case 'roughness':
-					imgWorker.postMessage([
+					/* imgWorker.postMessage([
 						'roughnessSwap',
 						elm.value, 
 						textureDock[index].info.width, 
 						textureDock[index].info.height, 
 						target,
 						textureDock[index].shader
-					]);
+					]); */
 					console.warn(`roughness worker off`)
 					break;
 				default:
-					MapTextures(textureDock[index])
+					//MapTextures(textureDock[index])
 					break;
 			}
 		}),(rejected)=>{
@@ -2479,6 +2479,13 @@ $("#thacanvas").on("mouseover",function(event){
 
 		let uvTiles = matrixTransform.repeat
 		tslUpdateUVTransform();
+	}
+}).on('materialNormal',function(ev,normalPower){
+	if (sceneLoaded()){
+		let selected = activeMLayer();
+		if (materialStack[selected]!=undefined){
+			materialStack[selected].userData.detailNormalScale = normalPower
+		}
 	}
 }).on('switchLayer',function(ev,layer=0){
 	if (sceneLoaded()){	

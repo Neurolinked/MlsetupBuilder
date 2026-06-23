@@ -276,6 +276,11 @@ function orderLevelsRough(a,b){
     $("#layers-contextual").addClass("visible");
   }
 
+function chooseAppearance(){
+  const  winMiao = document.getElementById("appearanceDialogWindow");
+  winMiao.showModal();
+}
+
 function setQuestion(text,action=''){
   $("#winConfirm .modal-title").html(text);
   $("#winConfirm button[value='yes']").attr("data-action",action);
@@ -834,6 +839,11 @@ $(function(){
           $("#thacanvas").trigger("texTiled",'ui');
         },400);
       }
+      if (controller=="#mbNorm"){
+         callOnce(()=>{
+          $("#thacanvas").trigger("materialNormal", parseFloat($("#mbNorm").val()));
+        },400);
+      }
     }
   }
 
@@ -1195,11 +1205,13 @@ $("#resetShades span.choose").click(function(){
 			(parseFloat($("#mbOffV").val()) != parseFloat($("#layeringsystem li.active").data("mboffv")))
 			){
 			$("#layeringsystem li.active").addClass("notsync");
+
       if ((ev.target.id=="layerOffU") || (ev.target.id=="layerOffV")){
         callOnce(()=>{
           $("#thacanvas").trigger("texOffset",'ui');
         },400);
       }
+      
 		}else{
 			$("#layeringsystem li.active").removeClass("notsync");
 		}
@@ -3793,5 +3805,4 @@ function applyValueInEditor(layersSelected){
   }).on('changeMBBackground',(ev)=>{
     $("#mb-preview").css("background-color",PARMAS.mbBackColor);
   });
-
 });
