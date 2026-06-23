@@ -2,10 +2,14 @@
 ## 1.6.9
 ### Done
 ### Todo
-- [ ] Huge Code cleanup
+- [ ] Code cleanup
+  - [ ] remove dead functions and events
+  - [ ] inspect workers calls
+  - [ ] review bulk textures loading and re-mapping
   - [ ] Better format performance for in-memory textures
 - [x] Model DB rebuild
 - Three.js Engine
+  - [ ] Write TSL functions for material encoding
   - [ ] Customize Shader material form normal and detail blending
   - [ ] Update 3d window ration when reloading the scene;
 - [ ] UI
