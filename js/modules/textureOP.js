@@ -243,23 +243,17 @@ async function pngResolve(dataURI,textureObj){
  * 
  * @param {string} relativepath Relative path of the .mlmask file
  */
-async function mapDotMlMasks(relativepath){
+async function mapDotMlMasks(maskfile){
 	return new Promise((resolve,reject)=>{
-		const basePaths = relativepath.split("\\").slice(0,-1);
-		const maskFilename = relativepath.split("\\").pop().toString();
-		const subfolder = maskFilename.split(".")[0]+"_layers"
 		const mlmaskObject = {
 			layers:1,
 		}
-		basePaths.push(subfolder,maskFilename);
-		const filename = basePaths.join("\\");
-	
-		const maxMasksPR = thePIT.mapMasks(filename); //check the numbers of masks layers in the subfolder
+		const maxMasksPR = thePIT.mapMasks(maskfile); //check the numbers of masks layers in the subfolder
 		maxMasksPR.then((layerCount)=>{
 			mlmaskObject.layers = (!isNaN(layerCount)) ? layerCount :  0;
 		}).then(()=>{
 			//here i need to build the whole list of files
-			
+					
 		}).catch((error)=>{
 			notifyMe(error);
 			mlmaskObject.layers = 0;

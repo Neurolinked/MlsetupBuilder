@@ -2322,38 +2322,34 @@ ipcMain.on('main:scanFolder',()=>{
 function mlMaskNameExplode(maskTemplate){
 	const ext = preferences.get("maskformat");
 	const response = {
-			customPath: "",
-			filetemplate: "",
 			actuallayer: "",
+			customPath: "",
+			extension: ext,
+			filetemplate: "",
 			maskslayers: [],
-			extension: ext
+			subfolder : ""
 		}
 	try{
-		response.customPath = maskTemplate.split("\\").slice(0,-1).join("\\");
+		response.customPath = maskTemplate.split("\\").slice(0,-1);
 		response.filetemplate = maskTemplate.split("\\").pop().toString();
+		response.subfolder = response.filetemplate.split(".")[0]+"_layers"
 		response.actuallayer = response.filetemplate.replace(".mlmask",`_\\d+\\.${ext}$`)
+		response.customPath.push(response.subfolder);
+		response.customPath = response.customPath.join("\\");
 	}catch(error){
 		mainWindow.webContents.send('preload:logEntry',`fn > mlmask name explosion - ${error}`,true)
 	}
 	return response
 }
 
-ipcMain.handle('main:getMasksset',(ev,maskTemplate)=>{
-
-});
-
 ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 	return new Promise((resolve,reject)=>{
 		var actualfile, fileTemplate, customPath, maskLayers
-		let temp = mlMaskNameExplode(maskTemplate)
+		var temp = mlMaskNameExplode(maskTemplate);
+		[actualfile, fileTemplate, customPath, maskLayers] = [temp.actuallayer, temp.filetemplate, temp.customPath, temp.maskslayers];
 
-		actualfile = temp.actuallayer
-		fileTemplate = temp.filetemplate
-		customPath = temp.customPath
-		maskLayers = temp.maskslayers
-		
 		try {
-			var test = path.join(preferences.get('paths.depot'),customPath)
+			var test = path.join(preferences.get('paths.depot'), customPath)
 
 			const options = {
 				stat:false,
@@ -2372,7 +2368,7 @@ ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 				
 				if (tree?.children.length > 0){
 					
-/* 					const allLayers = Array(20).fill(false,0,19);
+					/* const allLayers = Array(20).fill(false,0,19);
 					const onlyFileNames = tree.children.map((x)=> x.name )
 					//generate the list of files of the masks
 					for(let i=0 , j=tree.children.length; i < j; i++){
@@ -2382,7 +2378,6 @@ ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 							allLayers[i] = unmaskedFile
 						}
 					} */
-
 					resolve(tree.children.length)
 				}
 				resolve(0)
