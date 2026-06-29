@@ -2363,28 +2363,26 @@ ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 				matches:new RegExp(actualfile)
 			}
 
+			const allLayers = Array(20).fill(false);
 			list_files(test,options)
 			.then(function (tree) {
 				
 				if (tree?.children.length > 0){
-					
-					/* const allLayers = Array(20).fill(false,0,19);
 					const onlyFileNames = tree.children.map((x)=> x.name )
 					//generate the list of files of the masks
 					for(let i=0 , j=tree.children.length; i < j; i++){
-
 						let unmaskedFile = actualfile.replace("\\d+\\",i).replace("$","")
 						if (onlyFileNames.includes(unmaskedFile)){
 							allLayers[i] = unmaskedFile
 						}
-					} */
-					resolve(tree.children.length)
+					}
+					resolve(allLayers)
 				}
-				resolve(0)
+				resolve(allLayers)
 			}).catch((error)=>{
 				log.info(`${actualfile} not found`);
 				mainWindow.webContents.send('preload:logEntry',`${error}`,true)
-				resolve(0)
+				resolve(allLayers)
 			});
 		} catch (error) {
 			mainWindow.webContents.send('preload:logEntry',`${error}, '${maskTemplate}'`);
