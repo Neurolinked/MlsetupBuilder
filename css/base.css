@@ -799,3 +799,12 @@ div#unChecksMesh label {
     }
   }
 }
+
+#layer_settings{
+  .tp-rotv{
+    font-size:.85rem;
+  }
+  .tp-lblv_v{
+    flex-grow:1!important;
+  }
+}

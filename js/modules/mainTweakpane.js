@@ -283,3 +283,74 @@ document.getElementById('tweakContainer')
   .addEventListener('changedUI',function(ev){
     panel.refresh();
 })
+
+const LayerParams = {
+  opacity: 1.0,
+  tiles: 1.0,
+  offset: {x:0,y:0},
+  override:"",
+  material:"base\\surfaces\\materials\\special\\unused.mltemplate",
+  normal:true,
+  ratio:1.0,
+  utiles:1.0,
+  ucontrast:1.0,
+  unormal:1.0,
+  uoffset: {x:0,y:0},
+}
+/**
+ * Panel for parameters Editor
+ */
+export const tweakEditor = new Pane({
+    container: document.getElementById('layer_settings'),
+    title: 'Parameters Editor',
+    expanded: true
+  });
+tweakEditor.registerPlugin(EssentialsPlugin);
+
+const tabs = tweakEditor.addTab({
+  pages: [
+    {title: 'x Layer'},
+    {title: 'Global'},
+  ],
+});
+
+const layerEditor = tabs.pages[0];
+
+layerEditor.addBinding(LayerParams,'tiles',{min:0.001, max:150.0});
+layerEditor.addBinding(LayerParams,'opacity',{min:0.0, max:1.0});
+layerEditor.addBinding(LayerParams,'offset',{x:{min:-5.0, max:5.0},y:{min:-5.0, max:5.0}});
+layerEditor.addBinding(LayerParams,'override');
+layerEditor.addBinding(LayerParams,'material',{label:"Material file"});
+
+layerEditor.addBlade({
+  view: 'list',
+  label: 'Material',
+  options: [
+    {text: 'asphalt_old_01_300', value: 'base\\surfaces\\materials\\asphalt\\asphalt_old\\asphalt_old_01_300.mltemplate'},
+    {text: 'leather_croc_01_30', value: 'base\\surfaces\\materials\\fabric\\leather\\leather_croc_01_30.mltemplate'},
+    {text: 'plastic_scraped_matte_zebra_01_300', value: 'base\\surfaces\\materials\\plastic\\plastic_scraped\\plastic_scraped_matte_zebra_01_300.mltemplate'},
+  ],
+  value: 'base\\surfaces\\materials\\asphalt\\asphalt_old\\asphalt_old_01_300.mltemplate',
+});
+
+
+layerEditor.addBlade({
+  view: 'separator',
+});
+
+const lBlends = layerEditor.addFolder({
+  title:"µblends"
+})
+
+lBlends.addBinding(LayerParams,'utiles',{min:0.001, max:150.0});
+lBlends.addBinding(LayerParams,'ucontrast',{min:0.0, max:1.0});
+lBlends.addBinding(LayerParams,'unormal',{min:0.0, max:2.0});
+lBlends.addBinding(LayerParams,'uoffset',{x:{min:-5.0, max:5.0},y:{min:-5.0, max:5.0}});
+const btn = lBlends.addButton({
+  title: 'µblends Aim'
+});
+
+const lGlobal = tabs.pages[1]
+
+lGlobal.addBinding(LayerParams,'normal')
+lGlobal.addBinding(LayerParams,'ratio')
