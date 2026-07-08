@@ -300,6 +300,8 @@ const LayerParams = {
 /**
  * Panel for parameters Editor
  */
+
+//Set a delay for the material to be loaded and then create the UI
 export const tweakEditor = new Pane({
     container: document.getElementById('layer_settings'),
     title: 'Parameters Editor',
@@ -322,16 +324,30 @@ layerEditor.addBinding(LayerParams,'offset',{x:{min:-5.0, max:5.0},y:{min:-5.0, 
 layerEditor.addBinding(LayerParams,'override');
 layerEditor.addBinding(LayerParams,'material',{label:"Material file"});
 
-layerEditor.addBlade({
+const materiaLlist = layerEditor.addBlade({
   view: 'list',
   label: 'Material',
-  options: [
-    {text: 'asphalt_old_01_300', value: 'base\\surfaces\\materials\\asphalt\\asphalt_old\\asphalt_old_01_300.mltemplate'},
-    {text: 'leather_croc_01_30', value: 'base\\surfaces\\materials\\fabric\\leather\\leather_croc_01_30.mltemplate'},
-    {text: 'plastic_scraped_matte_zebra_01_300', value: 'base\\surfaces\\materials\\plastic\\plastic_scraped\\plastic_scraped_matte_zebra_01_300.mltemplate'},
-  ],
-  value: 'base\\surfaces\\materials\\asphalt\\asphalt_old\\asphalt_old_01_300.mltemplate',
+  options: [],
+  value: 'base\\surfaces\\materials\\special\\unused.mltemplate',
+}).on('change',(ev)=>{
+  LayerParams.material = ev.value
+  tweakEditor.refresh();
 });
+
+
+//material Loading
+
+function TPlistMaterialLoading(){
+  var myNewOptions=[]
+  for (const [key, value] of Object.entries(MLSB.Materials)) {
+    myNewOptions.push({text:key,value:value.file});
+  }
+  return myNewOptions
+}
+
+setTimeout(()=>{
+  materiaLlist.options = TPlistMaterialLoading()
+},2000);
 
 
 layerEditor.addBlade({
