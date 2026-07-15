@@ -43,6 +43,8 @@ function isPNG(binaryHeader){
 	return ((binaryHeader[0]==0x89) && (binaryHeader[1]==0x50) && (binaryHeader[2]==0x4e) && (binaryHeader[3]==0x47)	&& (binaryHeader[4]==0x0d) && (binaryHeader[5]==0x0a) && (binaryHeader[6]==0x1a) && (binaryHeader[7]==0x0a))
 }
 
+function encodePng(textureData){ return "data:image/png;base64," + btoa(textureData); }
+
 function getImageInfo(binaryData){
 	var bufferData = str2ab(binaryData);
 	if (!bufferData){
@@ -192,7 +194,6 @@ async function ddsResolve(binarydata, info){
 					break;
 			}
 
-			
 			if (info.DXGIformat == 'DXGI_FORMAT_R8_UNORM'){
 				imageDatas = rebuildText(imageDatas,info.width,info.height);
 				info.channels = 4;
@@ -239,26 +240,75 @@ async function pngResolve(dataURI,textureObj){
 	});
 }
 
+function countValidLayers(textureNames){
+	return textureNames.filter((x)=>x!=false).length
+}
+
 /**
  * 
- * @param {string} relativepath Relative path of the .mlmask file
+ * @param {string} maskfile Relative path of the .mlmask file
  */
 async function mapDotMlMasks(maskfile){
 	return new Promise((resolve,reject)=>{
 		const mlmaskObject = {
-			layers:1,
+			layers:[],
 		}
 		const maxMasksPR = thePIT.mapMasks(maskfile); //check the numbers of masks layers in the subfolder
-		maxMasksPR.then((layerCount)=>{
-			mlmaskObject.layers = (!isNaN(layerCount)) ? layerCount :  0;
+		maxMasksPR.then((layersTex)=>{
+			mlmaskObject.layers = layersTex;
 		}).then(()=>{
 			//here i need to build the whole list of files
-					
+			//console.log(mlmaskObject.layers.filter((x)=> x != false ))
 		}).catch((error)=>{
 			notifyMe(error);
-			mlmaskObject.layers = 0;
+			mlmaskObject.layers = [];
 		}).finally(()=>{
 			resolve(mlmaskObject);
 		});
 	})
+}
+
+
+
+async function _getTextureBytes(filename){
+	return new Promise((resolve, reject)=>{
+		var theTextureContent = thePIT.OpenStream(filename,'binary');
+		theTextureContent.then((textureResult)=>{
+			resolve(textureResult);
+		}).catch((error)=>{
+			notifyMe(`I couldn't open ${filename} `);
+			resolve();
+		});
+	})
+}
+
+/**
+ * 
+ * @param {array} arrlist 
+ */
+async function textureListLoader(arrlist){
+	if (!Array.isArray(arrlist)){
+		throw new TypeError("The list need to be an array")
+	}
+	return arrlist.reduce((previousPromise,nextID)=>{
+			return previousPromise.then(()=>{
+				return _getTextureBytes(nextID).then((textureContent)=>{
+					nextID.content=textureContent;
+				})
+			});
+		},Promise.resolve())
+}
+/**
+ * 
+ * @param {array} list texture list array to check
+ * @param {array} against texture array to check to for duplicate
+ * @param {string} l_prop property of the list array to check
+ * @param {string} a_prop property of the against array to check to
+ */
+function textureSplicer(list, against,l_prop="file",a_prop="file" ){
+	list.forEach((texture,index)=>{
+		if ((against.filter((tex)=> tex[a_prop]==texture[l_prop])).length > 0){
+			list.splice(index,1);
+		}
+	});
 }
