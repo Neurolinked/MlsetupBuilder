@@ -2525,7 +2525,7 @@ $("#thacanvas").on("mouseover",function(event){
 
 		if (materialStack[selected]!=undefined){
 			if (materialStack[selected].hasOwnProperty("mask")){
-				var test = _getFileContent({id:getEncodedFileName(layerMaterial),file:layerMaterial,maptype:'mlmask',shader:selected})
+				var test = _getFileContent({id:getEncodedFileName(materialStack[selected].mask),file:materialStack[selected].mask,maptype:'mlmask',shader:selected})
 					.then((result)=>{
 						var myMask = textureDock.filter(elm=>elm.file==materialStack[selected].mask)
 						if (myMask?.length==1){
