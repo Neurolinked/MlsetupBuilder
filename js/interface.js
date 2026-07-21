@@ -1164,7 +1164,6 @@ $(function(){
 $("#masksPanel li").click(function(){
   $("#masksPanel li.active").removeClass("active");
   $(this).addClass("active");
-  $("#layeringsystem li").eq($(this).index()).click();
 });
 
 $("#resetShades span.choose").click(function(){
@@ -1904,7 +1903,6 @@ $("#resetShades span.choose").click(function(){
       mouseX = e.clientX;
       mouseY = e.clientY;
       UISetFloatMaterial($(this).data('ref'),{x:(nuPos.left - 132),y:(mouseY - 64)})
-      $("#floatMat").removeClass('d-none');
 		});
 
 	$("#materiaList").mouseout(function(e){ $("#floatMat").addClass('d-none'); });
@@ -3340,8 +3338,12 @@ unCooKonfirm.addEventListener("click", (event) => {
   });
 
   $(".controLayers li").click(function(ev){
-    ev.preventDefault();
     if (($(this).attr("disabled")==undefined) || ($(this).attr("disabled")==null )){
+      const index = $(this).index();
+      $(".controLayers li.active").removeClass("active");
+      $(".controLayers").each((el)=>{
+        $(".controLayers").eq(el).find("li").eq(index).addClass("active")
+      })
       $("#thacanvas").trigger("switchLayer",$(this).index());
     }
   })
@@ -3628,13 +3630,13 @@ function applyValueInEditor(layersSelected){
   }
 
   $("#layeringsystem li").click(function(e){
-    
-		if (!$(this).attr("disabled")){
+    /* check what happen here and in controLayers */
+    if (!$(this).attr("disabled")){
       MLSB.Editor.layerSelected = $(this).index();
       switchLayer();
       return;
 		}
-	});
+  });
 
   //Document Events
   $(window)
@@ -3706,7 +3708,7 @@ function applyValueInEditor(layersSelected){
       const sbUI = document.querySelector("substance-layer");
       sbUI.dispatchEvent(new CustomEvent("disable",{detail:{layers:index}}));
   }).on('fetchMaterialsComplete',function(ev){
-    var matListText = materialTemplate(`<li class='p-1 fs-80' data-ref='materialName' data-path='materialPath'>materialNameNoUScore</li>`);
+    var matListText = materialTemplate(`<li class='p-1 fs-80' data-ref='materialName' data-path='materialPath' popovertarget="floatMat" >materialNameNoUScore</li>`);
     matListText.then((result)=>{
       console.log(`Material List build (${performance.now()} milliseconds)` )
       $("#materiaList").append(result);
