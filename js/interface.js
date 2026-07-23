@@ -3620,7 +3620,6 @@ function applyValueInEditor(layersSelected){
   //$("#maskLayer").attr("value",MLSB.Editor.layerSelected);
   updateFriendsUI();
 }
-
   function switchLayer(source=null){
     let layersSelected = MLSB.getMllayer(MLSB.Editor.activeMlsetup);
     uiActivateLayer()
@@ -3651,6 +3650,8 @@ function applyValueInEditor(layersSelected){
       //adapt model table size to the window
       $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("max-height",`${tblsize}px`);
       $("#DataModelsLibrary_wrapper .dataTables_scrollBody").css("min-height",`${tblsize}px`);
+    }).on("setActiveLayer",(e)=>{
+      uiActivateLayer();
     }).on("load", function (e) {
       const AppLoading = document.getElementById("Loading");
       AppLoading.showModal();
