@@ -322,7 +322,19 @@ layerEditor.addBinding(LayerParams,'tiles',{min:0.001, max:150.0});
 layerEditor.addBinding(LayerParams,'opacity',{min:0.0, max:1.0});
 layerEditor.addBinding(LayerParams,'offset',{x:{min:-5.0, max:5.0},y:{min:-5.0, max:5.0}});
 layerEditor.addBinding(LayerParams,'override');
+
+layerEditor.addBlade({view: 'separator',});
 layerEditor.addBinding(LayerParams,'material',{label:"Material file"});
+
+layerEditor.addBlade({
+  view: 'text',
+  label: 'Material Filter',
+  parse: (v) => String(v),
+  value: '',
+}).on('change',(ev)=>{
+  console.log(ev);
+  materiaLlist.options = (TPlistMaterialLoading()).filter((el) => el.text.includes(ev.value) )
+})
 
 const materiaLlist = layerEditor.addBlade({
   view: 'list',
