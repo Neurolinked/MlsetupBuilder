@@ -318,27 +318,23 @@ const tabs = tweakEditor.addTab({
 
 const layerEditor = tabs.pages[0];
 
-layerEditor.addBinding(LayerParams,'tiles',{min:0.001, max:150.0});
-layerEditor.addBinding(LayerParams,'opacity',{min:0.0, max:1.0});
-layerEditor.addBinding(LayerParams,'offset',{x:{min:-5.0, max:5.0},y:{min:-5.0, max:5.0}});
-layerEditor.addBinding(LayerParams,'override');
+const materialFolder = layerEditor.addFolder({
+  title:"Material"
+})
 
-layerEditor.addBlade({view: 'separator',});
-layerEditor.addBinding(LayerParams,'material',{label:"Material file"});
-
-layerEditor.addBlade({
+materialFolder.addBinding(LayerParams,'material',{label:"file"});
+materialFolder.addBlade({
   view: 'text',
-  label: 'Material Filter',
+  label: 'Search material',
   parse: (v) => String(v),
   value: '',
-}).on('change',(ev)=>{
+}).on('input, change',(ev)=>{
   console.log(ev);
   materiaLlist.options = (TPlistMaterialLoading()).filter((el) => el.text.includes(ev.value) )
 })
-
-const materiaLlist = layerEditor.addBlade({
+const materiaLlist = materialFolder.addBlade({
   view: 'list',
-  label: 'Material',
+  label: 'List',
   options: [],
   value: 'base\\surfaces\\materials\\special\\unused.mltemplate',
 }).on('change',(ev)=>{
@@ -346,6 +342,12 @@ const materiaLlist = layerEditor.addBlade({
   tweakEditor.refresh();
 });
 
+materialFolder.addBlade({view: 'separator',});
+materialFolder.addBinding(LayerParams,'tiles',{min:0.001, max:150.0});
+materialFolder.addBinding(LayerParams,'opacity',{min:0.0, max:1.0});
+materialFolder.addBinding(LayerParams,'offset',{x:{min:-5.0, max:5.0},y:{min:-5.0, max:5.0,inverted:true}});
+
+layerEditor.addBinding(LayerParams,'override',{label:'Override'});
 
 //material Loading
 
@@ -357,8 +359,13 @@ function TPlistMaterialLoading(){
   return myNewOptions
 }
 
+
+
+
+
 setTimeout(()=>{
   materiaLlist.options = TPlistMaterialLoading()
+  tweakEditor.refresh();
 },2000);
 
 
@@ -370,10 +377,10 @@ const lBlends = layerEditor.addFolder({
   title:"µblends"
 })
 
-lBlends.addBinding(LayerParams,'utiles',{min:0.001, max:150.0});
-lBlends.addBinding(LayerParams,'ucontrast',{min:0.0, max:1.0});
-lBlends.addBinding(LayerParams,'unormal',{min:0.0, max:2.0});
-lBlends.addBinding(LayerParams,'uoffset',{x:{min:-5.0, max:5.0},y:{min:-5.0, max:5.0}});
+lBlends.addBinding(LayerParams,'utiles',{label: "µ Tiles",min:0.001, max:150.0});
+lBlends.addBinding(LayerParams,'ucontrast',{label: "µ Contrast", min:0.0, max:1.0});
+lBlends.addBinding(LayerParams,'unormal',{label: "µ Normal", min:0.0, max:2.0});
+lBlends.addBinding(LayerParams,'uoffset',{ label: "µ Offset", x:{min:-5.0, max:5.0},y:{min:-5.0, max:5.0}});
 const btn = lBlends.addButton({
   title: 'µblends Aim'
 });
@@ -382,3 +389,8 @@ const lGlobal = tabs.pages[1]
 
 lGlobal.addBinding(LayerParams,'normal')
 lGlobal.addBinding(LayerParams,'ratio')
+
+document.getElementById('layer_settings')
+  .addEventListener('reloadMaterials',()=>{
+  materiaLlist.options = TPlistMaterialLoading()
+});
