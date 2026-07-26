@@ -26,10 +26,10 @@
     "electron-store": "^8.1.0",
     "fs-extra": "^11.2.0",
     "intro.js": "^7.2.0",
-    "sharp": "^0.34.3"
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
-    "@electron/packager": "^18.4.0",
+    "@electron/packager": "^20.0.4",
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@tweakpane/plugin-essentials": "^0.2.1",
     "electron": "^39.0.0",
