@@ -303,10 +303,11 @@ const LayerParams = {
 
 //Set a delay for the material to be loaded and then create the UI
 export const tweakEditor = new Pane({
-    container: document.getElementById('layer_settings'),
+    container: document.getElementById('tweakEditor'),
     title: 'Parameters Editor',
     expanded: true
   });
+
 tweakEditor.registerPlugin(EssentialsPlugin);
 
 const tabs = tweakEditor.addTab({
@@ -328,10 +329,10 @@ materialFolder.addBlade({
   label: 'Search material',
   parse: (v) => String(v),
   value: '',
-}).on('input, change',(ev)=>{
-  console.log(ev);
+}).on('change',(ev)=>{
   materiaLlist.options = (TPlistMaterialLoading()).filter((el) => el.text.includes(ev.value) )
 })
+
 const materiaLlist = materialFolder.addBlade({
   view: 'list',
   label: 'List',
@@ -359,16 +360,6 @@ function TPlistMaterialLoading(){
   return myNewOptions
 }
 
-
-
-
-
-setTimeout(()=>{
-  materiaLlist.options = TPlistMaterialLoading()
-  tweakEditor.refresh();
-},2000);
-
-
 layerEditor.addBlade({
   view: 'separator',
 });
@@ -390,7 +381,7 @@ const lGlobal = tabs.pages[1]
 lGlobal.addBinding(LayerParams,'normal')
 lGlobal.addBinding(LayerParams,'ratio')
 
-document.getElementById('layer_settings')
-  .addEventListener('reloadMaterials',()=>{
-  materiaLlist.options = TPlistMaterialLoading()
-});
+document.getElementById("tweakEditor")
+  .addEventListener("reloadMaterials",function(ev){
+    materiaLlist.options = TPlistMaterialLoading();
+  })

@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		.then(data=>{
 			MLSB.Materials = data;
 			Object.freeze(MLSB.Materials);
+			document.getElementById("tweakEditor").dispatchEvent(new CustomEvent("reloadMaterials"));
 			notifyMe(`Material Database Loaded ${Object.keys(MLSB.Materials).length} vanilla materials`,false);
 			$(window).trigger("fetchMaterialsComplete");
 		}).catch(error=>notifyMe(error))
