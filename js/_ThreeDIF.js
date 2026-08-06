@@ -945,7 +945,6 @@ async function _getFileContent(textureObj){
 			if ((PARAMS.obFoldercheck) || (!materialStack[textureObj.shader].userData.hasOwnProperty("layers")) || (materialStack[textureObj.shader].userData?.layers < 0) ){
 				var maxMasksPR = thePIT.mapMasks(filename); //check the numbers of masks layers in the subfolder
 				maxMasksPR.then((result)=>{
-					console.log(result);
 					materialStack[textureObj.shader].userData.layers = result
 				}).catch((error)=>{
 					notifyMe(error);
@@ -1197,7 +1196,12 @@ function getTHREEFormat(textureObject){
 async function ProcessStackTextures(){
 	var textForMe = textureDock.map((x)=> x.file);
 
-	systemLoadTextures(textForMe)
+	let nigga = [];
+	textureDock.forEach((val,ind,arr)=>{
+		nigga[getEncodedFileName(val.file)] = val
+	})
+
+/* 	systemLoadTextures(textForMe)
 	.then((result)=>{
 		//console.log(result);
 		clearTexturePanel();
@@ -1207,11 +1211,10 @@ async function ProcessStackTextures(){
 		/*
 		Go to the TextureStack verify new files and paint the texture datas in
 		the Maps > Textures pane
-		*/
-	})
+		
+	})*/
 
 	texturePromise = textureDock.map((x)=>{return _getFileContent(x)});
-
 	/* textureDock.reduce((previousPromise,nextID)=>{
 			return previousPromise.then(()=>{
 				return _getFileContent(nextID).then((textureContent)=>{
@@ -1250,8 +1253,6 @@ async function ProcessStackTextures(){
 					});
 				},Promise.resolve())
 	 */
-	
-
 	Promise.allSettled(texturePromise).then((res)=>{
 		res.forEach((elm,index)=>{
 			if (elm.status=='rejected'){return}
@@ -1290,8 +1291,8 @@ async function ProcessStackTextures(){
 				textureDock[index].info.width,
 				textureDock[index].info.height,
 				target,
-				THREEFormat
-			)
+				THREEFormat)
+			
 			if (PARAMS.textureDebug){ console.log(textureDock[index].maptype,target); }
 			
 			switch (textureDock[index].maptype) {
@@ -1768,6 +1769,7 @@ function LoadMaterial(DBmaterial,checkTextures=true){
 			})
 		}).then(()=>{
 			console.log(`resolved ${DBmaterial}`);
+			console.log(textureList)
 			resolve(textureList)
 		}).catch((error)=>{
 			notifyMe(error);
@@ -1804,7 +1806,8 @@ function LoadMaterialsJson(path){
 
 				if (materialLoaded = materialJSON.import(tempMaterial)){
 
-					new Set(getAppearanceMaterials(materialJSON.Appearances)).forEach((material,key,set)=>{
+					new Set(getAppearanceMaterials(materialJSON.Appearances))
+						.forEach((material,key,set)=>{
 						materialSet.add(material);
 					})
 
@@ -2187,12 +2190,12 @@ $("#thacanvas").on("mouseover",function(event){
 		.then((config)=>{actualExtension=config.maskformat;},chainError)
 		.then(()=>{return LoadMaterialsJson(materialFile);},chainError)
 		.then(()=>{
-			$("#layeringsystem li").removeClass("active");
-			$("#layeringsystem li").eq(MLSB.Editor.layerSelected).addClass("active");
+			$(window).trigger("setActiveLayer");
 			return LoadModel(fileModel);
 			}
 			,chainError)
 		.then(()=>{
+			console.log(materialJSON.TexturesList)
 			return LoadMaterial("unused");
 		},chainError)
 		.then(()=>{
