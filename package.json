@@ -32,7 +32,10 @@
     "@electron/packager": "^20.0.4",
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "electron": "^39.0.0",
+    "electron": "^43.4.0",
     "tweakpane": "^4.0.5"
+  },
+  "allowScripts": {
+    "electron@39.8.10": true
   }
 }
