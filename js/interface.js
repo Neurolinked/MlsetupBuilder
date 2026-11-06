@@ -3461,4 +3461,6 @@ unCooKonfirm.addEventListener("click", (event) => {
      */
     $("#rc-ColorSelector").show();
   })
+  
+  $("#BWAdd").trigger("input");
 });
