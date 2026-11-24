@@ -10,7 +10,7 @@ import * as fs from 'node:fs';
 import fse from 'fs-extra/esm';
 import Store from 'electron-store';
 import sharp from 'sharp';
-import * as dree from 'dree';
+import dree from 'dree'; 
 import { fileURLToPath } from 'url';
 /* import { arrayBuffer } from 'node:stream/consumers'; */
 
@@ -820,7 +820,6 @@ ipcMain.on('main:reloadAim',()=>{
 ipcMain.handle('main:composerMaterial',async(ev,filepath)=>{
 	try {
 		const content = await AfileRead(filepath,'utf8',false);
-		//console.log(content);
 		McomposerWindow = childWindow("apps/materials.html",mainWindow,1200,800,'Material Composer', {preload: path.join(__dirname, 'apps/preloadmats.js')} );
 		setTimeout(()=>{
 			McomposerWindow.webContents.send('preload:openMaterial',content);
@@ -2347,7 +2346,7 @@ ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 		var actualfile, fileTemplate, customPath, maskLayers
 		var temp = mlMaskNameExplode(maskTemplate);
 		[actualfile, fileTemplate, customPath, maskLayers] = [temp.actuallayer, temp.filetemplate, temp.customPath, temp.maskslayers];
-
+		console.log(maskLayers,customPath)
 		try {
 			var test = path.join(preferences.get('paths.depot'), customPath)
 
@@ -2366,7 +2365,6 @@ ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 			const allLayers = Array(20).fill(false);
 			list_files(test,options)
 			.then(function (tree) {
-				
 				if (tree?.children.length > 0){
 					const onlyFileNames = tree.children.map((x)=> x.name )
 					//generate the list of files of the masks
