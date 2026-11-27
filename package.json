@@ -8,7 +8,8 @@
     "start": "electron .",
     "dev": "electron . --dev=true",
     "package": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\"",
-    "compile": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\" --prune=true  --asar.unpackDir={**/node_modules/sharp,**/node_modules/@img,**/jsons,**/images} "
+    "compile": "electron-packager ./ --platform=win32 --arch=x64 --overwrite --out=../Builds --icon=public/Logo_256.png --ignore=\".git\" --prune=true  --asar.unpackDir={**/node_modules/sharp,**/node_modules/@img,**/jsons,**/images} ",
+    "savex": "electron-packager ./ --platform=darwin --arch=arm64 --overwrite --out=../Builds --icon=public/Logo_256.icns --ignore=\".git\" --prune=true  --asar.unpackDir={**/node_modules/sharp,**/node_modules/@img,**/jsons,**/images} "
   },
   "keywords": [
     "Cyberpunk2077",
