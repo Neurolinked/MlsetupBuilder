@@ -10,7 +10,8 @@ import * as fs from 'node:fs';
 import fse from 'fs-extra/esm';
 import Store from 'electron-store';
 import sharp from 'sharp';
-import * as dree from 'dree';
+//import * as dree from 'dree';
+import dree from 'dree';
 import { fileURLToPath } from 'url';
 /* import { arrayBuffer } from 'node:stream/consumers'; */
 
@@ -2336,15 +2337,14 @@ ipcMain.handle('main:findMasks',(ev, maskTemplate)=>{
 	return new Promise((resolve,reject)=>{
 		var actualfile, fileTemplate, customPath, maskLayers
 		let temp = mlMaskNameExplode(maskTemplate)
-
 		actualfile = temp.actuallayer
 		fileTemplate = temp.filetemplate
 		customPath = temp.customPath
 		maskLayers = temp.maskslayers
-		
+
 		try {
 			var test = path.join(preferences.get('paths.depot'),customPath)
-
+			
 			const options = {
 				stat:false,
 				followLinks:false,
